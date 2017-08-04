@@ -83,11 +83,7 @@
 	padding-left: 2%;
 }
 
-.mobile{
-	display:block;
-}
-
-.c90{
+.c90,.c92,.mobile{
 	display:none;
 }
 

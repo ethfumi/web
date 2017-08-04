@@ -31,7 +31,8 @@ function set_c92(state)
 function toggle_mobile()
 {
 	set_mobile("block");
-	set_c90("none");
+    set_c90("none");
+	set_c92("none");
 	mobile_tab.classList.add('tab-select');
 	c90_tab.classList.remove('tab-select');
 	c92_tab.classList.remove('tab-select');
@@ -40,6 +41,7 @@ function toggle_c90()
 {
 	set_mobile("none");
 	set_c90("block");
+    set_c92("none");
 	mobile_tab.classList.remove('tab-select');
 	c90_tab.classList.add('tab-select');
 	c92_tab.classList.remove('tab-select');
@@ -47,7 +49,8 @@ function toggle_c90()
 function toggle_c92()
 {
 	set_mobile("none");
-	set_c90("block");
+    set_c90("none");
+	set_c92("block");
 	mobile_tab.classList.remove('tab-select');
 	c90_tab.classList.remove('tab-select');
 	c92_tab.classList.add('tab-select');
