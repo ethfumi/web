@@ -201,20 +201,22 @@ article .btn{
 	margin: 0 auto 20px;
 }
 
-@media only screen and (max-device-width: 480px) and (-webkit-device-pixel-ratio: 2) {
-	article .btn li span.txt{
-		line-height:1.2;
-	}
-	.board{
-		border-width: 50px 50px 50px 50px;
-		margin: 50% 1.5% 1.5%;
-		padding: 5px;
-	}
-	.board-banner{
-		border-width: 50px 50px 50px 50px;
-		margin: 0 1.5% 1.5%;
-		padding: 5px;
-	}
+@media only screen and (max-width: 767px) {
+    article .btn li span.txt {
+        line-height: 1.2;
+    }
+
+    .board {
+        border-width: 50px 50px 50px 50px;
+        margin: 50% 1.5% 1.5%;
+        padding: 5px;
+    }
+
+    .board-banner {
+        border-width: 50px 50px 50px 50px;
+        margin: 0 1.5% 1.5%;
+        padding: 5px;
+    }
 }
 
 article .btn li{
@@ -270,8 +272,17 @@ article .block h3{
 	padding: 18% 5% 0;
 }
 
-@media only screen and (max-device-width: 480px) and (-webkit-device-pixel-ratio: 2) { #introduction, #screensho, #iconArea{ font-size: 84%; } }
-@media only screen and (min-device-width: 768px) { #introduction, #screensho, #iconArea{ font-size: 100%; } }
+@media only screen and (min-device-width: 768px) {
+    #introduction, #screensho, #iconArea {
+        font-size: 100%;
+    }
+}
+
+@media only screen and (max-width: 767px) {
+    #introduction, #screensho, #iconArea {
+        font-size: 84%;
+    }
+}
 
 #introduction .txt_intro,
 #iconArea .txt_intro{
@@ -333,12 +344,16 @@ article .block h3{
 	font-size: 84%;
 }
 
+@media only screen and (min-device-width: 768px) {
+    #appli .box {
+        width: 640px;
+    }
+}
+
 #appli .box{
 	padding: 10px 10px 0;
 	margin: 0 auto;
 }
-
-@media only screen and (min-device-width: 768px) { #appli .box{ width: 640px; } }
 
 #appli p.icon{
 	float: left;
