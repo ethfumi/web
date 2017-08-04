@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <!-- Google Analytics -->
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-39720205-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>index.html</title>
+		<link href="./css/jquery.alerts.css" rel="stylesheet" type="text/css" media="screen" />
+		<link href="./css/common.css" rel="stylesheet" type="text/css" media="screen" />
+		<link href="./css/webplayer.css" rel="stylesheet" type="text/css" media="screen" />
+
+		<script type="text/javascript" src="./js/jquery-1.8.2.min.js"></script>
+		<script type="text/javascript" src="./js/jquery.ui.core.min.js"></script>
+		<script type="text/javascript" src="./js/jquery.ui.widget.min.js"></script>
+		<script type="text/javascript" src="./js/jquery.ui.mouse.min.js"></script>
+		<script type="text/javascript" src="./js/jquery.ui.draggable.min.js"></script>
+		<script type="text/javascript" src="./js/jquery.alerts.js"></script>
+		<script type="text/javascript" src="./js/unity_object2.js"></script>
+		<script type="text/javascript" src="./js/resize.js"></script>
+		<script type="text/javascript">
+		<!--
+		var config = {
+			width: width, 
+			height: height,
+			fullInstall: true,
+			params: {
+				enableDebugging:"0",
+				disableContextMenu:true,
+				backgroundcolor: "000000",
+				bordercolor: "000000",
+				textcolor: "FFFFFF",
+				logoimage: "images/loading_480-320.png",
+			}
+		};
+
+		var u = new UnityObject2(config);
+
+		jQuery(function() {
+			var $missingScreen = jQuery("#unityPlayer").find(".missing");
+			var $brokenScreen = jQuery("#unityPlayer").find(".broken");
+			$missingScreen.hide();
+			$brokenScreen.hide();
+			
+			u.observeProgress(function (progress) {
+				switch(progress.pluginStatus) {
+					case "broken":
+						$brokenScreen.find("a").click(function (e) {
+							e.stopPropagation();
+							e.preventDefault();
+							u.installPlugin();
+							return false;
+						});
+						$brokenScreen.show();
+					break;
+					case "missing":
+						$missingScreen.find("a").click(function (e) {
+							e.stopPropagation();
+							e.preventDefault();
+							u.installPlugin();
+							return false;
+						});
+						$missingScreen.show();
+					break;
+					case "installed":
+						$missingScreen.remove();
+					break;
+					case "first":
+					break;
+				}
+			});
+			u.initPlugin(jQuery("#unityPlayer")[0], "pushpapa.unity3d");
+		});
+
+		function GetUnity() {
+			return u.getUnity();
+		}
+		-->
+		</script>
+	</head>
+	<body>
+		<p class="header"><span>Unity Web Player | </span>どんぱっぱ</p>
+		<div class="content" id="content">
+			<div id="unityPlayer">
+				<div class="missing">
+					<a href="http://unity3d.com/webplayer/" title="Unity Web Player. Install now!">
+						<img alt="Unity Web Player. Install now!" src="http://webplayer.unity3d.com/installation/getunity.png" width="193" height="63" />
+					</a>
+				</div>
+				<div class="broken">
+					<a href="http://unity3d.com/webplayer/" title="Unity Web Player. Install now! Restart your browser after install.">
+						<img alt="Unity Web Player. Install now! Restart your browser after install." src="http://webplayer.unity3d.com/installation/getunityrestart.png" width="193" height="63" />
+					</a>
+				</div>
+			</div>
+		</div>
+		<br />
+		<p class = "explanation"><span>操作方法</span>：<span>マウス</span> もしくは <span>スペース</span> or <span>Zキー</span></p>
+		<p class = "footer"><a href= "../">このゲームのトップページへ</a></p>
+		<br />
+		<br />
+		<br />
+		<div id="addition">
+			<div id="twitter" class="extension">
+				<div class="title">
+					どんぱっぱの情報
+				</div>
+				<div class="element">
+					<div class="note">
+						<span>動作環境について</span><br />
+						一部ブラウザで上手く動かないかもしれません。GoogleChromeがおすすめ。<br />
+						<a href="http://bit.ly/push_itunes_jp" title="どんぱっぱのAppStore">iPhone</a>や<a href="http://bit.ly/push_android" title="どんぱっぱのGooglePlay">Android</a>のスマートフォンでも遊ぶことができます。<br />
+						iPhone版のみ、GameCenterによるランキングが実装されています。
+					</div>					
+					<div class="note">
+						<span>各種データ</span><br />
+						AppleのGameCenterのリーダーボードによると、500名近くの方がプレイをし、完全クリアをされた方は5名とのことです。<br />
+						また、iTunesConnectの統計によると、プレイヤーの70%は海外ユーザのようです。
+					</div>					
+					<div class="note">
+						<span>紹介など</span><br />
+						<a href="http://www.nicovideo.jp/watch/sm20485972" title="どんぱっぱの紹介動画">ニコニコ動画:どんぱっぱ【ニコニコ自作ゲームフェス】</a><br />
+						<a href="https://www.youtube.com/watch?v=tStqqAv-j_0" title="どんぱっぱの紹介動画">youtube:どんぱっぱ -Push Papa-</a><br />
+						<a href="http://matatabi-yasiki.blogspot.jp/2013/04/push-papa.html" title="またたび屋敷さんのどんぱっぱレビュー">またたび屋敷さんのレビュー</a><br />
+						<a href="http://gamesbox.blog57.fc2.com/blog-entry-8415.html" title="無料で遊べる！おもしろ フラッシュゲーム ミュージアムさんのレビュー">無料で遊べる！おもしろ フラッシュゲーム ミュージアムさんのレビュー</a>
+					</div>
+				</div>
+				<a class="twitter-timeline"  href="https://twitter.com/search?q=%23pushpapa"  data-widget-id="311859745508171777">
+					#pushpapa に関するツイート
+				</a>
+				<script>
+					!function(d,s,id){
+					var js,fjs=d.getElementsByTagName(s)[0];
+					if(!d.getElementById(id)){
+						js=d.createElement(s);
+						js.id=id;js.src="//platform.twitter.com/widgets.js";
+						fjs.parentNode.insertBefore(js,fjs);
+						}
+					}
+					(document,"script","twitter-wjs");
+				</script>
+			</div>
+			<div id="banner" class="extension">
+				<div class="title">
+					他のゲームとか。
+				</div>
+				<div class="element">
+					<div class="banner">
+						<a href="http://bit.ly/YtLs8s" title="どうぶつしょうぎウォーズ">
+							<img alt="どうぶつしょうぎウォーズ" src="images/banner_dsw_480.png" width="480" height="96" />
+						</a>
+					</div>
+					<div class="note">
+						<span>どうぶつしょうぎウォーズ</span><br />
+						<a href="http://ja.wikipedia.org/wiki/%E3%81%A9%E3%81%86%E3%81%B6%E3%81%A4%E3%81%97%E3%82%87%E3%81%86%E3%81%8E" title="wikipedia:どうぶつしょうぎのページ">どうぶつしょうぎ</a>(3*4マスの将棋)のオンライン対戦アプリです。<br />
+						<a href="http://bit.ly/ZNVYcd" title="どうぶつしょうぎウォーズのAppStore">iPhone</a>や<a href="http://bit.ly/YtLs8s" title="どうぶつしょうぎウォーズのGooglePlay">Android</a>で遊ぶことができます。<br />
+						どんぱっぱのボイスを担当されている<a href="http://bit.ly/nanahira" title="ななひらさんのサイトconfetto">ななひら</a>さんは、こちらのアプリのタイトルや囲いのボイスも担当されているので、興味がありましたら是非遊んでみて下さい。
+					</div>
+				</div>
+				<div class="element">
+					<div class="banner">
+						<a href="http://wars.fm/m" title="算数ウォーズ">
+							<img alt="算数ウォーズ" src="images/banner_mw_480.png" width="480" height="180" />
+						</a>
+					</div>
+					<div class="note">
+						<span>算数ウォーズ</span><br/>
+						24+36+3などの問題を、他のプレイヤー達と解く早さで競うゲームです。<br />
+						制限時間は1問8秒。1ゲームは全6問。1分ほどで遊べます。<br />
+						実力によって、出題される問題は徐々に難しくなっていきます。<br />
+						計算能力を付けたい方から、自分の実力を確かめたい方まで、幅広い方にオススメです。
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,109 @@
+p.header {
+	font-size: small;
+	margin-top: 5px;
+	margin-bottom: 5px		
+}
+p.header span {
+	font-weight: bold;
+}
+p.footer {
+	font-size: x-small;
+	margin-top: 5px;
+}
+p.explanation{
+	font-size: small;
+	color: rgb(0,0,0);
+}
+p.explanation span{
+	font-weight: bold;
+}
+p.attention {
+	font-size: small;
+	color: rgb(234,168,168);
+}
+div.content {
+	position: relative;
+	margin: auto;
+}
+div.broken,
+div.missing {
+	margin: auto;
+	position: relative;
+	top: 50%;
+	width: 193px;
+}
+div.broken a,
+div.missing a {
+	height: 63px;
+	position: relative;
+	top: -31px;
+}
+div.broken img,
+div.missing img {
+	border-width: 0px;
+}
+div.broken {
+	display: none;
+}
+div#unityPlayer {
+	cursor: default;
+	position: relative;
+}
+iframe {
+	position: absolute;
+	border: 0;
+}
+
+div#addition{
+	width:1024px;
+	margin:auto;
+}
+
+div.extension {
+	margin: 8px;
+	width: 492px;
+	border:2px rgb(255,255,255) dotted;
+	background-color:rgb(255,221,215);
+}
+
+div#twitter{
+	float:left;
+}
+
+div#banner{
+	float:right;
+}
+
+div.title{
+	font-size:large;
+	font-weight:bold;
+	background-color:rgb(255,255,255);
+}
+
+div.element{
+	margin: 12px 6px;
+	text-align: left;
+
+}
+
+div.app_title{
+	font-size:large;
+	text-align:center;
+}
+
+div.banner{
+	text-align:center;
+}
+
+div.note{
+	margin: 4px;
+	font-size: small;
+}
+
+div.extension span{
+	font-weight:bold;
+}
+
+a{
+	text-shadow: 0 0px 0px #fff;
+}

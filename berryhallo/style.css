@@ -1,0 +1,86 @@
+/* ---全体の設定--- */
+BODY{
+  color : #000; /* 文字色 */
+  background-color : #FFF097; /* 背景色 */
+  font-size : 10px; /* 文字の大きさ */
+  font-family : Verdana,Arial,"ヒラギノ角ゴ Pro W3","Hiragino Kaku GothicPro",Osaka,"ＭＳ Ｐゴシック",serif;
+/* スクロールバーの設定 */
+  scrollbar-face-color:#d2e7ee;  scrollbar-highlight-color:#084b6b;  scrollbar-shadow-color:#084b6b;
+  scrollbar-darkshadow-color: #084b6b;  scrollbar-arrow-color:#084b6b;  scrollbar-track-color:#d2e7ee;
+}
+/* リンクの設定 */
+A {
+  color : #666; /* 文字色 */
+  font-size : 10px; /* 文字の大きさ */
+  text-decoration : none;
+}
+A img{
+ border-style: none;
+}
+
+/* テーブルの設定 */
+TD{
+  color : #000; /* 文字色 */
+  font-size : 10px; /* 文字の大きさ */
+}
+
+
+/* ----サイト名---- */
+.sitename A{
+  color : #000040; /* 文字色 */
+  font-weight : bold;
+  font-size : 20px;
+}
+
+/* ----indexのライン色---- */
+.line01{
+  background-color : #ffff80;
+  height : 10px;
+}
+.line02{
+  background-color : #000040;
+  height : 10px;
+}
+
+
+
+/* ---メニューページ--- */
+#menupage{
+  background-color : #FF8000; /* 背景色 */
+  margin : 0px;
+  height : 100%;
+  overflow: hidden;
+  border-right : 1px dotted #000040;
+  text-align : center;
+}
+#menupage A{
+  color : #000;
+}
+#menupage table{
+  width : 100%;height : 90%;
+}
+#menupage td{
+  text-align : center;
+}
+.menutd0{
+  color : #FFF;
+  background-color : #000040;
+  height : 20px;
+  font-weight: bold;
+  border-bottom : 1px dotted #000040;
+}
+.menutd1{
+  color : #000;
+  border-bottom : 1px dotted #000040;
+  height : 20px;
+}
+
+.menutd1 A{
+	display:block;
+	width:100%;
+	height:100%;	
+}
+
+.menutd3{
+  text-align : center;vertical-align: bottom;
+}

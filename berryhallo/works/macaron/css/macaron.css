@@ -1,0 +1,58 @@
+@charset "utf-8";
+/* CSS Document */
+
+.background{
+	background-image: url("../img/bg.png");
+	background-size: 140px 140px;
+	background-repeat: repeat;
+	background-attachment: fixed;
+	background-position: right bottom
+}
+
+.title-bg{
+	display: inline-block;
+	background-image: url("../img/logo.png"),url("../img/arisu.png");
+	background-position: right 2.5%,left top;
+	background-size: 50% , 100% ;
+	background-repeat: no-repeat;
+	width: 100%;
+}
+
+.board{
+	border-style: solid;
+	border-width: 55px 55px 55px 55px;
+	-moz-border-image: url(../img/board-9patch2.png) 55 55 55 55;
+	-webkit-border-image: url(../img/board-9patch2.png) 55 55 55 55;
+	-o-border-image: url(../img/board-9patch2.png) 55 55 55 55;
+	border-image: url(../img/board-9patch2.png) 55 55 55 55 fill;
+	margin: 50% 2.5% 2.5%;
+	opacity: 0.9;
+}
+
+.boardmargin{
+	margin: -20px -30px;
+}
+
+.boardtext{
+	font-size: 1.5em;
+}
+
+.left{
+	text-align: left;
+}
+
+.center{
+	text-align: center;
+}
+
+.space{
+	margin-top: 3%
+}
+
+.paragraph{
+	padding-left: 2%;
+}
+
+a{
+	text-decoration: underline;
+}

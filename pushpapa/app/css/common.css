@@ -1,0 +1,20 @@
+* {
+	border: 0;
+	margin: 0;
+	padding: 0;
+}
+body {
+	font-family:'ヒラギノ角ゴ Pro W3','Hiragino Kaku Gothic Pro','メイリオ',Meiryo,'ＭＳ Ｐゴシック',sans-serif;
+	background-color: black;
+	background-image:url(../images/back.png);
+	background-attachment: scroll;
+	color: black;
+	text-shadow: 0 -1px 1px #FFF;
+	text-align: center;
+}
+a:link, a:visited {
+	color: #333;
+}
+a:active, a:hover {
+	color: #333;
+}

@@ -1,0 +1,132 @@
+@charset "utf-8";
+/* CSS Document */
+
+.background{
+	background-image: url("../img/bg.png");
+	background-size: 140px 140px;
+	background-repeat: repeat;
+	background-attachment: fixed;
+	background-position: right bottom
+}
+
+.title-bg{
+	display: inline-block;
+	background-image: url("../img/logo.png"),url("../img/arisu.png");
+	background-position: right 25px,left top;
+	-ms-transform-origin: top left;
+	-webkit-transform-origin: top left;
+	transform-origin: top left;
+	background-size: 50% , 100% ;
+	background-repeat: no-repeat;
+	width: 100%;
+}
+
+.board{
+	border-style: solid;
+	border-width: 55px 55px 55px 55px;
+	-moz-border-image: url(../img/board-9patch2.png) 55 55 55 55;
+	-webkit-border-image: url(../img/board-9patch2.png) 55 55 55 55;
+	-o-border-image: url(../img/board-9patch2.png) 55 55 55 55;
+	border-image: url(../img/board-9patch2.png) 55 55 55 55 fill;
+	margin: 2.5% 2.5% 2.5%;
+	opacity: 0.9;
+}
+
+.description{
+	margin: 1% 2.5%;
+}
+
+.store-link{
+	margin: 52.5% 5.0% 2%;
+	text-align: right;
+}
+
+.store-link li{
+	margin: 13px; /* AppStoreのバッジは、バッジの長さの1/4以上の余白を空けないといけない。 */
+}
+
+.boardmargin{
+	margin: -20px -30px;
+}
+
+.boardtext{
+	font-size: 1.2em;
+}
+
+.left{
+	text-align: left;
+}
+
+.center{
+	text-align: center;
+}
+
+.space{
+	margin-top: 3%
+}
+
+.paragraph{
+	padding-left: 2%;
+}
+
+.board a{
+	text-decoration: underline;
+}
+
+.screenshot{
+	text-align: center;
+	display: box;
+	display: -webkit-box;
+	display: -moz-box;
+	-webkit-box-pack: center;
+	-moz-box-pack: center;
+}
+
+.screenshot img{
+	text-align: center;
+	width: 45%;
+	margin: 1.5%;
+	/*
+	width: 250px;
+	margin: 9px;
+	*/
+	/* スマホでスクショ大きくみせるならこっちに切り替え。*/
+}
+
+/* Appli Area ---------------- */
+
+#appli{
+	background: rgba(17,24,28,0.8);
+	border-top: 1px solid #fefefe;
+	border-bottom: 1px dashed #272727;
+	color: #FFF;
+	text-align: left;
+	font-size: 84%;
+}
+
+#appli .box{
+	padding: 10px;
+	margin: 0 auto;
+}
+
+@media only screen and (min-device-width: 768px) { #appli .box{ width: 640px; } }
+
+#appli p.icon{
+	float: left;
+	margin: 0 3px 0 0;
+}
+
+/* Footer Styles ---------------- */
+
+footer{
+	margin: 0 auto;
+	text-align: center;
+	color: #FFF;
+	background: rgba(9,13,14,0.8);
+	padding: 5px 0;
+}
+
+footer a:link,footer a:visited,footer a:hover,footer a:active{
+	color: #FFF;
+	text-decoration:none;
+}
