@@ -1,21 +1,50 @@
 @charset "utf-8";
 /* CSS Document */
 
-.background{
-	background-image: url("../img/bg.jpg");
+.background {
+    /* c92 以外の引数で来ると微妙なので修正したい… */
+    background-image: url("../img/bg02.jpg");
+    background-size: 1920px 1080px;
+    background-repeat: repeat;
+    background-attachment: fixed;
+    background-position: center top;
+}
+
+.background-01{
+	background-image: url("../img/bg01.jpg");
 	background-size: 1920px 1080px;
 	background-repeat: repeat;
 	background-attachment: fixed;
 	background-position: center top;
 }
 
-.title-bg{
-	display: inline-block;
-	background-image: url("../img/logo.png"),url("../img/arisu.png");
-	background-position: 20% 10px,140% -20px;
-	background-size: 50% , 80% ;
-	background-repeat: no-repeat;
-	width: 100%;
+.background-02 {
+    background-image: url("../img/bg02.jpg");
+    background-size: 1920px 1080px;
+    background-repeat: repeat;
+    background-attachment: fixed;
+    background-position: center top;
+}
+
+.title-bg {
+}
+
+.title-bg-01 {
+    display: inline-block;
+    background-image: url("../img/logo.png"),url("../img/arisu01s.png");
+    background-position: 20% 10px,140% -20px;
+    background-size: 50%, 80%;
+    background-repeat: no-repeat;
+    width: 100%;
+}
+
+.title-bg-02 {
+    display: inline-block;
+    background-image: url("../img/logo_c92.png"),url("../img/arisu02s.png");
+    background-position: 100% 10px, 30% 60px;
+    background-size: 50%, 90%;
+    background-repeat: no-repeat;
+    width: 100%;
 }
 
 .board{
@@ -48,6 +77,11 @@
 
 .description{
 	margin: 1% 2.5%;
+}
+
+.c92-margin {
+    margin: 50.0% 5.0% 2%;
+    text-align: right;
 }
 
 .store-link{
