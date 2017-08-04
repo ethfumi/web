@@ -1,9 +1,18 @@
+var waitloads = document.getElementsByClassName("waitload");
 var mobiles = document.getElementsByClassName("mobile");
 var c90s = document.getElementsByClassName("c90");
 var c92s = document.getElementsByClassName("c92");
 var mobile_tab = document.getElementsByClassName("mobile-tab")[0];
 var c90_tab = document.getElementsByClassName("c90-tab")[0];
 var c92_tab = document.getElementsByClassName("c92-tab")[0];
+function set_waitload(state)
+{
+    for(var i=0; i<waitloads.length; i++)
+    {
+        var element = waitloads[i] ;
+        element.style.display = state;
+    }
+}
 function set_mobile(state)
 {
 	for(var i=0; i<mobiles.length; i++)
@@ -80,4 +89,5 @@ window.onload = function()
 		default:
 		case "c92": toggle_c92(); break;
 	}
+    set_waitload("none");
 };

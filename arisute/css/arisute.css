@@ -87,6 +87,11 @@
 	display:none;
 }
 
+.waitload {
+    height: 2000px;
+    display: block;
+}
+
 .board a{
 	text-decoration: underline;
 }
