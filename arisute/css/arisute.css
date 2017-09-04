@@ -47,6 +47,15 @@
     width: 100%;
 }
 
+.title-bg-03 {
+    display: inline-block;
+    background-image: url("../img/logo.png"),url("../img/arisu02s.png");
+    background-position: 100% 10px, 30% 60px;
+    background-size: 50%, 90%;
+    background-repeat: no-repeat;
+    width: 100%;
+}
+
 .board{
 	border-style: solid;
 	-moz-border-image: url(../img/board-9patch2.png) 75 75 75 75;

@@ -49,8 +49,8 @@ function toggle_mobile()
 	mobile_tab.classList.add('tab-select');
 	c90_tab.classList.remove('tab-select');
 	c92_tab.classList.remove('tab-select');
-    titlebg.className = "title-bg-01"
-    background.className = "background-01"
+    titlebg.className = "title-bg-03"
+    background.className = "background-02"
 }
 function toggle_c90()
 {
@@ -95,9 +95,9 @@ window.onload = function()
 	switch (target)
 	{
 		case "c90": toggle_c90(); break;
-		case "mobile": toggle_mobile(); break;
-		default:
 		case "c92": toggle_c92(); break;
+		default:
+		case "mobile": toggle_mobile(); break;
 	}
     set_waitload("none");
 };
