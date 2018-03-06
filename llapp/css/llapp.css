@@ -1,0 +1,240 @@
+@charset "utf-8";
+/* CSS Document */
+
+.background {
+    /* c92 以外の引数で来ると微妙なので修正したい… */
+    background-image: url("../img/bg02.jpg");
+    background-size: 1920px 1080px;
+    background-repeat: repeat;
+    background-attachment: fixed;
+    background-position: center top;
+}
+
+.background-01{
+	background-image: url("../img/bg01.jpg");
+	background-size: 1920px 1080px;
+	background-repeat: repeat;
+	background-attachment: fixed;
+	background-position: center top;
+}
+
+.background-02 {
+    background-image: url("../img/bg02.jpg");
+    background-size: 1920px 1080px;
+    background-repeat: repeat;
+    background-attachment: fixed;
+    background-position: center top;
+}
+
+.title-bg {
+}
+
+.title-bg-01 {
+    display: inline-block;
+    background-image: url("../img/logo.png"),url("../img/arisu01s.png");
+    background-position: 20% 10px,140% -20px;
+    background-size: 50%, 80%;
+    background-repeat: no-repeat;
+    width: 100%;
+}
+
+.title-bg-02 {
+    display: inline-block;
+    background-image: url("../img/logo_c92.png"),url("../img/arisu02s.png");
+    background-position: 100% 10px, 30% 60px;
+    background-size: 50%, 90%;
+    background-repeat: no-repeat;
+    width: 100%;
+}
+
+.title-bg-03 {
+    display: inline-block;
+    background-image: url("../img/logo.png"),url("../img/arisu02s.png");
+    background-position: 100% 10px, 30% 60px;
+    background-size: 50%, 90%;
+    background-repeat: no-repeat;
+    width: 100%;
+}
+
+.board{
+	border-style: solid;
+	-moz-border-image: url(../img/board-9patch2.png) 75 75 75 75;
+	-webkit-border-image: url(../img/board-9patch2.png) 75 75 75 75;
+	-o-border-image: url(../img/board-9patch2.png) 75 75 75 75;
+	border-image: url(../img/board-9patch2.png) 75 75 75 75 fill;
+	opacity: 1.0;
+}
+
+.tabs{
+	text-align: center;
+}
+.tab-button{
+	text-align: center;
+	padding: 5px 20px;
+	margin: 0px 10px;
+	background-color: rgba(189,189,189,0.9);
+	color: #fff;
+	text-shadow: 0.5px 1px #999999;
+	font-size: 1.0em;
+	font-weight: bold;
+	border-style: none;
+}
+
+.tab-select{
+	background-color: rgba(251,205,244,0.9);
+}
+
+.description{
+	margin: 1% 2.5%;
+}
+
+.c92-margin {
+    margin: 50.0% 5.0% 2%;
+    text-align: right;
+}
+
+.store-link{
+	margin: 44.0% 5.0% 2%;
+	text-align: right;
+}
+
+.store-link li{
+	margin: 13px; /* AppStoreのバッジは、バッジの長さの1/4以上の余白を空けないといけない。 */
+}
+
+.boardmargin{
+	margin: -20px -30px;
+}
+
+.boardtext{
+	font-size: 1.2em;
+}
+
+.left{
+	text-align: left;
+}
+
+.center{
+	text-align: center;
+}
+
+.space{
+	margin-top: 3%
+}
+
+.paragraph{
+	padding-left: 2%;
+}
+
+.c90,.c92,.mobile{
+	display:none;
+}
+
+.waitload {
+    height: 2000px;
+    display: block;
+}
+
+.board a{
+	text-decoration: underline;
+}
+
+.screenshot{
+	text-align: center;
+	-webkit-box-pack: center;
+	-moz-box-pack: center;
+	width: 100%;
+}
+
+.screenshot img{
+	text-align: center;
+	margin: 1.5% 0px;
+	/*
+	width: 250px;
+	margin: 9px;
+	*/
+	/* スマホでスクショ大きくみせるならこっちに切り替え。*/
+}
+
+/* Appli Area ---------------- */
+
+#appli{
+	background: rgba(17,24,28,0.8);
+	border-top: 1px solid #fefefe;
+	border-bottom: 1px dashed #272727;
+	color: #FFF;
+	text-align: left;
+	font-size: 84%;
+}
+
+#appli .box{
+	padding: 10px;
+	margin: 0 auto;
+}
+
+@media only screen and (min-device-width: 768px) { #appli .box{ width: 640px; } }
+
+#appli p.icon{
+	float: left;
+	margin: 0 3px 0 0;
+}
+
+/* Footer Styles ---------------- */
+
+footer{
+	margin: 0 auto;
+	text-align: center;
+	color: #FFF;
+	background: rgba(9,13,14,0.8);
+	padding: 5px 0;
+}
+
+footer a:link,footer a:visited,footer a:hover,footer a:active{
+	color: #FFF;
+	text-decoration:none;
+}
+
+/* iframe要素内でサイズ指定している場合は必要なし */
+iframe {
+  width: 560px;
+  height: 315px;
+}
+/* CSSでレスポンシブ対応 */
+@media screen and (max-width: 700px) {
+  .iframe-wrapper {
+    position: relative;
+    padding: calc(315 / 560 * 100%) 0 0;
+  }
+  iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+/* ダウンロードの追加分 */
+
+.thumbnail{
+	text-align: center;
+	-webkit-box-pack: center;
+	-moz-box-pack: center;
+	width: 100%;
+}
+
+.square {
+	display: inline-block;
+	font-size: 1.5em;
+	font-weight: bold;
+    width: 50%;
+    height: 80px;
+    background: rgba(255,255,128,0.7);
+}
+
+.dl-button{
+	text-align: center;
+	padding: 0px 0px;
+	margin: 0px 0px;
+	border-style: none;
+}
