@@ -1,2 +1,1 @@
-
-http://fumi.li/
+fumi-web
