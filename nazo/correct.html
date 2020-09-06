@@ -13,21 +13,10 @@
     <span class="skiplink-text">Skip to main content</span>
   </div>
 </a>
-
-    <form class="form-signin" name="q1">
-		<img class="mb-4" src="https://pbs.twimg.com/profile_images/1230422996591894528/M1x5g84N_400x400.jpg" alt="" width="80">
-		<p class="mb-3">解けるかにゃ？</p>
-		
-
-		<img class="mb-4" src="https://pbs.twimg.com/media/EhNV7bSUYAAHp_U?format=jpg&name=medium" alt="" width="300">
-	<!-- <h1 class="h3 mb-3 font-weight-normal">解答する</h1> -->
-		<label for="inputEmail" class="sr-only">答え</label>
-		<input type="answer" id="answer" class="form-control">
-		<br>
-		<button type="button" id="submit" class="btn btn-lg btn-primary btn-block">解答する</button>
-		<p class="mt-5 mb-3 text-muted">&copy; 2020 memory ishida</p>
-	  </form>
-	  
+<div class="form-signin">
+	<img class="mb-4" src="https://pbs.twimg.com/media/EeoiaXoVAAIOIdF?format=jpg&name=medium" alt="" width="300">
+	<p class="mb-4"> 正解！ </p>
+</div>
 
 	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
 	<script>
@@ -39,18 +28,5 @@
 	<script src="./assets/js/src/application.js"></script>
 	<script src="./assets/js/src/search.js"></script>
 	<script src="./assets/js/src/ie-emulation-modes-warning.js"></script>
-
-	<script>
-		window.onload = function(){
-  var submit = document.getElementById("submit");
-  submit.onclick = function(){
- if (document.q1.answer.value=="swine"){
-　window.location.href="correct.html"
-　}
-　else {
-　window.location.href="incorrect.html"
-　}
-};
-};	</script>
 </body>
 </html>
