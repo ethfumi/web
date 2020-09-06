@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ja">
+<head>
+	<title>memory</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+	<link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP&display=swap" rel="stylesheet">
+	<link href="./css/nazo.css" rel="stylesheet">
+</head>
+
+<body  class="text-center" >
+    <a id="skippy" class="sr-only sr-only-focusable" href="#content">
+  <div class="container">
+    <span class="skiplink-text">Skip to main content</span>
+  </div>
+</a>
+
+    <form class="form-signin" name="q1">
+		<img class="mb-4" src="https://pbs.twimg.com/profile_images/1230422996591894528/M1x5g84N_400x400.jpg" alt="" width="80">
+		<p class="mb-3">解けるかにゃ？</p>
+		
+
+		<img class="mb-4" src="https://pbs.twimg.com/media/EhNV7bSUYAAHp_U?format=jpg&name=medium" alt="" width="300">
+	<!-- <h1 class="h3 mb-3 font-weight-normal">解答する</h1> -->
+		<label for="inputEmail" class="sr-only">答え</label>
+		<input type="answer" id="answer" class="form-control">
+		<br>
+		<button type="button" id="submit" class="btn btn-lg btn-primary btn-block">解答する</button>
+		<p class="mt-5 mb-3 text-muted">&copy; 2020 memory ishida</p>
+	  </form>
+	  
+
+	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+	<script>
+		window.jQuery || document.write('<script src="/docs/4.5/assets/js/vendor/jquery-slim.min.js"><\/script>')
+	</script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+	<script src="./assets/js/vendor/clipboard.min.js"></script>
+	<script src="./assets/js/vendor/bs-custom-file-input.min.js"></script>
+	<script src="./assets/js/src/application.js"></script>
+	<script src="./assets/js/src/search.js"></script>
+	<script src="./assets/js/src/ie-emulation-modes-warning.js"></script>
+
+	<script>
+		window.onload = function(){
+  var submit = document.getElementById("submit");
+  submit.onclick = function(){
+ if (document.q1.answer.value=="swine"){
+　window.location.href="correct.html"
+　}
+　else {
+　window.location.href="incorrect.html"
+　}
+};
+};	</script>
+</body>
+</html>
