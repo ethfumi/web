@@ -7,27 +7,69 @@
 	<link href="./css/nazo.css" rel="stylesheet">
 </head>
 
-<body  class="text-center" >
-    <a id="skippy" class="sr-only sr-only-focusable" href="#content">
-  <div class="container">
-    <span class="skiplink-text">Skip to main content</span>
-  </div>
-</a>
+<body class="text-center">
+	<div class="content-area">
+		<form class="form-signin" name="q1">
+			<img class="mb-4" src="https://pbs.twimg.com/profile_images/1230422996591894528/M1x5g84N_400x400.jpg" alt="" width="80">
+			<p class="mb-3">解けるかにゃ？</p>
+			
 
-    <form class="form-signin" name="q1">
-		<img class="mb-4" src="https://pbs.twimg.com/profile_images/1230422996591894528/M1x5g84N_400x400.jpg" alt="" width="80">
-		<p class="mb-3">解けるかにゃ？</p>
-		
+			<img class="mb-4" src="https://pbs.twimg.com/media/EhNV7bSUYAAHp_U?format=jpg&name=medium" alt="" width="300">
+		<!-- <h1 class="h3 mb-3 font-weight-normal">解答する</h1> -->
+			<label for="inputEmail" class="sr-only">答え</label>
+			<input type="answer" id="answer" class="form-control">
+			<br>
+			<button type="button" id="submit" class="btn btn-lg btn-primary btn-block">解答する</button>
 
-		<img class="mb-4" src="https://pbs.twimg.com/media/EhNV7bSUYAAHp_U?format=jpg&name=medium" alt="" width="300">
-	<!-- <h1 class="h3 mb-3 font-weight-normal">解答する</h1> -->
-		<label for="inputEmail" class="sr-only">答え</label>
-		<input type="answer" id="answer" class="form-control">
-		<br>
-		<button type="button" id="submit" class="btn btn-lg btn-primary btn-block">解答する</button>
+		</form>
+		<br />
+
+		<div>
+			<button class="btn btn-primary"
+				data-toggle="collapse"
+				data-target="#example-1"
+				aria-expand="false"
+				aria-controls="example-1">ヒント1</button>
+			<div class="collapse" id="example-1">
+				<div class="card card-body">
+					謎解きの基本は変換。
+				</div>
+			</div>
+		</div>
+
+		<br />
+
+		<div>
+			<button class="btn btn-primary"
+			data-toggle="collapse"
+			data-target="#example-2"
+			aria-expand="false"
+			aria-controls="example-2">ヒント2</button>
+			<div class="collapse" id="example-2">
+				<div class="card card-body">
+					人はどちらに歩こうとしている？
+				</div>
+			</div>
+		</div>
+
+		<br />
+
+		<div>
+			<button class="btn btn-primary"
+			data-toggle="collapse"
+			data-target="#example-3"
+			aria-expand="false"
+			aria-controls="example-3">ヒント3</button>
+			<div class="collapse" id="example-3">
+				<div class="card card-body">
+					人も文字として変換してみよう。
+				</div>
+			</div>
+		</div>
 		<p class="mt-5 mb-3 text-muted">&copy; 2020 memory ishida</p>
-	  </form>
-	  
+	</div>
+	
+
 
 	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
 	<script>
