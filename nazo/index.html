@@ -19,55 +19,79 @@
 			<label for="inputEmail" class="sr-only">答え</label>
 			<input type="answer" id="answer" class="form-control">
 			<br>
-			<button type="button" id="submit" class="btn btn-lg btn-primary btn-block">解答する</button>
+			<button type="button" id="submit" role="button" class="btn btn-lg btn-primary btn-block">解答する</button>
 
 		</form>
 		<br />
 
-		<div>
-			<button class="btn btn-lg btn-primary btn-block"
+		<!-- card https://getbootstrap.jp/docs/4.2/components/card/ -->
+		<!-- btn http://www.tohoho-web.com/bootstrap/buttons.html -->
+
+		<button class="btn btn-lg btn-secondary btn-block"
+			data-toggle="collapse"
+			data-target="#example-1-all"
+			aria-expand="false"
+			aria-controls="example-1-all">ヒントa</button>
+
+		<div class="collapse" id="example-1-all">
+			<div class="card card-body border-secondary">
+				<button class="btn btn-lg btn-danger btn-block"
+					data-toggle="collapse"
+					data-target="#example-1"
+					aria-expand="false"
+					aria-controls="example-1">ヒント1</button>
+				<div class="collapse" id="example-1">
+					<div class="card card-body border-danger">
+						謎解きの基本は変換。
+					</div>
+				</div>
+
+				<br />
+
+				<button class="btn btn-lg btn-danger btn-block"
 				data-toggle="collapse"
-				data-target="#example-1-all"
+				data-target="#example-2"
 				aria-expand="false"
-				aria-controls="example-1-all">ヒントa</button>
-
-			<div class="collapse" id="example-1-all">
-				<div class="card card-body">
-					<button class="btn btn-lg btn-secondary btn-block"
-						data-toggle="collapse"
-						data-target="#example-1"
-						aria-expand="false"
-						aria-controls="example-1">ヒント1</button>
-					<div class="collapse" id="example-1">
-						<div class="card card-body">
-							謎解きの基本は変換。
-						</div>
+				aria-controls="example-2">ヒント2</button>
+				<div class="collapse" id="example-2">
+					<div class="card card-body border-danger">
+						人はどちらに歩こうとしている？
 					</div>
+				</div>
 
-					<br />
+				<br />
 
-					<button class="btn btn-lg btn-secondary btn-block"
-					data-toggle="collapse"
-					data-target="#example-2"
-					aria-expand="false"
-					aria-controls="example-2">ヒント2</button>
-					<div class="collapse" id="example-2">
-						<div class="card card-body">
-							人はどちらに歩こうとしている？
-						</div>
+				<button class="btn btn-lg btn-danger btn-block"
+				data-toggle="collapse"
+				data-target="#example-3"
+				aria-expand="false"
+				aria-controls="example-3">ヒント3</button>
+				<div class="collapse" id="example-3">
+					<div class="card card-body border-danger">
+						人も文字として変換してみよう。
 					</div>
+				</div>
+			</div>
+		</div>
 
-					<br />
+		<br />
 
-					<button class="btn btn-lg btn-secondary btn-block"
+		<button class="btn btn-lg btn-secondary btn-block"
+			data-toggle="collapse"
+			data-target="#example-b-all"
+			aria-expand="false"
+			aria-controls="example-b-all">ヒントb</button>
+
+		<div class="collapse" id="example-b-all">
+			<div class="card card-body border-secondary">
+				<button class="btn btn-lg btn-danger btn-block"
 					data-toggle="collapse"
-					data-target="#example-3"
+					data-target="#example-b-1"
 					aria-expand="false"
-					aria-controls="example-3">ヒント3</button>
-					<div class="collapse" id="example-3">
-						<div class="card card-body">
-							人も文字として変換してみよう。
-						</div>
+					aria-controls="example-b-1">これ以上何を言えば…</button>
+				<div class="collapse" id="example-b-1">
+					<div class="card card-body border-danger" style="text-align: left;">
+						というわけで、<br />お仕事おつかれさまーーーー <br />ちゃんと見てくれてありがとね。
 					</div>
 				</div>
 			</div>
