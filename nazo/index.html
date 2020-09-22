@@ -25,47 +25,54 @@
 		<br />
 
 		<div>
-			<button class="btn btn-primary"
+			<button class="btn btn-lg btn-primary btn-block"
 				data-toggle="collapse"
-				data-target="#example-1"
+				data-target="#example-1-all"
 				aria-expand="false"
-				aria-controls="example-1">ヒント1</button>
-			<div class="collapse" id="example-1">
+				aria-controls="example-1-all">ヒントa</button>
+
+			<div class="collapse" id="example-1-all">
 				<div class="card card-body">
-					謎解きの基本は変換。
+					<button class="btn btn-lg btn-secondary btn-block"
+						data-toggle="collapse"
+						data-target="#example-1"
+						aria-expand="false"
+						aria-controls="example-1">ヒント1</button>
+					<div class="collapse" id="example-1">
+						<div class="card card-body">
+							謎解きの基本は変換。
+						</div>
+					</div>
+
+					<br />
+
+					<button class="btn btn-lg btn-secondary btn-block"
+					data-toggle="collapse"
+					data-target="#example-2"
+					aria-expand="false"
+					aria-controls="example-2">ヒント2</button>
+					<div class="collapse" id="example-2">
+						<div class="card card-body">
+							人はどちらに歩こうとしている？
+						</div>
+					</div>
+
+					<br />
+
+					<button class="btn btn-lg btn-secondary btn-block"
+					data-toggle="collapse"
+					data-target="#example-3"
+					aria-expand="false"
+					aria-controls="example-3">ヒント3</button>
+					<div class="collapse" id="example-3">
+						<div class="card card-body">
+							人も文字として変換してみよう。
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
 
-		<br />
-
-		<div>
-			<button class="btn btn-primary"
-			data-toggle="collapse"
-			data-target="#example-2"
-			aria-expand="false"
-			aria-controls="example-2">ヒント2</button>
-			<div class="collapse" id="example-2">
-				<div class="card card-body">
-					人はどちらに歩こうとしている？
-				</div>
-			</div>
-		</div>
-
-		<br />
-
-		<div>
-			<button class="btn btn-primary"
-			data-toggle="collapse"
-			data-target="#example-3"
-			aria-expand="false"
-			aria-controls="example-3">ヒント3</button>
-			<div class="collapse" id="example-3">
-				<div class="card card-body">
-					人も文字として変換してみよう。
-				</div>
-			</div>
-		</div>
 		<p class="mt-5 mb-3 text-muted">&copy; 2020 memory ishida</p>
 	</div>
 	
