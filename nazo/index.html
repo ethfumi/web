@@ -24,50 +24,51 @@
 		</form>
 		<br />
 
-		<div>
-			<button class="btn btn-lg btn-primary btn-block"
+		<!-- card https://getbootstrap.jp/docs/4.2/components/card/ -->
+		<!-- btn http://www.tohoho-web.com/bootstrap/buttons.html -->
+		
+		<button class="btn btn-lg btn-secondary btn-block"
+			data-toggle="collapse"
+			data-target="#example-1-all"
+			aria-expand="false"
+			aria-controls="example-1-all">ヒントa</button>
+
+		<div class="collapse" id="example-1-all">
+			<div class="card card-body border-secondary">
+				<button class="btn btn-lg btn-danger btn-block"
+					data-toggle="collapse"
+					data-target="#example-1"
+					aria-expand="false"
+					aria-controls="example-1">ヒント1</button>
+				<div class="collapse" id="example-1">
+					<div class="card card-body border-danger">
+						謎解きの基本は変換。
+					</div>
+				</div>
+
+				<br />
+
+				<button class="btn btn-lg btn-danger btn-block"
 				data-toggle="collapse"
-				data-target="#example-1-all"
+				data-target="#example-2"
 				aria-expand="false"
-				aria-controls="example-1-all">ヒントa</button>
-
-			<div class="collapse" id="example-1-all">
-				<div class="card card-body">
-					<button class="btn btn-lg btn-secondary btn-block"
-						data-toggle="collapse"
-						data-target="#example-1"
-						aria-expand="false"
-						aria-controls="example-1">ヒント1</button>
-					<div class="collapse" id="example-1">
-						<div class="card card-body">
-							謎解きの基本は変換。
-						</div>
+				aria-controls="example-2">ヒント2</button>
+				<div class="collapse" id="example-2">
+					<div class="card card-body border-danger">
+						人はどちらに歩こうとしている？
 					</div>
+				</div>
 
-					<br />
+				<br />
 
-					<button class="btn btn-lg btn-secondary btn-block"
-					data-toggle="collapse"
-					data-target="#example-2"
-					aria-expand="false"
-					aria-controls="example-2">ヒント2</button>
-					<div class="collapse" id="example-2">
-						<div class="card card-body">
-							人はどちらに歩こうとしている？
-						</div>
-					</div>
-
-					<br />
-
-					<button class="btn btn-lg btn-secondary btn-block"
-					data-toggle="collapse"
-					data-target="#example-3"
-					aria-expand="false"
-					aria-controls="example-3">ヒント3</button>
-					<div class="collapse" id="example-3">
-						<div class="card card-body">
-							人も文字として変換してみよう。
-						</div>
+				<button class="btn btn-lg btn-danger btn-block"
+				data-toggle="collapse"
+				data-target="#example-3"
+				aria-expand="false"
+				aria-controls="example-3">ヒント3</button>
+				<div class="collapse" id="example-3">
+					<div class="card card-body border-danger">
+						人も文字として変換してみよう。
 					</div>
 				</div>
 			</div>
