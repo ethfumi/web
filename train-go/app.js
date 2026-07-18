@@ -1139,7 +1139,7 @@
 
   function drawCrossing() {
     if (routeEvent !== "crossing" || !routeEventAnnounced) return;
-    const x = W * (1.02 - (routeEventProgress - 0.22) * 1.5);
+    const x = W * 0.76;
     const { x0, x1 } = viewRange();
     if (x < x0 - 160 || x > x1 + 160) return;
     const nearY = H * GROUND_R;
@@ -1182,8 +1182,9 @@
     if (weather === "rain") {
       ctx.strokeStyle = "rgba(205,235,255,0.72)";
       ctx.lineWidth = 2;
+      const rainSpan = W + 80;
       for (let i = 0; i < 85; i++) {
-        const x = (i * 79 + weatherTime * 310) % (W + 80) - 40;
+        const x = ((i * 79 - weatherTime * 310) % rainSpan + rainSpan) % rainSpan - 40;
         const y = (i * 47 + weatherTime * 520) % (H + 50) - 25;
         ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 12, y + 25); ctx.stroke();
       }
