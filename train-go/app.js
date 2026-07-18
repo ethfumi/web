@@ -42,6 +42,10 @@
     "ろくりょう", "ななりょう", "はちりょう", "きゅうりょう", "じゅうりょう",
   ];
   const MAX_CARS = 100;
+  const KOMACHI_COUPLING_STATIONS = {
+    chuo: "おぎくぼ",
+    tohoku: "もりおか",
+  };
 
   // 11両以降は「11りょう」表記でも日本語 TTS が「じゅういちりょう」と読んでくれる
   function carWord(n) {
@@ -537,14 +541,18 @@
     canvas.dataset.nextStationMeters = String(intervalMeters);
     stationWorldX = distance + intervalMeters * PIXELS_PER_METER;
     currentLineKm = nextStation.km;
+    if (isKomachiCouplingStop(nextStationName)) komachiStationX = stationWorldX;
+  }
+
+  function isKomachiCouplingStop(stationName) {
+    return train === TRAINS.hayabusa
+      && KOMACHI_COUPLING_STATIONS[selectedRouteKey] === stationName
+      && !komachiCoupled;
   }
 
   function shouldPassNextStation() {
     if (!expressMode || !activeRoute.supportsExpress) return false;
-    const isFirstKomachiStop = selectedRouteKey === "chuo"
-      && train === TRAINS.hayabusa
-      && nextStationName === "おぎくぼ"
-      && !komachiCoupled;
+    const isFirstKomachiStop = isKomachiCouplingStop(nextStationName);
     return !isFirstKomachiStop && !activeRoute.expressStops.has(nextStationName);
   }
 
@@ -704,14 +712,14 @@
     canvas.dataset.currentStation = currentStationName;
     stationIdx = -1;
     currentLineKm = activeRoute.startKm;
+    komachiCoupled = false;
+    komachiReady = false;
+    komachiGap = 110;
+    komachiStationX = null;
     viewScale = 1;
     speedBoostPopups = [];
     state = "stopped";
     scheduleNextStation();
-    komachiCoupled = false;
-    komachiReady = false;
-    komachiGap = 110;
-    komachiStationX = selectedRouteKey === "chuo" && key === "hayabusa" ? stationWorldX : null;
     doorsOpen = false;
     stationDoorsDone = true;
     expressMode = false;
@@ -822,9 +830,7 @@
     stationDoorsDone = false;
     btnStationDoors.classList.add("hidden");
     stationPassengers.classList.add("hidden");
-    const isKomachiStop = selectedRouteKey === "chuo" && train === TRAINS.hayabusa
-      && currentStationName === "おぎくぼ"
-      && !komachiCoupled;
+    const isKomachiStop = isKomachiCouplingStop(currentStationName);
     scheduleNextStation();
     arrivalBanner.classList.remove("hidden");
     chime();
@@ -832,7 +838,7 @@
       komachiReady = true;
       arrivalBanner.textContent = "こまちがいた！";
       btnKomachiCouple.classList.remove("hidden");
-      say("おぎくぼにとうちゃく！こまちがまっているよ。れんけつしよう！");
+      say(`${currentStationName}にとうちゃく！こまちがまっているよ。れんけつしよう！`);
     } else {
       arrivalBanner.textContent = "とうちゃく〜！";
       showStationDoorPrompt();
