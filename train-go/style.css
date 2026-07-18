@@ -1,0 +1,137 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #aee3ff;
+  font-family: "Hiragino Maru Gothic ProN", "BIZ UDGothic", "Yu Gothic", sans-serif;
+  touch-action: manipulation;
+}
+
+#game {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* --- 車両えらび --- */
+#select-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4vmin;
+  background: linear-gradient(#aee3ff, #e8f7ff 60%, #d5f0c9);
+  z-index: 10;
+}
+
+.select-title {
+  font-size: 7vmin;
+  font-weight: bold;
+  color: #2a5caa;
+  text-shadow: 0 2px 0 #fff;
+}
+
+.train-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 3vmin;
+  width: min(80vw, 560px);
+}
+
+.train-btn {
+  display: flex;
+  align-items: center;
+  gap: 3vmin;
+  padding: 2.5vmin 4vmin;
+  border: none;
+  border-radius: 4vmin;
+  background: #fff;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.train-btn:active {
+  transform: scale(0.95) translateY(3px);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
+}
+
+.train-btn svg {
+  width: 45%;
+  height: auto;
+  flex-shrink: 0;
+}
+
+.train-btn span {
+  font-size: 5vmin;
+  font-weight: bold;
+  color: #444;
+}
+
+/* --- 走行画面 UI --- */
+#run-ui {
+  position: fixed;
+  right: max(3vmin, env(safe-area-inset-right));
+  bottom: max(3vmin, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 2.5vmin;
+  z-index: 5;
+}
+
+#run-ui button {
+  width: 14vmin;
+  height: 14vmin;
+  border: none;
+  border-radius: 50%;
+  font-size: 6vmin;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+
+#run-ui button:active {
+  transform: scale(0.9);
+}
+
+#btn-home {
+  opacity: 0.55;
+}
+
+/* --- とうちゃく --- */
+#arrival-banner {
+  position: fixed;
+  top: 18%;
+  left: 50%;
+  transform: translateX(-50%) rotate(-3deg);
+  font-size: 10vmin;
+  font-weight: bold;
+  color: #ff6a00;
+  text-shadow: 0 3px 0 #fff, 0 6px 12px rgba(0, 0, 0, 0.2);
+  z-index: 6;
+  animation: pop 0.5s ease-out;
+  pointer-events: none;
+}
+
+@keyframes pop {
+  0% { transform: translateX(-50%) scale(0) rotate(-3deg); }
+  70% { transform: translateX(-50%) scale(1.2) rotate(-3deg); }
+  100% { transform: translateX(-50%) scale(1) rotate(-3deg); }
+}
