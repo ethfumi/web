@@ -75,6 +75,9 @@
   const btnStationDoors = document.getElementById("btn-station-doors");
   const doorLabel = document.getElementById("door-label");
   const stationPassengers = document.getElementById("station-passengers");
+  const routeEventBanner = document.getElementById("route-event-banner");
+  const btnHeadlight = document.getElementById("btn-headlight");
+  const headlightLabel = document.getElementById("headlight-label");
 
   let W = 0, H = 0, DPR = 1;
   let forcedSize = false; // デバッグ用: 非表示タブでも描画検証できるようにサイズを固定する
@@ -169,6 +172,13 @@
   let komachiGap = 110;
   let doorsOpen = false;
   let stationDoorsDone = true;
+  let segmentNumber = 0;
+  let segmentStartDistance = 0;
+  let routeEvent = ""; // "" | fuji | inspection | tunnel
+  let routeEventAnnounced = false;
+  let routeEventProgress = 0;
+  let lightsOn = false;
+  let inspectionTime = 0;
 
   function initClouds() {
     clouds = [];
@@ -205,11 +215,14 @@
     komachiStationX = key === "hayabusa" ? stationWorldX : null;
     doorsOpen = false;
     stationDoorsDone = true;
+    segmentNumber = 0;
+    segmentStartDistance = 0;
     selectScreen.classList.add("hidden");
     runUi.classList.remove("hidden");
     btnKomachiCouple.classList.add("hidden");
     btnStationDoors.classList.add("hidden");
     stationPassengers.classList.add("hidden");
+    clearRouteEvent();
     arrivalBanner.textContent = "とうちゃく〜！";
     say(`${train.callName}、${START_STATION}えきを、しゅっぱつしんこう！`);
   }
@@ -223,6 +236,7 @@
     btnKomachiCouple.classList.add("hidden");
     btnStationDoors.classList.add("hidden");
     stationPassengers.classList.add("hidden");
+    clearRouteEvent();
   }
 
   function depart() {
@@ -231,12 +245,25 @@
     arrivalBanner.classList.add("hidden");
     btnStationDoors.classList.add("hidden");
     stationPassengers.classList.add("hidden");
+    segmentNumber++;
+    segmentStartDistance = distance;
+    routeEventAnnounced = false;
+    routeEventProgress = 0;
+    lightsOn = false;
+    inspectionTime = 0;
+    routeEvent = "";
+    if (segmentNumber === 1 && train === TRAINS.nozomi) routeEvent = "fuji";
+    if (segmentNumber === 1 && train === TRAINS.doctoryellow) routeEvent = "inspection";
+    if (segmentNumber === 2) routeEvent = "tunnel";
+    routeEventBanner.classList.add("hidden");
+    btnHeadlight.classList.add("hidden");
     horn();
     say(`つぎは、${nextStationName}`);
     speed = 220;
   }
 
   function arrive() {
+    clearRouteEvent();
     state = "stopped";
     speed = 0;
     currentStationX = stationWorldX;
@@ -281,7 +308,7 @@
     arrivalBanner.textContent = "れんけつ！";
     chime();
     spawnConfetti(90);
-    say("ガチャン！はやぶさと、こまち、れんけつ！");
+    say(`ガチャン！はやぶさと、こまち、れんけつ！ぜんぶで、${carWord(totalCarCount())}！`);
     showStationDoorPrompt();
   }
 
@@ -315,23 +342,74 @@
     say("ドアがしまりまーす。しゅっぱつしんこう！");
   }
 
+  function clearRouteEvent() {
+    routeEvent = "";
+    routeEventAnnounced = false;
+    routeEventProgress = 0;
+    lightsOn = false;
+    routeEventBanner.classList.add("hidden");
+    btnHeadlight.classList.add("hidden");
+    headlightLabel.textContent = "ライトをつける";
+    btnHeadlight.setAttribute("aria-label", "ライトをつける");
+  }
+
+  function updateRouteEvent(dt) {
+    if (!routeEvent || state !== "running") return;
+    const segmentLength = Math.max(stationWorldX - segmentStartDistance, 1);
+    routeEventProgress = (distance - segmentStartDistance) / segmentLength;
+    inspectionTime += dt;
+
+    if (!routeEventAnnounced && routeEventProgress >= 0.22) {
+      routeEventAnnounced = true;
+      routeEventBanner.classList.remove("hidden");
+      if (routeEvent === "fuji") {
+        routeEventBanner.textContent = "ふじさんだ〜！";
+        say("みてみて！おおきな、ふじさんがみえるよ！");
+      } else if (routeEvent === "inspection") {
+        routeEventBanner.textContent = "せんろを けんさちゅう！";
+        say("ドクターイエロー、せんろをけんさちゅうです！");
+      } else if (routeEvent === "tunnel") {
+        routeEventBanner.textContent = "トンネルだ！";
+        btnHeadlight.classList.remove("hidden");
+        say("トンネルだ！ライトをつけてみよう！");
+      }
+    }
+
+    if (routeEventProgress >= 0.8) {
+      if (routeEvent === "inspection") {
+        say("けんさ、おわり！せんろ、いじょうなし！");
+        spawnConfetti(24);
+      } else if (routeEvent === "tunnel") {
+        say("トンネルを、ぬけたよ〜！");
+      }
+      clearRouteEvent();
+    }
+  }
+
   function addCar() {
     if (cars >= MAX_CARS) {
-      say(`${carWord(MAX_CARS)}！ながーい！これでまんたんだよ！`);
+      say(`${carWord(totalCarCount())}！ながーい！これでまんたんだよ！`);
       return;
     }
     cars++;
-    say(`${carWord(cars)}！`);
+    say(`${carWord(totalCarCount())}！`);
     spawnConfetti(12);
   }
 
   function removeCar() {
     if (cars <= 1) {
-      say(`${carWord(1)}！これがさいごのいちりょうだよ！`);
+      const count = totalCarCount();
+      say(komachiCoupled
+        ? `${carWord(count)}！これいじょうは、きりはなせないよ！`
+        : `${carWord(count)}！これがさいごのいちりょうだよ！`);
       return;
     }
     cars--;
-    say(`${carWord(cars)}！`);
+    say(`${carWord(totalCarCount())}！`);
+  }
+
+  function totalCarCount() {
+    return cars + (komachiCoupled ? 2 : 0);
   }
 
   function spawnConfetti(n = 40) {
@@ -384,6 +462,16 @@
   btnStationDoors.addEventListener("click", () => {
     ensureAudio();
     toggleStationDoors();
+  });
+  btnHeadlight.addEventListener("click", () => {
+    ensureAudio();
+    if (routeEvent !== "tunnel" || lightsOn) return;
+    lightsOn = true;
+    headlightLabel.textContent = "ライト ついた！";
+    btnHeadlight.setAttribute("aria-label", "ライトがついた");
+    routeEventBanner.textContent = "ピカッ！あかるいね！";
+    chime();
+    say("ピカッ！ライトがついたよ！あかるいね！");
   });
 
   // ---- 描画 ----
@@ -444,6 +532,66 @@
     }
   }
 
+  function routeEventAlpha() {
+    if (!routeEventAnnounced) return 0;
+    const fadeIn = Math.min((routeEventProgress - 0.22) / 0.08, 1);
+    const fadeOut = Math.min((0.8 - routeEventProgress) / 0.08, 1);
+    return Math.max(0, Math.min(fadeIn, fadeOut));
+  }
+
+  function drawFuji() {
+    if (routeEvent !== "fuji" || !routeEventAnnounced) return;
+    const base = H * GROUND_R;
+    const x = W * 0.78 - distance * 0.015;
+    const peakY = base - H * 0.52;
+    const halfW = W * 0.34;
+    ctx.save();
+    ctx.globalAlpha = routeEventAlpha();
+    ctx.fillStyle = "#7fa8c9";
+    ctx.beginPath();
+    ctx.moveTo(x - halfW, base);
+    ctx.lineTo(x, peakY);
+    ctx.lineTo(x + halfW, base);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "#fff";
+    ctx.beginPath();
+    ctx.moveTo(x, peakY);
+    ctx.lineTo(x + halfW * 0.22, peakY + H * 0.12);
+    ctx.lineTo(x + halfW * 0.1, peakY + H * 0.1);
+    ctx.lineTo(x, peakY + H * 0.15);
+    ctx.lineTo(x - halfW * 0.1, peakY + H * 0.1);
+    ctx.lineTo(x - halfW * 0.22, peakY + H * 0.12);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawTunnel() {
+    if (routeEvent !== "tunnel" || !routeEventAnnounced) return;
+    const { x0, x1 } = viewRange();
+    const groundY = H * GROUND_R;
+    ctx.save();
+    ctx.globalAlpha = 0.94 * routeEventAlpha();
+    ctx.fillStyle = "#202735";
+    ctx.fillRect(x0, 0, x1 - x0, groundY);
+    ctx.strokeStyle = "#465268";
+    ctx.lineWidth = 10;
+    const ribSpacing = 180;
+    const off = (distance * 0.45) % ribSpacing;
+    for (let x = x0 - off; x < x1 + ribSpacing; x += ribSpacing) {
+      ctx.beginPath();
+      ctx.moveTo(x, groundY);
+      ctx.lineTo(x, H * 0.18);
+      ctx.stroke();
+    }
+    ctx.fillStyle = lightsOn ? "#fff4ad" : "#69758a";
+    for (let x = x0 + 90 - off; x < x1 + ribSpacing; x += ribSpacing) {
+      ctx.fillRect(x, H * 0.2, 38, 8);
+    }
+    ctx.restore();
+  }
+
   function drawTrack() {
     const y = H * GROUND_R;
     const { x0, x1 } = viewRange();
@@ -459,6 +607,51 @@
     // レール
     ctx.fillStyle = "#555";
     ctx.fillRect(x0, y + 6, x1 - x0, 4);
+  }
+
+  function drawInspectionEffect() {
+    if (routeEvent !== "inspection" || !routeEventAnnounced) return;
+    const y = H * GROUND_R;
+    const { x0, x1 } = viewRange();
+    const scanX = x0 + ((inspectionTime * 260) % Math.max(x1 - x0, 1));
+    ctx.save();
+    ctx.globalAlpha = routeEventAlpha();
+    const glow = ctx.createLinearGradient(scanX - 90, 0, scanX + 90, 0);
+    glow.addColorStop(0, "rgba(65,225,255,0)");
+    glow.addColorStop(0.5, "rgba(65,225,255,0.9)");
+    glow.addColorStop(1, "rgba(65,225,255,0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(scanX - 90, y - 8, 180, 38);
+    ctx.fillStyle = "#d8fbff";
+    for (let i = 0; i < 4; i++) {
+      const sparkleX = scanX - 55 + i * 36;
+      const sparkleY = y + 8 + Math.sin(inspectionTime * 7 + i) * 8;
+      ctx.beginPath();
+      ctx.arc(sparkleX, sparkleY, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawHeadlight() {
+    if (routeEvent !== "tunnel" || !routeEventAnnounced || !lightsOn) return;
+    const { carW, gap } = carMetrics();
+    const frontX = W * NOSE_R + (komachiCoupled ? komachiGap + carW * 2 + gap : 0);
+    const centerY = H * GROUND_R - carW * 0.16;
+    const beam = ctx.createLinearGradient(frontX, 0, frontX + W * 0.4, 0);
+    beam.addColorStop(0, "rgba(255,244,160,0.75)");
+    beam.addColorStop(1, "rgba(255,244,160,0)");
+    ctx.save();
+    ctx.globalAlpha = routeEventAlpha();
+    ctx.fillStyle = beam;
+    ctx.beginPath();
+    ctx.moveTo(frontX - 4, centerY - 7);
+    ctx.lineTo(frontX + W * 0.42, centerY - H * 0.13);
+    ctx.lineTo(frontX + W * 0.42, centerY + H * 0.13);
+    ctx.lineTo(frontX - 4, centerY + 7);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
   }
 
   function drawStations() {
@@ -510,6 +703,23 @@
     ctx.stroke();
   }
 
+  function drawCarNumber(x, y, number, carH) {
+    const radius = Math.max(10, Math.min(14, carH * 0.22));
+    ctx.fillStyle = "rgba(255,255,255,0.96)";
+    ctx.strokeStyle = "#25384a";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = "#17212b";
+    ctx.font = `bold ${Math.max(14, radius * 1.25)}px sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(String(number), x, y + 1);
+    ctx.textBaseline = "alphabetic";
+  }
+
   function drawTrain() {
     const y = H * GROUND_R;
     const { carW, carH, gap } = carMetrics();
@@ -525,6 +735,7 @@
       ctx.strokeStyle = train.edge;
       ctx.lineWidth = 2;
       ctx.beginPath();
+      const isTail = cars > 1 && i === cars - 1;
       if (i === 0) {
         // 先頭車: ロングノーズ
         ctx.moveTo(left, top + 6);
@@ -534,6 +745,17 @@
         ctx.quadraticCurveTo(right, top + carH, right - 8, top + carH);
         ctx.lineTo(left + 6, top + carH);
         ctx.quadraticCurveTo(left, top + carH, left, top + carH - 6);
+        ctx.closePath();
+      } else if (isTail) {
+        // 最後の車両: 後ろ向きの運転席がある後尾車。
+        ctx.moveTo(left, top + carH - 8);
+        ctx.quadraticCurveTo(left + carW * 0.1, top + 2, left + carW * 0.45, top);
+        ctx.lineTo(right - 10, top);
+        ctx.quadraticCurveTo(right, top, right, top + 6);
+        ctx.lineTo(right, top + carH - 6);
+        ctx.quadraticCurveTo(right, top + carH, right - 6, top + carH);
+        ctx.lineTo(left + 8, top + carH);
+        ctx.quadraticCurveTo(left, top + carH, left, top + carH - 8);
         ctx.closePath();
       } else {
         roundRect(left, top, carW, carH, 8);
@@ -558,8 +780,8 @@
 
       // 窓
       ctx.fillStyle = "#333";
-      const winCount = i === 0 ? 2 : 3;
-      const winStart = i === 0 ? left + carW * 0.12 : left + carW * 0.12;
+      const winCount = i === 0 || isTail ? 2 : 3;
+      const winStart = isTail ? left + carW * 0.38 : left + carW * 0.12;
       for (let wi = 0; wi < winCount; wi++) {
         roundRect(winStart + wi * carW * 0.28, top + carH * 0.18, carW * 0.18, carH * 0.22, 4);
         ctx.fill();
@@ -589,6 +811,9 @@
         ctx.fillStyle = "#666";
         ctx.fillRect(right, top + carH * 0.6, gap, 6);
       }
+
+      const carNumber = komachiCoupled ? i + 3 : i + 1;
+      drawCarNumber(left + carW * 0.52, top + carH * 0.72, carNumber, carH);
 
       drawWheel(left + carW * 0.22, y - 8, 9);
       drawWheel(left + carW * 0.78, y - 8, 9);
@@ -652,6 +877,7 @@
         ctx.fillStyle = "#666";
         ctx.fillRect(right, top + carH * 0.6, gap, 6);
       }
+      drawCarNumber(left + carW * 0.52, top + carH * 0.72, 2 - i, carH);
       drawWheel(left + carW * 0.22, y - 8, 9);
       drawWheel(left + carW * 0.78, y - 8, 9);
     }
@@ -712,6 +938,7 @@
 
       distance += speed * dt;
       wheelAngle += speed * dt * 0.08;
+      updateRouteEvent(dt);
     }
 
     if (state === "coupling") {
@@ -743,9 +970,13 @@
       ctx.translate(ax, ay);
       ctx.scale(viewScale, viewScale);
       ctx.translate(-ax, -ay);
+      drawFuji();
       drawMountains();
+      drawTunnel();
       drawTrack();
+      drawInspectionEffect();
       drawStations();
+      drawHeadlight();
       drawTrain();
       drawKomachi();
       ctx.restore();
@@ -766,7 +997,8 @@
   scheduleFrame();
 
   // ---- デバッグフック (?debug 付きで開いた時だけ) ----
-  if (new URLSearchParams(location.search).has("debug")) {
+  const isDebug = new URLSearchParams(location.search).has("debug");
+  if (isDebug) {
     window.__tg = {
       skipToStation() { distance = stationWorldX - 600; },
       status() {
@@ -776,6 +1008,7 @@
           nextStationName, currentStationName,
           komachiCoupled, komachiReady, komachiGap,
           doorsOpen, stationDoorsDone,
+          segmentNumber, routeEvent, routeEventProgress, lightsOn,
         };
       },
       setCars(n) { cars = Math.max(1, Math.min(MAX_CARS, n)); },
@@ -789,13 +1022,46 @@
         ctx.setTransform(1, 0, 0, 1, 0, 0);
       },
     };
+
+    // ブラウザの分離された検証環境からも、実際の操作として駅直前へ進められる。
+    const debugSkipButton = document.createElement("button");
+    debugSkipButton.type = "button";
+    debugSkipButton.textContent = "テスト: えきのまえへ";
+    debugSkipButton.setAttribute("aria-label", "テストで駅の前へ進む");
+    Object.assign(debugSkipButton.style, {
+      position: "fixed", left: "8px", bottom: "8px", zIndex: "99",
+      padding: "8px", fontSize: "14px",
+    });
+    debugSkipButton.addEventListener("click", () => {
+      if (state === "stopped" && stationDoorsDone && !komachiReady) depart();
+      if (state !== "running") return;
+      distance = stationWorldX;
+      arrive();
+    });
+    document.body.appendChild(debugSkipButton);
+
+    const debugEventButton = document.createElement("button");
+    debugEventButton.type = "button";
+    debugEventButton.textContent = "テスト: イベントへ";
+    debugEventButton.setAttribute("aria-label", "テストで走行イベントへ進む");
+    Object.assign(debugEventButton.style, {
+      position: "fixed", left: "8px", bottom: "52px", zIndex: "99",
+      padding: "8px", fontSize: "14px",
+    });
+    debugEventButton.addEventListener("click", () => {
+      if (state === "stopped" && stationDoorsDone && !komachiReady) depart();
+      if (state !== "running") return;
+      distance = segmentStartDistance + (stationWorldX - segmentStartDistance) * 0.3;
+      updateRouteEvent(0);
+    });
+    document.body.appendChild(debugEventButton);
   }
 
   // ---- PWA ----
   const canUseServiceWorker = location.protocol === "https:"
     || location.hostname === "localhost"
     || location.hostname === "127.0.0.1";
-  if ("serviceWorker" in navigator && canUseServiceWorker) {
+  if ("serviceWorker" in navigator && canUseServiceWorker && !isDebug) {
     let reloadingForServiceWorker = false;
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       if (reloadingForServiceWorker) return;
