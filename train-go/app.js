@@ -84,6 +84,19 @@
     "たちかわ", "はちおうじ", "にしはちおうじ", START_STATION,
   ]);
 
+  const PASSENGER_POOL = [
+    "🧒", "👧", "👦", "👩", "👨", "👵", "👴",
+    "🐰", "🐻", "🐧", "🐶", "🐱", "🦊", "🐼",
+  ];
+
+  const OPPOSING_TRAIN_TYPES = [
+    { name: "そうぶせん", kind: "local", body: "#e8ecef", stripe: "#ffd400" },
+    { name: "ちゅうおうせん", kind: "local", body: "#e8ecef", stripe: "#f28c28" },
+    { name: "ローカルせん", kind: "local", body: "#d9efe8", stripe: "#42a57a" },
+    { name: "かもつれっしゃ", kind: "freight", body: "#40505d", stripe: "#e49a31" },
+    { name: "きかんしゃ", kind: "steam", body: "#28323a", stripe: "#c7443e" },
+  ];
+
   // ---- 要素 ----
   const canvas = document.getElementById("game");
   const ctx = canvas.getContext("2d");
@@ -293,6 +306,9 @@
   let passingStation = false;
   let midAnnouncementDone = false;
   let runningSoundEnabled = true;
+  let onboardPassengers = [];
+  let opposingTrain = null;
+  let nextOpposingTrainIn = 3;
 
   function initClouds() {
     clouds = [];
@@ -358,6 +374,10 @@
     expressMode = false;
     passingStation = false;
     midAnnouncementDone = false;
+    onboardPassengers = [];
+    stationPassengers.replaceChildren();
+    opposingTrain = null;
+    nextOpposingTrainIn = 2.5 + Math.random() * 4;
     segmentNumber = 0;
     segmentStartDistance = 0;
     selectScreen.classList.add("hidden");
@@ -390,6 +410,7 @@
   function beginSegment(playHorn = true, announceNext = true) {
     state = "running";
     arrivalBanner.classList.add("hidden");
+    arrivalBanner.classList.remove("passenger-exchange");
     btnStationDoors.classList.add("hidden");
     stationPassengers.classList.add("hidden");
     segmentNumber++;
@@ -499,6 +520,48 @@
     btnStationDoors.classList.remove("hidden");
   }
 
+  function pickPassengers(count) {
+    const choices = [...PASSENGER_POOL];
+    return Array.from({ length: count }, () => {
+      const index = Math.floor(Math.random() * choices.length);
+      return choices.splice(index, 1)[0];
+    });
+  }
+
+  function exchangePassengers() {
+    const alighting = [];
+    if (onboardPassengers.length > 0) {
+      const alightCount = 1 + Math.floor(Math.random() * Math.min(3, onboardPassengers.length));
+      for (let i = 0; i < alightCount; i++) {
+        const index = Math.floor(Math.random() * onboardPassengers.length);
+        alighting.push(onboardPassengers.splice(index, 1)[0]);
+      }
+    }
+
+    const boarding = pickPassengers(1 + Math.floor(Math.random() * 3));
+    onboardPassengers.push(...boarding);
+
+    stationPassengers.replaceChildren();
+    [...alighting.map((icon) => ({ icon, direction: "alight" })),
+      ...boarding.map((icon) => ({ icon, direction: "board" }))]
+      .forEach((passenger, index) => {
+        const span = document.createElement("span");
+        span.textContent = passenger.icon;
+        span.className = `passenger-${passenger.direction}`;
+        span.style.setProperty("--passenger-delay", `${index * 0.18}s`);
+        stationPassengers.appendChild(span);
+      });
+
+    stationPassengers.classList.remove("hidden");
+    arrivalBanner.classList.add("passenger-exchange");
+    arrivalBanner.textContent = alighting.length > 0
+      ? `${alighting.length}にん おりて ${boarding.length}にん のるよ！`
+      : `${boarding.length}にん ごじょうしゃ！`;
+    say(alighting.length > 0
+      ? `ドアがひらきます。${alighting.length}にんおりて、${boarding.length}にんごじょうしゃ！`
+      : `ドアがひらきます。${boarding.length}にん、ごじょうしゃくださーい！`);
+  }
+
   function toggleStationDoors() {
     if (state !== "stopped" || stationDoorsDone || komachiReady) return;
 
@@ -507,10 +570,8 @@
       doorSound(true);
       doorLabel.textContent = "ドアをしめる";
       btnStationDoors.setAttribute("aria-label", "ドアをしめる");
-      arrivalBanner.textContent = "ごじょうしゃ〜！";
-      stationPassengers.classList.remove("hidden");
+      exchangePassengers();
       spawnConfetti(18);
-      say("ドアがひらきます。うさぎさん、くまさん、ぺんぎんさん、ごじょうしゃくださーい！");
       return;
     }
 
@@ -519,6 +580,7 @@
     stationDoorsDone = true;
     btnStationDoors.classList.add("hidden");
     stationPassengers.classList.add("hidden");
+    arrivalBanner.classList.remove("passenger-exchange");
     arrivalBanner.textContent = "しゅっぱつできるよ！";
     say("ドアがしまりまーす。しゅっぱつしんこう！");
   }
@@ -863,21 +925,126 @@
     ctx.restore();
   }
 
+  function opposingTrackY() {
+    return H * GROUND_R - Math.max(72, H * 0.12);
+  }
+
   function drawTrack() {
     const y = H * GROUND_R;
+    const farY = opposingTrackY();
     const { x0, x1 } = viewRange();
+
+    // 向こう側の線路
+    ctx.fillStyle = "#aaa18d";
+    ctx.fillRect(x0, farY - 6, x1 - x0, 24);
+    ctx.fillStyle = "#756b59";
+    const farSpacing = 42;
+    const farOff = (distance * 0.55) % farSpacing;
+    for (let x = -farOff + Math.floor((x0 + farOff) / farSpacing) * farSpacing; x < x1; x += farSpacing) {
+      ctx.fillRect(x, farY - 3, 24, 18);
+    }
+    ctx.fillStyle = "#545a60";
+    ctx.fillRect(x0, farY, x1 - x0, 4);
+    ctx.fillRect(x0, farY + 11, x1 - x0, 4);
+
+    // 手前側の線路
     ctx.fillStyle = "#8a7a5c";
     ctx.fillRect(x0, y, x1 - x0, (H - y) / viewScale);
-    // 枕木
     ctx.fillStyle = "#6d5f45";
     const spacing = 46;
     const off = distance % spacing;
     for (let x = -off + Math.floor((x0 + off) / spacing) * spacing; x < x1; x += spacing) {
       ctx.fillRect(x, y + 10, 26, 8);
     }
-    // レール
     ctx.fillStyle = "#555";
     ctx.fillRect(x0, y + 6, x1 - x0, 4);
+  }
+
+  function spawnOpposingTrain(typeIndex = null) {
+    const index = typeIndex === null
+      ? Math.floor(Math.random() * OPPOSING_TRAIN_TYPES.length)
+      : typeIndex % OPPOSING_TRAIN_TYPES.length;
+    const type = OPPOSING_TRAIN_TYPES[index];
+    const { x1 } = viewRange();
+    opposingTrain = {
+      type,
+      x: x1 + 180,
+      cars: type.kind === "freight"
+        ? 4 + Math.floor(Math.random() * 3)
+        : 2 + Math.floor(Math.random() * 3),
+      speed: 360 + Math.random() * 180,
+    };
+  }
+
+  function updateOpposingTrain(dt) {
+    if (state === "select") return;
+    if (!opposingTrain) {
+      nextOpposingTrainIn -= dt;
+      if (nextOpposingTrainIn <= 0) spawnOpposingTrain();
+      return;
+    }
+
+    const carW = Math.min(W * 0.13, 115);
+    const { x0 } = viewRange();
+    opposingTrain.x -= (opposingTrain.speed + Math.min(speed, 1800) * 0.55) * dt;
+    if (opposingTrain.x + opposingTrain.cars * (carW + 5) < x0 - 120) {
+      opposingTrain = null;
+      nextOpposingTrainIn = 4 + Math.random() * 7;
+    }
+  }
+
+  function drawOpposingTrain() {
+    if (!opposingTrain) return;
+    const { type } = opposingTrain;
+    const y = opposingTrackY();
+    const carW = Math.min(W * 0.13, 115);
+    const carH = carW * 0.34;
+    const gap = 5;
+
+    for (let i = 0; i < opposingTrain.cars; i++) {
+      const left = opposingTrain.x + i * (carW + gap);
+      const top = y - carH + 1;
+      const isEngine = i === 0;
+
+      if (type.kind === "freight" && !isEngine) {
+        const containerColors = ["#b6533c", "#4f7892", "#9b7b3c", "#52745b"];
+        ctx.fillStyle = containerColors[i % containerColors.length];
+        ctx.fillRect(left + 3, top + 6, carW - 6, carH - 7);
+        ctx.fillStyle = "#313940";
+        ctx.fillRect(left, top + carH - 3, carW, 4);
+      } else {
+        ctx.fillStyle = type.body;
+        ctx.strokeStyle = "#56616a";
+        ctx.lineWidth = 2;
+        roundRect(left, top, carW, carH, type.kind === "steam" && isEngine ? 12 : 7);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = type.stripe;
+        ctx.fillRect(left + 2, top + carH * 0.58, carW - 4, carH * 0.16);
+
+        if (type.kind === "steam" && isEngine) {
+          ctx.fillStyle = "#20272c";
+          ctx.fillRect(left + carW * 0.58, top - carH * 0.32, carW * 0.16, carH * 0.36);
+          ctx.beginPath();
+          ctx.arc(left + carW * 0.35, top + carH * 0.54, carH * 0.28, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.fillStyle = "#293947";
+          const windowCount = type.kind === "freight" ? 2 : 3;
+          for (let wi = 0; wi < windowCount; wi++) {
+            roundRect(left + carW * (0.13 + wi * 0.27), top + carH * 0.2, carW * 0.17, carH * 0.24, 3);
+            ctx.fill();
+          }
+        }
+      }
+
+      ctx.fillStyle = "#34383b";
+      ctx.beginPath();
+      ctx.arc(left + carW * 0.24, y + 2, 6, 0, Math.PI * 2);
+      ctx.arc(left + carW * 0.76, y + 2, 6, 0, Math.PI * 2);
+      ctx.fill();
+    }
   }
 
   function formatTrackDistance(worldX) {
@@ -1259,6 +1426,7 @@
     }
 
     updateDriveUi();
+    updateOpposingTrain(dt);
 
     if (state === "coupling") {
       komachiGap = Math.max(komachiGap - 85 * dt, 8);
@@ -1294,6 +1462,7 @@
       drawCityscape();
       drawTunnel();
       drawTrack();
+      drawOpposingTrain();
       drawDistanceMarkers();
       drawInspectionEffect();
       drawStations();
@@ -1331,6 +1500,12 @@
           doorsOpen, stationDoorsDone,
           segmentNumber, routeEvent, routeEventProgress, lightsOn,
           expressMode, passingStation, midAnnouncementDone, runningSoundEnabled,
+          onboardPassengers: [...onboardPassengers],
+          opposingTrain: opposingTrain ? {
+            name: opposingTrain.type.name,
+            cars: opposingTrain.cars,
+            x: opposingTrain.x,
+          } : null,
         };
       },
       setCars(n) {
@@ -1381,6 +1556,17 @@
       updateRouteEvent(0);
     });
     document.body.appendChild(debugEventButton);
+
+    const debugOpposingButton = document.createElement("button");
+    debugOpposingButton.type = "button";
+    debugOpposingButton.textContent = "テスト: たいこうれっしゃ";
+    debugOpposingButton.setAttribute("aria-label", "テストで対向列車を出す");
+    Object.assign(debugOpposingButton.style, {
+      position: "fixed", left: "8px", bottom: "96px", zIndex: "99",
+      padding: "8px", fontSize: "14px",
+    });
+    debugOpposingButton.addEventListener("click", () => spawnOpposingTrain());
+    document.body.appendChild(debugOpposingButton);
   }
 
   // ---- PWA ----
