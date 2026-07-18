@@ -57,17 +57,12 @@
 
 <!-- 走行画面の操作ボタン -->
 <div id="run-ui" class="hidden">
-  <button id="btn-couple" aria-label="車両を選んで連結" aria-expanded="false">🚃＋</button>
+  <button id="btn-couple" aria-label="いまの車両を連結">🚃＋</button>
+  <button class="btn-quick-add" data-slot="0"><span class="quick-train-art"></span><span class="quick-plus">＋</span></button>
+  <button class="btn-quick-add" data-slot="1"><span class="quick-train-art"></span><span class="quick-plus">＋</span></button>
+  <button class="btn-quick-add" data-slot="2"><span class="quick-train-art"></span><span class="quick-plus">＋</span></button>
   <button id="btn-remove" aria-label="きりはなす">🚃−</button>
   <button id="btn-home" aria-label="えらびなおす">🏠</button>
-</div>
-
-<div id="car-picker" class="hidden" aria-label="れんけつする車両を選ぶ">
-  <button class="car-picker-btn current" data-car="current" aria-label="いまの車両を連結"><span class="picker-train-art" data-preview="current"></span><span>いまの＋</span></button>
-  <button class="car-picker-btn" data-car="nozomi" aria-label="のぞみを連結"><span class="picker-train-art" data-preview="nozomi"></span><span>のぞみ＋</span></button>
-  <button class="car-picker-btn" data-car="doctoryellow" aria-label="ドクターイエローを連結"><span class="picker-train-art" data-preview="doctoryellow"></span><span>ドクター<br>イエロー＋</span></button>
-  <button class="car-picker-btn" data-car="hayabusa" aria-label="はやぶさを連結"><span class="picker-train-art" data-preview="hayabusa"></span><span>はやぶさ＋</span></button>
-  <button class="car-picker-btn" data-car="komachi" aria-label="こまちを連結"><span class="picker-train-art" data-preview="komachi"></span><span>こまち＋</span></button>
 </div>
 
 <div id="drive-panel" class="hidden">
