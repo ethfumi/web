@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#04070b">
+  <meta name="description" content="指先で探索するリアルタイム3D Mandelbulb">
+  <meta property="og:title" content="MANDELBULB / DEEP FIELD">
+  <meta property="og:description" content="指先で探索するリアルタイム3Dフラクタル">
+  <meta property="og:image" content="./og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <title>MANDELBULB / DEEP FIELD</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<main class="app">
+  <canvas id="scene" aria-label="リアルタイムで描画されるMandelbulb"></canvas>
+  <div class="grain" aria-hidden="true"></div>
+  <header class="topbar">
+    <div><span class="eyebrow">FRACTAL SPECIMEN / NO. 008</span><h1><span id="fractalTitle">MANDELBULB</span> <em id="fractalSubtitle">/ DEEP FIELD</em></h1></div>
+    <div class="readout"><i></i><span id="status">INITIALIZING</span><b id="fps">-- FPS</b><b id="gpu">GPU -- ms / 16.7 ms</b><b id="headroom">HEADROOM --%</b></div>
+  </header>
+  <section class="coords" aria-hidden="true"><span><i id="axisLabel">ORBIT</i> <b id="orbitOut">+00 / +00</b></span><span>MAG <b id="distOut">×1.00</b></span><span><i id="shapeLabel">POWER</i> <b id="powerOut">8.0</b></span></section><section class="zoomMeter" aria-live="polite"><span>MAGNIFICATION</span><b id="zoomBadge">×1.00</b></section>
+  <section class="hint" id="hint"><strong>✦</strong><div><b>TOUCH THE FIELD</b><small>ドラッグで回転 · ピンチで深く潜る</small></div></section>
+  <aside class="panel open" id="panel" aria-label="フラクタル設定">
+    <header><div><span>FRACTAL LIBRARY</span><b>数式標本を切り替える</b></div><button id="closePanel" aria-label="設定を閉じる">×</button></header>
+<section class="modeSection" aria-label="3Dフラクタル">
+  <span>3D FIELD</span>
+  <div class="modeGrid">
+    <button class="active" data-mode="0"><b>MANDELBULB</b><small>POWER SET</small></button>
+    <button data-mode="1"><b>MANDELBOX</b><small>FOLDED SPACE</small></button>
+    <button data-mode="2"><b>MENGER</b><small>VOID CUBE</small></button>
+  </div>
+</section>
+<section class="modeSection" aria-label="2Dフラクタル">
+  <span>2D PLANE</span>
+  <div class="modeGrid twoD">
+    <button data-mode="3"><b>MANDELBROT</b><small>CLASSIC SET</small></button>
+    <button data-mode="4"><b>JULIA</b><small>ORBIT SLICE</small></button>
+    <button data-mode="5"><b>BURNING SHIP</b><small>ABSOLUTE SET</small></button>
+    <button data-mode="12"><b>BURNING JULIA</b><small>FIXED FLAME</small></button>
+    <button data-mode="6"><b>NEWTON</b><small>ROOT BASINS</small></button>
+    <button data-mode="7"><b>SIERPINSKI</b><small>CLEAN CARPET</small></button>
+    <button data-mode="8"><b>KALEIDOSCOPE</b><small>MIRROR TILES</small></button>
+  </div>
+</section>
+<section class="modeSection" aria-label="生成数学パターン">
+  <span>GENERATIVE FIELD</span>
+  <div class="modeGrid">
+    <button data-mode="9"><b>PHYLLOTAXIS</b><small>GOLDEN SEEDS</small></button>
+    <button data-mode="10"><b>TRUCHET</b><small>QUIET MAZE</small></button>
+    <button data-mode="11"><b>HARMONIC</b><small>WAVE NODES</small></button>
+  </div>
+</section>
+    <section class="theory" id="theory" aria-live="polite">
+      <span>FORMULA / HOW IT WORKS</span>
+      <h2 id="theoryTitle">MANDELBULB</h2>
+      <code id="formula"></code>
+      <p id="theoryText"></p>
+      <small id="theoryNote"></small>
+    </section>
+    <section id="modeParameters" class="parameterGroup" aria-label="形状パラメータ"></section>
+    <label><span><b>DETAIL</b><small>反復回数</small></span><output id="detailValue">12</output><input id="detail" type="range" min="1" max="32" step="1" value="12"></label>
+    <label><span><b>EXPOSURE</b><small>発光強度</small></span><output id="exposureValue">1.00</output><input id="exposure" type="range" min=".55" max="1.65" step=".05" value="1"></label>
+    <div class="option"><span><b>SPECTRUM</b><small>観測波長</small></span><div class="swatches"><button class="active" data-palette="0" style="--c:#5df4ff" aria-label="Cyan"></button><button data-palette="1" style="--c:#b69cff" aria-label="Violet"></button><button data-palette="2" style="--c:#72ffb2" aria-label="Emerald"></button></div></div>
+    <div class="option"><span><b>RENDER SCALE</b><small>端末性能に合わせる</small></span><div class="segments"><button data-quality=".56">ECO</button><button class="active" data-quality=".78">BAL</button><button data-quality="1">MAX</button></div></div>
+  </aside>
+  <nav class="dock" aria-label="再生コントロール">
+    <button id="motion" class="play" aria-label="自動回転を一時停止">Ⅱ</button>
+    <label class="speed"><span>SPEED</span><output id="speedValue">×0.36</output><input id="speed" type="range" min="0" max="1.4" step=".05" value=".36"></label>
+    <button id="openPanel" class="dockButton" aria-label="フラクタルと数式メニューを開く"><b>⌁</b><small>LIBRARY</small></button>
+    <button id="reset" class="dockButton" aria-label="視点をリセット"><b>↺</b><small>RESET</small></button>
+  </nav>
+  <div id="error" class="error" hidden><b>WEBGL2 NOT AVAILABLE</b><p>最新のSafariまたはChromeで開いてください。</p></div>
+</main>
+<script src="./app.js"></script>
+</body>
+</html>
