@@ -265,6 +265,12 @@
   const speedValue = document.getElementById("speed-value");
   const distanceValue = document.getElementById("distance-value");
   const distanceKmValue = document.getElementById("distance-km-value");
+  const nextStationDistanceLabel = document.getElementById("next-station-distance-label");
+  const nextStationDistanceValue = document.getElementById("next-station-distance-value");
+  const nextStationDistanceKm = document.getElementById("next-station-distance-km");
+  const terminalDistanceLabel = document.getElementById("terminal-distance-label");
+  const terminalDistanceValue = document.getElementById("terminal-distance-value");
+  const terminalDistanceKm = document.getElementById("terminal-distance-km");
   const btnExpress = document.getElementById("btn-express");
   const expressLabel = document.getElementById("express-label");
   const btnRunningSound = document.getElementById("btn-running-sound");
@@ -539,10 +545,45 @@
     return !isFirstKomachiStop && !activeRoute.expressStops.has(nextStationName);
   }
 
+  function remainingDistanceMeters(meters) {
+    return String(Math.max(0, Math.ceil(meters - 0.001)));
+  }
+
+  function remainingDistanceKm(meters) {
+    return `${(Math.max(0, meters) / 1000).toFixed(1)} km`;
+  }
+
+  function nextStationRemainingMeters() {
+    if (stationIdx < 0 || !nextStationName) return 0;
+    return Math.max(0, (stationWorldX - distance) / PIXELS_PER_METER);
+  }
+
+  function terminalRemainingMeters() {
+    const terminalIndex = activeRoute.stations.length - 2;
+    if (stationIdx < 0) {
+      return Math.max(0, (activeRoute.stations[terminalIndex].km - activeRoute.startKm) * 1000);
+    }
+    if (stationIdx > terminalIndex) return 0;
+    const remainingAfterNext = Math.max(
+      0,
+      (activeRoute.stations[terminalIndex].km - activeRoute.stations[stationIdx].km) * 1000,
+    );
+    return nextStationRemainingMeters() + remainingAfterNext;
+  }
+
   function updateDriveUi() {
+    const terminal = activeRoute.stations[activeRoute.stations.length - 2];
     speedValue.textContent = String(Math.round(speed * 0.3));
     distanceValue.textContent = String(Math.floor(distance / PIXELS_PER_METER));
     distanceKmValue.textContent = `${(Math.floor(distance / PIXELS_PER_METER) / 1000).toFixed(1)} km`;
+    const nextRemaining = nextStationRemainingMeters();
+    const terminalRemaining = terminalRemainingMeters();
+    nextStationDistanceLabel.textContent = `つぎの ${nextStationName || "えき"}まで`;
+    nextStationDistanceValue.textContent = remainingDistanceMeters(nextRemaining);
+    nextStationDistanceKm.textContent = remainingDistanceKm(nextRemaining);
+    terminalDistanceLabel.textContent = `しゅうてん ${terminal.name}まで`;
+    terminalDistanceValue.textContent = remainingDistanceMeters(terminalRemaining);
+    terminalDistanceKm.textContent = remainingDistanceKm(terminalRemaining);
     btnExpress.classList.toggle("hidden", !activeRoute.supportsExpress);
     btnExpress.setAttribute("aria-pressed", String(expressMode));
     btnExpress.setAttribute("aria-label", expressMode ? "各駅停車モードにする" : `${activeRoute.expressModeName}モードにする`);

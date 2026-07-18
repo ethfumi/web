@@ -305,6 +305,59 @@ html, body {
   opacity: 0.78;
 }
 
+#remaining-meter {
+  display: grid;
+  width: 100%;
+  margin-top: 0.8vmin;
+  padding-top: 0.8vmin;
+  gap: 0.7vmin;
+  border-top: 0.25vmin solid rgba(255, 255, 255, 0.55);
+}
+
+.remaining-row {
+  display: flex;
+  min-width: 24vmin;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.4vmin;
+  line-height: 1.1;
+}
+
+.remaining-row > small {
+  max-width: 17vmin;
+  font-size: 1.65vmin;
+  line-height: 1.15;
+  text-align: left;
+}
+
+.remaining-values {
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  gap: 0.25vmin;
+  white-space: nowrap;
+}
+
+.remaining-main {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4vmin;
+}
+
+.remaining-main span {
+  font-size: 3.1vmin;
+  font-variant-numeric: tabular-nums;
+}
+
+.remaining-main small,
+.remaining-values > small {
+  font-size: 1.6vmin;
+}
+
+.remaining-values > small {
+  opacity: 0.75;
+}
+
 #drive-panel button {
   color: #344054;
   display: flex;
