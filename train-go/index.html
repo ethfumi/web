@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="しんかんせん">
+<title>しんかんせん GO!</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<!-- 車両えらび画面 -->
+<div id="select-screen">
+  <div class="select-title">どれにのる？</div>
+  <div class="train-buttons">
+    <button class="train-btn" data-train="nozomi" aria-label="のぞみ">
+      <svg viewBox="0 0 200 70">
+        <path d="M10 55 Q10 25 55 22 L185 22 Q195 22 195 35 L195 55 Q195 60 190 60 L15 60 Q10 60 10 55 Z" fill="#f8f8f8" stroke="#ccc" stroke-width="2"/>
+        <path d="M12 40 Q20 30 60 28 L195 28 L195 36 L12 44 Z" fill="#1c48a6"/>
+        <rect x="70" y="30" width="22" height="12" rx="3" fill="#333"/>
+        <rect x="105" y="30" width="22" height="12" rx="3" fill="#333"/>
+        <rect x="140" y="30" width="22" height="12" rx="3" fill="#333"/>
+        <circle cx="55" cy="60" r="7" fill="#555"/><circle cx="95" cy="60" r="7" fill="#555"/><circle cx="150" cy="60" r="7" fill="#555"/>
+      </svg>
+      <span>のぞみ</span>
+    </button>
+    <button class="train-btn" data-train="doctoryellow" aria-label="ドクターイエロー">
+      <svg viewBox="0 0 200 70">
+        <path d="M10 55 Q10 25 55 22 L185 22 Q195 22 195 35 L195 55 Q195 60 190 60 L15 60 Q10 60 10 55 Z" fill="#ffd900" stroke="#d4b400" stroke-width="2"/>
+        <path d="M12 40 Q20 30 60 28 L195 28 L195 36 L12 44 Z" fill="#1c48a6"/>
+        <rect x="70" y="30" width="22" height="12" rx="3" fill="#333"/>
+        <rect x="105" y="30" width="22" height="12" rx="3" fill="#333"/>
+        <rect x="140" y="30" width="22" height="12" rx="3" fill="#333"/>
+        <circle cx="55" cy="60" r="7" fill="#555"/><circle cx="95" cy="60" r="7" fill="#555"/><circle cx="150" cy="60" r="7" fill="#555"/>
+      </svg>
+      <span>ドクターイエロー</span>
+    </button>
+    <button class="train-btn" data-train="hayabusa" aria-label="はやぶさ">
+      <svg viewBox="0 0 200 70">
+        <path d="M10 55 Q10 25 55 22 L185 22 Q195 22 195 35 L195 55 Q195 60 190 60 L15 60 Q10 60 10 55 Z" fill="#2ea44f" stroke="#1e7a38" stroke-width="2"/>
+        <path d="M12 42 Q20 34 60 32 L195 32 L195 38 L12 48 Z" fill="#e83a8b"/>
+        <rect x="70" y="30" width="22" height="12" rx="3" fill="#333"/>
+        <rect x="105" y="30" width="22" height="12" rx="3" fill="#333"/>
+        <rect x="140" y="30" width="22" height="12" rx="3" fill="#333"/>
+        <circle cx="55" cy="60" r="7" fill="#555"/><circle cx="95" cy="60" r="7" fill="#555"/><circle cx="150" cy="60" r="7" fill="#555"/>
+      </svg>
+      <span>はやぶさ</span>
+    </button>
+  </div>
+</div>
+
+<!-- 走行画面の操作ボタン -->
+<div id="run-ui" class="hidden">
+  <button id="btn-couple" aria-label="れんけつ">🚃＋</button>
+  <button id="btn-home" aria-label="えらびなおす">🏠</button>
+</div>
+
+<div id="arrival-banner" class="hidden">とうちゃく〜！</div>
+
+<script src="app.js"></script>
+</body>
+</html>
