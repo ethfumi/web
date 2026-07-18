@@ -16,7 +16,16 @@
 
 <!-- 車両えらび画面 -->
 <div id="select-screen">
-  <div class="select-title">どれにのる？</div>
+  <div class="select-title">どこを はしる？</div>
+  <div class="route-buttons" role="group" aria-label="はしるろせん">
+    <button class="route-btn selected" data-route="chuo" aria-pressed="true"><span>🟧</span>ちゅうおうせん</button>
+    <button class="route-btn" data-route="tokaido" aria-pressed="false"><span>🗻</span>とうかいどう</button>
+    <button class="route-btn" data-route="tohoku" aria-pressed="false"><span>🌲</span>とうほく</button>
+    <button class="route-btn" data-route="sobu" aria-pressed="false"><span>🟨</span>そうぶせん</button>
+    <button class="route-btn" data-route="tozai" aria-pressed="false"><span>🔵</span>とうざいせん</button>
+    <button class="route-btn" data-route="inokashira" aria-pressed="false"><span>🌈</span>いのかしらせん</button>
+  </div>
+  <div class="train-select-title">どれに のる？</div>
   <div class="train-buttons">
     <button class="train-btn" data-train="nozomi" aria-label="のぞみ">
       <svg viewBox="0 0 200 70">
@@ -54,8 +63,8 @@
     </button>
   </div>
   <!-- 更新時は sw.js の CACHE バージョンと揃える -->
-  <div id="app-version" aria-label="バージョン17、2026年7月18日16時58分更新">
-    <strong>v17</strong><span>2026.07.18 16:58 更新</span>
+  <div id="app-version" aria-label="バージョン18、2026年7月18日17時29分更新">
+    <strong>v18</strong><span>2026.07.18 17:29 更新</span>
   </div>
 </div>
 
