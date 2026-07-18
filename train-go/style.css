@@ -115,6 +115,45 @@ html, body {
   opacity: 0.55;
 }
 
+/* --- はやぶさ＋こまち特別連結 --- */
+#btn-komachi-couple {
+  position: fixed;
+  left: 50%;
+  bottom: max(7vmin, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1vmin;
+  min-width: 40vmin;
+  padding: 2.5vmin 5vmin;
+  border: 0;
+  border-radius: 5vmin;
+  color: #fff;
+  background: linear-gradient(135deg, #2ea44f, #e83a8b);
+  box-shadow: 0 7px 0 #a72b68, 0 10px 20px rgba(0, 0, 0, 0.22);
+  font-size: 6vmin;
+  font-weight: bold;
+  z-index: 8;
+  cursor: pointer;
+  animation: couple-pulse 1s ease-in-out infinite;
+}
+
+#btn-komachi-couple:active {
+  transform: translateX(-50%) translateY(5px) scale(0.96);
+  box-shadow: 0 2px 0 #a72b68;
+}
+
+.couple-icon {
+  font-size: 8vmin;
+  line-height: 1;
+}
+
+@keyframes couple-pulse {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.06); }
+}
+
 /* --- とうちゃく --- */
 #arrival-banner {
   position: fixed;

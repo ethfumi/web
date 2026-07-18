@@ -27,6 +27,13 @@
       edge: "#1e7a38",
       callName: "はやぶさ",
     },
+    komachi: {
+      name: "こまち",
+      body: "#ef3340",
+      stripe: "#b7b7b7",
+      edge: "#b51f2a",
+      callName: "こまち",
+    },
   };
 
   const CAR_COUNT_WORDS = [
@@ -64,6 +71,7 @@
   const btnCouple = document.getElementById("btn-couple");
   const btnRemove = document.getElementById("btn-remove");
   const btnHome = document.getElementById("btn-home");
+  const btnKomachiCouple = document.getElementById("btn-komachi-couple");
 
   let W = 0, H = 0, DPR = 1;
   let forcedSize = false; // デバッグ用: 非表示タブでも描画検証できるようにサイズを固定する
@@ -138,7 +146,7 @@
   }
 
   // ---- ゲーム状態 ----
-  let state = "select"; // select | running | stopped
+  let state = "select"; // select | running | stopped | coupling
   let train = TRAINS.nozomi;
   let cars = 1;
   let speed = 0;
@@ -152,6 +160,10 @@
   let viewScale = 1;       // 編成全体が見えるようにカメラを引く倍率
   let confetti = [];
   let clouds = [];
+  let komachiCoupled = false;
+  let komachiReady = false;
+  let komachiStationX = null;
+  let komachiGap = 110;
 
   function initClouds() {
     clouds = [];
@@ -182,8 +194,14 @@
     viewScale = 1;
     state = "stopped";
     scheduleNextStation();
+    komachiCoupled = false;
+    komachiReady = false;
+    komachiGap = 110;
+    komachiStationX = key === "hayabusa" ? stationWorldX : null;
     selectScreen.classList.add("hidden");
     runUi.classList.remove("hidden");
+    btnKomachiCouple.classList.add("hidden");
+    arrivalBanner.textContent = "とうちゃく〜！";
     say(`${train.callName}、${START_STATION}えきを、しゅっぱつしんこう！`);
   }
 
@@ -193,9 +211,11 @@
     selectScreen.classList.remove("hidden");
     runUi.classList.add("hidden");
     arrivalBanner.classList.add("hidden");
+    btnKomachiCouple.classList.add("hidden");
   }
 
   function depart() {
+    if (komachiReady || state === "coupling") return;
     state = "running";
     arrivalBanner.classList.add("hidden");
     horn();
@@ -208,11 +228,42 @@
     speed = 0;
     currentStationX = stationWorldX;
     currentStationName = nextStationName;
+    const isKomachiStop = train === TRAINS.hayabusa
+      && currentStationName === "おぎくぼ"
+      && !komachiCoupled;
     scheduleNextStation();
     arrivalBanner.classList.remove("hidden");
     chime();
-    say(`${currentStationName}〜、${currentStationName}〜、とうちゃく！`);
+    if (isKomachiStop) {
+      komachiReady = true;
+      arrivalBanner.textContent = "こまちがいた！";
+      btnKomachiCouple.classList.remove("hidden");
+      say("おぎくぼにとうちゃく！こまちがまっているよ。れんけつしよう！");
+    } else {
+      arrivalBanner.textContent = "とうちゃく〜！";
+      say(`${currentStationName}〜、${currentStationName}〜、とうちゃく！`);
+    }
     spawnConfetti();
+  }
+
+  function startKomachiCoupling() {
+    if (!komachiReady || state !== "stopped") return;
+    state = "coupling";
+    btnKomachiCouple.classList.add("hidden");
+    arrivalBanner.textContent = "れんけつするよ〜！";
+    say("こまちと、れんけつするよ〜！");
+  }
+
+  function finishKomachiCoupling() {
+    komachiGap = 8;
+    komachiCoupled = true;
+    komachiReady = false;
+    komachiStationX = null;
+    state = "stopped";
+    arrivalBanner.textContent = "れんけつ！";
+    chime();
+    spawnConfetti(90);
+    say("ガチャン！はやぶさと、こまち、れんけつ！");
   }
 
   function addCar() {
@@ -273,6 +324,10 @@
     removeCar();
   });
   btnHome.addEventListener("click", goHome);
+  btnKomachiCouple.addEventListener("click", () => {
+    ensureAudio();
+    startKomachiCoupling();
+  });
 
   // ---- 描画 ----
   const GROUND_R = 0.78; // 線路の高さ(画面比)
@@ -464,6 +519,68 @@
     }
   }
 
+  function drawKomachi() {
+    if (train !== TRAINS.hayabusa || (!komachiCoupled && komachiStationX === null)) return;
+
+    const y = H * GROUND_R;
+    const { carW, carH, gap } = carMetrics();
+    const noseX = W * NOSE_R;
+    const connectionX = komachiCoupled
+      ? noseX + komachiGap
+      : komachiStationX - distance + noseX + komachiGap;
+    const bob = state === "running" ? Math.sin(distance * 0.05 + 1) * 1.5 : 0;
+    const top = y - carH - 10 + bob;
+
+    for (let i = 0; i < 2; i++) {
+      const left = connectionX + i * (carW + gap);
+      const right = left + carW;
+      ctx.fillStyle = TRAINS.komachi.body;
+      ctx.strokeStyle = TRAINS.komachi.edge;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      if (i === 0) {
+        // はやぶさ側を向く、連結用の先頭車。
+        ctx.moveTo(left, top + carH - 8);
+        ctx.quadraticCurveTo(left + carW * 0.1, top + 2, left + carW * 0.45, top);
+        ctx.lineTo(right - 10, top);
+        ctx.quadraticCurveTo(right, top, right, top + 6);
+        ctx.lineTo(right, top + carH - 6);
+        ctx.quadraticCurveTo(right, top + carH, right - 6, top + carH);
+        ctx.lineTo(left + 8, top + carH);
+        ctx.quadraticCurveTo(left, top + carH, left, top + carH - 8);
+      } else {
+        // 編成の外側は右向きのロングノーズ。
+        ctx.moveTo(left, top + 6);
+        ctx.quadraticCurveTo(left, top, left + 10, top);
+        ctx.lineTo(right - carW * 0.45, top);
+        ctx.quadraticCurveTo(right - carW * 0.1, top + 2, right, top + carH - 8);
+        ctx.quadraticCurveTo(right, top + carH, right - 8, top + carH);
+        ctx.lineTo(left + 6, top + carH);
+        ctx.quadraticCurveTo(left, top + carH, left, top + carH - 6);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = TRAINS.komachi.stripe;
+      ctx.fillRect(left + carW * 0.08, top + carH * 0.52, carW * 0.84, carH * 0.14);
+
+      ctx.fillStyle = "#333";
+      const windowStart = left + carW * 0.2;
+      for (let wi = 0; wi < 2; wi++) {
+        roundRect(windowStart + wi * carW * 0.3, top + carH * 0.18, carW * 0.18, carH * 0.22, 4);
+        ctx.fill();
+      }
+
+      if (i === 0) {
+        ctx.fillStyle = "#666";
+        ctx.fillRect(right, top + carH * 0.6, gap, 6);
+      }
+      drawWheel(left + carW * 0.22, y - 8, 9);
+      drawWheel(left + carW * 0.78, y - 8, 9);
+    }
+  }
+
   function roundRect(x, y, w, h, r) {
     ctx.beginPath();
     ctx.moveTo(x + r, y);
@@ -521,14 +638,23 @@
       wheelAngle += speed * dt * 0.08;
     }
 
+    if (state === "coupling") {
+      komachiGap = Math.max(komachiGap - 85 * dt, 8);
+      if (komachiGap <= 8) finishKomachiCoupling();
+    }
+
     // 編成全体が画面に入るようにカメラをなめらかに引く (W=0 の非表示中は更新しない)。
     // 下限 0.15: これより長い編成は画面外へ見切れさせ、車両が識別できる大きさを保つ
     if (W > 0) {
       const { carW, gap } = carMetrics();
-      const targetScale = Math.max(
-        Math.min(1, (W * (NOSE_R - 0.03)) / (cars * (carW + gap))),
-        0.15
-      );
+      const leftScale = (W * (NOSE_R - 0.03)) / (cars * (carW + gap));
+      const komachiIsNear = komachiStationX !== null
+        && komachiStationX - distance < W * 1.2;
+      const rightCars = komachiCoupled || komachiIsNear ? 2 : 0;
+      const rightScale = rightCars > 0
+        ? (W * (1 - NOSE_R - 0.03)) / (rightCars * (carW + gap) + komachiGap)
+        : 1;
+      const targetScale = Math.max(Math.min(1, leftScale, rightScale), 0.15);
       viewScale += (targetScale - viewScale) * Math.min(dt * 3, 1);
     }
 
@@ -545,6 +671,7 @@
       drawTrack();
       drawStations();
       drawTrain();
+      drawKomachi();
       ctx.restore();
     }
     drawConfetti(dt);
@@ -571,6 +698,7 @@
           state, speed, distance, cars, viewScale,
           toStation: stationWorldX - distance,
           nextStationName, currentStationName,
+          komachiCoupled, komachiReady, komachiGap,
         };
       },
       setCars(n) { cars = Math.max(1, Math.min(MAX_CARS, n)); },
