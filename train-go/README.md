@@ -27,7 +27,7 @@
 
 - ビルドなしの素の HTML / CSS / JS。canvas 描画
 - 音声: Web Speech API (読み上げ) + WebAudio (警笛・チャイム)。外部素材なし
-- PWA: manifest + service worker (https 配信時のみ登録、オフライン可)
+- PWA: manifest + service worker (https または localhost で登録、オフライン可)
 - アイコン生成: `python make_icons.py` (要 Pillow)
 
 ## 動作確認 (ローカル)
@@ -48,3 +48,5 @@ https なので service worker が有効になり、ホーム画面に追加す�
 
 - タブ/アプリが非表示の間は 200ms 間隔の低頻度更新に落ちる(電池対策と検証容易性の折衷)
 - 読み上げの声質は端末の Web Speech API に依存する
+- オンライン時は HTTP cache を避けて最新版を取得し、取得成功時にオフライン用Cache Storageを更新する
+- 新しい service worker が有効になった時は一度だけ自動リロードする
