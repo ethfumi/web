@@ -63,8 +63,8 @@
     </button>
   </div>
   <!-- 更新時は sw.js の CACHE バージョンと揃える -->
-  <div id="app-version" aria-label="バージョン18、2026年7月18日17時29分更新">
-    <strong>v18</strong><span>2026.07.18 17:29 更新</span>
+  <div id="app-version" aria-label="バージョン19、2026年7月18日17時49分更新">
+    <strong>v19</strong><span>2026.07.18 17:49 更新</span>
   </div>
 </div>
 
@@ -79,9 +79,13 @@
 </div>
 
 <div id="drive-panel" class="hidden">
-  <div id="speed-meter" aria-label="いまのスピードと総走行距離">
+  <div id="speed-meter" aria-label="いまのスピード、走行距離、駅までの残り距離">
     <div class="speed-row"><span id="speed-value">0</span><small>km/h</small></div>
     <div id="distance-meter"><small>そうこうきょり</small><div class="distance-main"><span id="distance-value">0</span><small>m</small></div><small id="distance-km-value">0.0 km</small></div>
+    <div id="remaining-meter">
+      <div class="remaining-row"><small id="next-station-distance-label">つぎのえきまで</small><div class="remaining-values"><div class="remaining-main"><span id="next-station-distance-value">0</span><small>m</small></div><small id="next-station-distance-km">0.0 km</small></div></div>
+      <div class="remaining-row"><small id="terminal-distance-label">しゅうてんまで</small><div class="remaining-values"><div class="remaining-main"><span id="terminal-distance-value">0</span><small>m</small></div><small id="terminal-distance-km">0.0 km</small></div></div>
+    </div>
   </div>
   <button id="btn-express" aria-label="中央特快モードにする" aria-pressed="false">
     <span>🚄</span><span id="express-label">かくえき</span>
