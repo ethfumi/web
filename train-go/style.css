@@ -115,6 +115,87 @@ html, body {
   opacity: 0.55;
 }
 
+/* --- 連結する車両えらび --- */
+#car-picker {
+  position: fixed;
+  left: max(2vmin, env(safe-area-inset-left));
+  right: 19vmin;
+  bottom: max(2vmin, env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1.4vmin;
+  padding: 2vmin;
+  border: 0.7vmin solid #fff;
+  border-radius: 4vmin;
+  background: rgba(49, 127, 197, 0.96);
+  box-shadow: 0 0 0 0.8vmin #2368aa, 0 8px 24px rgba(25, 48, 76, 0.32);
+  z-index: 7;
+}
+
+.car-picker-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 16vmin;
+  padding: 0;
+  border: 0.45vmin solid #c7d9ed;
+  border-radius: 3vmin;
+  color: #fff;
+  background: #fff;
+  box-shadow: 0 4px 0 rgba(42, 92, 170, 0.18);
+  font-size: clamp(13px, 2.8vmin, 25px);
+  font-weight: bold;
+  line-height: 1.05;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.car-picker-btn.current {
+  border-color: #ffd344;
+}
+
+.car-picker-btn > span:last-child {
+  display: flex;
+  width: 100%;
+  min-height: 5vmin;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6vmin;
+  background: #327ccc;
+}
+
+.car-picker-btn.current > span:last-child {
+  color: #57340b;
+  background: #ffd344;
+}
+
+.car-picker-btn:active {
+  transform: translateY(3px) scale(0.96);
+  box-shadow: 0 1px 0 rgba(42, 92, 170, 0.18);
+}
+
+.picker-train-art {
+  display: flex;
+  width: 100%;
+  height: 9vmin;
+  align-items: center;
+  justify-content: center;
+}
+
+.picker-train-art svg {
+  width: 100%;
+  max-height: 9vmin;
+}
+
+@media (orientation: portrait) {
+  #car-picker {
+    right: 20vmin;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 #drive-panel {
   position: fixed;
   top: max(3vmin, env(safe-area-inset-top));
@@ -152,6 +233,7 @@ html, body {
 }
 
 #drive-panel button {
+  color: #344054;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -160,7 +242,6 @@ html, body {
   padding: 1vmin 1.5vmin;
   border: 0;
   border-radius: 3vmin;
-  color: #344054;
   background: rgba(255, 255, 255, 0.92);
   box-shadow: 0 4px 0 rgba(0, 0, 0, 0.15);
   font-size: 2.7vmin;

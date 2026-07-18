@@ -49,7 +49,7 @@
   }
 
   const MAX_SPEED = 1100;         // px/s（表示上は約330km/h）
-  const TAP_BOOST = 240;
+  const TAP_BOOST = 75;          // 発進後の連打は細かく加速できるようにする
   const FRICTION = 18;            // 自然減速は小さく、連打の加速感を残す
   const STATION_INTERVAL = 9000;  // px 走るごとに駅が来る
 
@@ -65,6 +65,11 @@
   const CHUO_SPECIAL_RAPID_STOPS = new Set([
     "きちじょうじ", "みたか", "こくぶんじ", "たちかわ", "ひの", "とよだ",
     "はちおうじ", "にしはちおうじ", "たかお", START_STATION,
+  ]);
+  // 都心寄りと主要駅の近くは町並み、その間は山や緑を見せる。
+  const CITYSCAPE_STATIONS = new Set([
+    "おぎくぼ", "にしおぎくぼ", "きちじょうじ", "みたか",
+    "たちかわ", "はちおうじ", "にしはちおうじ", START_STATION,
   ]);
 
   // ---- 要素 ----
@@ -89,6 +94,7 @@
   const expressLabel = document.getElementById("express-label");
   const btnRunningSound = document.getElementById("btn-running-sound");
   const runningSoundIcon = document.getElementById("running-sound-icon");
+  const carPicker = document.getElementById("car-picker");
 
   let W = 0, H = 0, DPR = 1;
   let forcedSize = false; // デバッグ用: 非表示タブでも描画検証できるようにサイズを固定する
@@ -232,6 +238,8 @@
   // ---- ゲーム状態 ----
   let state = "select"; // select | running | stopped | coupling
   let train = TRAINS.nozomi;
+  let trainKey = "nozomi";
+  let carTypes = ["nozomi"];
   let cars = 1;
   let speed = 0;
   let distance = 0;
@@ -299,7 +307,9 @@
   }
 
   function startGame(key) {
+    trainKey = key;
     train = TRAINS[key];
+    carTypes = [key];
     cars = 1;
     speed = 0;
     distance = 0;
@@ -326,6 +336,8 @@
     btnKomachiCouple.classList.add("hidden");
     btnStationDoors.classList.add("hidden");
     stationPassengers.classList.add("hidden");
+    closeCarPicker();
+    populateCarPicker();
     clearRouteEvent();
     updateDriveUi();
     arrivalBanner.textContent = "とうちゃく〜！";
@@ -343,6 +355,7 @@
     btnKomachiCouple.classList.add("hidden");
     btnStationDoors.classList.add("hidden");
     stationPassengers.classList.add("hidden");
+    closeCarPicker();
     clearRouteEvent();
   }
 
@@ -382,6 +395,7 @@
   }
 
   function arrive() {
+    closeCarPicker();
     clearRouteEvent();
     state = "stopped";
     speed = 0;
@@ -431,6 +445,7 @@
 
   function startKomachiCoupling() {
     if (!komachiReady || state !== "stopped") return;
+    closeCarPicker();
     state = "coupling";
     btnKomachiCouple.classList.add("hidden");
     arrivalBanner.textContent = "れんけつするよ〜！";
@@ -451,6 +466,7 @@
   }
 
   function showStationDoorPrompt() {
+    closeCarPicker();
     doorsOpen = false;
     stationDoorsDone = false;
     doorLabel.textContent = "ドアをあける";
@@ -480,6 +496,35 @@
     stationPassengers.classList.add("hidden");
     arrivalBanner.textContent = "しゅっぱつできるよ！";
     say("ドアがしまりまーす。しゅっぱつしんこう！");
+  }
+
+  function populateCarPicker() {
+    document.querySelectorAll(".picker-train-art").forEach((target) => {
+      const key = target.dataset.preview === "current" ? trainKey : target.dataset.preview;
+      const sourceKey = key === "komachi" ? "nozomi" : key;
+      const source = document.querySelector(`.train-btn[data-train="${sourceKey}"] svg`);
+      const preview = source.cloneNode(true);
+      if (key === "komachi") {
+        const paths = preview.querySelectorAll("path");
+        paths[0].setAttribute("fill", TRAINS.komachi.body);
+        paths[0].setAttribute("stroke", TRAINS.komachi.edge);
+        paths[1].setAttribute("fill", TRAINS.komachi.stripe);
+      }
+      target.replaceChildren(preview);
+    });
+  }
+
+  function closeCarPicker() {
+    carPicker.classList.add("hidden");
+    btnCouple.setAttribute("aria-expanded", "false");
+    btnCouple.setAttribute("aria-label", "車両を選んで連結");
+  }
+
+  function toggleCarPicker() {
+    const opening = carPicker.classList.contains("hidden");
+    carPicker.classList.toggle("hidden", !opening);
+    btnCouple.setAttribute("aria-expanded", String(opening));
+    btnCouple.setAttribute("aria-label", opening ? "連結メニューを閉じる" : "車両を選んで連結");
   }
 
   function clearRouteEvent() {
@@ -537,13 +582,14 @@
       : `まもなく、${nextStationName}です。おりるかたは、じゅんびしてください`);
   }
 
-  function addCar() {
+  function addCar(typeKey = trainKey) {
     if (cars >= MAX_CARS) {
       say(`${carWord(totalCarCount())}！ながーい！これでまんたんだよ！`);
       return;
     }
-    cars++;
-    say(`${carWord(totalCarCount())}！`);
+    carTypes.push(typeKey);
+    cars = carTypes.length;
+    say(`${TRAINS[typeKey].callName}を、れんけつ！ぜんぶで、${carWord(totalCarCount())}！`);
     spawnConfetti(12);
   }
 
@@ -555,7 +601,8 @@
         : `${carWord(count)}！これがさいごのいちりょうだよ！`);
       return;
     }
-    cars--;
+    carTypes.pop();
+    cars = carTypes.length;
     say(`${carWord(totalCarCount())}！`);
   }
 
@@ -599,7 +646,13 @@
 
   btnCouple.addEventListener("click", () => {
     ensureAudio();
-    addCar();
+    toggleCarPicker();
+  });
+  document.querySelectorAll(".car-picker-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      ensureAudio();
+      addCar(btn.dataset.car === "current" ? trainKey : btn.dataset.car);
+    });
   });
   btnRemove.addEventListener("click", () => {
     ensureAudio();
@@ -670,7 +723,7 @@
   function drawClouds(dt) {
     ctx.fillStyle = "rgba(255,255,255,0.9)";
     for (const c of clouds) {
-      c.x -= (speed * 0.08 + 8) * dt * c.s;
+      c.x -= (speed * 0.18 + 8) * dt * c.s;
       if (c.x < -160) {
         c.x = W + 160;
         c.y = H * (0.05 + Math.random() * 0.25);
@@ -688,7 +741,7 @@
     const base = H * GROUND_R;
     const { x0, x1 } = viewRange();
     const period = W * 0.7;
-    const off = (distance * 0.15) % (W * 1.4);
+    const off = (distance * 0.28) % (W * 1.4);
     ctx.fillStyle = "#9fd48a";
     const iStart = Math.floor((x0 + off - W * 0.35 - W * 0.45) / period);
     const iEnd = Math.ceil((x1 + off - W * 0.35 + W * 0.45) / period);
@@ -698,6 +751,34 @@
       ctx.moveTo(x - W * 0.45, base);
       ctx.quadraticCurveTo(x, base - H * 0.3, x + W * 0.45, base);
       ctx.fill();
+    }
+  }
+
+  function drawCityscape() {
+    if (!CITYSCAPE_STATIONS.has(nextStationName)) return;
+    const base = H * GROUND_R;
+    const { x0, x1 } = viewRange();
+    const spacing = 118;
+    const scroll = distance * 0.48;
+    const start = Math.floor((x0 + scroll) / spacing) - 1;
+    const end = Math.ceil((x1 + scroll) / spacing) + 1;
+    const colors = ["#d6c4ab", "#c6d6df", "#e0b9a8", "#bcc9a8"];
+
+    for (let i = start; i <= end; i++) {
+      const x = i * spacing - scroll;
+      const seed = Math.abs((i * 47) % 97);
+      const width = 72 + seed % 38;
+      const height = H * (0.12 + (seed % 5) * 0.025);
+      ctx.fillStyle = colors[seed % colors.length];
+      ctx.fillRect(x, base - height, width, height);
+      ctx.fillStyle = "rgba(255, 248, 196, 0.8)";
+      for (let wy = base - height + 18; wy < base - 18; wy += 24) {
+        for (let wx = x + 12; wx < x + width - 10; wx += 24) {
+          ctx.fillRect(wx, wy, 10, 9);
+        }
+      }
+      ctx.fillStyle = "#667b88";
+      ctx.fillRect(x + width * 0.42, base - height - 8, width * 0.16, 8);
     }
   }
 
@@ -747,7 +828,7 @@
     ctx.strokeStyle = "#465268";
     ctx.lineWidth = 10;
     const ribSpacing = 180;
-    const off = (distance * 0.45) % ribSpacing;
+    const off = (distance * 0.75) % ribSpacing;
     for (let x = x0 - off; x < x1 + ribSpacing; x += ribSpacing) {
       ctx.beginPath();
       ctx.moveTo(x, groundY);
@@ -896,12 +977,13 @@
     const bob = state === "running" ? Math.sin(distance * 0.05) * 1.5 : 0;
 
     for (let i = 0; i < cars; i++) {
+      const carTrain = TRAINS[carTypes[i]];
       const right = noseX - i * (carW + gap);
       const left = right - carW;
       const top = y - carH - 10 + bob * (i % 2 === 0 ? 1 : -1);
 
-      ctx.fillStyle = train.body;
-      ctx.strokeStyle = train.edge;
+      ctx.fillStyle = carTrain.body;
+      ctx.strokeStyle = carTrain.edge;
       ctx.lineWidth = 2;
       ctx.beginPath();
       const isTail = cars > 1 && i === cars - 1;
@@ -930,17 +1012,17 @@
         roundRect(left, top, carW, carH, 8);
       }
       ctx.fill();
-      if (train.upper) {
+      if (carTrain.upper) {
         ctx.save();
         ctx.clip();
-        ctx.fillStyle = train.upper;
+        ctx.fillStyle = carTrain.upper;
         ctx.fillRect(left, top, carW, carH * 0.47);
         ctx.restore();
       }
       ctx.stroke();
 
       // 帯
-      ctx.fillStyle = train.stripe;
+      ctx.fillStyle = carTrain.stripe;
       if (i === 0) {
         ctx.beginPath();
         ctx.moveTo(left + 2, top + carH * 0.45);
@@ -969,9 +1051,9 @@
         const doorY = top + carH * 0.14;
         const doorW = carW * 0.16;
         const doorH = carH * 0.7;
-        ctx.fillStyle = doorsOpen ? "#25384a" : train.body;
+        ctx.fillStyle = doorsOpen ? "#25384a" : carTrain.body;
         ctx.fillRect(doorX, doorY, doorW, doorH);
-        ctx.strokeStyle = train.edge;
+        ctx.strokeStyle = carTrain.edge;
         ctx.lineWidth = 2;
         ctx.strokeRect(doorX, doorY, doorW, doorH);
         if (!doorsOpen) {
@@ -1157,6 +1239,7 @@
       ctx.translate(-ax, -ay);
       drawFuji();
       drawMountains();
+      drawCityscape();
       drawTunnel();
       drawTrack();
       drawInspectionEffect();
@@ -1188,7 +1271,7 @@
       skipToStation() { distance = stationWorldX - 600; },
       status() {
         return {
-          state, speed, distance, cars, viewScale,
+          state, speed, distance, cars, carTypes: [...carTypes], viewScale,
           toStation: stationWorldX - distance,
           nextStationName, currentStationName,
           komachiCoupled, komachiReady, komachiGap,
@@ -1197,7 +1280,10 @@
           expressMode, passingStation, midAnnouncementDone, runningSoundEnabled,
         };
       },
-      setCars(n) { cars = Math.max(1, Math.min(MAX_CARS, n)); },
+      setCars(n) {
+        cars = Math.max(1, Math.min(MAX_CARS, n));
+        carTypes = Array(cars).fill(trainKey);
+      },
       forceSize(w, h) {
         forcedSize = true;
         DPR = 1;
