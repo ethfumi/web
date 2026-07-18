@@ -48,9 +48,11 @@
     return n <= CAR_COUNT_WORDS.length ? CAR_COUNT_WORDS[n - 1] : `${n}りょう`;
   }
 
-  const TAP_BOOST = 75;          // 発進後の連打は細かく加速できるようにする
-  const FRICTION = 18;            // 自然減速は小さく、連打の加速感を残す
   const PIXELS_PER_METER = 12;
+  const KMH_PER_MPS = 3.6;
+  const TAP_BOOST_PX_PER_SEC = 75;       // 発進後の連打は細かく加速できるようにする
+  const FRICTION_PX_PER_SEC2 = 18;       // 自然減速は小さく、連打の加速感を残す
+  const SPEED_DISPLAY_SCALE = KMH_PER_MPS / PIXELS_PER_METER;
 
   // 駅間距離は各路線の営業キロを使う。終点の次は始発駅へ戻る周回コース。
   const ROUTES = {
@@ -472,7 +474,7 @@
   let trainKey = "nozomi";
   let carTypes = ["nozomi"];
   let cars = 1;
-  let speed = 0;
+  let speed = 0; // px/s
   let distance = 0;
   let wheelAngle = 0;
   let stationWorldX = 0;   // 次の駅の位置(距離座標)
@@ -572,9 +574,13 @@
     return nextStationRemainingMeters() + remainingAfterNext;
   }
 
+  function displaySpeed(value) {
+    return Math.round(value * SPEED_DISPLAY_SCALE);
+  }
+
   function updateDriveUi() {
     const terminal = activeRoute.stations[activeRoute.stations.length - 2];
-    speedValue.textContent = String(Math.round(speed * 0.3));
+    speedValue.textContent = String(displaySpeed(speed));
     distanceValue.textContent = String(Math.floor(distance / PIXELS_PER_METER));
     distanceKmValue.textContent = `${(Math.floor(distance / PIXELS_PER_METER) / 1000).toFixed(1)} km`;
     const nextRemaining = nextStationRemainingMeters();
@@ -1139,13 +1145,14 @@
       if (!stationDoorsDone && !komachiReady) {
         toggleStationDoors();
       } else {
-        const previousSpeed = speed;
+        const previousSpeed = displaySpeed(speed);
         depart();
-        showSpeedBoost(speed - previousSpeed, event);
+        showSpeedBoost(displaySpeed(speed) - previousSpeed, event);
       }
     } else if (state === "running") {
-      speed += TAP_BOOST;
-      showSpeedBoost(TAP_BOOST, event);
+      const previousSpeed = displaySpeed(speed);
+      speed += TAP_BOOST_PX_PER_SEC;
+      showSpeedBoost(displaySpeed(speed) - previousSpeed, event);
     }
   });
 
@@ -1969,7 +1976,7 @@
         speed = Math.max(speed - decel * dt, 0);
       } else {
         // 摩擦でゆるやかに減速(タップしなくても止まりはしない)
-        speed = Math.max(speed - FRICTION * dt, 120);
+        speed = Math.max(speed - FRICTION_PX_PER_SEC2 * dt, 120);
       }
 
       if (passingStation && distToStation <= 2) {
