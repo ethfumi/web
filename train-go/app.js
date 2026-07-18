@@ -675,7 +675,11 @@
     weather = WEATHERS[(WEATHERS.indexOf(weather) + 1) % WEATHERS.length];
     const timeName = { day: "ひる", sunset: "ゆうやけ", night: "よる" }[timeOfDay];
     const weatherName = { sunny: "はれ", rain: "あめ", snow: "ゆき" }[weather];
-    showPlayBanner(`${timeName}・${weatherName}になったよ`);
+    showPlayBanner(`${timeName}・${weatherName}になったよ${timeOfDay === "night" ? "　ライトも ついた！" : ""}`);
+  }
+
+  function headlightsAreOn() {
+    return lightsOn || timeOfDay === "night";
   }
 
   function startGame(key) {
@@ -1004,8 +1008,12 @@
         say("ドクターイエロー、せんろをけんさちゅうです！");
       } else if (routeEvent === "tunnel") {
         routeEventBanner.textContent = "トンネルだ！";
-        btnHeadlight.classList.remove("hidden");
-        say("トンネルだ！ライトをつけてみよう！");
+        if (headlightsAreOn()) {
+          say("トンネルだ！ライトは、もうついているよ！");
+        } else {
+          btnHeadlight.classList.remove("hidden");
+          say("トンネルだ！ライトをつけてみよう！");
+        }
       }
     }
 
@@ -1368,7 +1376,7 @@
       ctx.lineTo(x, H * 0.18);
       ctx.stroke();
     }
-    ctx.fillStyle = lightsOn ? "#fff4ad" : "#69758a";
+    ctx.fillStyle = headlightsAreOn() ? "#fff4ad" : "#69758a";
     for (let x = x0 + 90 - off; x < x1 + ribSpacing; x += ribSpacing) {
       ctx.fillRect(x, H * 0.2, 38, 8);
     }
@@ -1621,7 +1629,8 @@
   }
 
   function drawHeadlight() {
-    if (routeEvent !== "tunnel" || !routeEventAnnounced || !lightsOn) return;
+    const tunnelActive = routeEvent === "tunnel" && routeEventAnnounced;
+    if (!headlightsAreOn() || (!tunnelActive && timeOfDay !== "night")) return;
     const { carW, gap } = carMetrics();
     const frontX = W * NOSE_R + (komachiCoupled ? komachiGap + carW * 2 + gap : 0);
     const centerY = H * GROUND_R - carW * 0.16;
@@ -1629,7 +1638,7 @@
     beam.addColorStop(0, "rgba(255,244,160,0.75)");
     beam.addColorStop(1, "rgba(255,244,160,0)");
     ctx.save();
-    ctx.globalAlpha = routeEventAlpha();
+    ctx.globalAlpha = tunnelActive ? routeEventAlpha() : 0.72;
     ctx.fillStyle = beam;
     ctx.beginPath();
     ctx.moveTo(frontX - 4, centerY - 7);
@@ -1637,6 +1646,11 @@
     ctx.lineTo(frontX + W * 0.42, centerY + H * 0.13);
     ctx.lineTo(frontX - 4, centerY + 7);
     ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha = tunnelActive ? routeEventAlpha() : 0.95;
+    ctx.fillStyle = "#fff8bf";
+    ctx.beginPath();
+    ctx.arc(frontX - 3, centerY, Math.max(3, carW * 0.025), 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
   }
@@ -1707,6 +1721,17 @@
     ctx.textBaseline = "alphabetic";
   }
 
+  function drawTrainWindows(drawWindows) {
+    ctx.save();
+    ctx.fillStyle = timeOfDay === "night" ? "#ffe58a" : "#333";
+    if (timeOfDay === "night") {
+      ctx.shadowColor = "rgba(255, 221, 112, 0.9)";
+      ctx.shadowBlur = 8;
+    }
+    drawWindows();
+    ctx.restore();
+  }
+
   function drawTrain() {
     const y = H * GROUND_R;
     const { carW, carH, gap } = carMetrics();
@@ -1774,32 +1799,14 @@
       }
 
       // 窓
-      ctx.fillStyle = "#333";
       const winCount = i === 0 || isTail ? 2 : 3;
       const winStart = isTail ? left + carW * 0.38 : left + carW * 0.12;
-      for (let wi = 0; wi < winCount; wi++) {
-        roundRect(winStart + wi * carW * 0.28, top + carH * 0.18, carW * 0.18, carH * 0.22, 4);
-        ctx.fill();
-      }
-
-      // 駅では先頭車のドアが実際に開閉して見える。
-      if (i === 0 && currentStationName) {
-        const doorX = left + carW * 0.72;
-        const doorY = top + carH * 0.14;
-        const doorW = carW * 0.16;
-        const doorH = carH * 0.7;
-        ctx.fillStyle = doorsOpen ? "#25384a" : carTrain.body;
-        ctx.fillRect(doorX, doorY, doorW, doorH);
-        ctx.strokeStyle = carTrain.edge;
-        ctx.lineWidth = 2;
-        ctx.strokeRect(doorX, doorY, doorW, doorH);
-        if (!doorsOpen) {
-          ctx.beginPath();
-          ctx.moveTo(doorX + doorW / 2, doorY);
-          ctx.lineTo(doorX + doorW / 2, doorY + doorH);
-          ctx.stroke();
+      drawTrainWindows(() => {
+        for (let wi = 0; wi < winCount; wi++) {
+          roundRect(winStart + wi * carW * 0.28, top + carH * 0.18, carW * 0.18, carH * 0.22, 4);
+          ctx.fill();
         }
-      }
+      });
 
       // 連結器
       if (i > 0) {
@@ -1861,12 +1868,13 @@
       ctx.fillStyle = TRAINS.komachi.stripe;
       ctx.fillRect(left + carW * 0.08, top + carH * 0.52, carW * 0.84, carH * 0.14);
 
-      ctx.fillStyle = "#333";
       const windowStart = left + carW * 0.2;
-      for (let wi = 0; wi < 2; wi++) {
-        roundRect(windowStart + wi * carW * 0.3, top + carH * 0.18, carW * 0.18, carH * 0.22, 4);
-        ctx.fill();
-      }
+      drawTrainWindows(() => {
+        for (let wi = 0; wi < 2; wi++) {
+          roundRect(windowStart + wi * carW * 0.3, top + carH * 0.18, carW * 0.18, carH * 0.22, 4);
+          ctx.fill();
+        }
+      });
 
       if (i === 0) {
         ctx.fillStyle = "#666";
