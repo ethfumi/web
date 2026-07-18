@@ -85,6 +85,27 @@ html, body {
   color: #444;
 }
 
+#app-version {
+  position: absolute;
+  left: 50%;
+  bottom: max(2vmin, env(safe-area-inset-bottom));
+  display: flex;
+  align-items: baseline;
+  gap: 1.2vmin;
+  transform: translateX(-50%);
+  padding: 0.8vmin 1.8vmin;
+  border-radius: 999px;
+  color: #45637b;
+  background: rgba(255, 255, 255, 0.72);
+  font-size: clamp(12px, 2.1vmin, 18px);
+  white-space: nowrap;
+}
+
+#app-version strong {
+  color: #2a5caa;
+  font-size: 1.15em;
+}
+
 /* --- 走行画面 UI --- */
 #run-ui {
   position: fixed;

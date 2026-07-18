@@ -42,6 +42,7 @@
 - ビルドなしの素の HTML / CSS / JS。canvas 描画
 - 音声: Web Speech API (読み上げ) + WebAudio (警笛・チャイム)。外部素材なし
 - PWA: manifest + service worker (https または localhost で登録、オフライン可)
+- 車両選択画面の下に、反映確認用のバージョンと更新日時を表示。更新時は index.html と sw.js のバージョンを揃える
 - アイコン生成: `python make_icons.py` (要 Pillow)
 
 ## 動作確認 (ローカル)
