@@ -90,6 +90,8 @@
   const headlightLabel = document.getElementById("headlight-label");
   const drivePanel = document.getElementById("drive-panel");
   const speedValue = document.getElementById("speed-value");
+  const distanceValue = document.getElementById("distance-value");
+  const distanceKmValue = document.getElementById("distance-km-value");
   const btnExpress = document.getElementById("btn-express");
   const expressLabel = document.getElementById("express-label");
   const btnRunningSound = document.getElementById("btn-running-sound");
@@ -112,6 +114,7 @@
   // ---- 音まわり ----
   let audioCtx = null;
   let runningOsc = null;
+  let runningRailOsc = null;
   let runningGain = null;
   function ensureAudio() {
     if (!audioCtx) {
@@ -195,33 +198,41 @@
     if (!audioCtx || !runningSoundEnabled || runningOsc) return;
     const t = audioCtx.currentTime;
     runningOsc = audioCtx.createOscillator();
+    runningRailOsc = audioCtx.createOscillator();
     runningGain = audioCtx.createGain();
     runningOsc.type = "triangle";
-    runningOsc.frequency.value = 52;
+    runningRailOsc.type = "triangle";
+    runningOsc.frequency.value = 85;
+    runningRailOsc.frequency.value = 210;
     runningGain.gain.setValueAtTime(0.001, t);
-    runningGain.gain.linearRampToValueAtTime(0.025, t + 0.25);
-    runningOsc.connect(runningGain).connect(audioCtx.destination);
+    runningGain.gain.linearRampToValueAtTime(0.04, t + 0.25);
+    runningOsc.connect(runningGain);
+    runningRailOsc.connect(runningGain);
+    runningGain.connect(audioCtx.destination);
     runningOsc.start(t);
+    runningRailOsc.start(t);
   }
 
   function updateRunningSound() {
-    if (!audioCtx || !runningOsc || !runningGain) return;
+    if (!audioCtx || !runningOsc || !runningRailOsc || !runningGain) return;
     const t = audioCtx.currentTime;
-    runningOsc.frequency.setTargetAtTime(48 + speed * 0.055, t, 0.12);
-    runningGain.gain.setTargetAtTime(state === "running" ? 0.018 + speed / 70000 : 0.001, t, 0.1);
+    runningOsc.frequency.setTargetAtTime(70 + speed * 0.07, t, 0.12);
+    runningRailOsc.frequency.setTargetAtTime(180 + speed * 0.16, t, 0.12);
+    runningGain.gain.setTargetAtTime(state === "running" ? 0.035 + speed / 25000 : 0.001, t, 0.1);
   }
 
   function stopRunningSound() {
     if (!audioCtx || !runningOsc || !runningGain) return;
-    const osc = runningOsc;
+    const oscillators = [runningOsc, runningRailOsc].filter(Boolean);
     const gain = runningGain;
     runningOsc = null;
+    runningRailOsc = null;
     runningGain = null;
     const t = audioCtx.currentTime;
     gain.gain.cancelScheduledValues(t);
     gain.gain.setValueAtTime(Math.max(gain.gain.value, 0.001), t);
     gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
-    osc.stop(t + 0.2);
+    oscillators.forEach((osc) => osc.stop(t + 0.2));
   }
 
   function say(text) {
@@ -297,6 +308,8 @@
 
   function updateDriveUi() {
     speedValue.textContent = String(Math.round(speed * 0.3));
+    distanceValue.textContent = String(Math.floor(distance / 12));
+    distanceKmValue.textContent = `${(Math.floor(distance / 12) / 1000).toFixed(3)} km`;
     btnExpress.setAttribute("aria-pressed", String(expressMode));
     btnExpress.setAttribute("aria-label", expressMode ? "各駅停車モードにする" : "中央特快モードにする");
     expressLabel.textContent = expressMode ? "とっかい" : "かくえき";
@@ -848,6 +861,37 @@
     ctx.fillRect(x0, y + 6, x1 - x0, 4);
   }
 
+  function formatTrackDistance(worldX) {
+    const meters = Math.round(worldX / 12);
+    return meters >= 1000 ? `${(meters / 1000).toFixed(1)}km` : `${meters}m`;
+  }
+
+  function drawDistanceMarkers() {
+    const y = H * GROUND_R;
+    const noseX = W * NOSE_R;
+    const { x0, x1 } = viewRange();
+    const markerSpacing = 1200; // 表示速度の換算で100m
+    const worldLeft = distance + x0 - noseX;
+    const worldRight = distance + x1 - noseX;
+    const firstMarker = Math.max(markerSpacing, Math.ceil(worldLeft / markerSpacing) * markerSpacing);
+
+    for (let worldX = firstMarker; worldX <= worldRight; worldX += markerSpacing) {
+      const x = worldX - distance + noseX;
+      ctx.fillStyle = "#f7fbff";
+      ctx.strokeStyle = "#2a5caa";
+      ctx.lineWidth = 2;
+      roundRect(x - 32, y + 22, 64, 28, 6);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#2a5caa";
+      ctx.font = "bold 15px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(formatTrackDistance(worldX), x, y + 42);
+      ctx.fillStyle = "#586879";
+      ctx.fillRect(x - 2, y + 50, 4, 24);
+    }
+  }
+
   function drawInspectionEffect() {
     if (routeEvent !== "inspection" || !routeEventAnnounced) return;
     const y = H * GROUND_R;
@@ -1203,7 +1247,7 @@
     }
 
     // 編成全体が画面に入るようにカメラをなめらかに引く (W=0 の非表示中は更新しない)。
-    // 下限 0.15: これより長い編成は画面外へ見切れさせ、車両が識別できる大きさを保つ
+    // 100両でも全編成が画面に入るまで縮小する。
     if (W > 0) {
       const { carW, gap } = carMetrics();
       const leftScale = (W * (NOSE_R - 0.03)) / (cars * (carW + gap));
@@ -1213,7 +1257,7 @@
       const rightScale = rightCars > 0
         ? (W * (1 - NOSE_R - 0.03)) / (rightCars * (carW + gap) + komachiGap)
         : 1;
-      const targetScale = Math.max(Math.min(1, leftScale, rightScale), 0.15);
+      const targetScale = Math.max(Math.min(1, leftScale, rightScale), 0.018);
       viewScale += (targetScale - viewScale) * Math.min(dt * 3, 1);
     }
 
@@ -1231,6 +1275,7 @@
       drawCityscape();
       drawTunnel();
       drawTrack();
+      drawDistanceMarkers();
       drawInspectionEffect();
       drawStations();
       drawHeadlight();

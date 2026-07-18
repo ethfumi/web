@@ -66,8 +66,9 @@
 </div>
 
 <div id="drive-panel" class="hidden">
-  <div id="speed-meter" aria-label="いまのスピード">
-    <span id="speed-value">0</span><small>km/h</small>
+  <div id="speed-meter" aria-label="いまのスピードと総走行距離">
+    <div class="speed-row"><span id="speed-value">0</span><small>km/h</small></div>
+    <div id="distance-meter"><small>そうこうきょり</small><div class="distance-main"><span id="distance-value">0</span><small>m</small></div><small id="distance-km-value">0.000 km</small></div>
   </div>
   <button id="btn-express" aria-label="中央特快モードにする" aria-pressed="false">
     <span>🚄</span><span id="express-label">かくえき</span>
