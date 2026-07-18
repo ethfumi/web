@@ -30,10 +30,15 @@
   };
 
   const CAR_COUNT_WORDS = [
-    "いちりょう", "にりょう", "さんりょう", "よんりょう",
-    "ごりょう", "ろくりょう", "ななりょう", "はちりょう",
+    "いちりょう", "にりょう", "さんりょう", "よんりょう", "ごりょう",
+    "ろくりょう", "ななりょう", "はちりょう", "きゅうりょう", "じゅうりょう",
   ];
-  const MAX_CARS = CAR_COUNT_WORDS.length;
+  const MAX_CARS = 100;
+
+  // 11両以降は「11りょう」表記でも日本語 TTS が「じゅういちりょう」と読んでくれる
+  function carWord(n) {
+    return n <= CAR_COUNT_WORDS.length ? CAR_COUNT_WORDS[n - 1] : `${n}りょう`;
+  }
 
   const MAX_SPEED = 900;          // px/s
   const TAP_BOOST = 160;
@@ -47,10 +52,13 @@
   const runUi = document.getElementById("run-ui");
   const arrivalBanner = document.getElementById("arrival-banner");
   const btnCouple = document.getElementById("btn-couple");
+  const btnRemove = document.getElementById("btn-remove");
   const btnHome = document.getElementById("btn-home");
 
   let W = 0, H = 0, DPR = 1;
+  let forcedSize = false; // デバッグ用: 非表示タブでも描画検証できるようにサイズを固定する
   function resize() {
+    if (forcedSize) return;
     DPR = Math.min(window.devicePixelRatio || 1, 2);
     W = window.innerWidth;
     H = window.innerHeight;
@@ -128,6 +136,7 @@
   let wheelAngle = 0;
   let stationWorldX = 0;   // 次の駅の位置(距離座標)
   let currentStationX = null; // いま停車中(または通過直後)の駅の位置
+  let viewScale = 1;       // 編成全体が見えるようにカメラを引く倍率
   let confetti = [];
   let clouds = [];
 
@@ -153,6 +162,7 @@
     speed = 0;
     distance = 0;
     currentStationX = null;
+    viewScale = 1;
     state = "stopped";
     scheduleNextStation();
     selectScreen.classList.add("hidden");
@@ -188,12 +198,21 @@
 
   function addCar() {
     if (cars >= MAX_CARS) {
-      say(`${CAR_COUNT_WORDS[MAX_CARS - 1]}！ながーい！`);
+      say(`${carWord(MAX_CARS)}！ながーい！これでまんたんだよ！`);
       return;
     }
     cars++;
-    say(`${CAR_COUNT_WORDS[cars - 1]}！`);
+    say(`${carWord(cars)}！`);
     spawnConfetti(12);
+  }
+
+  function removeCar() {
+    if (cars <= 1) {
+      say(`${carWord(1)}！これがさいごのいちりょうだよ！`);
+      return;
+    }
+    cars--;
+    say(`${carWord(cars)}！`);
   }
 
   function spawnConfetti(n = 40) {
@@ -230,10 +249,26 @@
     ensureAudio();
     addCar();
   });
+  btnRemove.addEventListener("click", () => {
+    ensureAudio();
+    removeCar();
+  });
   btnHome.addEventListener("click", goHome);
 
   // ---- 描画 ----
   const GROUND_R = 0.78; // 線路の高さ(画面比)
+  const NOSE_R = 0.62;   // 先頭車の画面上の位置(画面幅比)
+
+  function carMetrics() {
+    const carW = Math.min(W * 0.22, 190);
+    return { carW, carH: carW * 0.32, gap: 8 };
+  }
+
+  // カメラを引いた時に描画が必要になる、スケール座標系での画面左右端
+  function viewRange() {
+    const ax = W * NOSE_R;
+    return { x0: ax - ax / viewScale, x1: ax + (W - ax) / viewScale };
+  }
 
   function drawSky() {
     const g = ctx.createLinearGradient(0, 0, 0, H);
@@ -263,10 +298,14 @@
 
   function drawMountains() {
     const base = H * GROUND_R;
+    const { x0, x1 } = viewRange();
+    const period = W * 0.7;
     const off = (distance * 0.15) % (W * 1.4);
     ctx.fillStyle = "#9fd48a";
-    for (let i = -1; i < 3; i++) {
-      const x = i * W * 0.7 - off + W * 0.35;
+    const iStart = Math.floor((x0 + off - W * 0.35 - W * 0.45) / period);
+    const iEnd = Math.ceil((x1 + off - W * 0.35 + W * 0.45) / period);
+    for (let i = iStart; i <= iEnd; i++) {
+      const x = i * period - off + W * 0.35;
       ctx.beginPath();
       ctx.moveTo(x - W * 0.45, base);
       ctx.quadraticCurveTo(x, base - H * 0.3, x + W * 0.45, base);
@@ -276,18 +315,19 @@
 
   function drawTrack() {
     const y = H * GROUND_R;
+    const { x0, x1 } = viewRange();
     ctx.fillStyle = "#8a7a5c";
-    ctx.fillRect(0, y, W, H - y);
+    ctx.fillRect(x0, y, x1 - x0, (H - y) / viewScale);
     // 枕木
     ctx.fillStyle = "#6d5f45";
     const spacing = 46;
     const off = distance % spacing;
-    for (let x = -off; x < W; x += spacing) {
+    for (let x = -off + Math.floor((x0 + off) / spacing) * spacing; x < x1; x += spacing) {
       ctx.fillRect(x, y + 10, 26, 8);
     }
     // レール
     ctx.fillStyle = "#555";
-    ctx.fillRect(0, y + 6, W, 4);
+    ctx.fillRect(x0, y + 6, x1 - x0, 4);
   }
 
   function drawStations() {
@@ -297,9 +337,10 @@
 
   function drawStation(worldX) {
     if (state !== "running" && state !== "stopped") return;
-    const trainNoseX = W * 0.62;
+    const trainNoseX = W * NOSE_R;
     const screenX = worldX - distance + trainNoseX;
-    if (screenX > W + 400 || screenX < -600) return;
+    const { x0, x1 } = viewRange();
+    if (screenX - 300 > x1 || screenX + 300 < x0) return;
     const y = H * GROUND_R;
     // ホーム
     ctx.fillStyle = "#e0e0e0";
@@ -339,10 +380,8 @@
 
   function drawTrain() {
     const y = H * GROUND_R;
-    const carW = Math.min(W * 0.22, 190);
-    const carH = carW * 0.32;
-    const gap = 8;
-    const noseX = W * 0.62;
+    const { carW, carH, gap } = carMetrics();
+    const noseX = W * NOSE_R;
     const bob = state === "running" ? Math.sin(distance * 0.05) * 1.5 : 0;
 
     for (let i = 0; i < cars; i++) {
@@ -436,7 +475,7 @@
     lastT = now;
 
     // バックグラウンド起動などで resize イベントを取りこぼしても復帰できるようにする
-    if (window.innerWidth !== W || window.innerHeight !== H || canvas.width === 0) {
+    if (!forcedSize && (window.innerWidth !== W || window.innerHeight !== H || canvas.width === 0)) {
       resize();
     }
 
@@ -462,13 +501,31 @@
       wheelAngle += speed * dt * 0.08;
     }
 
+    // 編成全体が画面に入るようにカメラをなめらかに引く (W=0 の非表示中は更新しない)。
+    // 下限 0.15: これより長い編成は画面外へ見切れさせ、車両が識別できる大きさを保つ
+    if (W > 0) {
+      const { carW, gap } = carMetrics();
+      const targetScale = Math.max(
+        Math.min(1, (W * (NOSE_R - 0.03)) / (cars * (carW + gap))),
+        0.15
+      );
+      viewScale += (targetScale - viewScale) * Math.min(dt * 3, 1);
+    }
+
     drawSky();
     drawClouds(dt);
     if (state !== "select") {
+      ctx.save();
+      const ax = W * NOSE_R;
+      const ay = H * GROUND_R;
+      ctx.translate(ax, ay);
+      ctx.scale(viewScale, viewScale);
+      ctx.translate(-ax, -ay);
       drawMountains();
       drawTrack();
       drawStations();
       drawTrain();
+      ctx.restore();
     }
     drawConfetti(dt);
 
@@ -490,7 +547,17 @@
     window.__tg = {
       skipToStation() { distance = stationWorldX - 600; },
       status() {
-        return { state, speed, distance, cars, toStation: stationWorldX - distance };
+        return { state, speed, distance, cars, viewScale, toStation: stationWorldX - distance };
+      },
+      setCars(n) { cars = Math.max(1, Math.min(MAX_CARS, n)); },
+      forceSize(w, h) {
+        forcedSize = true;
+        DPR = 1;
+        W = w;
+        H = h;
+        canvas.width = w;
+        canvas.height = h;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
       },
     };
   }

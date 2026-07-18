@@ -1,5 +1,5 @@
 // オフラインでも遊べるようにするだけの最小 service worker。
-const CACHE = "train-go-v1";
+const CACHE = "train-go-v2";
 const ASSETS = [
   ".",
   "index.html",
