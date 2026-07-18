@@ -256,6 +256,14 @@ html, body {
   opacity: 0.62;
 }
 
+#arrival-banner.passenger-exchange {
+  width: max-content;
+  max-width: 72vw;
+  font-size: 5.2vmin;
+  text-align: center;
+  white-space: nowrap;
+}
+
 /* --- はやぶさ＋こまち特別連結 --- */
 #btn-komachi-couple {
   position: fixed;
@@ -336,28 +344,44 @@ html, body {
 
 #station-passengers {
   position: fixed;
-  left: 32vw;
+  left: 30vw;
   bottom: 22%;
   display: flex;
-  gap: 2vmin;
+  gap: 1.2vmin;
   font-size: 7vmin;
   z-index: 7;
   pointer-events: none;
 }
 
 #station-passengers span {
+  display: inline-block;
   opacity: 0;
-  animation: passenger-board 1.4s ease-in forwards;
+  animation-duration: 1.5s;
+  animation-delay: var(--passenger-delay, 0s);
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: forwards;
 }
 
-#station-passengers span:nth-child(2) { animation-delay: 0.25s; }
-#station-passengers span:nth-child(3) { animation-delay: 0.5s; }
+#station-passengers .passenger-board {
+  animation-name: passenger-board;
+}
+
+#station-passengers .passenger-alight {
+  animation-name: passenger-alight;
+}
 
 @keyframes passenger-board {
   0% { opacity: 0; transform: translateX(0) translateY(0) scale(1); }
-  20% { opacity: 1; }
-  70% { opacity: 1; transform: translateX(13vw) translateY(-1vmin) scale(0.85); }
-  100% { opacity: 0; transform: translateX(18vw) translateY(-4vmin) scale(0.4); }
+  18% { opacity: 1; }
+  70% { opacity: 1; transform: translateX(14vw) translateY(-1vmin) scale(0.85); }
+  100% { opacity: 0; transform: translateX(19vw) translateY(-4vmin) scale(0.4); }
+}
+
+@keyframes passenger-alight {
+  0% { opacity: 0; transform: translateX(19vw) translateY(-4vmin) scale(0.4); }
+  22% { opacity: 1; }
+  75% { opacity: 1; transform: translateX(4vw) translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateX(0) translateY(0) scale(1); }
 }
 
 /* --- 走行中のおたのしみイベント --- */
