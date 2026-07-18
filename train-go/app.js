@@ -48,19 +48,31 @@
     return n <= CAR_COUNT_WORDS.length ? CAR_COUNT_WORDS[n - 1] : `${n}りょう`;
   }
 
-  const MAX_SPEED = 1100;         // px/s（表示上は約330km/h）
   const TAP_BOOST = 75;          // 発進後の連打は細かく加速できるようにする
   const FRICTION = 18;            // 自然減速は小さく、連打の加速感を残す
-  const STATION_INTERVAL = 9000;  // px 走るごとに駅が来る
+  const PIXELS_PER_METER = 12;
 
-  // 中央・総武線各駅停車ごっこ: 阿佐ケ谷を出発して西へ。高尾まで行ったら最初に戻る
+  // 中央本線の東京駅起点の営業キロ。阿佐ケ谷を出発して西へ進み、高尾から最初に戻る。
   const START_STATION = "あさがや";
+  const START_STATION_KM = 17.3;
   const STATIONS = [
-    "おぎくぼ", "にしおぎくぼ", "きちじょうじ", "みたか",
-    "むさしさかい", "ひがしこがねい", "むさしこがねい", "こくぶんじ",
-    "にしこくぶんじ", "くにたち", "たちかわ", "ひの",
-    "とよだ", "はちおうじ", "にしはちおうじ", "たかお",
-    START_STATION,
+    { name: "おぎくぼ", km: 18.7 },
+    { name: "にしおぎくぼ", km: 20.6 },
+    { name: "きちじょうじ", km: 22.5 },
+    { name: "みたか", km: 24.1 },
+    { name: "むさしさかい", km: 25.7 },
+    { name: "ひがしこがねい", km: 27.4 },
+    { name: "むさしこがねい", km: 29.1 },
+    { name: "こくぶんじ", km: 31.4 },
+    { name: "にしこくぶんじ", km: 32.8 },
+    { name: "くにたち", km: 34.5 },
+    { name: "たちかわ", km: 37.5 },
+    { name: "ひの", km: 40.8 },
+    { name: "とよだ", km: 43.1 },
+    { name: "はちおうじ", km: 47.4 },
+    { name: "にしはちおうじ", km: 49.8 },
+    { name: "たかお", km: 53.1 },
+    { name: START_STATION, km: START_STATION_KM },
   ];
   const CHUO_SPECIAL_RAPID_STOPS = new Set([
     "きちじょうじ", "みたか", "こくぶんじ", "たちかわ", "ひの", "とよだ",
@@ -216,9 +228,10 @@
   function updateRunningSound() {
     if (!audioCtx || !runningOsc || !runningRailOsc || !runningGain) return;
     const t = audioCtx.currentTime;
-    runningOsc.frequency.setTargetAtTime(70 + speed * 0.07, t, 0.12);
-    runningRailOsc.frequency.setTargetAtTime(180 + speed * 0.16, t, 0.12);
-    runningGain.gain.setTargetAtTime(state === "running" ? 0.035 + speed / 25000 : 0.001, t, 0.1);
+    const soundSpeed = Math.min(speed, 2400);
+    runningOsc.frequency.setTargetAtTime(70 + soundSpeed * 0.07, t, 0.12);
+    runningRailOsc.frequency.setTargetAtTime(180 + soundSpeed * 0.16, t, 0.12);
+    runningGain.gain.setTargetAtTime(state === "running" ? 0.035 + soundSpeed / 25000 : 0.001, t, 0.1);
   }
 
   function stopRunningSound() {
@@ -257,6 +270,7 @@
   let stationWorldX = 0;   // 次の駅の位置(距離座標)
   let currentStationX = null; // いま停車中(または通過直後)の駅の位置
   let stationIdx = -1;        // STATIONS 内の次に停まる駅
+  let currentLineKm = START_STATION_KM;
   let nextStationName = "";
   let currentStationName = "";
   let viewScale = 1;       // 編成全体が見えるようにカメラを引く倍率
@@ -294,8 +308,11 @@
 
   function scheduleNextStation() {
     stationIdx = (stationIdx + 1) % STATIONS.length;
-    nextStationName = STATIONS[stationIdx];
-    stationWorldX = distance + STATION_INTERVAL + Math.random() * 3000;
+    const nextStation = STATIONS[stationIdx];
+    const intervalMeters = Math.round(Math.abs(nextStation.km - currentLineKm) * 1000);
+    nextStationName = nextStation.name;
+    stationWorldX = distance + intervalMeters * PIXELS_PER_METER;
+    currentLineKm = nextStation.km;
   }
 
   function shouldPassNextStation() {
@@ -308,8 +325,8 @@
 
   function updateDriveUi() {
     speedValue.textContent = String(Math.round(speed * 0.3));
-    distanceValue.textContent = String(Math.floor(distance / 12));
-    distanceKmValue.textContent = `${(Math.floor(distance / 12) / 1000).toFixed(3)} km`;
+    distanceValue.textContent = String(Math.floor(distance / PIXELS_PER_METER));
+    distanceKmValue.textContent = `${(Math.floor(distance / PIXELS_PER_METER) / 1000).toFixed(1)} km`;
     btnExpress.setAttribute("aria-pressed", String(expressMode));
     btnExpress.setAttribute("aria-label", expressMode ? "各駅停車モードにする" : "中央特快モードにする");
     expressLabel.textContent = expressMode ? "とっかい" : "かくえき";
@@ -328,6 +345,7 @@
     currentStationX = null;
     currentStationName = "";
     stationIdx = -1;
+    currentLineKm = START_STATION_KM;
     viewScale = 1;
     state = "stopped";
     scheduleNextStation();
@@ -521,7 +539,8 @@
   function populateQuickAddButtons() {
     const otherKeys = Object.keys(TRAINS).filter((key) => key !== trainKey);
     btnCouple.setAttribute("aria-label", `${TRAINS[trainKey].callName}を連結`);
-    document.querySelectorAll(".btn-quick-add").forEach((btn, index) => {
+    btnCouple.querySelector(".quick-train-art").replaceChildren(createTrainPreview(trainKey));
+    document.querySelectorAll(".btn-quick-add:not(#btn-couple)").forEach((btn, index) => {
       const key = otherKeys[index];
       btn.dataset.car = key;
       btn.setAttribute("aria-label", `${TRAINS[key].callName}を連結`);
@@ -642,7 +661,7 @@
         depart();
       }
     } else if (state === "running") {
-      speed = Math.min(speed + TAP_BOOST, MAX_SPEED);
+      speed += TAP_BOOST;
     }
   });
 
@@ -862,7 +881,7 @@
   }
 
   function formatTrackDistance(worldX) {
-    const meters = Math.round(worldX / 12);
+    const meters = Math.round(worldX / PIXELS_PER_METER);
     return meters >= 1000 ? `${(meters / 1000).toFixed(1)}km` : `${meters}m`;
   }
 
@@ -870,7 +889,7 @@
     const y = H * GROUND_R;
     const noseX = W * NOSE_R;
     const { x0, x1 } = viewRange();
-    const markerSpacing = 1200; // 表示速度の換算で100m
+    const markerSpacing = PIXELS_PER_METER * 100;
     const worldLeft = distance + x0 - noseX;
     const worldRight = distance + x1 - noseX;
     const firstMarker = Math.max(markerSpacing, Math.ceil(worldLeft / markerSpacing) * markerSpacing);
