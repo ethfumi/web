@@ -220,17 +220,30 @@
     osc.stop(t + 0.5);
   }
 
-  function crossingSound() {
+  function crossingBell(screenX) {
     if (!audioCtx) return;
-    for (let i = 0; i < 6; i++) {
-      const t = audioCtx.currentTime + i * 0.22;
+    const trainX = W * NOSE_R;
+    const relativeX = Math.max(-1, Math.min(1, (screenX - trainX) / Math.max(W * 0.7, 1)));
+    const proximity = 1 - Math.min(Math.abs(screenX - trainX) / Math.max(W * 0.8, 1), 1);
+    const baseFrequency = 760 + relativeX * 150;
+    const t = audioCtx.currentTime;
+    const gain = audioCtx.createGain();
+    gain.gain.setValueAtTime(0.025 + proximity * 0.09, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.17);
+
+    if (audioCtx.createStereoPanner) {
+      const pan = audioCtx.createStereoPanner();
+      pan.pan.value = Math.max(-1, Math.min(1, (screenX / Math.max(W, 1)) * 2 - 1));
+      gain.connect(pan).connect(audioCtx.destination);
+    } else {
+      gain.connect(audioCtx.destination);
+    }
+
+    for (const [ratio, type] of [[1, "square"], [1.48, "sine"]]) {
       const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = "square";
-      osc.frequency.value = i % 2 === 0 ? 880 : 660;
-      gain.gain.setValueAtTime(0.08, t);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
-      osc.connect(gain).connect(audioCtx.destination);
+      osc.type = type;
+      osc.frequency.value = baseFrequency * ratio;
+      osc.connect(gain);
       osc.start(t);
       osc.stop(t + 0.18);
     }
@@ -333,6 +346,8 @@
   let routeEvent = ""; // "" | fuji | inspection | tunnel | crossing
   let routeEventAnnounced = false;
   let routeEventProgress = 0;
+  let crossingWorldX = null;
+  let crossingBellTimer = 0;
   let lightsOn = false;
   let inspectionTime = 0;
   let expressMode = false;
@@ -563,6 +578,11 @@
     if (segmentNumber === 1 && train === TRAINS.doctoryellow) routeEvent = "inspection";
     if (segmentNumber === 2) routeEvent = "tunnel";
     if (!routeEvent && segmentNumber % 4 === 0) routeEvent = "crossing";
+    if (routeEvent === "crossing") {
+      const segmentLength = Math.max(stationWorldX - segmentStartDistance, 1);
+      crossingWorldX = segmentStartDistance + segmentLength * (0.35 + Math.random() * 0.3);
+      crossingBellTimer = 0;
+    }
     if (segmentNumber > 1 && segmentNumber % 3 === 0) cycleWeatherAndTime();
     routeEventBanner.classList.add("hidden");
     btnHeadlight.classList.add("hidden");
@@ -753,6 +773,8 @@
     routeEvent = "";
     routeEventAnnounced = false;
     routeEventProgress = 0;
+    crossingWorldX = null;
+    crossingBellTimer = 0;
     lightsOn = false;
     routeEventBanner.classList.add("hidden");
     btnHeadlight.classList.add("hidden");
@@ -765,6 +787,16 @@
     const segmentLength = Math.max(stationWorldX - segmentStartDistance, 1);
     routeEventProgress = (distance - segmentStartDistance) / segmentLength;
     inspectionTime += dt;
+    if (routeEvent === "crossing") {
+      const screenX = crossingScreenX();
+      crossingBellTimer -= dt;
+      if (screenX < W * 1.12 && screenX > -W * 0.18 && crossingBellTimer <= 0) {
+        crossingBell(screenX);
+        crossingBellTimer = 0.27;
+      }
+      if (screenX < -W * 0.2) clearRouteEvent();
+      return;
+    }
 
     if (!routeEventAnnounced && routeEventProgress >= 0.22) {
       routeEventAnnounced = true;
@@ -779,10 +811,6 @@
         routeEventBanner.textContent = "トンネルだ！";
         btnHeadlight.classList.remove("hidden");
         say("トンネルだ！ライトをつけてみよう！");
-      } else if (routeEvent === "crossing") {
-        routeEventBanner.textContent = "カンカン！ふみきり！";
-        crossingSound();
-        say("カンカンカン！ふみきりを、とおります！");
       }
     }
 
@@ -1137,9 +1165,15 @@
     ctx.restore();
   }
 
+  function crossingScreenX() {
+    if (crossingWorldX === null) return Number.POSITIVE_INFINITY;
+    const trainX = W * NOSE_R;
+    return trainX + (crossingWorldX - distance) * viewScale;
+  }
+
   function drawCrossing() {
-    if (routeEvent !== "crossing" || !routeEventAnnounced) return;
-    const x = W * 0.76;
+    if (routeEvent !== "crossing" || crossingWorldX === null) return;
+    const x = crossingWorldX - distance + W * NOSE_R;
     const { x0, x1 } = viewRange();
     if (x < x0 - 160 || x > x1 + 160) return;
     const nearY = H * GROUND_R;
@@ -1873,12 +1907,12 @@
       if (state === "stopped" && stationDoorsDone && !komachiReady) depart();
       if (state !== "running") return;
       routeEvent = "crossing";
-      routeEventAnnounced = true;
-      routeEventProgress = 0.45;
+      routeEventAnnounced = false;
+      routeEventProgress = 0;
       inspectionTime = 0;
-      distance = segmentStartDistance + (stationWorldX - segmentStartDistance) * 0.45;
-      routeEventBanner.textContent = "カンカン！ふみきり！";
-      routeEventBanner.classList.remove("hidden");
+      crossingBellTimer = 0;
+      crossingWorldX = distance + (W * 1.6 - W * NOSE_R) / Math.max(viewScale, 0.01);
+      routeEventBanner.classList.add("hidden");
     });
     document.body.appendChild(debugCrossingButton);
   }
