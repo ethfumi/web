@@ -1,4 +1,4 @@
-// しんかんせん GO! — 3歳向け新幹線アプリ
+// つなげて！しんかんせん — 3歳向け新幹線アプリ
 // 文字が読めなくても遊べる・失敗がない・タップで必ず反応する、を設計原則とする。
 
 (() => {
@@ -282,6 +282,8 @@
   const btnRunningSound = document.getElementById("btn-running-sound");
   const runningSoundIcon = document.getElementById("running-sound-icon");
   const onboardPanel = document.getElementById("onboard-panel");
+  const onboardSummary = document.getElementById("onboard-summary");
+  const onboardHint = document.getElementById("onboard-hint");
   const onboardList = document.getElementById("onboard-list");
   const playControls = document.getElementById("play-controls");
   const btnDriver = document.getElementById("btn-driver");
@@ -518,6 +520,7 @@
   let weatherTime = 0;
   let driverCallIndex = 0;
   let playBannerTimer = 0;
+  let onboardPanelTimer = 0;
   let visitedStations = loadVisitedStations();
 
   function initClouds() {
@@ -668,13 +671,25 @@
 
   function updateOnboardPanel() {
     if (onboardPassengers.length === 0) {
+      onboardSummary.textContent = "0にん";
       onboardList.textContent = "まだ だれも のっていないよ";
+      onboardPanel.setAttribute("aria-label", "のっているひとは0にん。タップでいきさきを見る");
       return;
     }
+    onboardSummary.textContent = `${onboardPassengers.map((passenger) => passenger.icon).join("")} ${onboardPassengers.length}にん`;
     const shown = onboardPassengers.slice(0, 4)
       .map((passenger) => `${passenger.icon} → ${passenger.destination}`);
     if (onboardPassengers.length > shown.length) shown.push(`ほか ${onboardPassengers.length - shown.length}にん`);
     onboardList.textContent = shown.join("\n");
+    onboardPanel.setAttribute("aria-label", `のっているひとは${onboardPassengers.length}にん。タップでいきさきを見る`);
+  }
+
+  function setOnboardPanelExpanded(expanded) {
+    window.clearTimeout(onboardPanelTimer);
+    onboardPanel.classList.toggle("expanded", expanded);
+    onboardPanel.setAttribute("aria-expanded", String(expanded));
+    onboardHint.textContent = expanded ? "とじる ▴" : "いきさき ▾";
+    if (expanded) onboardPanelTimer = window.setTimeout(() => setOnboardPanelExpanded(false), 4000);
   }
 
   function makeBoardingPassengers(count) {
@@ -726,6 +741,7 @@
     passingStation = false;
     midAnnouncementDone = false;
     onboardPassengers = [];
+    setOnboardPanelExpanded(false);
     stationPassengers.replaceChildren();
     opposingTrain = null;
     nextOpposingTrainIn = 2.5 + Math.random() * 4;
@@ -1225,6 +1241,9 @@
   btnStamps.addEventListener("click", () => {
     renderStampBook();
     stampBook.classList.remove("hidden");
+  });
+  onboardPanel.addEventListener("click", () => {
+    setOnboardPanelExpanded(onboardPanel.getAttribute("aria-expanded") !== "true");
   });
   btnCloseStamps.addEventListener("click", () => stampBook.classList.add("hidden"));
   stampBook.addEventListener("click", (event) => {

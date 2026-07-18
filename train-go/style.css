@@ -548,20 +548,36 @@ html, body {
   position: fixed;
   left: 2.5vmin;
   bottom: max(22vmin, calc(env(safe-area-inset-bottom) + 20vmin));
-  max-width: 44vmin;
-  padding: 1.8vmin 2.4vmin;
-  border: 0.8vmin solid rgba(255,255,255,0.85);
-  border-radius: 3vmin;
+  max-width: 34vmin;
+  padding: 1vmin 1.5vmin;
+  border: 0.45vmin solid rgba(255,255,255,0.85);
+  border-radius: 2.2vmin;
   color: #273445;
   background: rgba(255,255,255,0.88);
   box-shadow: 0 5px 0 rgba(60,90,120,0.25);
-  font-size: 3vmin;
-  line-height: 1.45;
+  font-family: inherit;
+  font-size: 2.5vmin;
+  line-height: 1.3;
+  text-align: left;
   z-index: 6;
-  pointer-events: none;
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-appearance: none;
+  appearance: none;
 }
-#onboard-panel strong { display: block; margin-bottom: 0.6vmin; }
-#onboard-list { white-space: pre-line; }
+#onboard-panel:active { transform: scale(0.97); }
+.onboard-compact { display: flex; align-items: center; gap: 1.2vmin; }
+#onboard-panel strong { white-space: nowrap; }
+#onboard-hint { color: #52708d; font-size: 0.78em; white-space: nowrap; }
+#onboard-list { display: none; margin-top: 0.8vmin; white-space: pre-line; }
+#onboard-panel.expanded {
+  max-width: 44vmin;
+  padding: 1.6vmin 2.1vmin;
+  border-width: 0.7vmin;
+  border-radius: 3vmin;
+  font-size: 3vmin;
+}
+#onboard-panel.expanded #onboard-list { display: block; }
 
 #play-controls {
   position: fixed;

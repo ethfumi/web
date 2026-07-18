@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="しんかんせん">
-<title>しんかんせん GO!</title>
+<meta name="apple-mobile-web-app-title" content="つなげて！しんかんせん">
+<title>つなげて！しんかんせん</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="stylesheet" href="style.css">
@@ -63,8 +63,8 @@
     </button>
   </div>
   <!-- 更新時は sw.js の CACHE バージョンと揃える -->
-  <div id="app-version" aria-label="バージョン23、2026年7月18日18時48分更新">
-    <strong>v23</strong><span>2026.07.18 18:48 更新</span>
+  <div id="app-version" aria-label="バージョン24、2026年7月18日20時06分更新">
+    <strong>v24</strong><span>2026.07.18 20:06 更新</span>
   </div>
 </div>
 
@@ -109,10 +109,10 @@
 
 <div id="station-passengers" class="hidden" aria-hidden="true"></div>
 
-<div id="onboard-panel" class="hidden" aria-live="polite">
-  <strong>🚃 のっているひと</strong>
-  <div id="onboard-list">まだ だれも のっていないよ</div>
-</div>
+<button id="onboard-panel" class="hidden" type="button" aria-live="polite" aria-expanded="false" aria-label="のっているひと。タップでいきさきを見る">
+  <span class="onboard-compact"><strong>🚃 <span id="onboard-summary">0にん</span></strong><span id="onboard-hint">いきさき ▾</span></span>
+  <span id="onboard-list">まだ だれも のっていないよ</span>
+</button>
 
 <div id="play-controls" class="hidden">
   <button id="btn-driver" aria-label="うんてんしごっこ"><span>🧑‍✈️</span><span>うんてんし</span></button>
