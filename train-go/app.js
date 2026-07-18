@@ -97,6 +97,13 @@
     { name: "きかんしゃ", kind: "steam", body: "#28323a", stripe: "#c7443e" },
   ];
 
+  const ALL_STATION_NAMES = [START_STATION, ...STATIONS.map((station) => station.name)]
+    .filter((name, index, names) => names.indexOf(name) === index);
+  const DRIVER_CALLS = ["しんごうよし！", "ドアよし！", "しゅっぱつしんこう！", "じこくよし！"];
+  const TIMES_OF_DAY = ["day", "sunset", "night"];
+  const WEATHERS = ["sunny", "rain", "snow"];
+  const STAMP_STORAGE_KEY = "train-go-station-stamps-v1";
+
   // ---- 要素 ----
   const canvas = document.getElementById("game");
   const ctx = canvas.getContext("2d");
@@ -121,6 +128,16 @@
   const expressLabel = document.getElementById("express-label");
   const btnRunningSound = document.getElementById("btn-running-sound");
   const runningSoundIcon = document.getElementById("running-sound-icon");
+  const onboardPanel = document.getElementById("onboard-panel");
+  const onboardList = document.getElementById("onboard-list");
+  const playControls = document.getElementById("play-controls");
+  const btnDriver = document.getElementById("btn-driver");
+  const btnStamps = document.getElementById("btn-stamps");
+  const stampBook = document.getElementById("stamp-book");
+  const btnCloseStamps = document.getElementById("btn-close-stamps");
+  const stampCount = document.getElementById("stamp-count");
+  const stampGrid = document.getElementById("stamp-grid");
+  const playBanner = document.getElementById("play-banner");
 
   let W = 0, H = 0, DPR = 1;
   let forcedSize = false; // デバッグ用: 非表示タブでも描画検証できるようにサイズを固定する
@@ -201,6 +218,22 @@
     osc.connect(gain).connect(audioCtx.destination);
     osc.start(t);
     osc.stop(t + 0.5);
+  }
+
+  function crossingSound() {
+    if (!audioCtx) return;
+    for (let i = 0; i < 6; i++) {
+      const t = audioCtx.currentTime + i * 0.22;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "square";
+      osc.frequency.value = i % 2 === 0 ? 880 : 660;
+      gain.gain.setValueAtTime(0.08, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(t);
+      osc.stop(t + 0.18);
+    }
   }
 
   function passingSound() {
@@ -297,7 +330,7 @@
   let stationDoorsDone = true;
   let segmentNumber = 0;
   let segmentStartDistance = 0;
-  let routeEvent = ""; // "" | fuji | inspection | tunnel
+  let routeEvent = ""; // "" | fuji | inspection | tunnel | crossing
   let routeEventAnnounced = false;
   let routeEventProgress = 0;
   let lightsOn = false;
@@ -309,6 +342,12 @@
   let onboardPassengers = [];
   let opposingTrain = null;
   let nextOpposingTrainIn = 3;
+  let timeOfDay = "day";
+  let weather = "sunny";
+  let weatherTime = 0;
+  let driverCallIndex = 0;
+  let playBannerTimer = 0;
+  let visitedStations = loadVisitedStations();
 
   function initClouds() {
     clouds = [];
@@ -351,6 +390,89 @@
     runningSoundIcon.textContent = runningSoundEnabled ? "🔊" : "🔇";
   }
 
+  function loadVisitedStations() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STAMP_STORAGE_KEY) || "[]");
+      return new Set(saved.filter((name) => ALL_STATION_NAMES.includes(name)));
+    } catch {
+      return new Set();
+    }
+  }
+
+  function saveVisitedStations() {
+    try {
+      localStorage.setItem(STAMP_STORAGE_KEY, JSON.stringify([...visitedStations]));
+    } catch {
+      // 保存できない環境でも、その回のスタンプ帳は遊べる。
+    }
+  }
+
+  function renderStampBook() {
+    stampGrid.replaceChildren();
+    ALL_STATION_NAMES.forEach((name) => {
+      const stamp = document.createElement("div");
+      stamp.className = `station-stamp${visitedStations.has(name) ? " visited" : ""}`;
+      stamp.textContent = visitedStations.has(name) ? name : `？\n${name}`;
+      stampGrid.appendChild(stamp);
+    });
+    stampCount.textContent = `${visitedStations.size} / ${ALL_STATION_NAMES.length} えき`;
+  }
+
+  function addStationStamp(name, celebrate = true) {
+    if (!name || visitedStations.has(name)) return false;
+    visitedStations.add(name);
+    saveVisitedStations();
+    renderStampBook();
+    if (celebrate) {
+      showPlayBanner(`🚉 ${name} スタンプ！`);
+      spawnConfetti(24);
+    }
+    return true;
+  }
+
+  function showPlayBanner(message, duration = 1800) {
+    window.clearTimeout(playBannerTimer);
+    playBanner.textContent = message;
+    playBanner.classList.remove("hidden");
+    playBannerTimer = window.setTimeout(() => playBanner.classList.add("hidden"), duration);
+  }
+
+  function futureDestinationNames() {
+    const names = [];
+    for (let offset = 0; offset < STATIONS.length && names.length < 5; offset++) {
+      const candidate = STATIONS[(stationIdx + offset) % STATIONS.length].name;
+      if (!expressMode || CHUO_SPECIAL_RAPID_STOPS.has(candidate)) names.push(candidate);
+    }
+    return names.length > 0 ? names : [nextStationName];
+  }
+
+  function updateOnboardPanel() {
+    if (onboardPassengers.length === 0) {
+      onboardList.textContent = "まだ だれも のっていないよ";
+      return;
+    }
+    const shown = onboardPassengers.slice(0, 4)
+      .map((passenger) => `${passenger.icon} → ${passenger.destination}`);
+    if (onboardPassengers.length > shown.length) shown.push(`ほか ${onboardPassengers.length - shown.length}にん`);
+    onboardList.textContent = shown.join("\n");
+  }
+
+  function makeBoardingPassengers(count) {
+    const destinations = futureDestinationNames();
+    return pickPassengers(count).map((icon) => ({
+      icon,
+      destination: destinations[Math.floor(Math.random() * destinations.length)],
+    }));
+  }
+
+  function cycleWeatherAndTime() {
+    timeOfDay = TIMES_OF_DAY[(TIMES_OF_DAY.indexOf(timeOfDay) + 1) % TIMES_OF_DAY.length];
+    weather = WEATHERS[(WEATHERS.indexOf(weather) + 1) % WEATHERS.length];
+    const timeName = { day: "ひる", sunset: "ゆうやけ", night: "よる" }[timeOfDay];
+    const weatherName = { sunny: "はれ", rain: "あめ", snow: "ゆき" }[weather];
+    showPlayBanner(`${timeName}・${weatherName}になったよ`);
+  }
+
   function startGame(key) {
     trainKey = key;
     train = TRAINS[key];
@@ -378,11 +500,22 @@
     stationPassengers.replaceChildren();
     opposingTrain = null;
     nextOpposingTrainIn = 2.5 + Math.random() * 4;
+    timeOfDay = "day";
+    weather = "sunny";
+    weatherTime = 0;
+    driverCallIndex = 0;
+    updateOnboardPanel();
+    addStationStamp(START_STATION, false);
+    renderStampBook();
     segmentNumber = 0;
     segmentStartDistance = 0;
     selectScreen.classList.add("hidden");
     runUi.classList.remove("hidden");
     drivePanel.classList.remove("hidden");
+    onboardPanel.classList.remove("hidden");
+    playControls.classList.remove("hidden");
+    stampBook.classList.add("hidden");
+    playBanner.classList.add("hidden");
     btnKomachiCouple.classList.add("hidden");
     btnStationDoors.classList.add("hidden");
     stationPassengers.classList.add("hidden");
@@ -400,6 +533,10 @@
     selectScreen.classList.remove("hidden");
     runUi.classList.add("hidden");
     drivePanel.classList.add("hidden");
+    onboardPanel.classList.add("hidden");
+    playControls.classList.add("hidden");
+    stampBook.classList.add("hidden");
+    playBanner.classList.add("hidden");
     arrivalBanner.classList.add("hidden");
     btnKomachiCouple.classList.add("hidden");
     btnStationDoors.classList.add("hidden");
@@ -425,6 +562,8 @@
     if (segmentNumber === 1 && train === TRAINS.nozomi) routeEvent = "fuji";
     if (segmentNumber === 1 && train === TRAINS.doctoryellow) routeEvent = "inspection";
     if (segmentNumber === 2) routeEvent = "tunnel";
+    if (!routeEvent && segmentNumber % 4 === 0) routeEvent = "crossing";
+    if (segmentNumber > 1 && segmentNumber % 3 === 0) cycleWeatherAndTime();
     routeEventBanner.classList.add("hidden");
     btnHeadlight.classList.add("hidden");
     if (playHorn) horn();
@@ -451,6 +590,7 @@
     updateDriveUi();
     currentStationX = stationWorldX;
     currentStationName = nextStationName;
+    addStationStamp(currentStationName);
     doorsOpen = false;
     stationDoorsDone = false;
     btnStationDoors.classList.add("hidden");
@@ -529,25 +669,23 @@
   }
 
   function exchangePassengers() {
-    const alighting = [];
-    if (onboardPassengers.length > 0) {
-      const alightCount = 1 + Math.floor(Math.random() * Math.min(3, onboardPassengers.length));
-      for (let i = 0; i < alightCount; i++) {
-        const index = Math.floor(Math.random() * onboardPassengers.length);
-        alighting.push(onboardPassengers.splice(index, 1)[0]);
-      }
-    }
+    const alighting = onboardPassengers.filter((passenger) => passenger.destination === currentStationName);
+    onboardPassengers = onboardPassengers.filter((passenger) => passenger.destination !== currentStationName);
 
-    const boarding = pickPassengers(1 + Math.floor(Math.random() * 3));
+    const availableSeats = Math.max(0, 7 - onboardPassengers.length);
+    const boardingCount = Math.min(availableSeats, 1 + Math.floor(Math.random() * 3));
+    const boarding = makeBoardingPassengers(boardingCount);
     onboardPassengers.push(...boarding);
+    updateOnboardPanel();
 
     stationPassengers.replaceChildren();
-    [...alighting.map((icon) => ({ icon, direction: "alight" })),
-      ...boarding.map((icon) => ({ icon, direction: "board" }))]
+    [...alighting.map((passenger) => ({ ...passenger, direction: "alight" })),
+      ...boarding.map((passenger) => ({ ...passenger, direction: "board" }))]
       .forEach((passenger, index) => {
         const span = document.createElement("span");
         span.textContent = passenger.icon;
         span.className = `passenger-${passenger.direction}`;
+        span.title = `${passenger.destination}へいくよ`;
         span.style.setProperty("--passenger-delay", `${index * 0.18}s`);
         stationPassengers.appendChild(span);
       });
@@ -557,9 +695,10 @@
     arrivalBanner.textContent = alighting.length > 0
       ? `${alighting.length}にん おりて ${boarding.length}にん のるよ！`
       : `${boarding.length}にん ごじょうしゃ！`;
+    const destination = boarding[0]?.destination;
     say(alighting.length > 0
       ? `ドアがひらきます。${alighting.length}にんおりて、${boarding.length}にんごじょうしゃ！`
-      : `ドアがひらきます。${boarding.length}にん、ごじょうしゃくださーい！`);
+      : `ドアがひらきます。${boarding.length}にん、${destination ? `${destination}まで` : ""}ごじょうしゃくださーい！`);
   }
 
   function toggleStationDoors() {
@@ -640,6 +779,10 @@
         routeEventBanner.textContent = "トンネルだ！";
         btnHeadlight.classList.remove("hidden");
         say("トンネルだ！ライトをつけてみよう！");
+      } else if (routeEvent === "crossing") {
+        routeEventBanner.textContent = "カンカン！ふみきり！";
+        crossingSound();
+        say("カンカンカン！ふみきりを、とおります！");
       }
     }
 
@@ -706,6 +849,34 @@
     }
   }
 
+  function identifyOpposingTrain(event) {
+    if (!opposingTrain || state === "select") return false;
+    const rect = canvas.getBoundingClientRect();
+    const px = event.offsetX * W / Math.max(rect.width, 1);
+    const py = event.offsetY * H / Math.max(rect.height, 1);
+    const carW = Math.min(W * 0.13, 115);
+    const carH = carW * 0.34;
+    const gap = 5;
+    const ax = W * NOSE_R;
+    const ay = H * GROUND_R;
+    const left = ax + (opposingTrain.x - ax) * viewScale;
+    const rightWorld = opposingTrain.x + opposingTrain.cars * (carW + gap);
+    const right = ax + (rightWorld - ax) * viewScale;
+    const topWorld = opposingTrackY() - carH;
+    const top = ay + (topWorld - ay) * viewScale;
+    const bottom = ay + (opposingTrackY() + 18 - ay) * viewScale;
+    const padding = 40;
+    if (px < Math.min(left, right) - padding || px > Math.max(left, right) + padding
+      || py < top - padding || py > bottom + padding) return false;
+
+    ensureAudio();
+    passingSound();
+    showPlayBanner(`🚆 ${opposingTrain.type.name}・${opposingTrain.cars}りょう！`, 2200);
+    say(`${opposingTrain.type.name}、${opposingTrain.cars}りょう！みつけたね！`);
+    spawnConfetti(14);
+    return true;
+  }
+
   // ---- 入力 ----
   document.querySelectorAll(".train-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -714,7 +885,8 @@
     });
   });
 
-  canvas.addEventListener("pointerdown", () => {
+  canvas.addEventListener("pointerdown", (event) => {
+    if (identifyOpposingTrain(event)) return;
     ensureAudio();
     if (state === "stopped") {
       if (!stationDoorsDone && !komachiReady) {
@@ -778,6 +950,22 @@
     else stopRunningSound();
     updateDriveUi();
   });
+  btnDriver.addEventListener("click", () => {
+    ensureAudio();
+    const call = DRIVER_CALLS[driverCallIndex % DRIVER_CALLS.length];
+    driverCallIndex++;
+    showPlayBanner(`🧑‍✈️ ${call}`);
+    chime();
+    say(call);
+  });
+  btnStamps.addEventListener("click", () => {
+    renderStampBook();
+    stampBook.classList.remove("hidden");
+  });
+  btnCloseStamps.addEventListener("click", () => stampBook.classList.add("hidden"));
+  stampBook.addEventListener("click", (event) => {
+    if (event.target === stampBook) stampBook.classList.add("hidden");
+  });
 
   // ---- 描画 ----
   const GROUND_R = 0.78; // 線路の高さ(画面比)
@@ -795,12 +983,36 @@
   }
 
   function drawSky() {
+    const palettes = {
+      day: ["#8fd4ff", "#d8f2ff", "#c2ecb0"],
+      sunset: ["#715d9d", "#ff9d73", "#f4c77b"],
+      night: ["#101b4c", "#263c72", "#49678a"],
+    };
+    const colors = palettes[timeOfDay];
     const g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, "#8fd4ff");
-    g.addColorStop(0.6, "#d8f2ff");
-    g.addColorStop(1, "#c2ecb0");
+    g.addColorStop(0, colors[0]);
+    g.addColorStop(0.6, colors[1]);
+    g.addColorStop(1, colors[2]);
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, W, H);
+
+    if (timeOfDay === "sunset") {
+      ctx.fillStyle = "#ffe073";
+      ctx.beginPath();
+      ctx.arc(W * 0.82, H * 0.22, Math.max(24, H * 0.05), 0, Math.PI * 2);
+      ctx.fill();
+    } else if (timeOfDay === "night") {
+      ctx.fillStyle = "#fff6c7";
+      ctx.beginPath();
+      ctx.arc(W * 0.82, H * 0.16, Math.max(22, H * 0.045), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,0.85)";
+      for (let i = 0; i < 24; i++) {
+        const x = (i * 83 + 31) % Math.max(W, 1);
+        const y = H * (0.04 + ((i * 37) % 28) / 100);
+        ctx.fillRect(x, y, 2 + i % 3, 2 + i % 3);
+      }
+    }
   }
 
   function drawClouds(dt) {
@@ -921,6 +1133,67 @@
     ctx.fillStyle = lightsOn ? "#fff4ad" : "#69758a";
     for (let x = x0 + 90 - off; x < x1 + ribSpacing; x += ribSpacing) {
       ctx.fillRect(x, H * 0.2, 38, 8);
+    }
+    ctx.restore();
+  }
+
+  function drawCrossing() {
+    if (routeEvent !== "crossing" || !routeEventAnnounced) return;
+    const x = W * (1.02 - (routeEventProgress - 0.22) * 1.5);
+    const { x0, x1 } = viewRange();
+    if (x < x0 - 160 || x > x1 + 160) return;
+    const nearY = H * GROUND_R;
+    const farY = opposingTrackY();
+    ctx.save();
+    ctx.fillStyle = "#77736d";
+    ctx.fillRect(x - 34, farY - 125, 68, nearY + 190 - farY);
+    ctx.fillStyle = "#f2d45c";
+    for (let y = farY - 120; y < nearY + 170; y += 32) ctx.fillRect(x - 4, y, 8, 18);
+    ctx.strokeStyle = "#f4d13d";
+    ctx.lineWidth = 12;
+    ctx.beginPath();
+    ctx.moveTo(x - 95, nearY - 105);
+    ctx.lineTo(x - 20, nearY - 30);
+    ctx.stroke();
+    ctx.strokeStyle = "#222";
+    ctx.lineWidth = 4;
+    for (let i = 0; i < 5; i++) {
+      const gx = x - 91 + i * 15;
+      const gy = nearY - 101 + i * 15;
+      ctx.beginPath(); ctx.moveTo(gx - 5, gy + 5); ctx.lineTo(gx + 5, gy - 5); ctx.stroke();
+    }
+    ctx.fillStyle = "#f4d13d";
+    ctx.fillRect(x - 108, nearY - 112, 12, 112);
+    ctx.fillStyle = Math.floor(inspectionTime * 6) % 2 ? "#ff3434" : "#682626";
+    ctx.beginPath(); ctx.arc(x - 102, nearY - 126, 13, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 28px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("×", x - 102, nearY - 151);
+    ctx.fillText("🚗", x + 6, farY - 73);
+    ctx.fillText("🐶", x + 8, nearY + 85);
+    ctx.restore();
+  }
+
+  function drawWeather(dt) {
+    weatherTime += dt;
+    if (weather === "sunny") return;
+    ctx.save();
+    if (weather === "rain") {
+      ctx.strokeStyle = "rgba(205,235,255,0.72)";
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 85; i++) {
+        const x = (i * 79 + weatherTime * 310) % (W + 80) - 40;
+        const y = (i * 47 + weatherTime * 520) % (H + 50) - 25;
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 12, y + 25); ctx.stroke();
+      }
+    } else if (weather === "snow") {
+      ctx.fillStyle = "rgba(255,255,255,0.88)";
+      for (let i = 0; i < 65; i++) {
+        const x = (i * 97 + Math.sin(weatherTime + i) * 35) % (W + 30);
+        const y = (i * 53 + weatherTime * (35 + i % 25)) % (H + 20);
+        ctx.beginPath(); ctx.arc(x, y, 2 + i % 4, 0, Math.PI * 2); ctx.fill();
+      }
     }
     ctx.restore();
   }
@@ -1462,6 +1735,7 @@
       drawCityscape();
       drawTunnel();
       drawTrack();
+      drawCrossing();
       drawOpposingTrain();
       drawDistanceMarkers();
       drawInspectionEffect();
@@ -1471,6 +1745,7 @@
       drawKomachi();
       ctx.restore();
     }
+    drawWeather(dt);
     drawConfetti(dt);
 
     scheduleFrame();
@@ -1501,6 +1776,7 @@
           segmentNumber, routeEvent, routeEventProgress, lightsOn,
           expressMode, passingStation, midAnnouncementDone, runningSoundEnabled,
           onboardPassengers: [...onboardPassengers],
+          timeOfDay, weather, visitedStations: [...visitedStations],
           opposingTrain: opposingTrain ? {
             name: opposingTrain.type.name,
             cars: opposingTrain.cars,
@@ -1529,7 +1805,7 @@
     debugSkipButton.textContent = "テスト: えきのまえへ";
     debugSkipButton.setAttribute("aria-label", "テストで駅の前へ進む");
     Object.assign(debugSkipButton.style, {
-      position: "fixed", left: "8px", bottom: "8px", zIndex: "99",
+      position: "fixed", left: "45%", top: "8px", zIndex: "99",
       padding: "8px", fontSize: "14px",
     });
     debugSkipButton.addEventListener("click", () => {
@@ -1546,7 +1822,7 @@
     debugEventButton.textContent = "テスト: イベントへ";
     debugEventButton.setAttribute("aria-label", "テストで走行イベントへ進む");
     Object.assign(debugEventButton.style, {
-      position: "fixed", left: "8px", bottom: "52px", zIndex: "99",
+      position: "fixed", left: "45%", top: "52px", zIndex: "99",
       padding: "8px", fontSize: "14px",
     });
     debugEventButton.addEventListener("click", () => {
@@ -1562,11 +1838,48 @@
     debugOpposingButton.textContent = "テスト: たいこうれっしゃ";
     debugOpposingButton.setAttribute("aria-label", "テストで対向列車を出す");
     Object.assign(debugOpposingButton.style, {
-      position: "fixed", left: "8px", bottom: "96px", zIndex: "99",
+      position: "fixed", left: "45%", top: "96px", zIndex: "99",
       padding: "8px", fontSize: "14px",
     });
-    debugOpposingButton.addEventListener("click", () => spawnOpposingTrain());
+    debugOpposingButton.addEventListener("click", () => {
+      spawnOpposingTrain();
+      opposingTrain.x = W * 0.42;
+      opposingTrain.speed = 0;
+      identifyOpposingTrain({ offsetX: W * 0.5, offsetY: opposingTrackY() - 10 });
+    });
     document.body.appendChild(debugOpposingButton);
+
+    const debugWeatherButton = document.createElement("button");
+    debugWeatherButton.type = "button";
+    debugWeatherButton.textContent = "テスト: てんきとじかん";
+    debugWeatherButton.setAttribute("aria-label", "テストで天気と時間を変える");
+    Object.assign(debugWeatherButton.style, {
+      position: "fixed", left: "45%", top: "140px", zIndex: "99",
+      padding: "8px", fontSize: "14px",
+    });
+    debugWeatherButton.addEventListener("click", cycleWeatherAndTime);
+    document.body.appendChild(debugWeatherButton);
+
+    const debugCrossingButton = document.createElement("button");
+    debugCrossingButton.type = "button";
+    debugCrossingButton.textContent = "テスト: ふみきり";
+    debugCrossingButton.setAttribute("aria-label", "テストで踏切を出す");
+    Object.assign(debugCrossingButton.style, {
+      position: "fixed", left: "45%", top: "184px", zIndex: "99",
+      padding: "8px", fontSize: "14px",
+    });
+    debugCrossingButton.addEventListener("click", () => {
+      if (state === "stopped" && stationDoorsDone && !komachiReady) depart();
+      if (state !== "running") return;
+      routeEvent = "crossing";
+      routeEventAnnounced = true;
+      routeEventProgress = 0.45;
+      inspectionTime = 0;
+      distance = segmentStartDistance + (stationWorldX - segmentStartDistance) * 0.45;
+      routeEventBanner.textContent = "カンカン！ふみきり！";
+      routeEventBanner.classList.remove("hidden");
+    });
+    document.body.appendChild(debugCrossingButton);
   }
 
   // ---- PWA ----

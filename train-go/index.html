@@ -54,8 +54,8 @@
     </button>
   </div>
   <!-- 更新時は sw.js の CACHE バージョンと揃える -->
-  <div id="app-version" aria-label="バージョン14、2026年7月18日15時18分更新">
-    <strong>v14</strong><span>2026.07.18 15:18 更新</span>
+  <div id="app-version" aria-label="バージョン15、2026年7月18日16時04分更新">
+    <strong>v15</strong><span>2026.07.18 16:04 更新</span>
   </div>
 </div>
 
@@ -96,7 +96,27 @@
 
 <div id="station-passengers" class="hidden" aria-hidden="true"></div>
 
+<div id="onboard-panel" class="hidden" aria-live="polite">
+  <strong>🚃 のっているひと</strong>
+  <div id="onboard-list">まだ だれも のっていないよ</div>
+</div>
+
+<div id="play-controls" class="hidden">
+  <button id="btn-driver" aria-label="うんてんしごっこ"><span>🧑‍✈️</span><span>うんてんし</span></button>
+  <button id="btn-stamps" aria-label="えきスタンプちょうをひらく"><span>📖</span><span>スタンプ</span></button>
+</div>
+
+<div id="stamp-book" class="hidden" role="dialog" aria-modal="true" aria-labelledby="stamp-title">
+  <div class="stamp-sheet">
+    <button id="btn-close-stamps" aria-label="スタンプちょうをとじる">×</button>
+    <h2 id="stamp-title">📖 えきスタンプちょう</h2>
+    <p id="stamp-count">0 / 0 えき</p>
+    <div id="stamp-grid"></div>
+  </div>
+</div>
+
 <div id="route-event-banner" class="hidden" role="status" aria-live="polite"></div>
+<div id="play-banner" class="hidden" role="status" aria-live="polite"></div>
 
 <button id="btn-headlight" class="hidden" aria-label="ライトをつける">
   <span>🔦</span><span id="headlight-label">ライトをつける</span>
