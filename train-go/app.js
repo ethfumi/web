@@ -72,6 +72,9 @@
   const btnRemove = document.getElementById("btn-remove");
   const btnHome = document.getElementById("btn-home");
   const btnKomachiCouple = document.getElementById("btn-komachi-couple");
+  const btnStationDoors = document.getElementById("btn-station-doors");
+  const doorLabel = document.getElementById("door-label");
+  const stationPassengers = document.getElementById("station-passengers");
 
   let W = 0, H = 0, DPR = 1;
   let forcedSize = false; // デバッグ用: 非表示タブでも描画検証できるようにサイズを固定する
@@ -164,6 +167,8 @@
   let komachiReady = false;
   let komachiStationX = null;
   let komachiGap = 110;
+  let doorsOpen = false;
+  let stationDoorsDone = true;
 
   function initClouds() {
     clouds = [];
@@ -198,9 +203,13 @@
     komachiReady = false;
     komachiGap = 110;
     komachiStationX = key === "hayabusa" ? stationWorldX : null;
+    doorsOpen = false;
+    stationDoorsDone = true;
     selectScreen.classList.add("hidden");
     runUi.classList.remove("hidden");
     btnKomachiCouple.classList.add("hidden");
+    btnStationDoors.classList.add("hidden");
+    stationPassengers.classList.add("hidden");
     arrivalBanner.textContent = "とうちゃく〜！";
     say(`${train.callName}、${START_STATION}えきを、しゅっぱつしんこう！`);
   }
@@ -212,12 +221,16 @@
     runUi.classList.add("hidden");
     arrivalBanner.classList.add("hidden");
     btnKomachiCouple.classList.add("hidden");
+    btnStationDoors.classList.add("hidden");
+    stationPassengers.classList.add("hidden");
   }
 
   function depart() {
-    if (komachiReady || state === "coupling") return;
+    if (komachiReady || state === "coupling" || !stationDoorsDone) return;
     state = "running";
     arrivalBanner.classList.add("hidden");
+    btnStationDoors.classList.add("hidden");
+    stationPassengers.classList.add("hidden");
     horn();
     say(`つぎは、${nextStationName}`);
     speed = 220;
@@ -228,6 +241,10 @@
     speed = 0;
     currentStationX = stationWorldX;
     currentStationName = nextStationName;
+    doorsOpen = false;
+    stationDoorsDone = false;
+    btnStationDoors.classList.add("hidden");
+    stationPassengers.classList.add("hidden");
     const isKomachiStop = train === TRAINS.hayabusa
       && currentStationName === "おぎくぼ"
       && !komachiCoupled;
@@ -241,7 +258,8 @@
       say("おぎくぼにとうちゃく！こまちがまっているよ。れんけつしよう！");
     } else {
       arrivalBanner.textContent = "とうちゃく〜！";
-      say(`${currentStationName}〜、${currentStationName}〜、とうちゃく！`);
+      showStationDoorPrompt();
+      say(`${currentStationName}〜、${currentStationName}〜、とうちゃく！ドアをあけてみよう！`);
     }
     spawnConfetti();
   }
@@ -264,6 +282,37 @@
     chime();
     spawnConfetti(90);
     say("ガチャン！はやぶさと、こまち、れんけつ！");
+    showStationDoorPrompt();
+  }
+
+  function showStationDoorPrompt() {
+    doorsOpen = false;
+    stationDoorsDone = false;
+    doorLabel.textContent = "ドアをあける";
+    btnStationDoors.setAttribute("aria-label", "ドアをあける");
+    btnStationDoors.classList.remove("hidden");
+  }
+
+  function toggleStationDoors() {
+    if (state !== "stopped" || stationDoorsDone || komachiReady) return;
+
+    if (!doorsOpen) {
+      doorsOpen = true;
+      doorLabel.textContent = "ドアをしめる";
+      btnStationDoors.setAttribute("aria-label", "ドアをしめる");
+      arrivalBanner.textContent = "ごじょうしゃ〜！";
+      stationPassengers.classList.remove("hidden");
+      spawnConfetti(18);
+      say("ドアがひらきます。うさぎさん、くまさん、ぺんぎんさん、ごじょうしゃくださーい！");
+      return;
+    }
+
+    doorsOpen = false;
+    stationDoorsDone = true;
+    btnStationDoors.classList.add("hidden");
+    stationPassengers.classList.add("hidden");
+    arrivalBanner.textContent = "しゅっぱつできるよ！";
+    say("ドアがしまりまーす。しゅっぱつしんこう！");
   }
 
   function addCar() {
@@ -309,7 +358,11 @@
   canvas.addEventListener("pointerdown", () => {
     ensureAudio();
     if (state === "stopped") {
-      depart();
+      if (!stationDoorsDone && !komachiReady) {
+        toggleStationDoors();
+      } else {
+        depart();
+      }
     } else if (state === "running") {
       speed = Math.min(speed + TAP_BOOST, MAX_SPEED);
     }
@@ -327,6 +380,10 @@
   btnKomachiCouple.addEventListener("click", () => {
     ensureAudio();
     startKomachiCoupling();
+  });
+  btnStationDoors.addEventListener("click", () => {
+    ensureAudio();
+    toggleStationDoors();
   });
 
   // ---- 描画 ----
@@ -506,6 +563,25 @@
       for (let wi = 0; wi < winCount; wi++) {
         roundRect(winStart + wi * carW * 0.28, top + carH * 0.18, carW * 0.18, carH * 0.22, 4);
         ctx.fill();
+      }
+
+      // 駅では先頭車のドアが実際に開閉して見える。
+      if (i === 0 && currentStationName) {
+        const doorX = left + carW * 0.72;
+        const doorY = top + carH * 0.14;
+        const doorW = carW * 0.16;
+        const doorH = carH * 0.7;
+        ctx.fillStyle = doorsOpen ? "#25384a" : train.body;
+        ctx.fillRect(doorX, doorY, doorW, doorH);
+        ctx.strokeStyle = train.edge;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(doorX, doorY, doorW, doorH);
+        if (!doorsOpen) {
+          ctx.beginPath();
+          ctx.moveTo(doorX + doorW / 2, doorY);
+          ctx.lineTo(doorX + doorW / 2, doorY + doorH);
+          ctx.stroke();
+        }
       }
 
       // 連結器
@@ -699,6 +775,7 @@
           toStation: stationWorldX - distance,
           nextStationName, currentStationName,
           komachiCoupled, komachiReady, komachiGap,
+          doorsOpen, stationDoorsDone,
         };
       },
       setCars(n) { cars = Math.max(1, Math.min(MAX_CARS, n)); },
