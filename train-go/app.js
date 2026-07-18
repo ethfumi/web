@@ -45,6 +45,16 @@
   const FRICTION = 60;            // px/s^2
   const STATION_INTERVAL = 9000;  // px 走るごとに駅が来る
 
+  // 中央・総武線各駅停車ごっこ: 阿佐ケ谷を出発して西へ。高尾まで行ったら最初に戻る
+  const START_STATION = "あさがや";
+  const STATIONS = [
+    "おぎくぼ", "にしおぎくぼ", "きちじょうじ", "みたか",
+    "むさしさかい", "ひがしこがねい", "むさしこがねい", "こくぶんじ",
+    "にしこくぶんじ", "くにたち", "たちかわ", "ひの",
+    "とよだ", "はちおうじ", "にしはちおうじ", "たかお",
+    START_STATION,
+  ];
+
   // ---- 要素 ----
   const canvas = document.getElementById("game");
   const ctx = canvas.getContext("2d");
@@ -136,6 +146,9 @@
   let wheelAngle = 0;
   let stationWorldX = 0;   // 次の駅の位置(距離座標)
   let currentStationX = null; // いま停車中(または通過直後)の駅の位置
+  let stationIdx = -1;        // STATIONS 内の次に停まる駅
+  let nextStationName = "";
+  let currentStationName = "";
   let viewScale = 1;       // 編成全体が見えるようにカメラを引く倍率
   let confetti = [];
   let clouds = [];
@@ -153,6 +166,8 @@
   initClouds();
 
   function scheduleNextStation() {
+    stationIdx = (stationIdx + 1) % STATIONS.length;
+    nextStationName = STATIONS[stationIdx];
     stationWorldX = distance + STATION_INTERVAL + Math.random() * 3000;
   }
 
@@ -162,12 +177,14 @@
     speed = 0;
     distance = 0;
     currentStationX = null;
+    currentStationName = "";
+    stationIdx = -1;
     viewScale = 1;
     state = "stopped";
     scheduleNextStation();
     selectScreen.classList.add("hidden");
     runUi.classList.remove("hidden");
-    say(`${train.callName}、しゅっぱつしんこう！`);
+    say(`${train.callName}、${START_STATION}えきを、しゅっぱつしんこう！`);
   }
 
   function goHome() {
@@ -182,6 +199,7 @@
     state = "running";
     arrivalBanner.classList.add("hidden");
     horn();
+    say(`つぎは、${nextStationName}`);
     speed = 220;
   }
 
@@ -189,10 +207,11 @@
     state = "stopped";
     speed = 0;
     currentStationX = stationWorldX;
+    currentStationName = nextStationName;
     scheduleNextStation();
     arrivalBanner.classList.remove("hidden");
     chime();
-    say("とうちゃく！");
+    say(`${currentStationName}〜、${currentStationName}〜、とうちゃく！`);
     spawnConfetti();
   }
 
@@ -331,11 +350,11 @@
   }
 
   function drawStations() {
-    drawStation(stationWorldX);
-    if (currentStationX !== null) drawStation(currentStationX);
+    drawStation(stationWorldX, nextStationName);
+    if (currentStationX !== null) drawStation(currentStationX, currentStationName);
   }
 
-  function drawStation(worldX) {
+  function drawStation(worldX, name) {
     if (state !== "running" && state !== "stopped") return;
     const trainNoseX = W * NOSE_R;
     const screenX = worldX - distance + trainNoseX;
@@ -353,16 +372,17 @@
     ctx.fillStyle = "#888";
     ctx.fillRect(screenX - 180, y - 108, 8, 94);
     ctx.fillRect(screenX + 172, y - 108, 8, 94);
-    // 駅名板(絵として)
+    // 駅名板(ひらがな)。文字数に合わせて板の幅を変える
+    const bw = Math.max(110, name.length * 22 + 26);
     ctx.fillStyle = "#fff";
-    ctx.fillRect(screenX - 60, y - 90, 120, 34);
+    ctx.fillRect(screenX - bw / 2, y - 90, bw, 34);
     ctx.strokeStyle = "#4a6fa5";
     ctx.lineWidth = 3;
-    ctx.strokeRect(screenX - 60, y - 90, 120, 34);
+    ctx.strokeRect(screenX - bw / 2, y - 90, bw, 34);
     ctx.fillStyle = "#4a6fa5";
     ctx.font = "bold 20px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("えき", screenX, y - 66);
+    ctx.fillText(name, screenX, y - 66);
   }
 
   function drawWheel(x, y, r) {
@@ -547,7 +567,11 @@
     window.__tg = {
       skipToStation() { distance = stationWorldX - 600; },
       status() {
-        return { state, speed, distance, cars, viewScale, toStation: stationWorldX - distance };
+        return {
+          state, speed, distance, cars, viewScale,
+          toStation: stationWorldX - distance,
+          nextStationName, currentStationName,
+        };
       },
       setCars(n) { cars = Math.max(1, Math.min(MAX_CARS, n)); },
       forceSize(w, h) {
