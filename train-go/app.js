@@ -94,7 +94,6 @@
   const expressLabel = document.getElementById("express-label");
   const btnRunningSound = document.getElementById("btn-running-sound");
   const runningSoundIcon = document.getElementById("running-sound-icon");
-  const carPicker = document.getElementById("car-picker");
 
   let W = 0, H = 0, DPR = 1;
   let forcedSize = false; // デバッグ用: 非表示タブでも描画検証できるようにサイズを固定する
@@ -336,8 +335,7 @@
     btnKomachiCouple.classList.add("hidden");
     btnStationDoors.classList.add("hidden");
     stationPassengers.classList.add("hidden");
-    closeCarPicker();
-    populateCarPicker();
+    populateQuickAddButtons();
     clearRouteEvent();
     updateDriveUi();
     arrivalBanner.textContent = "とうちゃく〜！";
@@ -355,7 +353,6 @@
     btnKomachiCouple.classList.add("hidden");
     btnStationDoors.classList.add("hidden");
     stationPassengers.classList.add("hidden");
-    closeCarPicker();
     clearRouteEvent();
   }
 
@@ -395,7 +392,6 @@
   }
 
   function arrive() {
-    closeCarPicker();
     clearRouteEvent();
     state = "stopped";
     speed = 0;
@@ -445,7 +441,6 @@
 
   function startKomachiCoupling() {
     if (!komachiReady || state !== "stopped") return;
-    closeCarPicker();
     state = "coupling";
     btnKomachiCouple.classList.add("hidden");
     arrivalBanner.textContent = "れんけつするよ〜！";
@@ -466,7 +461,6 @@
   }
 
   function showStationDoorPrompt() {
-    closeCarPicker();
     doorsOpen = false;
     stationDoorsDone = false;
     doorLabel.textContent = "ドアをあける";
@@ -498,33 +492,28 @@
     say("ドアがしまりまーす。しゅっぱつしんこう！");
   }
 
-  function populateCarPicker() {
-    document.querySelectorAll(".picker-train-art").forEach((target) => {
-      const key = target.dataset.preview === "current" ? trainKey : target.dataset.preview;
-      const sourceKey = key === "komachi" ? "nozomi" : key;
-      const source = document.querySelector(`.train-btn[data-train="${sourceKey}"] svg`);
-      const preview = source.cloneNode(true);
-      if (key === "komachi") {
-        const paths = preview.querySelectorAll("path");
-        paths[0].setAttribute("fill", TRAINS.komachi.body);
-        paths[0].setAttribute("stroke", TRAINS.komachi.edge);
-        paths[1].setAttribute("fill", TRAINS.komachi.stripe);
-      }
-      target.replaceChildren(preview);
+  function createTrainPreview(key) {
+    const sourceKey = key === "komachi" ? "nozomi" : key;
+    const source = document.querySelector(`.train-btn[data-train="${sourceKey}"] svg`);
+    const preview = source.cloneNode(true);
+    if (key === "komachi") {
+      const paths = preview.querySelectorAll("path");
+      paths[0].setAttribute("fill", TRAINS.komachi.body);
+      paths[0].setAttribute("stroke", TRAINS.komachi.edge);
+      paths[1].setAttribute("fill", TRAINS.komachi.stripe);
+    }
+    return preview;
+  }
+
+  function populateQuickAddButtons() {
+    const otherKeys = Object.keys(TRAINS).filter((key) => key !== trainKey);
+    btnCouple.setAttribute("aria-label", `${TRAINS[trainKey].callName}を連結`);
+    document.querySelectorAll(".btn-quick-add").forEach((btn, index) => {
+      const key = otherKeys[index];
+      btn.dataset.car = key;
+      btn.setAttribute("aria-label", `${TRAINS[key].callName}を連結`);
+      btn.querySelector(".quick-train-art").replaceChildren(createTrainPreview(key));
     });
-  }
-
-  function closeCarPicker() {
-    carPicker.classList.add("hidden");
-    btnCouple.setAttribute("aria-expanded", "false");
-    btnCouple.setAttribute("aria-label", "車両を選んで連結");
-  }
-
-  function toggleCarPicker() {
-    const opening = carPicker.classList.contains("hidden");
-    carPicker.classList.toggle("hidden", !opening);
-    btnCouple.setAttribute("aria-expanded", String(opening));
-    btnCouple.setAttribute("aria-label", opening ? "連結メニューを閉じる" : "車両を選んで連結");
   }
 
   function clearRouteEvent() {
@@ -646,12 +635,12 @@
 
   btnCouple.addEventListener("click", () => {
     ensureAudio();
-    toggleCarPicker();
+    addCar(trainKey);
   });
-  document.querySelectorAll(".car-picker-btn").forEach((btn) => {
+  document.querySelectorAll(".btn-quick-add").forEach((btn) => {
     btn.addEventListener("click", () => {
       ensureAudio();
-      addCar(btn.dataset.car === "current" ? trainKey : btn.dataset.car);
+      addCar(btn.dataset.car);
     });
   });
   btnRemove.addEventListener("click", () => {
