@@ -50,6 +50,7 @@
 
   const TAP_BOOST = 75;          // 発進後の連打は細かく加速できるようにする
   const FRICTION = 18;            // 自然減速は小さく、連打の加速感を残す
+  const SPEED_DISPLAY_SCALE = 0.3;
   const PIXELS_PER_METER = 12;
 
   // 駅間距離は各路線の営業キロを使う。終点の次は始発駅へ戻る周回コース。
@@ -572,9 +573,13 @@
     return nextStationRemainingMeters() + remainingAfterNext;
   }
 
+  function displaySpeed(value) {
+    return Math.round(value * SPEED_DISPLAY_SCALE);
+  }
+
   function updateDriveUi() {
     const terminal = activeRoute.stations[activeRoute.stations.length - 2];
-    speedValue.textContent = String(Math.round(speed * 0.3));
+    speedValue.textContent = String(displaySpeed(speed));
     distanceValue.textContent = String(Math.floor(distance / PIXELS_PER_METER));
     distanceKmValue.textContent = `${(Math.floor(distance / PIXELS_PER_METER) / 1000).toFixed(1)} km`;
     const nextRemaining = nextStationRemainingMeters();
@@ -1139,13 +1144,14 @@
       if (!stationDoorsDone && !komachiReady) {
         toggleStationDoors();
       } else {
-        const previousSpeed = speed;
+        const previousSpeed = displaySpeed(speed);
         depart();
-        showSpeedBoost(speed - previousSpeed, event);
+        showSpeedBoost(displaySpeed(speed) - previousSpeed, event);
       }
     } else if (state === "running") {
+      const previousSpeed = displaySpeed(speed);
       speed += TAP_BOOST;
-      showSpeedBoost(TAP_BOOST, event);
+      showSpeedBoost(displaySpeed(speed) - previousSpeed, event);
     }
   });
 
