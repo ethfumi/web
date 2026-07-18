@@ -42,8 +42,9 @@
     </button>
     <button class="train-btn" data-train="hayabusa" aria-label="はやぶさ">
       <svg viewBox="0 0 200 70">
-        <path d="M10 55 Q10 25 55 22 L185 22 Q195 22 195 35 L195 55 Q195 60 190 60 L15 60 Q10 60 10 55 Z" fill="#2ea44f" stroke="#1e7a38" stroke-width="2"/>
-        <path d="M12 42 Q20 34 60 32 L195 32 L195 38 L12 48 Z" fill="#e83a8b"/>
+        <path d="M10 55 Q10 25 55 22 L185 22 Q195 22 195 35 L195 55 Q195 60 190 60 L15 60 Q10 60 10 55 Z" fill="#f7f5ed" stroke="#218b7a" stroke-width="2"/>
+        <path d="M10 42 Q17 25 55 22 L185 22 Q195 22 195 35 L195 39 L60 36 Q25 36 10 48 Z" fill="#36a995"/>
+        <path d="M12 43 Q25 37 60 36 L195 39 L195 44 L12 49 Z" fill="#e73d8f"/>
         <rect x="70" y="30" width="22" height="12" rx="3" fill="#333"/>
         <rect x="105" y="30" width="22" height="12" rx="3" fill="#333"/>
         <rect x="140" y="30" width="22" height="12" rx="3" fill="#333"/>
@@ -59,6 +60,18 @@
   <button id="btn-couple" aria-label="れんけつ">🚃＋</button>
   <button id="btn-remove" aria-label="きりはなす">🚃−</button>
   <button id="btn-home" aria-label="えらびなおす">🏠</button>
+</div>
+
+<div id="drive-panel" class="hidden">
+  <div id="speed-meter" aria-label="いまのスピード">
+    <span id="speed-value">0</span><small>km/h</small>
+  </div>
+  <button id="btn-express" aria-label="中央特快モードにする" aria-pressed="false">
+    <span>🚄</span><span id="express-label">かくえき</span>
+  </button>
+  <button id="btn-running-sound" aria-label="走行音を消す" aria-pressed="true">
+    <span id="running-sound-icon">🔊</span><span>そうこうおん</span>
+  </button>
 </div>
 
 <div id="arrival-banner" class="hidden">とうちゃく〜！</div>
