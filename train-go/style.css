@@ -154,6 +154,71 @@ html, body {
   50% { transform: translateX(-50%) scale(1.06); }
 }
 
+/* --- 駅のドア遊び --- */
+#btn-station-doors {
+  position: fixed;
+  left: 50%;
+  bottom: max(7vmin, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 2vmin;
+  min-width: 38vmin;
+  justify-content: center;
+  padding: 3vmin 5vmin;
+  border: 0;
+  border-radius: 5vmin;
+  color: #fff;
+  background: linear-gradient(135deg, #3279d8, #55b9eb);
+  box-shadow: 0 7px 0 #2460ad, 0 10px 20px rgba(0, 0, 0, 0.22);
+  font-size: 5.5vmin;
+  font-weight: bold;
+  z-index: 8;
+  cursor: pointer;
+  animation: door-pulse 1s ease-in-out infinite;
+}
+
+#btn-station-doors:active {
+  transform: translateX(-50%) translateY(5px) scale(0.96);
+  box-shadow: 0 2px 0 #2460ad;
+}
+
+.door-icon {
+  font-size: 8vmin;
+  line-height: 1;
+}
+
+@keyframes door-pulse {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.04); }
+}
+
+#station-passengers {
+  position: fixed;
+  left: 12vw;
+  bottom: 22%;
+  display: flex;
+  gap: 2vmin;
+  font-size: 7vmin;
+  z-index: 7;
+  pointer-events: none;
+}
+
+#station-passengers span {
+  opacity: 0;
+  animation: passenger-board 1.4s ease-in forwards;
+}
+
+#station-passengers span:nth-child(2) { animation-delay: 0.25s; }
+#station-passengers span:nth-child(3) { animation-delay: 0.5s; }
+
+@keyframes passenger-board {
+  0% { opacity: 0; transform: translateX(-8vw) translateY(0) scale(1); }
+  20% { opacity: 1; }
+  70% { opacity: 1; transform: translateX(30vw) translateY(-1vmin) scale(0.85); }
+  100% { opacity: 0; transform: translateX(38vw) translateY(-4vmin) scale(0.4); }
+}
+
 /* --- とうちゃく --- */
 #arrival-banner {
   position: fixed;
