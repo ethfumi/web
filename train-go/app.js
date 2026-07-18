@@ -483,6 +483,7 @@
   let currentStationName = "";
   let viewScale = 1;       // 編成全体が見えるようにカメラを引く倍率
   let confetti = [];
+  let speedBoostPopups = [];
   let clouds = [];
   let komachiCoupled = false;
   let komachiReady = false;
@@ -698,6 +699,7 @@
     stationIdx = -1;
     currentLineKm = activeRoute.startKm;
     viewScale = 1;
+    speedBoostPopups = [];
     state = "stopped";
     scheduleNextStation();
     komachiCoupled = false;
@@ -1137,10 +1139,13 @@
       if (!stationDoorsDone && !komachiReady) {
         toggleStationDoors();
       } else {
+        const previousSpeed = speed;
         depart();
+        showSpeedBoost(speed - previousSpeed, event);
       }
     } else if (state === "running") {
       speed += TAP_BOOST;
+      showSpeedBoost(TAP_BOOST, event);
     }
   });
 
@@ -1910,6 +1915,39 @@
     ctx.globalAlpha = 1;
   }
 
+  function showSpeedBoost(amount, event) {
+    if (amount <= 0) return;
+    const rect = canvas.getBoundingClientRect();
+    speedBoostPopups.push({
+      amount: Math.round(amount),
+      x: event.offsetX * W / Math.max(rect.width, 1),
+      y: event.offsetY * H / Math.max(rect.height, 1) - 28,
+      life: 1,
+    });
+    speedBoostPopups = speedBoostPopups.slice(-8);
+  }
+
+  function drawSpeedBoosts(dt) {
+    speedBoostPopups = speedBoostPopups.filter((popup) => popup.life > 0);
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.lineJoin = "round";
+    for (const popup of speedBoostPopups) {
+      popup.life -= dt;
+      popup.y -= 55 * dt;
+      ctx.globalAlpha = Math.min(1, Math.max(0, popup.life * 1.8));
+      ctx.font = `bold ${Math.max(30, Math.min(52, W * 0.04))}px sans-serif`;
+      ctx.lineWidth = 8;
+      ctx.strokeStyle = "rgba(255,255,255,0.95)";
+      ctx.fillStyle = "#f06a22";
+      const text = `＋${popup.amount} km/h`;
+      ctx.strokeText(text, popup.x, popup.y);
+      ctx.fillText(text, popup.x, popup.y);
+    }
+    ctx.restore();
+  }
+
   // ---- メインループ ----
   let lastT = performance.now();
   function frame(now) {
@@ -2000,6 +2038,7 @@
     }
     drawWeather(dt);
     drawConfetti(dt);
+    drawSpeedBoosts(dt);
 
     scheduleFrame();
   }
