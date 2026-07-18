@@ -731,7 +731,7 @@
     ensureAudio();
     addCar(trainKey);
   });
-  document.querySelectorAll(".btn-quick-add").forEach((btn) => {
+  document.querySelectorAll(".btn-quick-add:not(#btn-couple)").forEach((btn) => {
     btn.addEventListener("click", () => {
       ensureAudio();
       addCar(btn.dataset.car);
