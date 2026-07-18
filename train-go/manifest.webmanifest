@@ -1,6 +1,6 @@
 {
-  "name": "しんかんせん GO!",
-  "short_name": "しんかんせん",
+  "name": "つなげて！しんかんせん",
+  "short_name": "つなげて！しんかんせん",
   "display": "fullscreen",
   "orientation": "landscape",
   "start_url": ".",
