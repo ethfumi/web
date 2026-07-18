@@ -22,9 +22,10 @@
     },
     hayabusa: {
       name: "はやぶさ",
-      body: "#2ea44f",
-      stripe: "#e83a8b",
-      edge: "#1e7a38",
+      body: "#f7f5ed",
+      upper: "#36a995",
+      stripe: "#e73d8f",
+      edge: "#218b7a",
       callName: "はやぶさ",
     },
     komachi: {
@@ -47,9 +48,9 @@
     return n <= CAR_COUNT_WORDS.length ? CAR_COUNT_WORDS[n - 1] : `${n}りょう`;
   }
 
-  const MAX_SPEED = 900;          // px/s
-  const TAP_BOOST = 160;
-  const FRICTION = 60;            // px/s^2
+  const MAX_SPEED = 1100;         // px/s（表示上は約330km/h）
+  const TAP_BOOST = 240;
+  const FRICTION = 18;            // 自然減速は小さく、連打の加速感を残す
   const STATION_INTERVAL = 9000;  // px 走るごとに駅が来る
 
   // 中央・総武線各駅停車ごっこ: 阿佐ケ谷を出発して西へ。高尾まで行ったら最初に戻る
@@ -61,6 +62,10 @@
     "とよだ", "はちおうじ", "にしはちおうじ", "たかお",
     START_STATION,
   ];
+  const CHUO_SPECIAL_RAPID_STOPS = new Set([
+    "きちじょうじ", "みたか", "こくぶんじ", "たちかわ", "ひの", "とよだ",
+    "はちおうじ", "にしはちおうじ", "たかお", START_STATION,
+  ]);
 
   // ---- 要素 ----
   const canvas = document.getElementById("game");
@@ -78,6 +83,12 @@
   const routeEventBanner = document.getElementById("route-event-banner");
   const btnHeadlight = document.getElementById("btn-headlight");
   const headlightLabel = document.getElementById("headlight-label");
+  const drivePanel = document.getElementById("drive-panel");
+  const speedValue = document.getElementById("speed-value");
+  const btnExpress = document.getElementById("btn-express");
+  const expressLabel = document.getElementById("express-label");
+  const btnRunningSound = document.getElementById("btn-running-sound");
+  const runningSoundIcon = document.getElementById("running-sound-icon");
 
   let W = 0, H = 0, DPR = 1;
   let forcedSize = false; // デバッグ用: 非表示タブでも描画検証できるようにサイズを固定する
@@ -95,6 +106,8 @@
 
   // ---- 音まわり ----
   let audioCtx = null;
+  let runningOsc = null;
+  let runningGain = null;
   function ensureAudio() {
     if (!audioCtx) {
       const AC = window.AudioContext || window.webkitAudioContext;
@@ -141,6 +154,71 @@
     });
   }
 
+  function doorSound(opening) {
+    if (!audioCtx) return;
+    const t = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(opening ? 480 : 720, t);
+    osc.frequency.linearRampToValueAtTime(opening ? 760 : 430, t + 0.42);
+    gain.gain.setValueAtTime(0.001, t);
+    gain.gain.linearRampToValueAtTime(0.16, t + 0.04);
+    gain.gain.linearRampToValueAtTime(0.001, t + 0.48);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(t);
+    osc.stop(t + 0.5);
+  }
+
+  function passingSound() {
+    if (!audioCtx) return;
+    const t = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(240, t);
+    osc.frequency.exponentialRampToValueAtTime(70, t + 0.55);
+    gain.gain.setValueAtTime(0.001, t);
+    gain.gain.linearRampToValueAtTime(0.08, t + 0.06);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(t);
+    osc.stop(t + 0.62);
+  }
+
+  function startRunningSound() {
+    if (!audioCtx || !runningSoundEnabled || runningOsc) return;
+    const t = audioCtx.currentTime;
+    runningOsc = audioCtx.createOscillator();
+    runningGain = audioCtx.createGain();
+    runningOsc.type = "triangle";
+    runningOsc.frequency.value = 52;
+    runningGain.gain.setValueAtTime(0.001, t);
+    runningGain.gain.linearRampToValueAtTime(0.025, t + 0.25);
+    runningOsc.connect(runningGain).connect(audioCtx.destination);
+    runningOsc.start(t);
+  }
+
+  function updateRunningSound() {
+    if (!audioCtx || !runningOsc || !runningGain) return;
+    const t = audioCtx.currentTime;
+    runningOsc.frequency.setTargetAtTime(48 + speed * 0.055, t, 0.12);
+    runningGain.gain.setTargetAtTime(state === "running" ? 0.018 + speed / 70000 : 0.001, t, 0.1);
+  }
+
+  function stopRunningSound() {
+    if (!audioCtx || !runningOsc || !runningGain) return;
+    const osc = runningOsc;
+    const gain = runningGain;
+    runningOsc = null;
+    runningGain = null;
+    const t = audioCtx.currentTime;
+    gain.gain.cancelScheduledValues(t);
+    gain.gain.setValueAtTime(Math.max(gain.gain.value, 0.001), t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+    osc.stop(t + 0.2);
+  }
+
   function say(text) {
     if (!("speechSynthesis" in window)) return;
     speechSynthesis.cancel();
@@ -179,6 +257,10 @@
   let routeEventProgress = 0;
   let lightsOn = false;
   let inspectionTime = 0;
+  let expressMode = false;
+  let passingStation = false;
+  let midAnnouncementDone = false;
+  let runningSoundEnabled = true;
 
   function initClouds() {
     clouds = [];
@@ -198,6 +280,24 @@
     stationWorldX = distance + STATION_INTERVAL + Math.random() * 3000;
   }
 
+  function shouldPassNextStation() {
+    if (!expressMode) return false;
+    const isFirstKomachiStop = train === TRAINS.hayabusa
+      && nextStationName === "おぎくぼ"
+      && !komachiCoupled;
+    return !isFirstKomachiStop && !CHUO_SPECIAL_RAPID_STOPS.has(nextStationName);
+  }
+
+  function updateDriveUi() {
+    speedValue.textContent = String(Math.round(speed * 0.3));
+    btnExpress.setAttribute("aria-pressed", String(expressMode));
+    btnExpress.setAttribute("aria-label", expressMode ? "各駅停車モードにする" : "中央特快モードにする");
+    expressLabel.textContent = expressMode ? "とっかい" : "かくえき";
+    btnRunningSound.setAttribute("aria-pressed", String(runningSoundEnabled));
+    btnRunningSound.setAttribute("aria-label", runningSoundEnabled ? "走行音を消す" : "走行音を鳴らす");
+    runningSoundIcon.textContent = runningSoundEnabled ? "🔊" : "🔇";
+  }
+
   function startGame(key) {
     train = TRAINS[key];
     cars = 1;
@@ -215,14 +315,19 @@
     komachiStationX = key === "hayabusa" ? stationWorldX : null;
     doorsOpen = false;
     stationDoorsDone = true;
+    expressMode = false;
+    passingStation = false;
+    midAnnouncementDone = false;
     segmentNumber = 0;
     segmentStartDistance = 0;
     selectScreen.classList.add("hidden");
     runUi.classList.remove("hidden");
+    drivePanel.classList.remove("hidden");
     btnKomachiCouple.classList.add("hidden");
     btnStationDoors.classList.add("hidden");
     stationPassengers.classList.add("hidden");
     clearRouteEvent();
+    updateDriveUi();
     arrivalBanner.textContent = "とうちゃく〜！";
     say(`${train.callName}、${START_STATION}えきを、しゅっぱつしんこう！`);
   }
@@ -230,8 +335,10 @@
   function goHome() {
     state = "select";
     speed = 0;
+    stopRunningSound();
     selectScreen.classList.remove("hidden");
     runUi.classList.add("hidden");
+    drivePanel.classList.add("hidden");
     arrivalBanner.classList.add("hidden");
     btnKomachiCouple.classList.add("hidden");
     btnStationDoors.classList.add("hidden");
@@ -239,8 +346,7 @@
     clearRouteEvent();
   }
 
-  function depart() {
-    if (komachiReady || state === "coupling" || !stationDoorsDone) return;
+  function beginSegment(playHorn = true, announceNext = true) {
     state = "running";
     arrivalBanner.classList.add("hidden");
     btnStationDoors.classList.add("hidden");
@@ -251,21 +357,36 @@
     routeEventProgress = 0;
     lightsOn = false;
     inspectionTime = 0;
+    midAnnouncementDone = false;
+    passingStation = shouldPassNextStation();
     routeEvent = "";
     if (segmentNumber === 1 && train === TRAINS.nozomi) routeEvent = "fuji";
     if (segmentNumber === 1 && train === TRAINS.doctoryellow) routeEvent = "inspection";
     if (segmentNumber === 2) routeEvent = "tunnel";
     routeEventBanner.classList.add("hidden");
     btnHeadlight.classList.add("hidden");
-    horn();
-    say(`つぎは、${nextStationName}`);
-    speed = 220;
+    if (playHorn) horn();
+    if (announceNext) {
+      say(passingStation
+        ? `このでんしゃは、ちゅうおうとっかいです。${nextStationName}は、とおりすぎます`
+        : `つぎは、${nextStationName}`);
+    }
+    speed = Math.max(speed, 220);
+    startRunningSound();
+    updateDriveUi();
+  }
+
+  function depart() {
+    if (komachiReady || state === "coupling" || !stationDoorsDone) return;
+    beginSegment();
   }
 
   function arrive() {
     clearRouteEvent();
     state = "stopped";
     speed = 0;
+    stopRunningSound();
+    updateDriveUi();
     currentStationX = stationWorldX;
     currentStationName = nextStationName;
     doorsOpen = false;
@@ -289,6 +410,23 @@
       say(`${currentStationName}〜、${currentStationName}〜、とうちゃく！ドアをあけてみよう！`);
     }
     spawnConfetti();
+  }
+
+  function passStation() {
+    const passedName = nextStationName;
+    clearRouteEvent();
+    currentStationX = stationWorldX;
+    currentStationName = passedName;
+    scheduleNextStation();
+    beginSegment(false, false);
+    arrivalBanner.textContent = `${passedName} つうか！`;
+    arrivalBanner.classList.remove("hidden");
+    setTimeout(() => {
+      if (state === "running") arrivalBanner.classList.add("hidden");
+    }, 1400);
+    passingSound();
+    spawnConfetti(18);
+    say(`${passedName}を、つうか！つぎは、${nextStationName}`);
   }
 
   function startKomachiCoupling() {
@@ -325,6 +463,7 @@
 
     if (!doorsOpen) {
       doorsOpen = true;
+      doorSound(true);
       doorLabel.textContent = "ドアをしめる";
       btnStationDoors.setAttribute("aria-label", "ドアをしめる");
       arrivalBanner.textContent = "ごじょうしゃ〜！";
@@ -335,6 +474,7 @@
     }
 
     doorsOpen = false;
+    doorSound(false);
     stationDoorsDone = true;
     btnStationDoors.classList.add("hidden");
     stationPassengers.classList.add("hidden");
@@ -384,6 +524,17 @@
       }
       clearRouteEvent();
     }
+  }
+
+  function updateMidRouteAnnouncement() {
+    if (state !== "running" || midAnnouncementDone) return;
+    const segmentLength = Math.max(stationWorldX - segmentStartDistance, 1);
+    const progress = (distance - segmentStartDistance) / segmentLength;
+    if (progress < 0.52) return;
+    midAnnouncementDone = true;
+    say(passingStation
+      ? `まもなく、${nextStationName}を、つうかします`
+      : `まもなく、${nextStationName}です。おりるかたは、じゅんびしてください`);
   }
 
   function addCar() {
@@ -472,6 +623,24 @@
     routeEventBanner.textContent = "ピカッ！あかるいね！";
     chime();
     say("ピカッ！ライトがついたよ！あかるいね！");
+  });
+  btnExpress.addEventListener("click", () => {
+    ensureAudio();
+    expressMode = !expressMode;
+    passingStation = shouldPassNextStation();
+    midAnnouncementDone = false;
+    updateDriveUi();
+    chime();
+    say(expressMode
+      ? "ちゅうおうとっかいモード！きちじょうじ、みたか、こくぶんじ、たちかわにとまって、たかおへいきます"
+      : "かくえきていしゃモード！ぜんぶのえきに、とまります");
+  });
+  btnRunningSound.addEventListener("click", () => {
+    ensureAudio();
+    runningSoundEnabled = !runningSoundEnabled;
+    if (runningSoundEnabled && state === "running") startRunningSound();
+    else stopRunningSound();
+    updateDriveUi();
   });
 
   // ---- 描画 ----
@@ -761,6 +930,13 @@
         roundRect(left, top, carW, carH, 8);
       }
       ctx.fill();
+      if (train.upper) {
+        ctx.save();
+        ctx.clip();
+        ctx.fillStyle = train.upper;
+        ctx.fillRect(left, top, carW, carH * 0.47);
+        ctx.restore();
+      }
       ctx.stroke();
 
       // 帯
@@ -920,7 +1096,7 @@
 
     if (state === "running") {
       const distToStation = stationWorldX - distance;
-      const braking = distToStation < speed * speed / (2 * 300) + 50;
+      const braking = !passingStation && distToStation < speed * speed / (2 * 300) + 50;
 
       if (braking) {
         // 駅が近づいたら自動でブレーキして、ぴったり停車する
@@ -931,15 +1107,24 @@
         speed = Math.max(speed - FRICTION * dt, 120);
       }
 
-      if (distToStation <= 2 || (speed <= 1 && distToStation < 400)) {
+      if (passingStation && distToStation <= 2) {
+        distance = stationWorldX;
+        passStation();
+      } else if (distToStation <= 2 || (speed <= 1 && distToStation < 400)) {
         distance = stationWorldX;
         arrive();
       }
 
-      distance += speed * dt;
-      wheelAngle += speed * dt * 0.08;
-      updateRouteEvent(dt);
+      if (state === "running") {
+        distance += speed * dt;
+        wheelAngle += speed * dt * 0.08;
+        updateRouteEvent(dt);
+        updateMidRouteAnnouncement();
+        updateRunningSound();
+      }
     }
+
+    updateDriveUi();
 
     if (state === "coupling") {
       komachiGap = Math.max(komachiGap - 85 * dt, 8);
@@ -1009,6 +1194,7 @@
           komachiCoupled, komachiReady, komachiGap,
           doorsOpen, stationDoorsDone,
           segmentNumber, routeEvent, routeEventProgress, lightsOn,
+          expressMode, passingStation, midAnnouncementDone, runningSoundEnabled,
         };
       },
       setCars(n) { cars = Math.max(1, Math.min(MAX_CARS, n)); },
@@ -1036,7 +1222,8 @@
       if (state === "stopped" && stationDoorsDone && !komachiReady) depart();
       if (state !== "running") return;
       distance = stationWorldX;
-      arrive();
+      if (passingStation) passStation();
+      else arrive();
     });
     document.body.appendChild(debugSkipButton);
 
