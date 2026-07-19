@@ -61,17 +61,27 @@ vec3 hsvToRgb(vec3 hsv) {
   return hsv.z * mix(vec3(1.0), clamp(p - 1.0, 0.0, 1.0), hsv.y);
 }
 
+vec3 threeColorPalette(float t, vec3 a, vec3 b, vec3 c) {
+  float phase = fract(t) * 3.0;
+  float blend = smoothstep(0.0, 1.0, fract(phase));
+  if (phase < 1.0) return mix(a, b, blend);
+  if (phase < 2.0) return mix(b, c, blend);
+  return mix(c, a, blend);
+}
+
 vec3 palette(float t) {
-  if (uPalette == 3) {
-    return hsvToRgb(vec3(fract(t), 0.82, 1.0));
-  }
-  if (uPalette == 1) {
-    return 0.55 + 0.45 * cos(6.28318 * (vec3(0.66,0.38,0.18) * t + vec3(0.05,0.12,0.22)));
-  }
-  if (uPalette == 2) {
-    return 0.52 + 0.48 * cos(6.28318 * (vec3(0.28,0.44,0.62) * t + vec3(0.48,0.08,0.16)));
-  }
-  return 0.53 + 0.47 * cos(6.28318 * (vec3(0.72,0.46,0.28) * t + vec3(0.58,0.18,0.08)));
+  if (uPalette == 11) return hsvToRgb(vec3(fract(t), 0.64, 0.96));
+  if (uPalette == 10) return threeColorPalette(t, vec3(0.95,0.82,0.61), vec3(0.84,0.51,0.41), vec3(0.45,0.35,0.56));
+  if (uPalette == 9) return threeColorPalette(t, vec3(0.90,0.84,0.72), vec3(0.60,0.50,0.38), vec3(0.30,0.32,0.27));
+  if (uPalette == 8) return threeColorPalette(t, vec3(0.91,0.90,0.87), vec3(0.56,0.60,0.61), vec3(0.15,0.18,0.21));
+  if (uPalette == 7) return threeColorPalette(t, vec3(0.88,0.84,0.95), vec3(0.56,0.51,0.73), vec3(0.27,0.34,0.46));
+  if (uPalette == 6) return threeColorPalette(t, vec3(0.91,0.76,0.76), vec3(0.66,0.37,0.47), vec3(0.30,0.27,0.41));
+  if (uPalette == 5) return threeColorPalette(t, vec3(0.95,0.84,0.64), vec3(0.73,0.47,0.34), vec3(0.23,0.30,0.40));
+  if (uPalette == 4) return threeColorPalette(t, vec3(0.85,0.82,0.64), vec3(0.43,0.55,0.39), vec3(0.14,0.29,0.26));
+  if (uPalette == 3) return threeColorPalette(t, vec3(0.73,0.89,0.69), vec3(0.41,0.65,0.63), vec3(0.43,0.36,0.57));
+  if (uPalette == 2) return threeColorPalette(t, vec3(0.66,0.88,0.85), vec3(0.22,0.48,0.57), vec3(0.08,0.18,0.31));
+  if (uPalette == 1) return threeColorPalette(t, vec3(0.85,0.81,0.70), vec3(0.44,0.53,0.50), vec3(0.11,0.17,0.29));
+  return threeColorPalette(t, vec3(0.85,0.89,0.88), vec3(0.44,0.56,0.60), vec3(0.18,0.25,0.33));
 }
 
 float mandelbulbDE(vec3 p, out float trap) {
@@ -267,37 +277,11 @@ vec3 renderNewton(vec2 coordinate) {
 }
 
 vec3 glassPalette(float t) {
-  if (uPalette == 3) {
-    return hsvToRgb(vec3(fract(t), 0.92, 1.0));
-  }
-  float w0 = 0.5 + 0.5 * cos(6.28318530718 * t);
-  float w1 = 0.5 + 0.5 * cos(6.28318530718 * (t + 0.3333333));
-  float w2 = 0.5 + 0.5 * cos(6.28318530718 * (t + 0.6666667));
-  w0 = w0 * w0 * w0;
-  w1 = w1 * w1 * w1;
-  w2 = w2 * w2 * w2;
-  vec3 colorA;
-  vec3 colorB;
-  vec3 colorC;
-  if (uPalette == 1) {
-    colorA = vec3(0.58, 0.34, 1.0);
-    colorB = vec3(1.0, 0.28, 0.66);
-    colorC = vec3(1.0, 0.68, 0.25);
-  } else if (uPalette == 2) {
-    colorA = vec3(0.15, 1.0, 0.58);
-    colorB = vec3(0.18, 0.82, 1.0);
-    colorC = vec3(0.92, 0.82, 0.25);
-  } else {
-    colorA = vec3(0.12, 0.88, 1.0);
-    colorB = vec3(0.43, 0.42, 1.0);
-    colorC = vec3(0.95, 0.22, 0.68);
-  }
-  return (colorA * w0 + colorB * w1 + colorC * w2) / max(0.001, w0 + w1 + w2);
+  return palette(t);
 }
 
 vec3 calmGeometryColor(float brightness) {
-  vec3 base = uPalette == 1 ? vec3(0.66, 0.58, 1.0) : (uPalette == 2 ? vec3(0.34, 1.0, 0.67) : vec3(0.32, 0.88, 1.0));
-  return base * brightness;
+  return palette(0.12) * brightness;
 }
 
 vec3 renderSierpinskiCarpet(vec2 coordinate) {
@@ -730,7 +714,7 @@ void main() {
     targetLogZoom: 0,
     iterations: 12,
     exposure: 1,
-    palette: 0,
+    palette: 3,
     quality: 0.78,
     speed: 0.36,
     motion: true,
@@ -1097,6 +1081,7 @@ void main() {
   document.querySelectorAll("[data-palette]").forEach(button => {
     button.addEventListener("click", () => {
       state.palette = Number(button.dataset.palette);
+      $("#paletteName").textContent = button.getAttribute("aria-label");
       document.querySelectorAll("[data-palette]").forEach(item => item.classList.toggle("active", item === button));
     });
   });
