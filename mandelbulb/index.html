@@ -7,17 +7,17 @@
   <meta name="description" content="色鮮やかな根の収束領域へ潜るリアルタイムNewtonフラクタル・ビューワー">
   <meta property="og:title" content="NEWTON FRACTAL / ROOT BASINS">
   <meta property="og:description" content="根の収束領域が無限に入り組むリアルタイムNewtonフラクタル">
-  <meta property="og:image" content="./og.png?v=1.6">
+  <meta property="og:image" content="./og.png?v=1.7">
   <meta name="twitter:card" content="summary_large_image">
   <title>NEWTON FRACTAL / ROOT BASINS</title>
-  <link rel="stylesheet" href="./style.css?v=1.6">
+  <link rel="stylesheet" href="./style.css?v=1.7">
 </head>
 <body>
 <main class="app">
   <canvas id="scene" aria-label="リアルタイムで描画されるNewtonフラクタル"></canvas>
   <div class="grain" aria-hidden="true"></div>
   <header class="topbar">
-    <div><span class="eyebrow">FRACTAL SPECIMEN · v1.6 · BY <a href="https://x.com/fumilin" target="_blank" rel="me noopener noreferrer">@fumilin ↗</a></span><h1><span id="fractalTitle">NEWTON FRACTAL</span> <em id="fractalSubtitle">/ ROOT BASINS</em></h1></div>
+    <div><span class="eyebrow">FRACTAL SPECIMEN · v1.7 · BY <a href="https://x.com/fumilin" target="_blank" rel="me noopener noreferrer">@fumilin ↗</a></span><h1><span id="fractalTitle">NEWTON FRACTAL</span> <em id="fractalSubtitle">/ ROOT BASINS</em></h1></div>
     <div class="readout"><i></i><span id="status">INITIALIZING</span><b id="fps">-- FPS</b><b id="gpu">GPU -- ms / 16.7 ms</b><b id="headroom">HEADROOM --%</b></div>
   </header>
   <section class="coords" aria-hidden="true"><span><i id="axisLabel">PAN</i> <b id="orbitOut">0.0000 / 0.0000</b></span><span>MAG <b id="distOut">×1.00</b></span><span><i id="shapeLabel">MIRRORS</i> <b id="powerOut">12</b></span></section><section class="zoomMeter" aria-live="polite"><span>MAGNIFICATION</span><b id="zoomBadge">×1.00</b></section>
@@ -70,6 +70,7 @@
     <section id="modeParameters" class="parameterGroup" aria-label="形状パラメータ"></section>
     <label><span><b>DETAIL</b><small>反復回数</small></span><output id="detailValue">12</output><input id="detail" type="range" min="1" max="32" step="1" value="12"></label>
     <label><span><b>EXPOSURE</b><small>発光強度</small></span><output id="exposureValue">1.00</output><input id="exposure" type="range" min=".55" max="1.65" step=".05" value="1"></label>
+    <label><span><b>COLOR DRIFT</b><small>ズームで進む色相</small></span><output id="colorDriftValue">+0.08</output><input id="colorDrift" type="range" min="-.5" max=".5" step=".01" value=".08"></label>
     <div class="option spectrumOption"><span><b>SPECTRUM</b><small>観測波長 · <i id="paletteName">Aurora</i></small></span><div class="swatches"><button data-palette="0" style="--c:linear-gradient(135deg,#d9e3e0,#708f99,#2e4054)" aria-label="Mist" title="Mist"></button><button data-palette="1" style="--c:linear-gradient(135deg,#d9cfb3,#70877f,#1c2b4a)" aria-label="Ink" title="Ink"></button><button data-palette="2" style="--c:linear-gradient(135deg,#a8e0d9,#397a91,#152e4f)" aria-label="Ocean" title="Ocean"></button><button class="active" data-palette="3" style="--c:linear-gradient(135deg,#bae3b0,#68a6a0,#6e5c92)" aria-label="Aurora" title="Aurora"></button><button data-palette="4" style="--c:linear-gradient(135deg,#d8d0a3,#6e8c63,#244b42)" aria-label="Forest" title="Forest"></button><button data-palette="5" style="--c:linear-gradient(135deg,#f1d6a3,#ba7857,#3b4c66)" aria-label="Amber" title="Amber"></button><button data-palette="6" style="--c:linear-gradient(135deg,#e9c1c1,#a85f78,#4c4568)" aria-label="Rose" title="Rose"></button><button data-palette="7" style="--c:linear-gradient(135deg,#e1d6f2,#8f83ba,#455775)" aria-label="Lavender" title="Lavender"></button><button data-palette="8" style="--c:linear-gradient(135deg,#e8e5df,#90999b,#262e36)" aria-label="Mono" title="Mono"></button><button data-palette="9" style="--c:linear-gradient(135deg,#e6d7b8,#987f61,#4c5245)" aria-label="Sepia" title="Sepia"></button><button data-palette="10" style="--c:linear-gradient(135deg,#f2d09b,#d78368,#73597a)" aria-label="Sunset" title="Sunset"></button><button data-palette="11" style="--c:conic-gradient(#f26d82,#e8c65d,#71c78b,#66bfce,#8275c5,#f26d82)" aria-label="Spectrum" title="Spectrum"></button></div></div>
     <div class="option"><span><b>RENDER SCALE</b><small>端末性能に合わせる</small></span><div class="segments"><button data-quality=".56">ECO</button><button class="active" data-quality=".78">BAL</button><button data-quality="1">MAX</button></div></div>
   </aside>
@@ -81,6 +82,6 @@
   </nav>
   <div id="error" class="error" hidden><b>WEBGL2 NOT AVAILABLE</b><p>最新のSafariまたはChromeで開いてください。</p></div>
 </main>
-<script src="./app.js?v=1.6"></script>
+<script src="./app.js?v=1.7"></script>
 </body>
 </html>
