@@ -711,6 +711,11 @@ html, body {
 .station-stamp { display: grid; place-items: center; white-space: pre-line; min-height: 16vmin; padding: 1vmin; border: 0.8vmin dashed #cdbb93; border-radius: 50%; color: #a99878; font-size: 3vmin; font-weight: bold; }
 .station-stamp.visited { border: 1vmin double #e44f4f; color: #d63838; background: rgba(255,255,255,0.6); transform: rotate(-3deg); }
 .station-stamp.visited::before { content: "🚉"; display: block; font-size: 5vmin; }
+.station-stamp.express-stop { border-color: #3478d4; background: rgba(225,240,255,0.75); }
+.station-stamp.express-pass { opacity: 0.58; }
+.stamp-stop-badge { padding: 0.3vmin 1.2vmin; border-radius: 999px; background: #3478d4; color: #fff; font-size: 2.2vmin; line-height: 1.25; }
+.station-stamp.express-pass .stamp-stop-badge { background: #8793a0; }
+.station-stamp-name { display: block; text-align: center; }
 #btn-headlight {
   position: fixed;
   left: 50%;
