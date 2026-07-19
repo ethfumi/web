@@ -713,7 +713,7 @@ void main() {
   ];
 
   const parameterValues = modes.map(mode => Object.fromEntries(mode.parameters.map(parameter => [parameter.key, parameter.value])));
-  const DEFAULT_MODE = 13;
+  const DEFAULT_MODE = 6;
   const defaultMode = modes[DEFAULT_MODE];
 
   const state = {
