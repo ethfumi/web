@@ -87,19 +87,24 @@
   const STAR_SPAWN_MIN_SECONDS = 9;
   const FALLING_STAR_TYPES = [
     {
-      key: "gold", chance: 0.7, multiplier: 3, seconds: 5, scale: 1, speed: 1,
+      key: "gold", chance: 0.69, multiplier: 2, seconds: 5, scale: 1, speed: 1,
       icon: "🌟", name: "きいろいほし", fill: "#ffd83d", inner: "#fff7b2",
       glow: "#fff08a", trail: "255,232,92", badge: "#fff8cc", accent: "#f2a51f", text: "#c15f00",
     },
     {
-      key: "green", chance: 0.22, multiplier: 4, seconds: 12, scale: 0.74, speed: 1.3,
+      key: "green", chance: 0.22, multiplier: 4, seconds: 6, scale: 2 / 3, speed: 2,
       icon: "💫", name: "みどりのほし", fill: "#62e687", inner: "#d7ffe0",
       glow: "#8dffac", trail: "98,230,135", badge: "#ddffe6", accent: "#31ad58", text: "#137132",
     },
     {
-      key: "blue", chance: 0.08, multiplier: 5, seconds: 10, scale: 0.48, speed: 1.85,
+      key: "blue", chance: 0.08, multiplier: 6, seconds: 7, scale: 1 / 2, speed: 3,
       icon: "🔵", name: "あおいほし", fill: "#48a9ff", inner: "#d9f2ff",
       glow: "#72c7ff", trail: "72,169,255", badge: "#dff3ff", accent: "#2789df", text: "#135b9b",
+    },
+    {
+      key: "rainbow", chance: 0.01, multiplier: 10, seconds: 8, scale: 1 / 3, speed: 4,
+      icon: "🌈", name: "にじいろのほし", fill: "#ff5b73", inner: "#ffffff",
+      glow: "#ffffff", trail: "255,91,115", badge: "#f4e8ff", accent: "#9b51e0", text: "#63319b",
     },
   ];
   const FRICTION_PX_PER_SEC2 = 18;       // 自然減速は小さく、連打の加速感を残す
@@ -1750,8 +1755,17 @@
     const { x, y, radius, rotation, type } = fallingStar;
     ctx.save();
     const trail = ctx.createLinearGradient(x, y, x + radius * 4, y - radius * 3);
-    trail.addColorStop(0, `rgba(${type.trail},0.9)`);
-    trail.addColorStop(1, `rgba(${type.trail},0)`);
+    if (type.key === "rainbow") {
+      trail.addColorStop(0, "rgba(255,91,115,0.95)");
+      trail.addColorStop(0.2, "rgba(255,166,70,0.82)");
+      trail.addColorStop(0.4, "rgba(255,224,82,0.68)");
+      trail.addColorStop(0.6, "rgba(80,218,125,0.5)");
+      trail.addColorStop(0.8, "rgba(72,169,255,0.28)");
+      trail.addColorStop(1, "rgba(154,91,255,0)");
+    } else {
+      trail.addColorStop(0, `rgba(${type.trail},0.9)`);
+      trail.addColorStop(1, `rgba(${type.trail},0)`);
+    }
     ctx.strokeStyle = trail;
     ctx.lineWidth = radius * 0.5;
     ctx.lineCap = "round";
@@ -1762,7 +1776,15 @@
 
     ctx.shadowColor = type.glow;
     ctx.shadowBlur = radius;
-    ctx.fillStyle = type.fill;
+    if (type.key === "rainbow") {
+      const rainbow = ctx.createLinearGradient(x - radius, y - radius, x + radius, y + radius);
+      ["#ff4d67", "#ff9f43", "#ffe052", "#50da7d", "#48a9ff", "#9a5bff"].forEach((color, index, colors) => {
+        rainbow.addColorStop(index / (colors.length - 1), color);
+      });
+      ctx.fillStyle = rainbow;
+    } else {
+      ctx.fillStyle = type.fill;
+    }
     drawStarPath(x, y, radius, radius * 0.46, rotation);
     ctx.fill();
     ctx.fillStyle = type.inner;
@@ -1800,7 +1822,9 @@
     const rect = canvas.getBoundingClientRect();
     const px = event.offsetX * W / Math.max(rect.width, 1);
     const py = event.offsetY * H / Math.max(rect.height, 1);
-    const hitRadius = Math.max(fallingStar.type.key === "blue" ? 42 : 52, fallingStar.radius * 2);
+    const hitRadius = Math.max({
+      gold: 52, green: 48, blue: 42, rainbow: 36,
+    }[fallingStar.type.key] || 48, fallingStar.radius * 2);
     if (Math.hypot(px - fallingStar.x, py - fallingStar.y) > hitRadius) return false;
 
     ensureAudio();
@@ -3137,6 +3161,9 @@
     canvas.dataset.stationScreenX = String(Math.round(stationScreenX(stationWorldX, nextStationName)));
     canvas.dataset.fallingStarX = fallingStar ? String(Math.round(fallingStar.x)) : "";
     canvas.dataset.fallingStarY = fallingStar ? String(Math.round(fallingStar.y)) : "";
+    canvas.dataset.fallingStarType = fallingStar?.type.key || "";
+    canvas.dataset.fallingStarRadius = fallingStar ? String(Math.round(fallingStar.radius * 10) / 10) : "";
+    canvas.dataset.fallingStarSpeed = fallingStar ? String(fallingStar.type.speed) : "";
     drawSky();
     drawClouds(dt);
     drawFallingStar();
@@ -3342,17 +3369,22 @@
     debugStarButton.addEventListener("click", () => window.__tg.forceFallingStar());
     document.body.appendChild(debugStarButton);
 
-    const debugBlueStarButton = document.createElement("button");
-    debugBlueStarButton.type = "button";
-    debugBlueStarButton.className = "debug-control";
-    debugBlueStarButton.textContent = "テスト: あおいほし";
-    debugBlueStarButton.setAttribute("aria-label", "テストでレアな青い星を出す");
-    Object.assign(debugBlueStarButton.style, {
-      position: "fixed", left: "58%", top: "360px", zIndex: "99",
-      padding: "8px", fontSize: "14px",
-    });
-    debugBlueStarButton.addEventListener("click", () => window.__tg.forceFallingStar("blue"));
-    document.body.appendChild(debugBlueStarButton);
+    const addDebugStarButton = (typeKey, label, left) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "debug-control";
+      button.textContent = `テスト: ${label}`;
+      button.setAttribute("aria-label", `テストで${label}を出す`);
+      Object.assign(button.style, {
+        position: "fixed", left, top: "360px", zIndex: "99",
+        padding: "8px", fontSize: "14px",
+      });
+      button.addEventListener("click", () => window.__tg.forceFallingStar(typeKey));
+      document.body.appendChild(button);
+    };
+    addDebugStarButton("green", "みどりのほし", "58%");
+    addDebugStarButton("blue", "あおいほし", "70%");
+    addDebugStarButton("rainbow", "にじいろのほし", "82%");
     const debugLongTrainButton = document.createElement("button");
     debugLongTrainButton.type = "button";
     debugLongTrainButton.className = "debug-control";
