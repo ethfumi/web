@@ -630,6 +630,7 @@ html, body {
 }
 .stamp-sheet h2 { margin: 0; font-size: 6vmin; }
 .stamp-sheet p { margin: 1vmin 0 3vmin; font-size: 3.8vmin; font-weight: bold; }
+.stamp-sheet .stamp-save-note { margin: -1.8vmin 0 2.5vmin; color: #52708d; font-size: 2.5vmin; }
 #btn-close-stamps { position: absolute; top: 1.2vmin; right: 1.2vmin; width: 9vmin; height: 9vmin; border: 0; border-radius: 50%; background: #ef7045; color: #fff; font-size: 6vmin; font-weight: bold; }
 #stamp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(18vmin, 1fr)); gap: 2vmin; }
 .station-stamp { display: grid; place-items: center; white-space: pre-line; min-height: 16vmin; padding: 1vmin; border: 0.8vmin dashed #cdbb93; border-radius: 50%; color: #a99878; font-size: 3vmin; font-weight: bold; }
