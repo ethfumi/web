@@ -87,7 +87,7 @@
   const STAR_SPAWN_MIN_SECONDS = 9;
   const FALLING_STAR_TYPES = [
     {
-      key: "gold", chance: 0.7, multiplier: 3, seconds: 15, scale: 1, speed: 1,
+      key: "gold", chance: 0.7, multiplier: 3, seconds: 5, scale: 1, speed: 1,
       icon: "🌟", name: "きいろいほし", fill: "#ffd83d", inner: "#fff7b2",
       glow: "#fff08a", trail: "255,232,92", badge: "#fff8cc", accent: "#f2a51f", text: "#c15f00",
     },
@@ -2187,28 +2187,43 @@
       && routeEvent === "tunnel";
   }
 
-  function tunnelVisualAlpha() {
-    if (isUndergroundStationView()) return 1;
-    if (isTunnelExitSegment()) return Math.max(0, Math.min((0.68 - routeEventProgress) / 0.18, 1));
-    if (isTunnelEntrySegment()) return Math.max(0, Math.min((routeEventProgress - 0.34) / 0.18, 1));
-    if (isUndergroundDepartureSegment()) return Math.max(0, Math.min((0.8 - routeEventProgress) / 0.12, 1));
-    return routeEventAlpha();
+  function tunnelVisualRange() {
+    const { x0, x1 } = viewRange();
+    if (isUndergroundStationView()) return { x0, x1, portalX: null, entering: false };
+    const width = x1 - x0;
+    const range = (start, end, entering) => {
+      const progress = Math.max(0, Math.min((routeEventProgress - start) / (end - start), 1));
+      const portalX = x1 - width * progress;
+      return entering
+        ? { x0: portalX, x1, portalX, entering }
+        : { x0, x1: portalX, portalX, entering };
+    };
+    if (isTunnelExitSegment()) return range(0.48, 0.68, false);
+    if (isTunnelEntrySegment()) return range(0.28, 0.5, true);
+    if (isUndergroundDepartureSegment()) return range(0.62, 0.8, false);
+    if (routeEventProgress < 0.34) return range(0.14, 0.34, true);
+    if (routeEventProgress > 0.66) return range(0.66, 0.8, false);
+    return { x0, x1, portalX: null, entering: false };
   }
 
   function isTunnelVisible() {
     return isUndergroundStationView()
-      || isUndergroundDepartureSegment()
-      || (isTunnelEntrySegment() && routeEventProgress > 0.34)
-      || (routeEvent === "tunnel" && routeEventAnnounced);
+      || (routeEvent === "tunnel" && routeEventProgress > 0.12 && routeEventProgress < 0.82);
   }
 
   function drawTunnel() {
     if (!isTunnelVisible()) return;
     const stationOrDepartureUnderground = isUndergroundStationView() || isUndergroundDepartureSegment();
-    const { x0, x1 } = viewRange();
+    const view = viewRange();
+    const visual = tunnelVisualRange();
+    if (visual.x1 - visual.x0 < 1) return;
+    const { x0, x1 } = view;
     const tunnelGroundY = groundY();
     ctx.save();
-    ctx.globalAlpha = 0.96 * tunnelVisualAlpha();
+    ctx.beginPath();
+    ctx.rect(visual.x0, 0, visual.x1 - visual.x0, tunnelGroundY);
+    ctx.clip();
+    ctx.globalAlpha = 0.96;
     const darkness = ctx.createLinearGradient(0, 0, 0, tunnelGroundY);
     darkness.addColorStop(0, "#0b1019");
     darkness.addColorStop(0.65, "#202a37");
@@ -2248,6 +2263,31 @@
     ctx.moveTo(x0, tunnelGroundY - 42);
     ctx.lineTo(x1, tunnelGroundY - 42);
     ctx.stroke();
+
+    if (visual.portalX !== null) {
+      const direction = visual.entering ? 1 : -1;
+      const edge = ctx.createLinearGradient(
+        visual.portalX,
+        0,
+        visual.portalX + direction * 100,
+        0,
+      );
+      edge.addColorStop(0, "rgba(8,12,18,0.98)");
+      edge.addColorStop(1, "rgba(8,12,18,0)");
+      ctx.fillStyle = edge;
+      ctx.fillRect(
+        visual.entering ? visual.portalX : visual.portalX - 100,
+        0,
+        100,
+        tunnelGroundY,
+      );
+      ctx.strokeStyle = "#667383";
+      ctx.lineWidth = 14;
+      ctx.beginPath();
+      ctx.moveTo(visual.portalX, tunnelGroundY);
+      ctx.lineTo(visual.portalX, H * 0.22);
+      ctx.stroke();
+    }
     ctx.restore();
   }
 
@@ -3174,7 +3214,7 @@
           nextStationName, currentStationName,
           komachiCoupled, komachiReady, komachiGap,
           doorsOpen, stationDoorsDone,
-          segmentNumber, routeEvent, routeEventProgress, lightsOn,
+          segmentNumber, routeEvent, routeEventProgress, tunnelVisualRange: isTunnelVisible() ? tunnelVisualRange() : null, lightsOn,
           expressMode, passingStation, braking: isBrakingForStation(),
           boostPopupCount: speedBoostPopups.length, midAnnouncementDone, runningSoundEnabled,
           autoMode, autoActionTimer, autoTargetKmh: autoTargetKmh(),
@@ -3255,6 +3295,29 @@
       updateRouteEvent(0);
     });
     document.body.appendChild(debugEventButton);
+
+    const debugTunnelStages = [0.18, 0.27, 0.72];
+    let debugTunnelStage = 0;
+    const debugTunnelButton = document.createElement("button");
+    debugTunnelButton.type = "button";
+    debugTunnelButton.className = "debug-control";
+    debugTunnelButton.textContent = "テスト: トンネル";
+    debugTunnelButton.setAttribute("aria-label", "トンネルの入口と出口を順番に確認する");
+    Object.assign(debugTunnelButton.style, {
+      position: "fixed", left: "58%", top: "52px", zIndex: "99",
+      padding: "8px", fontSize: "14px",
+    });
+    debugTunnelButton.addEventListener("click", () => {
+      if (state === "stopped" && stationDoorsDone && !komachiReady) depart();
+      if (state !== "running") return;
+      routeEvent = "tunnel";
+      routeEventAnnounced = true;
+      const progress = debugTunnelStages[debugTunnelStage % debugTunnelStages.length];
+      debugTunnelStage++;
+      distance = segmentStartDistance + (stationWorldX - segmentStartDistance) * progress;
+      routeEventProgress = progress;
+    });
+    document.body.appendChild(debugTunnelButton);
 
     const debugOpposingButton = document.createElement("button");
     debugOpposingButton.type = "button";
