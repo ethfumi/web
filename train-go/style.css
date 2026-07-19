@@ -466,6 +466,12 @@ html, body {
   box-shadow: 0 4px 0 #b9481d;
 }
 
+#btn-express.deadhead {
+  color: #fff;
+  background: #3f4858;
+  box-shadow: 0 4px 0 #252b35;
+}
+
 #btn-running-sound[aria-pressed="false"] {
   opacity: 0.62;
 }
