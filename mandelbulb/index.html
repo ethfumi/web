@@ -4,20 +4,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#04070b">
-  <meta name="description" content="ズームするほど咲き続けるリアルタイム無限カレイドスコープ">
-  <meta property="og:title" content="INFINITE ROSETTE / SCALE BLOOM">
-  <meta property="og:description" content="拡大そのものが模様になるリアルタイム無限ズーム・カレイドスコープ">
-  <meta property="og:image" content="./og.png?v=1.1">
+  <meta name="description" content="色ガラスが拡大の奥へ続くリアルタイム無限ズーム万華鏡">
+  <meta property="og:title" content="INFINITE KALEIDOSCOPE / STAINED MIRRORS">
+  <meta property="og:description" content="鏡映された色ガラスが拡大の奥へ続くリアルタイム無限ズーム万華鏡">
+  <meta property="og:image" content="./og.png?v=1.2">
   <meta name="twitter:card" content="summary_large_image">
-  <title>INFINITE ROSETTE / SCALE BLOOM</title>
-  <link rel="stylesheet" href="./style.css?v=1.1">
+  <title>INFINITE KALEIDOSCOPE / STAINED MIRRORS</title>
+  <link rel="stylesheet" href="./style.css?v=1.2">
 </head>
 <body>
 <main class="app">
   <canvas id="scene" aria-label="リアルタイムで描画される無限ズーム・カレイドスコープ"></canvas>
   <div class="grain" aria-hidden="true"></div>
   <header class="topbar">
-    <div><span class="eyebrow">FRACTAL SPECIMEN · v1.1 · BY <a href="https://x.com/fumilin" target="_blank" rel="me noopener noreferrer">@fumilin ↗</a></span><h1><span id="fractalTitle">INFINITE ROSETTE</span> <em id="fractalSubtitle">/ SCALE BLOOM</em></h1></div>
+    <div><span class="eyebrow">FRACTAL SPECIMEN · v1.2 · BY <a href="https://x.com/fumilin" target="_blank" rel="me noopener noreferrer">@fumilin ↗</a></span><h1><span id="fractalTitle">INFINITE KALEIDOSCOPE</span> <em id="fractalSubtitle">/ STAINED MIRRORS</em></h1></div>
     <div class="readout"><i></i><span id="status">INITIALIZING</span><b id="fps">-- FPS</b><b id="gpu">GPU -- ms / 16.7 ms</b><b id="headroom">HEADROOM --%</b></div>
   </header>
   <section class="coords" aria-hidden="true"><span><i id="axisLabel">PAN</i> <b id="orbitOut">0.0000 / 0.0000</b></span><span>MAG <b id="distOut">×1.00</b></span><span><i id="shapeLabel">MIRRORS</i> <b id="powerOut">12</b></span></section><section class="zoomMeter" aria-live="polite"><span>MAGNIFICATION</span><b id="zoomBadge">×1.00</b></section>
@@ -47,7 +47,7 @@
 <section class="modeSection" aria-label="無限ズームカレイドスコープ">
   <span>INFINITE ZOOM</span>
   <div class="modeGrid">
-    <button class="active" data-mode="13"><b>ROSETTE</b><small>SCALE BLOOM</small></button>
+    <button class="active" data-mode="13"><b>KALEIDO</b><small>STAINED MIRRORS</small></button>
     <button data-mode="14"><b>CRYSTAL</b><small>PRISM TUNNEL</small></button>
     <button data-mode="15"><b>SPIRAL</b><small>ENDLESS CHAMBER</small></button>
   </div>
@@ -81,6 +81,6 @@
   </nav>
   <div id="error" class="error" hidden><b>WEBGL2 NOT AVAILABLE</b><p>最新のSafariまたはChromeで開いてください。</p></div>
 </main>
-<script src="./app.js?v=1.1"></script>
+<script src="./app.js?v=1.2"></script>
 </body>
 </html>
