@@ -837,7 +837,7 @@
 
   // ---- ゲーム状態 ----
   let state = "select"; // select | running | stopped | coupling
-  let selectedRouteKey = "chuo";
+  let selectedRouteKey = "tokaido";
   let activeRoute = ROUTES[selectedRouteKey];
   let train = TRAINS.nozomi;
   let trainKey = "nozomi";
