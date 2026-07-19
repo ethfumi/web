@@ -35,6 +35,26 @@
       edge: "#b51f2a",
       callName: "こまち",
     },
+    yamanote: {
+      name: "やまのてせん", kind: "commuter", body: "#e8ecef", stripe: "#9acd32",
+      face: "#9acd32", edge: "#aeb8be", callName: "やまのてせん",
+    },
+    inokashira: {
+      name: "いのかしらせん", kind: "commuter", body: "#eef1f2", stripe: "#6f4aa8",
+      face: "#6f4aa8", edge: "#aeb8be", callName: "いのかしらせん",
+    },
+    tozai: {
+      name: "とうざいせん", kind: "commuter", body: "#e8ecef", stripe: "#32a5d2", stripe2: "#2362a8",
+      face: "#3085cc", edge: "#aeb8be", callName: "とうざいせん",
+    },
+    sobu: {
+      name: "そうぶせん", kind: "commuter", body: "#e8ecef", stripe: "#f0c928",
+      face: "#f0c928", edge: "#aeb8be", callName: "そうぶせん",
+    },
+    chuo: {
+      name: "ちゅうおうせん", kind: "commuter", body: "#e8ecef", stripe: "#f28c28",
+      face: "#f28c28", edge: "#aeb8be", callName: "ちゅうおうせん",
+    },
   };
 
   const CAR_COUNT_WORDS = [
@@ -59,7 +79,7 @@
   const SPEED_DISPLAY_SCALE = KMH_PER_MPS / PIXELS_PER_METER;
   const ROUTE_COLORS = {
     chuo: "#f28c28", tokaido: "#2362b8", tohoku: "#2a9b82",
-    sobu: "#f0c928", tozai: "#3085cc", inokashira: "#8156a6",
+    sobu: "#f0c928", tozai: "#3085cc", inokashira: "#8156a6", yamanote: "#9acd32",
   };
   const GRAND_STATIONS = new Set(["とうきょう", "しんじゅく", "しぶや", "しんおおさか"]);
   const MAJOR_STATIONS = new Set([
@@ -243,6 +263,38 @@
       expressStops: new Set(["しぶや", "しもきたざわ", "めいだいまえ", "えいふくちょう", "くがやま", "きちじょうじ"]),
       cityStations: new Set(["しぶや", "しもきたざわ", "めいだいまえ", "えいふくちょう", "きちじょうじ"]),
     },
+    yamanote: {
+      name: "やまのてせん",
+      start: "とうきょう",
+      startKm: 0,
+      supportsExpress: false,
+      allowCrossings: false,
+      loopKm: 34.5,
+      terminalIndex: 29,
+      stations: [
+        { name: "ゆうらくちょう", km: 0.8 }, { name: "しんばし", km: 1.9 },
+        { name: "はままつちょう", km: 3.1 }, { name: "たまち", km: 4.6 },
+        { name: "たかなわゲートウェイ", km: 5.9 }, { name: "しながわ", km: 6.8 },
+        { name: "おおさき", km: 8.8 }, { name: "ごたんだ", km: 9.7 },
+        { name: "めぐろ", km: 10.9 }, { name: "えびす", km: 12.4 },
+        { name: "しぶや", km: 14.0 }, { name: "はらじゅく", km: 15.2 },
+        { name: "よよぎ", km: 16.7 }, { name: "しんじゅく", km: 17.4 },
+        { name: "しんおおくぼ", km: 18.7 }, { name: "たかだのばば", km: 20.1 },
+        { name: "めじろ", km: 21.0 }, { name: "いけぶくろ", km: 22.2 },
+        { name: "おおつか", km: 24.0 }, { name: "すがも", km: 25.1 },
+        { name: "こまごめ", km: 25.8 }, { name: "たばた", km: 27.4 },
+        { name: "にしにっぽり", km: 28.2 }, { name: "にっぽり", km: 28.7 },
+        { name: "うぐいすだに", km: 29.8 }, { name: "うえの", km: 30.9 },
+        { name: "おかちまち", km: 31.5 }, { name: "あきはばら", km: 32.5 },
+        { name: "かんだ", km: 33.2 }, { name: "とうきょう", km: 34.5 },
+      ],
+      expressStops: new Set(),
+      cityStations: new Set([
+        "とうきょう", "しんばし", "しながわ", "おおさき", "しぶや", "はらじゅく",
+        "よよぎ", "しんじゅく", "しんおおくぼ", "たかだのばば", "いけぶくろ",
+        "うえの", "あきはばら", "かんだ",
+      ]),
+    },
   };
 
   function stationNamesForRoute(route) {
@@ -259,6 +311,7 @@
   ];
 
   const OPPOSING_TRAIN_TYPES = [
+    { name: "やまのてせん", kind: "local", body: "#e8ecef", stripe: "#9acd32" },
     { name: "そうぶせん", kind: "local", body: "#e8ecef", stripe: "#ffd400" },
     { name: "ちゅうおうせん", kind: "local", body: "#e8ecef", stripe: "#f28c28" },
     { name: "ローカルせん", kind: "local", body: "#d9efe8", stripe: "#42a57a" },
@@ -559,7 +612,9 @@
   function scheduleNextStation() {
     stationIdx = (stationIdx + 1) % activeRoute.stations.length;
     const nextStation = activeRoute.stations[stationIdx];
-    const intervalMeters = Math.round(Math.abs(nextStation.km - currentLineKm) * 1000);
+    let intervalKm = nextStation.km - currentLineKm;
+    if (intervalKm < 0 && activeRoute.loopKm) intervalKm += activeRoute.loopKm;
+    const intervalMeters = Math.round(Math.abs(intervalKm) * 1000);
     nextStationName = nextStation.name;
     canvas.dataset.nextStation = nextStationName;
     canvas.dataset.nextStationMeters = String(intervalMeters);
@@ -608,7 +663,7 @@
   }
 
   function terminalRemainingMeters() {
-    const terminalIndex = activeRoute.stations.length - 2;
+    const terminalIndex = activeRoute.terminalIndex ?? activeRoute.stations.length - 2;
     if (stationIdx < 0) {
       return Math.max(0, (activeRoute.stations[terminalIndex].km - activeRoute.startKm) * 1000);
     }
@@ -625,7 +680,7 @@
   }
 
   function updateDriveUi() {
-    const terminal = activeRoute.stations[activeRoute.stations.length - 2];
+    const terminal = activeRoute.stations[activeRoute.terminalIndex ?? activeRoute.stations.length - 2];
     speedValue.textContent = String(displaySpeed(speed));
     canvas.dataset.braking = String(isBrakingForStation());
     canvas.dataset.speedBoostCount = String(speedBoostPopups.length);
@@ -1012,16 +1067,7 @@
   }
 
   function createTrainPreview(key) {
-    const sourceKey = key === "komachi" ? "nozomi" : key;
-    const source = document.querySelector(`.train-btn[data-train="${sourceKey}"] svg`);
-    const preview = source.cloneNode(true);
-    if (key === "komachi") {
-      const paths = preview.querySelectorAll("path");
-      paths[0].setAttribute("fill", TRAINS.komachi.body);
-      paths[0].setAttribute("stroke", TRAINS.komachi.edge);
-      paths[1].setAttribute("fill", TRAINS.komachi.stripe);
-    }
-    return preview;
+    return document.querySelector(`.train-btn[data-train="${key}"] svg`).cloneNode(true);
   }
 
   function populateQuickAddButtons() {
@@ -1915,6 +1961,7 @@
 
     for (let i = 0; i < cars; i++) {
       const carTrain = TRAINS[carTypes[i]];
+      const commuter = carTrain.kind === "commuter";
       const right = noseX - i * (carW + gap);
       const left = right - carW;
       const top = y - carH - 10 + bob * (i % 2 === 0 ? 1 : -1);
@@ -1924,7 +1971,10 @@
       ctx.lineWidth = 2;
       ctx.beginPath();
       const isTail = cars > 1 && i === cars - 1;
-      if (i === 0) {
+      if (commuter) {
+        // 通勤電車は先頭・中間・後尾とも箱型の車体。
+        roundRect(left, top, carW, carH, Math.max(5, carH * 0.12));
+      } else if (i === 0) {
         // 先頭車: ロングノーズ
         ctx.moveTo(left, top + 6);
         ctx.quadraticCurveTo(left, top, left + 10, top);
@@ -1957,10 +2007,21 @@
         ctx.restore();
       }
       ctx.stroke();
+      if (commuter && (i === 0 || isTail)) {
+        ctx.fillStyle = carTrain.face;
+        const cabWidth = carW * 0.18;
+        ctx.fillRect(i === 0 ? right - cabWidth : left, top + 2, cabWidth, carH - 4);
+      }
 
       // 帯
       ctx.fillStyle = carTrain.stripe;
-      if (i === 0) {
+      if (commuter) {
+        ctx.fillRect(left + 2, top + carH * 0.58, carW - 4, carH * 0.14);
+        if (carTrain.stripe2) {
+          ctx.fillStyle = carTrain.stripe2;
+          ctx.fillRect(left + 2, top + carH * 0.73, carW - 4, carH * 0.08);
+        }
+      } else if (i === 0) {
         ctx.beginPath();
         ctx.moveTo(left + 2, top + carH * 0.45);
         ctx.lineTo(right - carW * 0.32, top + carH * 0.42);
