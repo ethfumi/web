@@ -43,15 +43,6 @@ html, body {
   z-index: 10;
 }
 
-.game-title {
-  color: #174f9a;
-  font-size: clamp(24px, 4.6vmin, 46px);
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  line-height: 1;
-  text-shadow: 0 0.35vmin 0 #fff;
-}
-
 .select-title {
   font-size: 5.5vmin;
   font-weight: bold;
@@ -137,8 +128,8 @@ html, body {
 #app-version {
   position: static;
   display: flex;
-  align-items: baseline;
-  gap: 1.2vmin;
+  align-items: center;
+  gap: 1vmin;
   transform: none;
   padding: 0.8vmin 1.8vmin;
   border-radius: 999px;
@@ -153,6 +144,12 @@ html, body {
   font-size: 1.15em;
 }
 
+.version-title {
+  padding-right: 1.2vmin;
+  border-right: 1px solid rgba(69, 99, 123, 0.28);
+  color: #36516a;
+  font-weight: 800;
+}
 
 @media (min-aspect-ratio: 4/3) {
   #select-screen { gap: 1.3vmin; padding-top: max(1.5vmin, env(safe-area-inset-top)); }
