@@ -85,9 +85,9 @@
   const KMH_PER_MPS = 3.6;
   const SPEED_DISPLAY_SCALE = KMH_PER_MPS / PIXELS_PER_METER;
   const DEPARTURE_SPEED_KMH = 30;
-  const TAP_BOOST_KMH = 10;
+  const BASE_TAP_BOOST_KMH = 5;
+  const PASSENGER_TAP_BONUS_KMH = 1;
   const DEPARTURE_SPEED_PX_PER_SEC = DEPARTURE_SPEED_KMH / SPEED_DISPLAY_SCALE;
-  const TAP_BOOST_PX_PER_SEC = TAP_BOOST_KMH / SPEED_DISPLAY_SCALE;
   const STAR_SPAWN_MIN_SECONDS = 9;
   const FALLING_STAR_TYPES = [
     {
@@ -654,6 +654,7 @@
   const headlightLabel = document.getElementById("headlight-label");
   const drivePanel = document.getElementById("drive-panel");
   const speedValue = document.getElementById("speed-value");
+  const tapBoostValue = document.getElementById("tap-boost-value");
   const distanceValue = document.getElementById("distance-value");
   const distanceKmValue = document.getElementById("distance-km-value");
   const nextStationDistanceLabel = document.getElementById("next-station-distance-label");
@@ -917,6 +918,7 @@
   let autoMode = false;
   let autoActionTimer = 0;
   let onboardPassengers = [];
+  let deliveredPassengers = 0;
   let opposingTrain = null;
   let nextOpposingTrainIn = 3;
   let timeOfDay = "day";
@@ -1103,6 +1105,9 @@
   function updateDriveUi() {
     const terminal = routeTerminalStation();
     speedValue.textContent = String(displaySpeed(speed));
+    tapBoostValue.textContent = String(currentTapBoostKmh());
+    canvas.dataset.tapBoostKmh = String(currentTapBoostKmh());
+    canvas.dataset.deliveredPassengers = String(deliveredPassengers);
     canvas.dataset.braking = String(isBrakingForStation());
     canvas.dataset.passingStation = String(passingStation);
     canvas.dataset.tunnelProgress = routeEvent === "tunnel" ? routeEventProgress.toFixed(3) : "";
@@ -1331,6 +1336,7 @@
     passingStation = false;
     midAnnouncementDone = false;
     onboardPassengers = [];
+    deliveredPassengers = 0;
     setOnboardPanelExpanded(false);
     stationPassengers.replaceChildren();
     opposingTrain = null;
@@ -1540,6 +1546,7 @@
   function exchangePassengers() {
     const alighting = onboardPassengers.filter((passenger) => passenger.destination === currentStationName);
     onboardPassengers = onboardPassengers.filter((passenger) => passenger.destination !== currentStationName);
+    deliveredPassengers += alighting.length;
 
     const availableSeats = Math.max(0, 7 - onboardPassengers.length);
     const boardingCount = Math.min(availableSeats, 1 + Math.floor(Math.random() * 3));
@@ -1562,11 +1569,11 @@
     stationPassengers.classList.remove("hidden");
     arrivalBanner.classList.add("passenger-exchange");
     arrivalBanner.textContent = alighting.length > 0
-      ? `${alighting.length}にん おりて ${boarding.length}にん のるよ！`
+      ? `${alighting.length}にん おとどけ！ タップかそく ＋${alighting.length} km/h`
       : `${boarding.length}にん ごじょうしゃ！`;
     const destination = boarding[0]?.destination;
     say(alighting.length > 0
-      ? `ドアがひらきます。${alighting.length}にんおりて、${boarding.length}にんごじょうしゃ！`
+      ? `ドアがひらきます。${alighting.length}にんとうちゃく！タップかそくが、${alighting.length}キロアップ！${boarding.length}にんごじょうしゃ！`
       : `ドアがひらきます。${boarding.length}にん、${destination ? `${destination}まで` : ""}ごじょうしゃくださーい！`);
   }
 
@@ -1969,6 +1976,14 @@
     });
   });
 
+  function currentTapBoostKmh() {
+    return BASE_TAP_BOOST_KMH + deliveredPassengers * PASSENGER_TAP_BONUS_KMH;
+  }
+
+  function currentTapBoostPxPerSec() {
+    return currentTapBoostKmh() / SPEED_DISPLAY_SCALE;
+  }
+
   canvas.addEventListener("pointerdown", (event) => {
     if (collectFallingStar(event)) return;
     if (identifyOpposingTrain(event)) return;
@@ -1985,7 +2000,7 @@
     } else if (state === "running") {
       if (isBrakingForStation()) return;
       const previousSpeed = displaySpeed(speed);
-      const boost = TAP_BOOST_PX_PER_SEC * (starBoostTime > 0 ? starBoostMultiplier : 1);
+      const boost = currentTapBoostPxPerSec() * (starBoostTime > 0 ? starBoostMultiplier : 1);
       speed += boost;
       accelerationEffect = 1;
       showSpeedBoost(displaySpeed(speed) - previousSpeed, event);
@@ -3465,7 +3480,7 @@
           boostPopupCount: speedBoostPopups.length, midAnnouncementDone, runningSoundEnabled,
           autoMode, autoActionTimer, autoTargetKmh: autoTargetKmh(),
           playElapsedSeconds, motionEffect: canvas.dataset.motionEffect,
-          onboardPassengers: [...onboardPassengers],
+          onboardPassengers: [...onboardPassengers], deliveredPassengers, tapBoostKmh: currentTapBoostKmh(),
           timeOfDay, weather, visitedStations: [...visitedStations],
           fallingStar: fallingStar ? { ...fallingStar } : null,
           starBoostTime, starBoostMultiplier, starBoostType: starBoostType.key,
