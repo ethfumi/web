@@ -257,6 +257,32 @@ vec3 renderNewton(vec2 coordinate) {
   return palette(rootIndex) * shade * rings;
 }
 
+vec3 glassPalette(float t) {
+  float w0 = 0.5 + 0.5 * cos(6.28318530718 * t);
+  float w1 = 0.5 + 0.5 * cos(6.28318530718 * (t + 0.3333333));
+  float w2 = 0.5 + 0.5 * cos(6.28318530718 * (t + 0.6666667));
+  w0 = w0 * w0 * w0;
+  w1 = w1 * w1 * w1;
+  w2 = w2 * w2 * w2;
+  vec3 colorA;
+  vec3 colorB;
+  vec3 colorC;
+  if (uPalette == 1) {
+    colorA = vec3(0.58, 0.34, 1.0);
+    colorB = vec3(1.0, 0.28, 0.66);
+    colorC = vec3(1.0, 0.68, 0.25);
+  } else if (uPalette == 2) {
+    colorA = vec3(0.15, 1.0, 0.58);
+    colorB = vec3(0.18, 0.82, 1.0);
+    colorC = vec3(0.92, 0.82, 0.25);
+  } else {
+    colorA = vec3(0.12, 0.88, 1.0);
+    colorB = vec3(0.43, 0.42, 1.0);
+    colorC = vec3(0.95, 0.22, 0.68);
+  }
+  return (colorA * w0 + colorB * w1 + colorC * w2) / max(0.001, w0 + w1 + w2);
+}
+
 vec3 calmGeometryColor(float brightness) {
   vec3 base = uPalette == 1 ? vec3(0.66, 0.58, 1.0) : (uPalette == 2 ? vec3(0.34, 1.0, 0.67) : vec3(0.32, 0.88, 1.0));
   return base * brightness;
@@ -320,20 +346,38 @@ float periodicLine(float value, float sharpness) {
   return exp(-sharpness * abs(sin(3.14159265359 * value)));
 }
 
-vec3 renderInfiniteRosette(vec2 coordinate) {
+vec3 renderInfiniteKaleidoscope(vec2 coordinate) {
   float radius = max(length(coordinate), 0.0000001);
   float logRadius = log(radius) / log(uShapeParams.y) - uShapeParams.w;
-  float angle = atan(coordinate.y, coordinate.x) + logRadius * uShapeParams.z;
-  float mirrors = uShapeParams.x;
-  float folded = abs(sin(angle * mirrors * 0.5));
   float phase = fract(logRadius);
-  float petal = abs(cos(6.28318530718 * phase) - (0.18 + 0.72 * pow(folded, 1.35)));
-  float innerPetal = abs(cos(6.28318530718 * (phase + 0.22)) - (0.52 - 0.38 * folded));
-  float rings = periodicLine(logRadius * 2.0, 30.0);
-  float spokes = exp(-42.0 * folded) * (0.35 + 0.65 * periodicLine(logRadius - 0.14, 8.0));
-  float glow = exp(-34.0 * petal) + 0.55 * exp(-45.0 * innerPetal) + 0.32 * rings + 0.4 * spokes;
-  float facets = 0.5 + 0.5 * cos(6.28318530718 * phase + folded * 4.0);
-  return calmGeometryColor(0.014 + facets * 0.026 + min(glow, 1.65) * 0.68);
+  float wedge = 6.28318530718 / uShapeParams.x;
+  float angle = atan(coordinate.y, coordinate.x) + logRadius * uShapeParams.z;
+  float mirrorAngle = abs(mod(angle + wedge * 0.5, wedge) - wedge * 0.5);
+  float fold = mirrorAngle / (wedge * 0.5);
+
+  float shardA = phase * 4.0 + fold * 1.5;
+  float shardB = phase * 3.0 - fold * 2.5;
+  float shardC = phase * 2.0 + fold * 4.0;
+  float edgeDistance = min(abs(sin(3.14159265359 * shardA)),
+                           min(abs(sin(3.14159265359 * shardB)),
+                               abs(sin(3.14159265359 * shardC))));
+  float lead = exp(-42.0 * edgeDistance);
+  float hairline = exp(-115.0 * edgeDistance);
+
+  float facetLight = 0.5 + 0.5 * sin(6.28318530718 * (phase * 1.7 + fold * 0.63));
+  float shardId = floor(shardA) * 0.19 + floor(shardB) * 0.31 + floor(shardC) * 0.13;
+  float glassShift = shardId + 0.17 * sin(6.28318530718 * (phase - fold));
+  vec3 glass = glassPalette(glassShift);
+  vec3 reflectedGlass = glassPalette(glassShift + 0.38 + facetLight * 0.14);
+  vec3 pane = mix(glass, reflectedGlass, 0.28 + facetLight * 0.36);
+
+  float mirrorSeam = exp(-48.0 * min(fold, 1.0 - fold));
+  float jewel = pow(max(0.0, sin(6.28318530718 * phase) * cos(3.14159265359 * fold)), 10.0);
+  vec3 color = pane * (0.09 + facetLight * 0.24);
+  color += pane * jewel * 0.62;
+  color += mix(pane, vec3(0.82, 0.95, 1.0), 0.68) * lead * 0.42;
+  color += vec3(0.72, 0.94, 1.0) * (hairline * 0.42 + mirrorSeam * 0.14);
+  return color;
 }
 
 vec3 renderInfinitePrism(vec2 coordinate) {
@@ -438,7 +482,7 @@ vec3 renderPlane(vec2 screenPoint) {
   else if (uMode == 9) color = renderPhyllotaxis(coordinate);
   else if (uMode == 10) color = renderTruchet(coordinate);
   else if (uMode == 11) color = renderHarmonicField(coordinate);
-  else if (uMode == 13) color = renderInfiniteRosette(coordinate);
+  else if (uMode == 13) color = renderInfiniteKaleidoscope(coordinate);
   else if (uMode == 14) color = renderInfinitePrism(coordinate);
   else if (uMode == 15) color = renderInfiniteSpiral(coordinate);
   else color = renderEscapeSet(coordinate);
@@ -605,10 +649,10 @@ void main() {
       { key: "cReal", label: "C · REAL", description: "固定するcの実部", min: -1.5, max: 1.5, step: 0.00001, value: -0.4, digits: 5, signed: true },
       { key: "cImag", label: "C · IMAGINARY", description: "固定するcの虚部", min: -1.5, max: 1.5, step: 0.00001, value: -0.59, digits: 5, signed: true }
     ] },
-    { title: "INFINITE ROSETTE", subtitle: "/ SCALE BLOOM", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "半径を対数へ変換し、一定倍率ごとに同じ位相へ戻してから角度を鏡映します。拡大そのものが模様の反復になる無限ズーム・カレイドスコープです。", note: "ZOOM PERIOD倍するたびに同じ花形が次の階層として現れます。TWISTで階層間の回転量が変わります。", parameters: [
+    { title: "INFINITE KALEIDOSCOPE", subtitle: "/ STAINED MIRRORS", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "対数半径で繰り返す色ガラスの断片を、中心から伸びる鏡の扇形へ折り返します。拡大しても新しい破片が現れ続ける無限ズーム万華鏡です。", note: "MIRRORSで鏡の枚数、ZOOM PERIODでガラス模様の反復倍率、TWISTで階層ごとの回転を変えられます。", parameters: [
       { key: "mirrors", label: "MIRRORS", description: "放射対称の枚数", min: 4, max: 32, step: 1, value: 12, digits: 0 },
-      { key: "zoomPeriod", label: "ZOOM PERIOD", description: "模様が戻る倍率", min: 1.35, max: 5, step: 0.05, value: 2, digits: 2, suffix: "×" },
-      { key: "twist", label: "TWIST", description: "階層ごとの回転", min: -3, max: 3, step: 0.05, value: 0.75, digits: 2, signed: true }
+      { key: "zoomPeriod", label: "ZOOM PERIOD", description: "ガラス模様が戻る倍率", min: 1.35, max: 5, step: 0.05, value: 2.6, digits: 2, suffix: "×" },
+      { key: "twist", label: "TWIST", description: "階層ごとの回転", min: -3, max: 3, step: 0.05, value: 0.05, digits: 2, signed: true }
     ] },
     { title: "INFINITE CRYSTAL", subtitle: "/ PRISM TUNNEL", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "対数半径と鏡映角を斜めに交差させ、拡大しても終わらない結晶格子を作ります。線の交点が次々に奥へ続く回廊になります。", note: "SIDESで結晶の面数、ZOOM PERIODで階層間隔、SHEARで回廊の傾きを調整できます。", parameters: [
       { key: "sides", label: "SIDES", description: "結晶の面数", min: 3, max: 24, step: 1, value: 8, digits: 0 },
