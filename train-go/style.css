@@ -681,6 +681,29 @@ html, body {
 #play-controls button span:first-child { font-size: 5vmin; line-height: 1; }
 #play-controls button:active { transform: translateY(0.8vmin); box-shadow: 0 0.4vmin 0 #a8bfd1; }
 
+@media (orientation: portrait) and (max-width: 700px) {
+  #run-ui {
+    bottom: max(2vmin, env(safe-area-inset-bottom));
+    grid-template-columns: repeat(6, 12vmin);
+    gap: 1.2vmin;
+  }
+  #run-ui button { width: 12vmin; height: 12vmin; }
+  #run-ui .quick-train-art { width: 9vmin; }
+  #run-ui .quick-plus { width: 4.2vmin; height: 4.2vmin; font-size: 3vmin; }
+  #btn-remove { grid-column: 6; grid-row: 2; }
+  #play-controls { bottom: max(29vmin, calc(env(safe-area-inset-bottom) + 29vmin)); }
+  #play-controls button { width: 16vmin; height: 16vmin; font-size: 3vmin; }
+  #play-controls button span:first-child { font-size: 6vmin; }
+  #btn-station-doors,
+  #btn-komachi-couple {
+    bottom: max(31vmin, calc(env(safe-area-inset-bottom) + 31vmin));
+    left: auto;
+    right: 4vmin;
+    transform: none;
+    animation: none;
+  }
+}
+
 #stamp-book {
   position: fixed;
   inset: 0;
