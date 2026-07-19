@@ -556,16 +556,18 @@ void main() {
   ];
 
   const parameterValues = modes.map(mode => Object.fromEntries(mode.parameters.map(parameter => [parameter.key, parameter.value])));
+  const DEFAULT_MODE = 2;
+  const defaultMode = modes[DEFAULT_MODE];
 
   const state = {
-    mode: 0,
-    orbitX: -0.48,
-    orbitY: 0.12,
-    targetOrbitX: -0.48,
-    targetOrbitY: 0.12,
-    panX: 0,
-    panY: 0,
-    distance: 3.08,
+    mode: DEFAULT_MODE,
+    orbitX: defaultMode.orbit[0],
+    orbitY: defaultMode.orbit[1],
+    targetOrbitX: defaultMode.orbit[0],
+    targetOrbitY: defaultMode.orbit[1],
+    panX: defaultMode.pan[0],
+    panY: defaultMode.pan[1],
+    distance: defaultMode.distance,
     zoom: 1,
     logZoom: 0,
     targetLogZoom: 0,
@@ -938,6 +940,6 @@ void main() {
 
   addEventListener("resize", () => { resizePending = true; });
   document.addEventListener("visibilitychange", () => { lastFrame = performance.now(); });
-  setMode(0);
+  setMode(DEFAULT_MODE);
   requestAnimationFrame(render);
 })();
