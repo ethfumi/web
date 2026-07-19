@@ -151,6 +151,30 @@ html, body {
   font-weight: 800;
 }
 
+#creator-contact {
+  display: flex;
+  align-items: center;
+  gap: 1.2vmin;
+  padding: 0.7vmin 1.6vmin;
+  border-radius: 999px;
+  color: #45637b;
+  background: rgba(255, 255, 255, 0.58);
+  font-size: clamp(11px, 1.8vmin, 16px);
+  text-decoration: none;
+}
+
+#creator-contact span + span {
+  padding-left: 1.2vmin;
+  border-left: 1px solid rgba(69, 99, 123, 0.28);
+  color: #2a5caa;
+  font-weight: 700;
+}
+
+#creator-contact:focus-visible {
+  outline: 3px solid #2a5caa;
+  outline-offset: 2px;
+}
+
 @media (min-aspect-ratio: 4/3) {
   #select-screen { gap: 1.3vmin; padding-top: max(1.5vmin, env(safe-area-inset-top)); }
   .train-buttons {
@@ -166,6 +190,8 @@ html, body {
 
 @media (max-width: 560px) {
   .route-buttons { grid-template-columns: repeat(2, 1fr); }
+  #creator-contact { flex-direction: column; gap: 0.2vmin; border-radius: 3vmin; }
+  #creator-contact span + span { padding-left: 0; border-left: 0; }
 }
 
 #select-screen:not(.hidden) ~ .debug-control {
