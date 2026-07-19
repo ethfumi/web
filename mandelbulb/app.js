@@ -43,6 +43,8 @@ uniform vec4 uShapeParams;
 uniform vec2 uExtraParams;
 uniform float uExposure;
 uniform float uZoom;
+uniform float uLogZoom;
+uniform float uColorDrift;
 uniform int uIterations;
 uniform int uPalette;
 uniform int uMode;
@@ -70,6 +72,7 @@ vec3 threeColorPalette(float t, vec3 a, vec3 b, vec3 c) {
 }
 
 vec3 palette(float t) {
+  t += uColorDrift * uLogZoom / 0.69314718056;
   if (uPalette == 11) return hsvToRgb(vec3(fract(t), 0.64, 0.96));
   if (uPalette == 10) return threeColorPalette(t, vec3(0.95,0.82,0.61), vec3(0.84,0.51,0.41), vec3(0.45,0.35,0.56));
   if (uPalette == 9) return threeColorPalette(t, vec3(0.90,0.84,0.72), vec3(0.60,0.50,0.38), vec3(0.30,0.32,0.27));
@@ -622,7 +625,7 @@ void main() {
   const uniforms = {};
   [
     "uResolution", "uOrbit", "uPan", "uTime", "uDistance", "uShapeParams", "uExtraParams",
-    "uExposure", "uZoom", "uIterations", "uPalette", "uMode"
+    "uExposure", "uZoom", "uLogZoom", "uColorDrift", "uIterations", "uPalette", "uMode"
   ].forEach(name => {
     uniforms[name] = gl.getUniformLocation(program, name);
   });
@@ -714,6 +717,7 @@ void main() {
     targetLogZoom: 0,
     iterations: 12,
     exposure: 1,
+    colorDrift: 0.08,
     palette: 3,
     quality: 0.78,
     speed: 0.36,
@@ -977,6 +981,8 @@ void main() {
     gl.uniform2f(uniforms.uExtraParams, shapeValues[3] || 0, shapeValues[4] || 0);
     gl.uniform1f(uniforms.uExposure, state.exposure);
     gl.uniform1f(uniforms.uZoom, shaderZoom);
+    gl.uniform1f(uniforms.uLogZoom, state.logZoom);
+    gl.uniform1f(uniforms.uColorDrift, state.colorDrift);
     gl.uniform1i(uniforms.uIterations, state.iterations);
     gl.uniform1i(uniforms.uPalette, state.palette);
     gl.uniform1i(uniforms.uMode, state.mode);
@@ -1067,6 +1073,7 @@ void main() {
 
   bindRange("#detail", "iterations", "#detailValue", String);
   bindRange("#exposure", "exposure", "#exposureValue", value => value.toFixed(2));
+  bindRange("#colorDrift", "colorDrift", "#colorDriftValue", value => (value >= 0 ? "+" : "") + value.toFixed(2));
   bindRange("#speed", "speed", "#speedValue", value => "×" + value.toFixed(2));
 
   $("#motion").addEventListener("click", () => setMotion(!state.motion));
