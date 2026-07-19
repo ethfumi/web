@@ -83,7 +83,11 @@
 
   const PIXELS_PER_METER = 12;
   const KMH_PER_MPS = 3.6;
-  const TAP_BOOST_PX_PER_SEC = 75;       // 発進後の連打は細かく加速できるようにする
+  const SPEED_DISPLAY_SCALE = KMH_PER_MPS / PIXELS_PER_METER;
+  const DEPARTURE_SPEED_KMH = 30;
+  const TAP_BOOST_KMH = 10;
+  const DEPARTURE_SPEED_PX_PER_SEC = DEPARTURE_SPEED_KMH / SPEED_DISPLAY_SCALE;
+  const TAP_BOOST_PX_PER_SEC = TAP_BOOST_KMH / SPEED_DISPLAY_SCALE;
   const STAR_SPAWN_MIN_SECONDS = 9;
   const FALLING_STAR_TYPES = [
     {
@@ -110,7 +114,6 @@
   const FRICTION_PX_PER_SEC2 = 18;       // 自然減速は小さく、連打の加速感を残す
   const AUTO_ACCEL_PX_PER_SEC2 = 40;     // 自動運転は遊びやすい時間に圧縮しつつ滑らかに加速
   const AUTO_OVERSPEED_DECEL_PX_PER_SEC2 = 90;
-  const SPEED_DISPLAY_SCALE = KMH_PER_MPS / PIXELS_PER_METER;
   const ROUTE_COLORS = {
     chuo: "#f28c28", tokaido: "#2362b8", tohoku: "#2a9b82",
     sobu: "#f0c928", tozai: "#3085cc", inokashira: "#8156a6", keio: "#d31359", yamanote: "#9acd32",
@@ -1418,7 +1421,7 @@
         ? `このでんしゃは、${deadheadMode ? "かいそうれっしゃ" : activeRoute.expressModeName}です。${nextStationName}は、とおりすぎます`
         : `つぎは、${nextStationName}`);
     }
-    speed = Math.max(speed, autoMode ? 60 : 220);
+    speed = Math.max(speed, autoMode ? 60 : DEPARTURE_SPEED_PX_PER_SEC);
     startRunningSound();
     updateDriveUi();
   }
