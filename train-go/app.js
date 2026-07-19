@@ -84,6 +84,9 @@
   const PIXELS_PER_METER = 12;
   const KMH_PER_MPS = 3.6;
   const TAP_BOOST_PX_PER_SEC = 75;       // 発進後の連打は細かく加速できるようにする
+  const STAR_BOOST_MULTIPLIER = 3;
+  const STAR_BOOST_SECONDS = 15;
+  const STAR_SPAWN_MIN_SECONDS = 9;
   const FRICTION_PX_PER_SEC2 = 18;       // 自然減速は小さく、連打の加速感を残す
   const AUTO_ACCEL_PX_PER_SEC2 = 40;     // 自動運転は遊びやすい時間に圧縮しつつ滑らかに加速
   const AUTO_OVERSPEED_DECEL_PX_PER_SEC2 = 90;
@@ -857,6 +860,9 @@
   let viewScale = 1;       // 編成全体が見えるようにカメラを引く倍率
   let confetti = [];
   let speedBoostPopups = [];
+  let fallingStar = null;
+  let nextFallingStarIn = 5;
+  let starBoostTime = 0;
   let accelerationEffect = 0;
   let brakeEffect = 0;
   let clouds = [];
@@ -1240,6 +1246,9 @@
     komachiStationX = null;
     viewScale = 1;
     speedBoostPopups = [];
+    fallingStar = null;
+    nextFallingStarIn = 5 + Math.random() * 5;
+    starBoostTime = 0;
     accelerationEffect = 0;
     brakeEffect = 0;
     playElapsedSeconds = 0;
@@ -1653,6 +1662,126 @@
       });
     }
   }
+  function spawnFallingStar() {
+    const radius = Math.max(24, Math.min(38, W * 0.035));
+    fallingStar = {
+      x: W * (0.62 + Math.random() * 0.28),
+      y: H * (0.08 + Math.random() * 0.12),
+      vx: -W * (0.09 + Math.random() * 0.07),
+      vy: H * (0.11 + Math.random() * 0.07),
+      radius,
+      rotation: Math.random() * Math.PI,
+    };
+  }
+
+  function updateFallingStar(dt) {
+    if (state !== "running") {
+      fallingStar = null;
+      canvas.dataset.starBoostSeconds = starBoostTime > 0 ? String(Math.ceil(starBoostTime)) : "0";
+      return;
+    }
+
+    starBoostTime = Math.max(0, starBoostTime - dt);
+    canvas.dataset.starBoostSeconds = starBoostTime > 0 ? String(Math.ceil(starBoostTime)) : "0";
+    if (!fallingStar) {
+      nextFallingStarIn -= dt;
+      if (nextFallingStarIn <= 0) spawnFallingStar();
+      return;
+    }
+
+    fallingStar.x += fallingStar.vx * dt;
+    fallingStar.y += fallingStar.vy * dt;
+    fallingStar.rotation += dt * 2.4;
+    if (fallingStar.y > groundY() - fallingStar.radius
+      || fallingStar.x < -fallingStar.radius * 2) {
+      fallingStar = null;
+      nextFallingStarIn = STAR_SPAWN_MIN_SECONDS + Math.random() * 10;
+    }
+  }
+
+  function drawStarPath(x, y, outerRadius, innerRadius, rotation) {
+    ctx.beginPath();
+    for (let i = 0; i < 10; i++) {
+      const radius = i % 2 === 0 ? outerRadius : innerRadius;
+      const angle = rotation - Math.PI / 2 + i * Math.PI / 5;
+      const px = x + Math.cos(angle) * radius;
+      const py = y + Math.sin(angle) * radius;
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+  }
+
+  function drawFallingStar() {
+    if (!fallingStar) return;
+    const { x, y, radius, rotation } = fallingStar;
+    ctx.save();
+    const trail = ctx.createLinearGradient(x, y, x + radius * 4, y - radius * 3);
+    trail.addColorStop(0, "rgba(255,232,92,0.9)");
+    trail.addColorStop(1, "rgba(255,232,92,0)");
+    ctx.strokeStyle = trail;
+    ctx.lineWidth = radius * 0.5;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + radius * 4, y - radius * 3);
+    ctx.stroke();
+
+    ctx.shadowColor = "#fff08a";
+    ctx.shadowBlur = radius;
+    ctx.fillStyle = "#ffd83d";
+    drawStarPath(x, y, radius, radius * 0.46, rotation);
+    ctx.fill();
+    ctx.fillStyle = "#fff7b2";
+    drawStarPath(x, y, radius * 0.5, radius * 0.22, rotation);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawStarPowerBadge() {
+    if (starBoostTime <= 0) return;
+    const seconds = Math.ceil(starBoostTime);
+    const text = `🌟 タップかそく ${STAR_BOOST_MULTIPLIER}ばい！ ${seconds}びょう`;
+    const width = Math.min(W * 0.62, 390);
+    const height = Math.max(44, Math.min(62, H * 0.08));
+    const x = W / 2;
+    const y = Math.max(height * 0.7, H * 0.08);
+    ctx.save();
+    ctx.globalAlpha = 0.94;
+    ctx.fillStyle = "#fff8cc";
+    ctx.strokeStyle = "#f2a51f";
+    ctx.lineWidth = 5;
+    roundRect(x - width / 2, y - height / 2, width, height, height / 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = "#c15f00";
+    ctx.font = `bold ${Math.max(19, Math.min(30, W * 0.027))}px sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(text, x, y + 1);
+    ctx.restore();
+  }
+
+  function collectFallingStar(event) {
+    if (!fallingStar || state === "select") return false;
+    const rect = canvas.getBoundingClientRect();
+    const px = event.offsetX * W / Math.max(rect.width, 1);
+    const py = event.offsetY * H / Math.max(rect.height, 1);
+    const hitRadius = Math.max(58, fallingStar.radius * 2);
+    if (Math.hypot(px - fallingStar.x, py - fallingStar.y) > hitRadius) return false;
+
+    ensureAudio();
+    fallingStar = null;
+    nextFallingStarIn = STAR_SPAWN_MIN_SECONDS + Math.random() * 10;
+    starBoostTime = STAR_BOOST_SECONDS;
+    canvas.dataset.starBoostSeconds = String(STAR_BOOST_SECONDS);
+    showPlayBanner(`🌟 タップかそく ${STAR_BOOST_MULTIPLIER}ばい！`, 2600);
+    say(`ながれぼし、ゲット！${STAR_BOOST_SECONDS}びょうかん、タップかそく、${STAR_BOOST_MULTIPLIER}ばい！`);
+    chime();
+    spawnConfetti(35);
+    return true;
+  }
+
 
   function identifyOpposingTrain(event) {
     if (!opposingTrain || state === "select") return false;
@@ -1705,6 +1834,7 @@
   });
 
   canvas.addEventListener("pointerdown", (event) => {
+    if (collectFallingStar(event)) return;
     if (identifyOpposingTrain(event)) return;
     ensureAudio();
     if (state === "stopped") {
@@ -1719,7 +1849,8 @@
     } else if (state === "running") {
       if (isBrakingForStation()) return;
       const previousSpeed = displaySpeed(speed);
-      speed += TAP_BOOST_PX_PER_SEC;
+      const boost = TAP_BOOST_PX_PER_SEC * (starBoostTime > 0 ? STAR_BOOST_MULTIPLIER : 1);
+      speed += boost;
       accelerationEffect = 1;
       showSpeedBoost(displaySpeed(speed) - previousSpeed, event);
     }
@@ -2351,7 +2482,7 @@
     const tunnelActive = routeEvent === "tunnel" && routeEventAnnounced;
     if (!headlightsAreOn() || (!tunnelActive && timeOfDay !== "night")) return;
     const { carW, gap } = carMetrics();
-    const frontX = W * NOSE_R + (komachiCoupled ? komachiGap + carW * 2 + gap : 0);
+    const frontX = W * NOSE_R + trainStationOffset() + (komachiCoupled ? komachiGap + carW * 2 + gap : 0);
     const centerY = groundY() - carW * 0.16;
     const beam = ctx.createLinearGradient(frontX, 0, frontX + W * 0.4, 0);
     beam.addColorStop(0, "rgba(255,244,160,0.75)");
@@ -2410,7 +2541,19 @@
   }
 
   function stationPlatformWidth(name) {
-    return { grand: 1800, major: 1500, city: 1250, local: 1000 }[stationGrade(name)];
+    const baseWidth = { grand: 1800, major: 1500, city: 1250, local: 1000 }[stationGrade(name)];
+    const capacity = {
+      tokaido: 16,
+      tohoku: 17,
+      yamanote: 11,
+      chuo: 12,
+      sobu: 10,
+      tozai: 10,
+      keio: 10,
+      inokashira: 5,
+    }[selectedRouteKey] || 5;
+    const { carW, gap } = carMetrics();
+    return Math.max(baseWidth, capacity * carW + Math.max(capacity - 1, 0) * gap + carW * 0.5);
   }
 
   function formationStationOffset(name) {
@@ -2425,17 +2568,28 @@
       : front - platformW / 2;
   }
 
-  function stationAlignmentProgress(worldX, name) {
+  function trainStationOffset() {
     if (cars <= 1 && !komachiCoupled) return 0;
-    if (currentStationAligned && worldX === currentStationX && name === currentStationName) return 1;
-    if (passingStation || worldX !== stationWorldX || name !== nextStationName) return 0;
-    const distanceToStation = stationWorldX - distance;
-    return Math.max(0, Math.min((700 - distanceToStation) / 700, 1));
+    if (state !== "running" && currentStationAligned && currentStationX !== null) {
+      return -formationStationOffset(currentStationName);
+    }
+
+    const approachProgress = passingStation
+      ? 0
+      : Math.max(0, Math.min((700 - (stationWorldX - distance)) / 700, 1));
+    if (approachProgress > 0) {
+      return -formationStationOffset(nextStationName) * approachProgress;
+    }
+
+    if (currentStationAligned && currentStationX !== null) {
+      const departureProgress = Math.max(0, Math.min((700 - (distance - currentStationX)) / 700, 1));
+      return -formationStationOffset(currentStationName) * departureProgress;
+    }
+    return 0;
   }
 
-  function stationScreenX(worldX, name) {
-    return worldX - distance + W * NOSE_R
-      + formationStationOffset(name) * stationAlignmentProgress(worldX, name);
+  function stationScreenX(worldX) {
+    return worldX - distance + W * NOSE_R;
   }
 
   function drawStation(worldX, name) {
@@ -2567,7 +2721,7 @@
   function drawTrainMotionEffects() {
     const y = groundY();
     const { carW, carH, gap } = carMetrics();
-    const noseX = W * NOSE_R;
+    const noseX = W * NOSE_R + trainStationOffset();
     const tailX = noseX - cars * (carW + gap);
 
     if (accelerationEffect > 0.02) {
@@ -2607,7 +2761,7 @@
   function drawTrain() {
     const y = groundY();
     const { carW, carH, gap } = carMetrics();
-    const noseX = W * NOSE_R;
+    const noseX = W * NOSE_R + trainStationOffset();
     const bob = state === "running" ? Math.sin(distance * 0.05) * 1.5 : 0;
 
     for (let i = 0; i < cars; i++) {
@@ -2714,7 +2868,7 @@
 
     const y = groundY();
     const { carW, carH, gap } = carMetrics();
-    const noseX = W * NOSE_R;
+    const noseX = W * NOSE_R + (komachiCoupled ? trainStationOffset() : 0);
     const connectionX = komachiCoupled
       ? noseX + komachiGap
       : komachiStationX - distance + noseX + komachiGap;
@@ -2853,6 +3007,7 @@
     }
 
     updateAutoOperations(dt);
+    updateFallingStar(dt);
 
     let braking = false;
     if (state === "running") {
@@ -2921,8 +3076,15 @@
     }
 
     canvas.dataset.groundY = String(Math.round(groundY()));
+    canvas.dataset.cars = String(totalCarCount());
+    canvas.dataset.platformWidth = String(Math.round(stationPlatformWidth(nextStationName)));
+    canvas.dataset.trainStationOffset = String(Math.round(trainStationOffset()));
+    canvas.dataset.stationScreenX = String(Math.round(stationScreenX(stationWorldX)));
+    canvas.dataset.fallingStarX = fallingStar ? String(Math.round(fallingStar.x)) : "";
+    canvas.dataset.fallingStarY = fallingStar ? String(Math.round(fallingStar.y)) : "";
     drawSky();
     drawClouds(dt);
+    drawFallingStar();
     if (state !== "select") {
       ctx.save();
       const ax = W * NOSE_R;
@@ -2947,6 +3109,7 @@
       ctx.restore();
     }
     drawWeather(dt);
+    drawStarPowerBadge();
     drawConfetti(dt);
     drawSpeedBoosts(dt);
 
@@ -2973,6 +3136,9 @@
           state, selectedRouteKey, routeName: activeRoute.name, routeVariant: activeRoute.variant || "main", currentLineKm, routeDirection,
           speed, distance, cars, carTypes: [...carTypes], viewScale,
           toStation: stationWorldX - distance,
+          stationScreenX: stationScreenX(stationWorldX),
+          platformWidth: stationPlatformWidth(nextStationName),
+          trainStationOffset: trainStationOffset(),
           nextStationName, currentStationName,
           komachiCoupled, komachiReady, komachiGap,
           doorsOpen, stationDoorsDone,
@@ -2983,6 +3149,8 @@
           playElapsedSeconds, motionEffect: canvas.dataset.motionEffect,
           onboardPassengers: [...onboardPassengers],
           timeOfDay, weather, visitedStations: [...visitedStations],
+          fallingStar: fallingStar ? { ...fallingStar } : null,
+          starBoostTime,
           opposingPool: opposingTrainPoolForSegment().map((type) => type.name),
           nextOpposingTrainIn,
           opposingTrain: opposingTrain ? {
@@ -2998,6 +3166,13 @@
       setCars(n) {
         cars = Math.max(1, Math.min(MAX_CARS, n));
         carTypes = Array(cars).fill(trainKey);
+      },
+      forceFallingStar() {
+        spawnFallingStar();
+        fallingStar.x = W * 0.72;
+        fallingStar.y = H * 0.25;
+        fallingStar.vx = 0;
+        fallingStar.vy = 0;
       },
       forceSize(w, h) {
         forcedSize = true;
@@ -3074,6 +3249,28 @@
     });
     debugWeatherButton.addEventListener("click", cycleWeatherAndTime);
     document.body.appendChild(debugWeatherButton);
+    const debugStarButton = document.createElement("button");
+    debugStarButton.type = "button";
+    debugStarButton.className = "debug-control";
+    debugStarButton.textContent = "テスト: ながれぼし";
+    debugStarButton.setAttribute("aria-label", "テストで流れ星を出す");
+    Object.assign(debugStarButton.style, {
+      position: "fixed", left: "45%", top: "360px", zIndex: "99",
+      padding: "8px", fontSize: "14px",
+    });
+    debugStarButton.addEventListener("click", () => window.__tg.forceFallingStar());
+    document.body.appendChild(debugStarButton);
+    const debugLongTrainButton = document.createElement("button");
+    debugLongTrainButton.type = "button";
+    debugLongTrainButton.className = "debug-control";
+    debugLongTrainButton.textContent = "テスト: 16りょう";
+    debugLongTrainButton.setAttribute("aria-label", "テストで16両編成にする");
+    Object.assign(debugLongTrainButton.style, {
+      position: "fixed", left: "45%", top: "404px", zIndex: "99",
+      padding: "8px", fontSize: "14px",
+    });
+    debugLongTrainButton.addEventListener("click", () => window.__tg.setCars(16));
+    document.body.appendChild(debugLongTrainButton);
 
     const debugBrakeButton = document.createElement("button");
     debugBrakeButton.type = "button";
