@@ -400,6 +400,12 @@ html, body {
   opacity: 0.62;
 }
 
+#btn-auto-mode[aria-pressed="true"] {
+  color: #fff;
+  background: #2a9b82;
+  box-shadow: 0 4px 0 #176a59;
+}
+
 #arrival-banner.passenger-exchange {
   width: max-content;
   max-width: 72vw;
