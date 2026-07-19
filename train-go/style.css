@@ -120,7 +120,7 @@ html, body {
 }
 
 .train-btn span {
-  font-size: 5vmin;
+  font-size: 4vmin;
   font-weight: bold;
   color: #444;
 }
@@ -146,14 +146,16 @@ html, body {
 
 
 @media (min-aspect-ratio: 4/3) {
+  #select-screen { gap: 1.3vmin; padding-top: max(1.5vmin, env(safe-area-inset-top)); }
   .train-buttons {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+    gap: 1.2vmin;
     width: min(92vw, 960px);
   }
-  .train-btn { flex-direction: column; gap: 0.5vmin; }
-  .train-btn svg { width: 78%; }
-  .train-btn span { font-size: 3.3vmin; }
+  .train-btn { flex-direction: column; gap: 0.2vmin; padding: 0.8vmin 2vmin; }
+  .train-btn svg { width: 62%; }
+  .train-btn span { font-size: 2.7vmin; }
 }
 
 @media (max-width: 560px) {
@@ -169,18 +171,18 @@ html, body {
   position: fixed;
   right: max(3vmin, env(safe-area-inset-right));
   bottom: max(3vmin, env(safe-area-inset-bottom));
-  display: flex;
-  flex-direction: column;
-  gap: 1.2vmin;
+  display: grid;
+  grid-template-columns: repeat(3, 9.5vmin);
+  gap: 1.1vmin;
   z-index: 5;
 }
 
 #run-ui button {
-  width: 12vmin;
-  height: 12vmin;
+  width: 9.5vmin;
+  height: 9.5vmin;
   border: none;
   border-radius: 50%;
-  font-size: 5vmin;
+  font-size: 4vmin;
   background: rgba(255, 255, 255, 0.9);
   box-shadow: 0 4px 0 rgba(0, 0, 0, 0.15);
   cursor: pointer;
@@ -190,7 +192,17 @@ html, body {
   transform: scale(0.9);
 }
 
+#btn-couple {
+  outline: 0.45vmin solid rgba(239, 108, 50, 0.7);
+}
+
+#btn-remove {
+  grid-column: 3;
+}
+
 #btn-home {
+  grid-column: 2;
+  grid-row: 4;
   opacity: 0.55;
 }
 
@@ -204,7 +216,7 @@ html, body {
 
 .quick-train-art {
   display: flex;
-  width: 9vmin;
+  width: 7.2vmin;
   align-items: center;
   justify-content: center;
 }
@@ -219,15 +231,15 @@ html, body {
   right: -0.2vmin;
   bottom: -0.2vmin;
   display: flex;
-  width: 4vmin;
-  height: 4vmin;
+  width: 3.5vmin;
+  height: 3.5vmin;
   align-items: center;
   justify-content: center;
   border: 0.35vmin solid #fff;
   border-radius: 50%;
   color: #fff;
   background: #ef6c32;
-  font-size: 3.4vmin;
+  font-size: 2.9vmin;
   font-weight: bold;
   line-height: 1;
 }
