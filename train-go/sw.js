@@ -1,13 +1,14 @@
 // オンラインでは常に最新版を取得し、通信できない時だけ保存済みデータを使う。
-const CACHE = "train-go-v53";
+const CACHE = "train-go-v54";
 const ASSETS = [
   ".",
   "index.html",
-  "style.css?v=53",
-  "app.js?v=53",
+  "style.css?v=54",
+  "app.js?v=54",
   "manifest.webmanifest",
   "icons/icon-180.png",
   "icons/icon-512.png",
+  "og.png?v=54",
 ];
 
 async function precacheFreshAssets() {
