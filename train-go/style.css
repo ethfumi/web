@@ -95,6 +95,31 @@ html, body {
   width: min(80vw, 560px);
 }
 
+.train-choice-group {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1vmin;
+}
+
+.train-choice-group.multiple {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.train-choice-group.multiple .train-btn {
+  flex-direction: column;
+  gap: 0.2vmin;
+  padding: 1vmin 0.8vmin;
+}
+
+.train-choice-group.multiple .train-btn svg {
+  width: 88%;
+}
+
+.train-choice-group.multiple .train-btn span {
+  font-size: clamp(11px, 2.2vmin, 16px);
+  white-space: nowrap;
+}
+
 .train-btn {
   display: flex;
   align-items: center;

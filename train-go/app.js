@@ -1663,7 +1663,7 @@
     const carH = carW * 0.34;
     const gap = 5;
     const ax = W * NOSE_R;
-    const ay = H * GROUND_R;
+    const ay = groundY();
     const left = ax + (opposingTrain.x - ax) * viewScale;
     const rightWorld = opposingTrain.x + opposingTrain.cars * (carW + gap);
     const right = ax + (rightWorld - ax) * viewScale;
@@ -1805,7 +1805,12 @@
   });
 
   // ---- 描画 ----
-  const GROUND_R = 0.78; // 線路の高さ(画面比)
+  const GROUND_R = 0.78; // 横画面の線路の高さ(画面比)
+  const PORTRAIT_GROUND_R = 0.66; // 縦画面は下部操作のため地面を高くする
+
+  function groundY() {
+    return H * (H > W ? PORTRAIT_GROUND_R : GROUND_R);
+  }
   const NOSE_R = 0.62;   // 先頭車の画面上の位置(画面幅比)
 
   function carMetrics() {
@@ -1870,7 +1875,7 @@
   }
 
   function drawMountains() {
-    const base = H * GROUND_R;
+    const base = groundY();
     const { x0, x1 } = viewRange();
     const period = W * 0.7;
     const off = (distance * 0.28) % (W * 1.4);
@@ -1887,7 +1892,7 @@
   }
 
   function drawCityscape() {
-    const base = H * GROUND_R;
+    const base = groundY();
     const { x0, x1 } = viewRange();
     const rawProgress = (distance - segmentStartDistance) / Math.max(stationWorldX - segmentStartDistance, 1);
     const progress = Math.max(0, Math.min(rawProgress, 1));
@@ -1965,7 +1970,7 @@
 
   function drawFuji() {
     if (routeEvent !== "fuji" || !routeEventAnnounced) return;
-    const base = H * GROUND_R;
+    const base = groundY();
     const x = W * (0.96 - routeEventProgress * 0.55);
     const peakY = base - H * 0.52;
     const halfW = W * 0.34;
@@ -2032,29 +2037,29 @@
     if (!isTunnelVisible()) return;
     const stationOrDepartureUnderground = isUndergroundStationView() || isUndergroundDepartureSegment();
     const { x0, x1 } = viewRange();
-    const groundY = H * GROUND_R;
+    const tunnelGroundY = groundY();
     ctx.save();
     ctx.globalAlpha = 0.96 * tunnelVisualAlpha();
-    const darkness = ctx.createLinearGradient(0, 0, 0, groundY);
+    const darkness = ctx.createLinearGradient(0, 0, 0, tunnelGroundY);
     darkness.addColorStop(0, "#0b1019");
     darkness.addColorStop(0.65, "#202a37");
     darkness.addColorStop(1, "#111722");
     ctx.fillStyle = darkness;
-    ctx.fillRect(x0, 0, x1 - x0, groundY);
+    ctx.fillRect(x0, 0, x1 - x0, tunnelGroundY);
     const ribSpacing = 220;
     const off = (distance * 0.75) % ribSpacing;
     for (let x = x0 - off; x < x1 + ribSpacing; x += ribSpacing) {
       ctx.strokeStyle = "#4a5665";
       ctx.lineWidth = 12;
       ctx.beginPath();
-      ctx.moveTo(x, groundY);
+      ctx.moveTo(x, tunnelGroundY);
       ctx.lineTo(x, H * 0.24);
       ctx.quadraticCurveTo(x + ribSpacing * 0.5, H * 0.08, x + ribSpacing, H * 0.24);
-      ctx.lineTo(x + ribSpacing, groundY);
+      ctx.lineTo(x + ribSpacing, tunnelGroundY);
       ctx.stroke();
       ctx.strokeStyle = "rgba(155,172,190,0.25)";
       ctx.lineWidth = 3;
-      for (let y = H * 0.32; y < groundY - 25; y += 58) {
+      for (let y = H * 0.32; y < tunnelGroundY - 25; y += 58) {
         ctx.beginPath();
         ctx.moveTo(x + 12, y);
         ctx.lineTo(x + ribSpacing - 12, y);
@@ -2071,8 +2076,8 @@
     ctx.strokeStyle = "#778393";
     ctx.lineWidth = 5;
     ctx.beginPath();
-    ctx.moveTo(x0, groundY - 42);
-    ctx.lineTo(x1, groundY - 42);
+    ctx.moveTo(x0, tunnelGroundY - 42);
+    ctx.lineTo(x1, tunnelGroundY - 42);
     ctx.stroke();
     ctx.restore();
   }
@@ -2088,7 +2093,7 @@
     const x = crossingWorldX - distance + W * NOSE_R;
     const { x0, x1 } = viewRange();
     if (x < x0 - 160 || x > x1 + 160) return;
-    const nearY = H * GROUND_R;
+    const nearY = groundY();
     const farY = opposingTrackY();
     ctx.save();
     ctx.fillStyle = "#77736d";
@@ -2147,11 +2152,11 @@
   }
 
   function opposingTrackY() {
-    return H * GROUND_R - Math.max(72, H * 0.12);
+    return groundY() - Math.max(72, H * 0.12);
   }
 
   function drawTrack() {
-    const y = H * GROUND_R;
+    const y = groundY();
     const farY = opposingTrackY();
     const { x0, x1 } = viewRange();
 
@@ -2293,7 +2298,7 @@
   }
 
   function drawDistanceMarkers() {
-    const y = H * GROUND_R;
+    const y = groundY();
     const noseX = W * NOSE_R;
     const { x0, x1 } = viewRange();
     const markerSpacing = PIXELS_PER_METER * 100;
@@ -2320,7 +2325,7 @@
 
   function drawInspectionEffect() {
     if (routeEvent !== "inspection" || !routeEventAnnounced) return;
-    const y = H * GROUND_R;
+    const y = groundY();
     const { x0, x1 } = viewRange();
     const scanX = x0 + ((inspectionTime * 260) % Math.max(x1 - x0, 1));
     ctx.save();
@@ -2347,7 +2352,7 @@
     if (!headlightsAreOn() || (!tunnelActive && timeOfDay !== "night")) return;
     const { carW, gap } = carMetrics();
     const frontX = W * NOSE_R + (komachiCoupled ? komachiGap + carW * 2 + gap : 0);
-    const centerY = H * GROUND_R - carW * 0.16;
+    const centerY = groundY() - carW * 0.16;
     const beam = ctx.createLinearGradient(frontX, 0, frontX + W * 0.4, 0);
     beam.addColorStop(0, "rgba(255,244,160,0.75)");
     beam.addColorStop(1, "rgba(255,244,160,0)");
@@ -2375,7 +2380,7 @@
     const screenX = stationScreenX(worldX, name);
     const { x0, x1 } = viewRange();
     if (screenX - 260 > x1 || screenX + 260 < x0) return;
-    const baseY = H * GROUND_R;
+    const baseY = groundY();
     ctx.save();
     ctx.globalAlpha = state === "stopped" && name === currentStationName ? 1 : 0.88;
     ctx.font = `${Math.max(42, H * 0.075)}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
@@ -2436,7 +2441,7 @@
   function drawStation(worldX, name) {
     if (state !== "running" && state !== "stopped") return;
     const screenX = stationScreenX(worldX, name);
-    const y = H * GROUND_R;
+    const y = groundY();
     const grade = stationGrade(name);
     const platformW = stationPlatformWidth(name);
     const canopyW = platformW * 0.86;
@@ -2560,7 +2565,7 @@
   }
 
   function drawTrainMotionEffects() {
-    const y = H * GROUND_R;
+    const y = groundY();
     const { carW, carH, gap } = carMetrics();
     const noseX = W * NOSE_R;
     const tailX = noseX - cars * (carW + gap);
@@ -2600,7 +2605,7 @@
     }
   }
   function drawTrain() {
-    const y = H * GROUND_R;
+    const y = groundY();
     const { carW, carH, gap } = carMetrics();
     const noseX = W * NOSE_R;
     const bob = state === "running" ? Math.sin(distance * 0.05) * 1.5 : 0;
@@ -2707,7 +2712,7 @@
   function drawKomachi() {
     if (train !== TRAINS.hayabusa || (!komachiCoupled && komachiStationX === null)) return;
 
-    const y = H * GROUND_R;
+    const y = groundY();
     const { carW, carH, gap } = carMetrics();
     const noseX = W * NOSE_R;
     const connectionX = komachiCoupled
@@ -2915,12 +2920,13 @@
       viewScale += (targetScale - viewScale) * Math.min(dt * 3, 1);
     }
 
+    canvas.dataset.groundY = String(Math.round(groundY()));
     drawSky();
     drawClouds(dt);
     if (state !== "select") {
       ctx.save();
       const ax = W * NOSE_R;
-      const ay = H * GROUND_R;
+      const ay = groundY();
       ctx.translate(ax, ay);
       ctx.scale(viewScale, viewScale);
       ctx.translate(-ax, -ay);
