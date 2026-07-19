@@ -66,6 +66,12 @@
     "ろくりょう", "ななりょう", "はちりょう", "きゅうりょう", "じゅうりょう",
   ];
   const MAX_CARS = 100;
+  const KEIO_SAGAMIHARA_CHANCE = 1 / 3;
+  const KEIO_SAGAMIHARA_BRANCH_STATIONS = new Set([
+    "けいおうたまがわ", "けいおういなだづつみ", "けいおうよみうりランド", "いなぎ",
+    "わかばだい", "けいおうながやま", "けいおうたまセンター", "けいおうほりのうち",
+    "みなみおおさわ", "たまさかい", "はしもと",
+  ]);
   const KOMACHI_COUPLING_STATIONS = {
     tohoku: "もりおか",
   };
@@ -95,7 +101,7 @@
     "しながわ", "しんよこはま", "なごや", "きょうと", "うえの", "おおみや",
     "せんだい", "もりおか", "しんあおもり", "きちじょうじ", "みたか",
     "たちかわ", "はちおうじ", "たかお", "なかの", "おおてまち", "にしふなばし",
-    "ちょうふ", "ふちゅう", "けいおうはちおうじ",
+    "ちょうふ", "ふちゅう", "けいおうはちおうじ", "けいおうたまセンター", "はしもと",
   ]);
   function segmentKey(stationA, stationB) {
     return [stationA, stationB].sort().join("::");
@@ -143,6 +149,7 @@
       ["しんじゅく", "ささづか"],
       ["しばさき", "こくりょう"], ["こくりょう", "ふだ"],
       ["ふだ", "ちょうふ"], ["ちょうふ", "にしちょうふ"],
+      ["ちょうふ", "けいおうたまがわ"],
       ["きたの", "けいおうはちおうじ"],
     ]),
   };
@@ -354,6 +361,42 @@
         "きたの", "けいおうはちおうじ",
       ]),
     },
+    keioSagamihara: {
+      name: "けいおうさがみはらせん",
+      start: "しんじゅく",
+      startKm: 0,
+      supportsExpress: true,
+      expressLabel: "とっきゅう",
+      expressModeName: "けいおうせんとっきゅう",
+      expressAnnouncement: "けいおうせん、とっきゅうモード！ささづか、めいだいまえ、ちとせからすやま、ちょうふ、けいおういなだづつみ、けいおうながやま、けいおうたまセンター、みなみおおさわにとまって、はしもとへいきます",
+      allowCrossings: true,
+      variant: "hashimoto",
+      stations: [
+        { name: "ささづか", km: 3.6 }, { name: "だいたばし", km: 4.4 },
+        { name: "めいだいまえ", km: 5.2 }, { name: "しもたかいど", km: 6.1 },
+        { name: "さくらじょうすい", km: 7.0 }, { name: "かみきたざわ", km: 7.8 },
+        { name: "はちまんやま", km: 8.4 }, { name: "ろかこうえん", km: 9.1 },
+        { name: "ちとせからすやま", km: 9.9 }, { name: "せんがわ", km: 11.5 },
+        { name: "つつじがおか", km: 12.5 }, { name: "しばさき", km: 13.3 },
+        { name: "こくりょう", km: 14.2 }, { name: "ふだ", km: 14.9 },
+        { name: "ちょうふ", km: 15.5 }, { name: "けいおうたまがわ", km: 16.7 },
+        { name: "けいおういなだづつみ", km: 18.0 }, { name: "けいおうよみうりランド", km: 19.4 },
+        { name: "いなぎ", km: 21.0 }, { name: "わかばだい", km: 24.3 },
+        { name: "けいおうながやま", km: 26.9 }, { name: "けいおうたまセンター", km: 29.2 },
+        { name: "けいおうほりのうち", km: 31.5 }, { name: "みなみおおさわ", km: 33.8 },
+        { name: "たまさかい", km: 35.6 }, { name: "はしもと", km: 38.1 },
+        { name: "しんじゅく", km: 0 },
+      ],
+      expressStops: new Set([
+        "しんじゅく", "ささづか", "めいだいまえ", "ちとせからすやま", "ちょうふ",
+        "けいおういなだづつみ", "けいおうながやま", "けいおうたまセンター",
+        "みなみおおさわ", "はしもと",
+      ]),
+      cityStations: new Set([
+        "しんじゅく", "ささづか", "めいだいまえ", "ちとせからすやま", "ちょうふ",
+        "けいおうたまセンター", "みなみおおさわ", "はしもと",
+      ]),
+    },
     yamanote: {
       name: "やまのてせん",
       start: "とうきょう",
@@ -390,6 +433,70 @@
       ]),
     },
   };
+
+  const STATION_CELEBRATIONS = {
+    chuo: {
+      "たかお": {
+        banner: "⛰️ やまの えきだ！",
+        announcement: "おおきなやまと、みどりがいっぱいだよ！",
+        symbols: ["⛰️", "🌲", "🐿️"],
+        stamp: "⛰️",
+      },
+    },
+    sobu: {
+      "ちば": {
+        banner: "🚝 そらをはしる でんしゃ！",
+        announcement: "そらをはしるモノレールがみえるよ！",
+        symbols: ["☁️", "🚝", "☁️"],
+        stamp: "🚝",
+      },
+    },
+    tozai: {
+      "かさい": {
+        banner: "🚇 ちかてつの はくぶつかん！",
+        announcement: "ちかてつがいっぱいの、はくぶつかんがあるまちだよ！",
+        symbols: ["🚇", "⚙️", "🎫"],
+        stamp: "🚇",
+      },
+    },
+    inokashira: {
+      "きちじょうじ": {
+        banner: "🌳 こうえんの まち！",
+        announcement: "おおきなこうえんと、みずどりがいるまちだよ！",
+        symbols: ["🌳", "🦆", "🌼"],
+        stamp: "🌳",
+      },
+    },
+    keio: {
+      "けいおうたまセンター": {
+        banner: "🌈 ゆめいっぱいの まち！",
+        announcement: "にじとほしがきらきら、ゆめいっぱいのまちだよ！",
+        symbols: ["🌈", "⭐", "🎈"],
+        stamp: "🌈",
+      },
+    },
+    yamanote: {
+      "うえの": {
+        banner: "🐼 どうぶつの まち！",
+        announcement: "どうぶつたちが、いっぱいのまちだよ！",
+        symbols: ["🐼", "🦁", "🐘"],
+        stamp: "🐼",
+      },
+    },
+  };
+
+  function stationCelebrationFor(name) {
+    return STATION_CELEBRATIONS[selectedRouteKey]?.[name] || null;
+  }
+
+  function routeForGameStart() {
+    if (selectedRouteKey !== "keio") return ROUTES[selectedRouteKey];
+    const params = new URLSearchParams(location.search);
+    const forcedKeioRoute = params.has("debug") ? params.get("keio") : "";
+    if (forcedKeioRoute === "hashimoto") return ROUTES.keioSagamihara;
+    if (forcedKeioRoute === "hachioji") return ROUTES.keio;
+    return Math.random() < KEIO_SAGAMIHARA_CHANCE ? ROUTES.keioSagamihara : ROUTES.keio;
+  }
 
   function stationNamesForRoute(route) {
     return [route.start, ...route.stations.map((station) => station.name)]
@@ -848,7 +955,10 @@
     if (selectedRouteKey === "tokaido" && train === TRAINS.nozomi && nextStationName === "しんふじ") return "fuji";
     if (selectedRouteKey === "tokaido" && train === TRAINS.doctoryellow && segmentNumber === 1) return "inspection";
     if (TUNNEL_SEGMENTS[selectedRouteKey]?.has(segmentKey(currentStationName, nextStationName))) return "tunnel";
-    if (activeRoute.allowCrossings && segmentNumber % 4 === 0) return "crossing";
+    const isSagamiharaBranch = activeRoute.variant === "hashimoto"
+      && (KEIO_SAGAMIHARA_BRANCH_STATIONS.has(currentStationName)
+        || KEIO_SAGAMIHARA_BRANCH_STATIONS.has(nextStationName));
+    if (activeRoute.allowCrossings && !isSagamiharaBranch && segmentNumber % 4 === 0) return "crossing";
     return "";
   }
 
@@ -980,7 +1090,10 @@
     routeStationNames.forEach((name) => {
       const stamp = document.createElement("div");
       stamp.className = `station-stamp${visitedStations.has(name) ? " visited" : ""}`;
-      stamp.textContent = visitedStations.has(name) ? name : `？\n${name}`;
+      const celebration = stationCelebrationFor(name);
+      stamp.textContent = visitedStations.has(name)
+        ? `${celebration?.stamp ? `${celebration.stamp}\n` : ""}${name}`
+        : `？\n${name}`;
       stampGrid.appendChild(stamp);
     });
     stampCount.textContent = `${activeRoute.name}　${routeVisitedCount} / ${routeStationNames.length} えき`;
@@ -1069,8 +1182,19 @@
     return lightsOn || timeOfDay === "night";
   }
 
+  function announceInitialDeparture() {
+    if (activeRoute.loopKm) {
+      showPlayBanner(`🚉 ${activeRoute.start} はつ　${activeRoute.name}`, 3200);
+      say(`このでんしゃは、${activeRoute.start}はつ、${activeRoute.name}です。つぎは、${nextStationName}です`);
+      return;
+    }
+    const destination = routeTerminalStation().name;
+    showPlayBanner(`🚉 ${activeRoute.start} はつ　➡ ${destination} ゆき`, 3200);
+    say(`このでんしゃは、${activeRoute.start}はつ、${destination}ゆきです。つぎは、${nextStationName}です`);
+  }
+
   function startGame(key) {
-    activeRoute = ROUTES[selectedRouteKey];
+    activeRoute = routeForGameStart();
     trainKey = key;
     train = TRAINS[key];
     carTypes = [key];
@@ -1132,7 +1256,7 @@
     clearRouteEvent();
     updateDriveUi();
     arrivalBanner.textContent = "とうちゃく〜！";
-    say(`${train.callName}、${activeRoute.name}の、${activeRoute.start}えきを、しゅっぱつしんこう！`);
+    announceInitialDeparture();
   }
 
   function goHome() {
@@ -1216,6 +1340,7 @@
     btnStationDoors.classList.add("hidden");
     stationPassengers.classList.add("hidden");
     const isKomachiStop = isKomachiCouplingStop(currentStationName);
+    const celebration = stationCelebrationFor(currentStationName);
     const terminalIndex = activeRoute.terminalIndex ?? activeRoute.stations.length - 2;
     const isTurnaround = !activeRoute.loopKm
       && (stationIdx === terminalIndex || currentStationName === activeRoute.start);
@@ -1229,6 +1354,13 @@
       arrivalBanner.textContent = "こまちがいた！";
       btnKomachiCouple.classList.remove("hidden");
       say(`${currentStationName}にとうちゃく！こまちがまっているよ。れんけつしよう！`);
+    } else if (celebration) {
+      arrivalBanner.textContent = celebration.banner;
+      showStationDoorPrompt();
+      const turnaroundAnnouncement = isTurnaround
+        ? `おりかえして、${routeTerminalStation().name}へいくよ。`
+        : "";
+      say(`${currentStationName}にとうちゃく！${celebration.announcement}${turnaroundAnnouncement}ドアをあけてみよう！`);
     } else {
       arrivalBanner.textContent = isTurnaround ? "おりかえし〜！" : "とうちゃく〜！";
       showStationDoorPrompt();
@@ -1236,7 +1368,7 @@
         ? `${currentStationName}にとうちゃく！おりかえして、${routeTerminalStation().name}へいくよ。ドアをあけてみよう！`
         : `${currentStationName}〜、${currentStationName}〜、とうちゃく！ドアをあけてみよう！`);
     }
-    spawnConfetti();
+    spawnConfetti(celebration ? 90 : 40);
   }
 
   function passStation() {
@@ -2139,9 +2271,34 @@
     ctx.restore();
   }
 
+  function drawStationCelebration(worldX, name) {
+    const celebration = stationCelebrationFor(name);
+    if (!celebration || (state !== "running" && state !== "stopped")) return;
+    const trainNoseX = W * NOSE_R;
+    const screenX = worldX - distance + trainNoseX;
+    const { x0, x1 } = viewRange();
+    if (screenX - 260 > x1 || screenX + 260 < x0) return;
+    const baseY = H * GROUND_R;
+    ctx.save();
+    ctx.globalAlpha = state === "stopped" && name === currentStationName ? 1 : 0.88;
+    ctx.font = `${Math.max(42, H * 0.075)}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    celebration.symbols.forEach((symbol, index) => {
+      const offsetX = (index - (celebration.symbols.length - 1) / 2) * Math.max(110, W * 0.09);
+      const offsetY = index % 2 === 0 ? H * 0.19 : H * 0.27;
+      ctx.fillText(symbol, screenX + offsetX, baseY - offsetY);
+    });
+    ctx.restore();
+  }
+
   function drawStations() {
+    drawStationCelebration(stationWorldX, nextStationName);
     drawStation(stationWorldX, nextStationName);
-    if (currentStationX !== null) drawStation(currentStationX, currentStationName);
+    if (currentStationX !== null) {
+      drawStationCelebration(currentStationX, currentStationName);
+      drawStation(currentStationX, currentStationName);
+    }
   }
 
   function drawStation(worldX, name) {
@@ -2673,7 +2830,7 @@
       skipToStation() { distance = stationWorldX - 600; },
       status() {
         return {
-          state, selectedRouteKey, routeName: activeRoute.name, currentLineKm, routeDirection,
+          state, selectedRouteKey, routeName: activeRoute.name, routeVariant: activeRoute.variant || "main", currentLineKm, routeDirection,
           speed, distance, cars, carTypes: [...carTypes], viewScale,
           toStation: stationWorldX - distance,
           nextStationName, currentStationName,
@@ -2839,6 +2996,27 @@
       arrive();
     });
     document.body.appendChild(debugTurnaroundButton);
+
+    const debugCelebrationButton = document.createElement("button");
+    debugCelebrationButton.type = "button";
+    debugCelebrationButton.className = "debug-control";
+    debugCelebrationButton.textContent = "テスト: とくべつえき";
+    debugCelebrationButton.setAttribute("aria-label", "テストで特別演出の駅へ進む");
+    Object.assign(debugCelebrationButton.style, {
+      position: "fixed", left: "45%", top: "316px", zIndex: "99",
+      padding: "8px", fontSize: "14px",
+    });
+    debugCelebrationButton.addEventListener("click", () => {
+      const celebrationIndex = activeRoute.stations.findIndex((station) => stationCelebrationFor(station.name));
+      if (celebrationIndex < 0) return;
+      const celebrationStation = activeRoute.stations[celebrationIndex];
+      stationIdx = celebrationIndex;
+      currentLineKm = celebrationStation.km;
+      nextStationName = celebrationStation.name;
+      stationWorldX = distance;
+      arrive();
+    });
+    document.body.appendChild(debugCelebrationButton);
   }
 
   // ---- PWA ----
