@@ -87,22 +87,22 @@
   const STAR_SPAWN_MIN_SECONDS = 9;
   const FALLING_STAR_TYPES = [
     {
-      key: "gold", chance: 0.69, multiplier: 2, seconds: 5, scale: 1, speed: 1,
+      key: "gold", weights: { day: 70, sunset: 40, night: 20 }, multiplier: 2, seconds: 5, scale: 1, speed: 1,
       icon: "🌟", name: "きいろいほし", fill: "#ffd83d", inner: "#fff7b2",
       glow: "#fff08a", trail: "255,232,92", badge: "#fff8cc", accent: "#f2a51f", text: "#c15f00",
     },
     {
-      key: "green", chance: 0.22, multiplier: 4, seconds: 6, scale: 2 / 3, speed: 2,
+      key: "green", weight: 20, multiplier: 4, seconds: 6, scale: 2 / 3, speed: 2,
       icon: "💫", name: "みどりのほし", fill: "#62e687", inner: "#d7ffe0",
       glow: "#8dffac", trail: "98,230,135", badge: "#ddffe6", accent: "#31ad58", text: "#137132",
     },
     {
-      key: "blue", chance: 0.08, multiplier: 6, seconds: 7, scale: 1 / 2, speed: 3,
+      key: "blue", weight: 9, multiplier: 6, seconds: 7, scale: 1 / 2, speed: 3,
       icon: "🔵", name: "あおいほし", fill: "#48a9ff", inner: "#d9f2ff",
       glow: "#72c7ff", trail: "72,169,255", badge: "#dff3ff", accent: "#2789df", text: "#135b9b",
     },
     {
-      key: "rainbow", chance: 0.01, multiplier: 10, seconds: 8, scale: 1 / 3, speed: 4,
+      key: "rainbow", weight: 1, multiplier: 10, seconds: 8, scale: 1 / 3, speed: 4,
       icon: "🌈", name: "にじいろのほし", fill: "#ff5b73", inner: "#ffffff",
       glow: "#ffffff", trail: "255,91,115", badge: "#f4e8ff", accent: "#9b51e0", text: "#63319b",
     },
@@ -886,6 +886,7 @@
   let starBoostTime = 0;
   let starBoostMultiplier = 1;
   let starBoostType = FALLING_STAR_TYPES[0];
+  let missedRareStars = { blue: 0, rainbow: 0 };
   let accelerationEffect = 0;
   let brakeEffect = 0;
   let clouds = [];
@@ -1311,6 +1312,7 @@
     starBoostTime = 0;
     starBoostMultiplier = 1;
     starBoostType = FALLING_STAR_TYPES[0];
+    missedRareStars = { blue: 0, rainbow: 0 };
     accelerationEffect = 0;
     brakeEffect = 0;
     playElapsedSeconds = 0;
@@ -1726,11 +1728,12 @@
     }
   }
   function spawnFallingStar() {
-    const roll = Math.random();
-    let chance = 0;
+    const weights = currentStarWeights();
+    const totalWeight = Object.values(weights).reduce((sum, weight) => sum + weight, 0);
+    let roll = Math.random() * totalWeight;
     const type = FALLING_STAR_TYPES.find((candidate) => {
-      chance += candidate.chance;
-      return roll <= chance;
+      roll -= weights[candidate.key];
+      return roll <= 0;
     }) || FALLING_STAR_TYPES[0];
     const radius = Math.max(24, Math.min(38, W * 0.035)) * type.scale;
     fallingStar = {
@@ -1744,9 +1747,28 @@
     };
   }
 
+  function currentStarWeights() {
+    return Object.fromEntries(FALLING_STAR_TYPES.map((type) => {
+      const baseWeight = type.weights?.[timeOfDay] ?? type.weight;
+      const missMultiplier = 1 + (missedRareStars[type.key] || 0);
+      return [type.key, baseWeight * missMultiplier];
+    }));
+  }
+
+  function missFallingStar() {
+    if (!fallingStar) return;
+    const missedType = fallingStar.type;
+    if (Object.hasOwn(missedRareStars, missedType.key)) {
+      missedRareStars[missedType.key] += 1;
+    }
+    fallingStar = null;
+    nextFallingStarIn = STAR_SPAWN_MIN_SECONDS + Math.random() * 10;
+  }
+
   function updateFallingStar(dt) {
     if (state !== "running") {
-      fallingStar = null;
+      if (state === "stopped") missFallingStar();
+      else fallingStar = null;
       canvas.dataset.starBoostSeconds = starBoostTime > 0 ? String(Math.ceil(starBoostTime)) : "0";
       return;
     }
@@ -1771,8 +1793,7 @@
     fallingStar.rotation += dt * 2.4;
     if (fallingStar.y > groundY() - fallingStar.radius
       || fallingStar.x < -fallingStar.radius * 2) {
-      fallingStar = null;
-      nextFallingStarIn = STAR_SPAWN_MIN_SECONDS + Math.random() * 10;
+      missFallingStar();
     }
   }
 
@@ -1869,6 +1890,9 @@
     ensureAudio();
     const collectedType = fallingStar.type;
     fallingStar = null;
+    if (Object.hasOwn(missedRareStars, collectedType.key)) {
+      missedRareStars[collectedType.key] = 0;
+    }
     nextFallingStarIn = STAR_SPAWN_MIN_SECONDS + Math.random() * 10;
     starBoostTime = collectedType.seconds;
     starBoostMultiplier = collectedType.multiplier;
@@ -3210,6 +3234,13 @@
     canvas.dataset.fallingStarType = fallingStar?.type.key || "";
     canvas.dataset.fallingStarRadius = fallingStar ? String(Math.round(fallingStar.radius * 10) / 10) : "";
     canvas.dataset.fallingStarSpeed = fallingStar ? String(fallingStar.type.speed) : "";
+    const starWeights = currentStarWeights();
+    canvas.dataset.starWeightGold = String(starWeights.gold);
+    canvas.dataset.starWeightGreen = String(starWeights.green);
+    canvas.dataset.starWeightBlue = String(starWeights.blue);
+    canvas.dataset.starWeightRainbow = String(starWeights.rainbow);
+    canvas.dataset.starMissBlue = String(missedRareStars.blue);
+    canvas.dataset.starMissRainbow = String(missedRareStars.rainbow);
     drawSky();
     drawClouds(dt);
     drawFallingStar();
@@ -3289,6 +3320,7 @@
           timeOfDay, weather, visitedStations: [...visitedStations],
           fallingStar: fallingStar ? { ...fallingStar } : null,
           starBoostTime, starBoostMultiplier, starBoostType: starBoostType.key,
+          starWeights: currentStarWeights(), missedRareStars: { ...missedRareStars },
           opposingPool: opposingTrainPoolForSegment().map((type) => type.name),
           nextOpposingTrainIn,
           opposingTrain: opposingTrain ? {
@@ -3441,6 +3473,17 @@
     addDebugStarButton("green", "みどりのほし", "58%");
     addDebugStarButton("blue", "あおいほし", "70%");
     addDebugStarButton("rainbow", "にじいろのほし", "82%");
+    const debugMissStarButton = document.createElement("button");
+    debugMissStarButton.type = "button";
+    debugMissStarButton.className = "debug-control";
+    debugMissStarButton.textContent = "テスト: ほしをのがす";
+    debugMissStarButton.setAttribute("aria-label", "テストで今の星を逃す");
+    Object.assign(debugMissStarButton.style, {
+      position: "fixed", left: "82%", top: "404px", zIndex: "99",
+      padding: "8px", fontSize: "14px",
+    });
+    debugMissStarButton.addEventListener("click", missFallingStar);
+    document.body.appendChild(debugMissStarButton);
     const debugLongTrainButton = document.createElement("button");
     debugLongTrainButton.type = "button";
     debugLongTrainButton.className = "debug-control";
