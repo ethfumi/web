@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="つなげて！しんかんせん">
-<title>つなげて！しんかんせん</title>
+<meta name="apple-mobile-web-app-title" content="つなげて！でんしゃ！">
+<title>つなげて！でんしゃ！</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="stylesheet" href="style.css">
@@ -16,6 +16,7 @@
 
 <!-- 車両えらび画面 -->
 <div id="select-screen">
+  <h1 class="game-title">つなげて！でんしゃ！</h1>
   <div class="select-title">どこを はしる？</div>
   <div class="route-buttons" role="group" aria-label="はしるろせん">
     <button class="route-btn selected" data-route="chuo" aria-pressed="true"><span>🟧</span>ちゅうおうせん</button>
@@ -88,8 +89,8 @@
     </button>
   </div>
   <!-- 更新時は sw.js の CACHE バージョンと揃える -->
-  <div id="app-version" aria-label="バージョン28、2026年7月19日10時46分更新">
-    <strong>v28</strong><span>2026.07.19 10:46 更新</span>
+  <div id="app-version" aria-label="バージョン29、2026年7月19日11時10分更新">
+    <strong>v29</strong><span>2026.07.19 11:10 更新</span>
   </div>
 </div>
 
@@ -105,8 +106,9 @@
   <button class="btn-quick-add" data-slot="7"><span class="quick-train-art"></span><span class="quick-plus">＋</span></button>
   <button id="btn-couple" class="btn-quick-add" aria-label="いまの車両を連結"><span class="quick-train-art"></span><span class="quick-plus">＋</span></button>
   <button id="btn-remove" aria-label="きりはなす">🚃−</button>
-  <button id="btn-home" aria-label="えらびなおす">🏠</button>
 </div>
+
+<button id="btn-home" class="hidden" aria-label="えらびなおす">🏠</button>
 
 <div id="drive-panel" class="hidden">
   <div id="speed-meter" aria-label="いまのスピード、走行距離、駅までの残り距離">
@@ -130,6 +132,10 @@
 
 <div id="arrival-banner" class="hidden">とうちゃく〜！</div>
 
+<div id="play-timer" class="hidden" aria-label="あそんだじかん">
+  <span>⏱️</span><strong id="play-time-value">00:00</strong>
+</div>
+
 <button id="btn-komachi-couple" class="hidden" aria-label="こまちとれんけつ">
   <span class="couple-icon">🚄💞🚅</span>
   <span>れんけつ！</span>
@@ -143,7 +149,7 @@
 <div id="station-passengers" class="hidden" aria-hidden="true"></div>
 
 <button id="onboard-panel" class="hidden" type="button" aria-live="polite" aria-expanded="false" aria-label="のっているひと。タップでいきさきを見る">
-  <span class="onboard-compact"><strong>🚃 <span id="onboard-summary">0にん</span></strong><span id="onboard-hint">いきさき ▾</span></span>
+  <span class="onboard-compact"><strong>🚃 <span id="onboard-summary">0にん</span></strong><span id="onboard-hint">▾</span></span>
   <span id="onboard-list">まだ だれも のっていないよ</span>
 </button>
 

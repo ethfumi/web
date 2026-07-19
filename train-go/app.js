@@ -1,4 +1,4 @@
-// つなげて！しんかんせん — 3歳向け新幹線アプリ
+// つなげて！でんしゃ！ — 3歳向けでんしゃアプリ
 // 文字が読めなくても遊べる・失敗がない・タップで必ず反応する、を設計原則とする。
 
 (() => {
@@ -375,6 +375,8 @@
   const stampCount = document.getElementById("stamp-count");
   const stampGrid = document.getElementById("stamp-grid");
   const playBanner = document.getElementById("play-banner");
+  const playTimer = document.getElementById("play-timer");
+  const playTimeValue = document.getElementById("play-time-value");
 
   let W = 0, H = 0, DPR = 1;
   let forcedSize = false; // デバッグ用: 非表示タブでも描画検証できるようにサイズを固定する
@@ -574,6 +576,8 @@
   let viewScale = 1;       // 編成全体が見えるようにカメラを引く倍率
   let confetti = [];
   let speedBoostPopups = [];
+  let accelerationEffect = 0;
+  let brakeEffect = 0;
   let clouds = [];
   let komachiCoupled = false;
   let komachiReady = false;
@@ -605,6 +609,7 @@
   let driverCallIndex = 0;
   let playBannerTimer = 0;
   let onboardPanelTimer = 0;
+  let playElapsedSeconds = 0;
   let visitedStations = loadVisitedStations();
 
   function initClouds() {
@@ -827,7 +832,7 @@
     window.clearTimeout(onboardPanelTimer);
     onboardPanel.classList.toggle("expanded", expanded);
     onboardPanel.setAttribute("aria-expanded", String(expanded));
-    onboardHint.textContent = expanded ? "とじる ▴" : "いきさき ▾";
+    onboardHint.textContent = expanded ? "▴" : "▾";
     if (expanded) onboardPanelTimer = window.setTimeout(() => setOnboardPanelExpanded(false), 4000);
   }
 
@@ -872,6 +877,8 @@
     komachiStationX = null;
     viewScale = 1;
     speedBoostPopups = [];
+    accelerationEffect = 0;
+    brakeEffect = 0;
     state = "stopped";
     scheduleNextStation();
     doorsOpen = false;
@@ -897,6 +904,8 @@
     segmentStartDistance = 0;
     selectScreen.classList.add("hidden");
     runUi.classList.remove("hidden");
+    btnHome.classList.remove("hidden");
+    playTimer.classList.remove("hidden");
     drivePanel.classList.remove("hidden");
     onboardPanel.classList.remove("hidden");
     playControls.classList.remove("hidden");
@@ -920,6 +929,8 @@
     stopRunningSound();
     selectScreen.classList.remove("hidden");
     runUi.classList.add("hidden");
+    btnHome.classList.add("hidden");
+    playTimer.classList.add("hidden");
     drivePanel.classList.add("hidden");
     onboardPanel.classList.add("hidden");
     playControls.classList.add("hidden");
@@ -1305,12 +1316,14 @@
       } else {
         const previousSpeed = displaySpeed(speed);
         depart();
+        accelerationEffect = 1;
         showSpeedBoost(displaySpeed(speed) - previousSpeed, event);
       }
     } else if (state === "running") {
       if (isBrakingForStation()) return;
       const previousSpeed = displaySpeed(speed);
       speed += TAP_BOOST_PX_PER_SEC;
+      accelerationEffect = 1;
       showSpeedBoost(displaySpeed(speed) - previousSpeed, event);
     }
   });
@@ -2009,6 +2022,46 @@
     ctx.restore();
   }
 
+  function drawTrainMotionEffects() {
+    const y = H * GROUND_R;
+    const { carW, carH, gap } = carMetrics();
+    const noseX = W * NOSE_R;
+    const tailX = noseX - cars * (carW + gap);
+
+    if (accelerationEffect > 0.02) {
+      ctx.save();
+      ctx.globalAlpha = accelerationEffect * 0.8;
+      ctx.strokeStyle = "#79d7ff";
+      ctx.lineWidth = Math.max(3, carH * 0.06);
+      ctx.lineCap = "round";
+      for (let i = 0; i < 4; i++) {
+        const lineY = y - carH * (0.2 + i * 0.22);
+        const length = carW * (0.28 + i * 0.08) * accelerationEffect;
+        ctx.beginPath();
+        ctx.moveTo(tailX - carW * 0.08, lineY);
+        ctx.lineTo(tailX - carW * 0.08 - length, lineY);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    if (brakeEffect > 0.02) {
+      ctx.save();
+      ctx.globalAlpha = brakeEffect;
+      ctx.fillStyle = "#ff9b42";
+      ctx.shadowColor = "#ff3d20";
+      ctx.shadowBlur = 12;
+      const wheelY = y - 7;
+      const points = [noseX - carW * 0.22, noseX - carW * 0.72, tailX + carW * 0.2];
+      points.forEach((x, index) => {
+        const r = 3 + ((Math.floor(distance / 12) + index) % 3);
+        ctx.beginPath();
+        ctx.arc(x, wheelY + (index % 2) * 3, r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.restore();
+    }
+  }
   function drawTrain() {
     const y = H * GROUND_R;
     const { carW, carH, gap } = carMetrics();
@@ -2235,11 +2288,22 @@
     ctx.restore();
   }
 
+  function updatePlayTimer() {
+    const totalSeconds = Math.floor(playElapsedSeconds);
+    const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+    const seconds = String(totalSeconds % 60).padStart(2, "0");
+    playTimeValue.textContent = `${minutes}:${seconds}`;
+  }
   // ---- メインループ ----
   let lastT = performance.now();
   function frame(now) {
-    const dt = Math.min((now - lastT) / 1000, 0.05);
+    const rawDt = Math.max(0, (now - lastT) / 1000);
+    const dt = Math.min(rawDt, 0.05);
     lastT = now;
+    if (state !== "select" && !document.hidden) {
+      playElapsedSeconds += Math.min(rawDt, 1);
+      updatePlayTimer();
+    }
 
     // バックグラウンド起動などで resize イベントを取りこぼしても復帰できるようにする
     if (!forcedSize && (window.innerWidth !== W || window.innerHeight !== H || canvas.width === 0)) {
@@ -2248,9 +2312,10 @@
 
     updateAutoOperations(dt);
 
+    let braking = false;
     if (state === "running") {
       const distToStation = stationWorldX - distance;
-      const braking = isBrakingForStation();
+      braking = isBrakingForStation();
 
       if (braking) {
         // 駅が近づいたら自動でブレーキして、ぴったり停車する
@@ -2260,6 +2325,7 @@
         const targetSpeed = autoTargetKmh() / SPEED_DISPLAY_SCALE;
         if (speed < targetSpeed) {
           speed = Math.min(targetSpeed, speed + AUTO_ACCEL_PX_PER_SEC2 * dt);
+          accelerationEffect = Math.max(accelerationEffect, 0.45);
         } else if (speed > targetSpeed) {
           speed = Math.max(targetSpeed, speed - AUTO_OVERSPEED_DECEL_PX_PER_SEC2 * dt);
         }
@@ -2284,6 +2350,10 @@
         updateRunningSound();
       }
     }
+
+    brakeEffect += ((braking ? 1 : 0) - brakeEffect) * Math.min(dt * 10, 1);
+    accelerationEffect = Math.max(0, accelerationEffect - dt * 1.7);
+    canvas.dataset.motionEffect = braking ? "braking" : (accelerationEffect > 0.08 ? "accelerating" : "");
 
     updateDriveUi();
     updateOpposingTrain(dt);
@@ -2328,6 +2398,7 @@
       drawInspectionEffect();
       drawStations();
       drawHeadlight();
+      drawTrainMotionEffects();
       drawTrain();
       drawKomachi();
       ctx.restore();
@@ -2366,6 +2437,7 @@
           expressMode, passingStation, braking: isBrakingForStation(),
           boostPopupCount: speedBoostPopups.length, midAnnouncementDone, runningSoundEnabled,
           autoMode, autoActionTimer, autoTargetKmh: autoTargetKmh(),
+          playElapsedSeconds, motionEffect: canvas.dataset.motionEffect,
           onboardPassengers: [...onboardPassengers],
           timeOfDay, weather, visitedStations: [...visitedStations],
           opposingTrain: opposingTrain ? {
