@@ -1100,6 +1100,8 @@
     speedValue.textContent = String(displaySpeed(speed));
     canvas.dataset.braking = String(isBrakingForStation());
     canvas.dataset.passingStation = String(passingStation);
+    canvas.dataset.tunnelProgress = routeEvent === "tunnel" ? routeEventProgress.toFixed(3) : "";
+    canvas.dataset.tunnelAlpha = tunnelVisualAlpha().toFixed(3);
     canvas.dataset.speedBoostCount = String(speedBoostPopups.length);
     distanceValue.textContent = String(Math.floor(distance / PIXELS_PER_METER));
     distanceKmValue.textContent = `${(Math.floor(distance / PIXELS_PER_METER) / 1000).toFixed(1)} km`;
@@ -2263,21 +2265,22 @@
 
   function tunnelVisualRange() {
     const { x0, x1 } = viewRange();
-    if (isUndergroundStationView()) return { x0, x1, portalX: null, entering: false };
-    const width = x1 - x0;
-    const range = (start, end, entering) => {
-      const progress = Math.max(0, Math.min((routeEventProgress - start) / (end - start), 1));
-      const portalX = x1 - width * progress;
-      return entering
-        ? { x0: portalX, x1, portalX, entering }
-        : { x0, x1: portalX, portalX, entering };
-    };
-    if (isTunnelExitSegment()) return range(0.48, 0.68, false);
-    if (isTunnelEntrySegment()) return range(0.28, 0.5, true);
-    if (isUndergroundDepartureSegment()) return range(0.62, 0.8, false);
-    if (routeEventProgress < 0.34) return range(0.14, 0.34, true);
-    if (routeEventProgress > 0.66) return range(0.66, 0.8, false);
     return { x0, x1, portalX: null, entering: false };
+  }
+
+  function tunnelVisualAlpha() {
+    if (!isTunnelVisible()) return 0;
+    if (isUndergroundStationView()) return 1;
+    const fade = (start, end) => {
+      const progress = Math.max(0, Math.min((routeEventProgress - start) / (end - start), 1));
+      return progress * progress * (3 - 2 * progress);
+    };
+    if (isTunnelExitSegment()) return 1 - fade(0.48, 0.68);
+    if (isTunnelEntrySegment()) return fade(0.28, 0.5);
+    if (isUndergroundDepartureSegment()) return 1 - fade(0.62, 0.8);
+    if (routeEventProgress < 0.4) return fade(0.16, 0.3);
+    if (routeEventProgress > 0.64) return 1 - fade(0.68, 0.8);
+    return 1;
   }
 
   function isTunnelVisible() {
@@ -2297,7 +2300,7 @@
     ctx.beginPath();
     ctx.rect(visual.x0, 0, visual.x1 - visual.x0, tunnelGroundY);
     ctx.clip();
-    ctx.globalAlpha = 0.96;
+    ctx.globalAlpha = 0.96 * tunnelVisualAlpha();
     const darkness = ctx.createLinearGradient(0, 0, 0, tunnelGroundY);
     darkness.addColorStop(0, "#0b1019");
     darkness.addColorStop(0.65, "#202a37");
@@ -2338,30 +2341,6 @@
     ctx.lineTo(x1, tunnelGroundY - 42);
     ctx.stroke();
 
-    if (visual.portalX !== null) {
-      const direction = visual.entering ? 1 : -1;
-      const edge = ctx.createLinearGradient(
-        visual.portalX,
-        0,
-        visual.portalX + direction * 100,
-        0,
-      );
-      edge.addColorStop(0, "rgba(8,12,18,0.98)");
-      edge.addColorStop(1, "rgba(8,12,18,0)");
-      ctx.fillStyle = edge;
-      ctx.fillRect(
-        visual.entering ? visual.portalX : visual.portalX - 100,
-        0,
-        100,
-        tunnelGroundY,
-      );
-      ctx.strokeStyle = "#667383";
-      ctx.lineWidth = 14;
-      ctx.beginPath();
-      ctx.moveTo(visual.portalX, tunnelGroundY);
-      ctx.lineTo(visual.portalX, H * 0.22);
-      ctx.stroke();
-    }
     ctx.restore();
   }
 
@@ -2411,9 +2390,13 @@
 
   function drawWeather(dt) {
     weatherTime += dt;
-    if (isTunnelVisible()) return;
     if (weather === "sunny") return;
     ctx.save();
+    ctx.globalAlpha = 1 - tunnelVisualAlpha();
+    if (ctx.globalAlpha <= 0.01) {
+      ctx.restore();
+      return;
+    }
     if (weather === "rain") {
       ctx.strokeStyle = "rgba(205,235,255,0.72)";
       ctx.lineWidth = 2;
@@ -3274,7 +3257,9 @@
           nextStationName, currentStationName,
           komachiCoupled, komachiReady, komachiGap,
           doorsOpen, stationDoorsDone,
-          segmentNumber, routeEvent, routeEventProgress, tunnelVisualRange: isTunnelVisible() ? tunnelVisualRange() : null, lightsOn,
+          segmentNumber, routeEvent, routeEventProgress,
+          tunnelVisualRange: isTunnelVisible() ? tunnelVisualRange() : null,
+          tunnelVisualAlpha: tunnelVisualAlpha(), lightsOn,
           expressMode, deadheadMode, passingStation, braking: isBrakingForStation(),
           boostPopupCount: speedBoostPopups.length, midAnnouncementDone, runningSoundEnabled,
           autoMode, autoActionTimer, autoTargetKmh: autoTargetKmh(),
