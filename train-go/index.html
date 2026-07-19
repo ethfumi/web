@@ -24,6 +24,7 @@
     <button class="route-btn" data-route="sobu" aria-pressed="false"><span>🟨</span>そうぶせん</button>
     <button class="route-btn" data-route="tozai" aria-pressed="false"><span>🔵</span>とうざいせん</button>
     <button class="route-btn" data-route="inokashira" aria-pressed="false"><span>🌈</span>いのかしらせん</button>
+    <button class="route-btn" data-route="keio" aria-pressed="false"><span>🟥</span>けいおうせん</button>
     <button class="route-btn" data-route="yamanote" aria-pressed="false"><span>🟩</span>やまのてせん</button>
   </div>
   <div class="train-select-title">どれに のる？</div>
@@ -86,11 +87,15 @@
       <svg viewBox="0 0 200 70"><rect x="10" y="16" width="180" height="44" rx="8" fill="#e8ecef" stroke="#aeb8be" stroke-width="2"/><rect x="168" y="18" width="20" height="40" rx="5" fill="#f28c28"/><rect x="12" y="45" width="176" height="8" fill="#f28c28"/><rect x="25" y="25" width="28" height="14" rx="3" fill="#333"/><rect x="65" y="25" width="28" height="14" rx="3" fill="#333"/><rect x="105" y="25" width="28" height="14" rx="3" fill="#333"/><circle cx="55" cy="60" r="7" fill="#555"/><circle cx="145" cy="60" r="7" fill="#555"/></svg>
       <span>ちゅうおうせん</span>
     </button>
+    <button class="train-btn" data-train="keio" aria-label="けいおうせん">
+      <svg viewBox="0 0 200 70"><rect x="10" y="16" width="180" height="44" rx="8" fill="#e8ecef" stroke="#aeb8be" stroke-width="2"/><rect x="168" y="18" width="20" height="40" rx="5" fill="#d31359"/><rect x="12" y="42" width="176" height="5" fill="#d31359"/><rect x="12" y="49" width="176" height="5" fill="#174f9a"/><rect x="25" y="25" width="28" height="14" rx="3" fill="#333"/><rect x="65" y="25" width="28" height="14" rx="3" fill="#333"/><rect x="105" y="25" width="28" height="14" rx="3" fill="#333"/><circle cx="55" cy="60" r="7" fill="#555"/><circle cx="145" cy="60" r="7" fill="#555"/></svg>
+      <span>けいおうせん</span>
+    </button>
   </div>
   <!-- 更新時は sw.js の CACHE バージョンと揃える -->
-  <div id="app-version" aria-label="つなげて！でんしゃ！、バージョン31、2026年7月19日11時35分更新">
+  <div id="app-version" aria-label="つなげて！でんしゃ！、バージョン32、2026年7月19日13時30分更新">
     <span class="version-title">つなげて！でんしゃ！</span>
-    <strong>v31</strong><span>2026.07.19 11:35 更新</span>
+    <strong>v32</strong><span>2026.07.19 13:30 更新</span>
   </div>
 </div>
 
@@ -104,6 +109,7 @@
   <button class="btn-quick-add" data-slot="5"><span class="quick-train-art"></span><span class="quick-plus">＋</span></button>
   <button class="btn-quick-add" data-slot="6"><span class="quick-train-art"></span><span class="quick-plus">＋</span></button>
   <button class="btn-quick-add" data-slot="7"><span class="quick-train-art"></span><span class="quick-plus">＋</span></button>
+  <button class="btn-quick-add" data-slot="8"><span class="quick-train-art"></span><span class="quick-plus">＋</span></button>
   <button id="btn-couple" class="btn-quick-add" aria-label="いまの車両を連結"><span class="quick-train-art"></span><span class="quick-plus">＋</span></button>
   <button id="btn-remove" aria-label="きりはなす">🚃−</button>
 </div>
