@@ -2634,34 +2634,17 @@
     return Math.max(baseWidth, capacity * carW + Math.max(capacity - 1, 0) * gap + carW * 0.5);
   }
 
-  function formationStationOffset(name) {
-    if (cars <= 1 && !komachiCoupled) return 0;
-    const { carW, gap } = carMetrics();
-    const rear = -(cars * carW + Math.max(cars - 1, 0) * gap);
-    const front = komachiCoupled ? komachiGap + carW * 2 + gap : 0;
-    const formationLength = front - rear;
-    const platformW = stationPlatformWidth(name);
-    return formationLength <= platformW
-      ? (rear + front) / 2
-      : front - platformW / 2;
-  }
-
   function trainStationOffset() {
-    if (cars <= 1 && !komachiCoupled) return 0;
-    const from = -formationStationOffset(currentStationName);
-    if (state !== "running" || passingStation) return from;
-
-    // 発車時に停車位置補正を0へ戻すと、長編成が一度後ろへ下がって見える。
-    // 区間全体で次のホーム位置へゆっくり引き継ぎ、発車直後の後ずさりをなくす。
-    const to = -formationStationOffset(nextStationName);
-    const segmentLength = Math.max(stationWorldX - segmentStartDistance, 1);
-    const rawProgress = Math.max(0, Math.min((distance - segmentStartDistance) / segmentLength, 1));
-    const smoothProgress = rawProgress * rawProgress * (3 - 2 * rawProgress);
-    return from + (to - from) * smoothProgress;
+    if (!komachiCoupled) return 0;
+    const { carW, gap } = carMetrics();
+    // 連結時も、編成の本当の先頭がホーム先端の停止位置へ来るよう固定する。
+    return -(komachiGap + carW * 2 + gap);
   }
 
-  function stationScreenX(worldX) {
-    return worldX - distance + W * NOSE_R;
+  function stationScreenX(worldX, name) {
+    // 駅の距離座標をホーム先端の停止位置として、ホーム全体は後ろ側へ伸ばす。
+    // 車両数に応じて編成を横移動しないため、到着時の「にゅっ」とした補正がなくなる。
+    return worldX - distance + W * NOSE_R - stationPlatformWidth(name) / 2;
   }
 
   function drawStation(worldX, name) {
@@ -3151,7 +3134,7 @@
     canvas.dataset.cars = String(totalCarCount());
     canvas.dataset.platformWidth = String(Math.round(stationPlatformWidth(nextStationName)));
     canvas.dataset.trainStationOffset = String(Math.round(trainStationOffset()));
-    canvas.dataset.stationScreenX = String(Math.round(stationScreenX(stationWorldX)));
+    canvas.dataset.stationScreenX = String(Math.round(stationScreenX(stationWorldX, nextStationName)));
     canvas.dataset.fallingStarX = fallingStar ? String(Math.round(fallingStar.x)) : "";
     canvas.dataset.fallingStarY = fallingStar ? String(Math.round(fallingStar.y)) : "";
     drawSky();
@@ -3208,7 +3191,7 @@
           state, selectedRouteKey, routeName: activeRoute.name, routeVariant: activeRoute.variant || "main", currentLineKm, routeDirection,
           speed, distance, cars, carTypes: [...carTypes], viewScale,
           toStation: stationWorldX - distance,
-          stationScreenX: stationScreenX(stationWorldX),
+          stationScreenX: stationScreenX(stationWorldX, nextStationName),
           platformWidth: stationPlatformWidth(nextStationName),
           trainStationOffset: trainStationOffset(),
           nextStationName, currentStationName,
