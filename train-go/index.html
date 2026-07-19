@@ -24,7 +24,7 @@
 <title>つなげて！でんしゃ！</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="stylesheet" href="style.css?v=40">
+<link rel="stylesheet" href="style.css?v=41">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -33,14 +33,14 @@
 <div id="select-screen">
   <div class="select-title">どこを はしる？</div>
   <div class="route-buttons" role="group" aria-label="はしるろせん">
-    <button class="route-btn selected" data-route="chuo" aria-pressed="true"><span>🟧</span>ちゅうおうせん</button>
-    <button class="route-btn" data-route="tokaido" aria-pressed="false"><span>🗻</span>とうかいどう</button>
+    <button class="route-btn selected" data-route="tokaido" aria-pressed="true"><span>🗻</span>とうかいどう</button>
     <button class="route-btn" data-route="tohoku" aria-pressed="false"><span>🌲</span>とうほく</button>
+    <button class="route-btn" data-route="yamanote" aria-pressed="false"><span>🟩</span>やまのてせん</button>
+    <button class="route-btn" data-route="chuo" aria-pressed="false"><span>🟧</span>ちゅうおうせん</button>
     <button class="route-btn" data-route="sobu" aria-pressed="false"><span>🟨</span>そうぶせん</button>
     <button class="route-btn" data-route="tozai" aria-pressed="false"><span>🔵</span>とうざいせん</button>
-    <button class="route-btn" data-route="inokashira" aria-pressed="false"><span>🌈</span>いのかしらせん</button>
     <button class="route-btn" data-route="keio" aria-pressed="false"><span>🟥</span>けいおうせん</button>
-    <button class="route-btn" data-route="yamanote" aria-pressed="false"><span>🟩</span>やまのてせん</button>
+    <button class="route-btn" data-route="inokashira" aria-pressed="false"><span>🌈</span>いのかしらせん</button>
   </div>
   <div class="train-select-title">どれに のる？</div>
   <div class="train-buttons">
@@ -124,9 +124,9 @@
     </div>
   </div>
   <!-- 更新時は sw.js の CACHE バージョンと揃える -->
-  <div id="app-version" aria-label="つなげて！でんしゃ！、バージョン40、2026年7月19日17時05分更新">
+  <div id="app-version" aria-label="つなげて！でんしゃ！、バージョン41、2026年7月19日17時38分更新">
     <span class="version-title">つなげて！でんしゃ！</span>
-    <strong>v40</strong><span>2026.07.19 17:05 更新</span>
+    <strong>v41</strong><span>2026.07.19 17:38 更新</span>
   </div>
   <a id="creator-contact" href="https://x.com/fumilin" target="_blank" rel="noopener noreferrer">
     <span>3歳の息子のために作りました。</span>
@@ -216,6 +216,6 @@
   <span>🔦</span><span id="headlight-label">ライトをつける</span>
 </button>
 
-<script src="app.js?v=40"></script>
+<script src="app.js?v=41"></script>
 </body>
 </html>

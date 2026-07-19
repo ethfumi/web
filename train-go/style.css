@@ -96,29 +96,19 @@ html, body {
 }
 
 .train-choice-group {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1vmin;
+  display: contents;
 }
 
-.train-choice-group.multiple {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.train-choice-group.multiple .train-btn {
-  flex-direction: column;
-  gap: 0.2vmin;
-  padding: 1vmin 0.8vmin;
-}
-
-.train-choice-group.multiple .train-btn svg {
-  width: 88%;
-}
-
-.train-choice-group.multiple .train-btn span {
-  font-size: clamp(11px, 2.2vmin, 16px);
-  white-space: nowrap;
-}
+.train-btn[data-train="nozomi"] { order: 1; }
+.train-btn[data-train="doctoryellow"] { order: 2; }
+.train-btn[data-train="hayabusa"] { order: 3; }
+.train-btn[data-train="komachi"] { order: 4; }
+.train-btn[data-train="yamanote"] { order: 5; }
+.train-btn[data-train="chuo"] { order: 6; }
+.train-btn[data-train="sobu"] { order: 7; }
+.train-btn[data-train="tozai"] { order: 8; }
+.train-btn[data-train="keio"] { order: 9; }
+.train-btn[data-train="inokashira"] { order: 10; }
 
 .train-btn {
   display: flex;
