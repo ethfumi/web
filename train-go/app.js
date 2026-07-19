@@ -87,22 +87,22 @@
   const STAR_SPAWN_MIN_SECONDS = 9;
   const FALLING_STAR_TYPES = [
     {
-      key: "gold", weights: { day: 70, sunset: 40, night: 20 }, multiplier: 2, seconds: 5, scale: 1, speed: 1,
+      key: "gold", weights: { day: 70, sunset: 40, night: 20 }, multiplier: 2, seconds: 5, scale: 1, speed: 1, trailScale: 1,
       icon: "🌟", name: "きいろいほし", fill: "#ffd83d", inner: "#fff7b2",
       glow: "#fff08a", trail: "255,232,92", badge: "#fff8cc", accent: "#f2a51f", text: "#c15f00",
     },
     {
-      key: "green", weight: 20, multiplier: 4, seconds: 6, scale: 2 / 3, speed: 2,
+      key: "green", weight: 20, multiplier: 4, seconds: 6, scale: 2 / 3, speed: 2, trailScale: 1.8,
       icon: "💫", name: "みどりのほし", fill: "#62e687", inner: "#d7ffe0",
       glow: "#8dffac", trail: "98,230,135", badge: "#ddffe6", accent: "#31ad58", text: "#137132",
     },
     {
-      key: "blue", weight: 9, multiplier: 6, seconds: 7, scale: 1 / 2, speed: 3,
+      key: "blue", weight: 9, multiplier: 6, seconds: 7, scale: 1 / 2, speed: 3, trailScale: 3,
       icon: "🔵", name: "あおいほし", fill: "#48a9ff", inner: "#d9f2ff",
       glow: "#72c7ff", trail: "72,169,255", badge: "#dff3ff", accent: "#2789df", text: "#135b9b",
     },
     {
-      key: "rainbow", weight: 1, multiplier: 10, seconds: 8, scale: 1 / 3, speed: 4,
+      key: "rainbow", weight: 1, multiplier: 10, seconds: 8, scale: 1 / 3, speed: 4, trailScale: 5.4,
       icon: "🌈", name: "にじいろのほし", fill: "#ff5b73", inner: "#ffffff",
       glow: "#ffffff", trail: "255,91,115", badge: "#f4e8ff", accent: "#9b51e0", text: "#63319b",
     },
@@ -1813,8 +1813,10 @@
   function drawFallingStar() {
     if (!fallingStar) return;
     const { x, y, radius, rotation, type } = fallingStar;
+    const trailX = x + radius * 4 * type.trailScale;
+    const trailY = y - radius * 3 * type.trailScale;
     ctx.save();
-    const trail = ctx.createLinearGradient(x, y, x + radius * 4, y - radius * 3);
+    const trail = ctx.createLinearGradient(x, y, trailX, trailY);
     if (type.key === "rainbow") {
       trail.addColorStop(0, "rgba(255,91,115,0.95)");
       trail.addColorStop(0.2, "rgba(255,166,70,0.82)");
@@ -1831,7 +1833,7 @@
     ctx.lineCap = "round";
     ctx.beginPath();
     ctx.moveTo(x, y);
-    ctx.lineTo(x + radius * 4, y - radius * 3);
+    ctx.lineTo(trailX, trailY);
     ctx.stroke();
 
     ctx.shadowColor = type.glow;
@@ -3234,6 +3236,9 @@
     canvas.dataset.fallingStarType = fallingStar?.type.key || "";
     canvas.dataset.fallingStarRadius = fallingStar ? String(Math.round(fallingStar.radius * 10) / 10) : "";
     canvas.dataset.fallingStarSpeed = fallingStar ? String(fallingStar.type.speed) : "";
+    canvas.dataset.fallingStarTrailLength = fallingStar
+      ? String(Math.round(fallingStar.radius * 5 * fallingStar.type.trailScale))
+      : "";
     const starWeights = currentStarWeights();
     canvas.dataset.starWeightGold = String(starWeights.gold);
     canvas.dataset.starWeightGreen = String(starWeights.green);
