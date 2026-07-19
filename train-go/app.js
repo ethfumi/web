@@ -76,10 +76,16 @@
   const KMH_PER_MPS = 3.6;
   const TAP_BOOST_PX_PER_SEC = 75;       // 発進後の連打は細かく加速できるようにする
   const FRICTION_PX_PER_SEC2 = 18;       // 自然減速は小さく、連打の加速感を残す
+  const AUTO_ACCEL_PX_PER_SEC2 = 40;     // 自動運転は遊びやすい時間に圧縮しつつ滑らかに加速
+  const AUTO_OVERSPEED_DECEL_PX_PER_SEC2 = 90;
   const SPEED_DISPLAY_SCALE = KMH_PER_MPS / PIXELS_PER_METER;
   const ROUTE_COLORS = {
     chuo: "#f28c28", tokaido: "#2362b8", tohoku: "#2a9b82",
     sobu: "#f0c928", tozai: "#3085cc", inokashira: "#8156a6", yamanote: "#9acd32",
+  };
+  const ROUTE_AUTO_SPEED_KMH = {
+    chuo: 100, tokaido: 285, tohoku: 320, sobu: 95,
+    tozai: 100, inokashira: 90, yamanote: 90,
   };
   const GRAND_STATIONS = new Set(["とうきょう", "しんじゅく", "しぶや", "しんおおさか"]);
   const MAJOR_STATIONS = new Set([
@@ -355,6 +361,8 @@
   const expressLabel = document.getElementById("express-label");
   const btnRunningSound = document.getElementById("btn-running-sound");
   const runningSoundIcon = document.getElementById("running-sound-icon");
+  const btnAutoMode = document.getElementById("btn-auto-mode");
+  const autoModeLabel = document.getElementById("auto-mode-label");
   const onboardPanel = document.getElementById("onboard-panel");
   const onboardSummary = document.getElementById("onboard-summary");
   const onboardHint = document.getElementById("onboard-hint");
@@ -586,6 +594,8 @@
   let passingStation = false;
   let midAnnouncementDone = false;
   let runningSoundEnabled = true;
+  let autoMode = false;
+  let autoActionTimer = 0;
   let onboardPassengers = [];
   let opposingTrain = null;
   let nextOpposingTrainIn = 3;
@@ -679,6 +689,40 @@
     return Math.round(value * SPEED_DISPLAY_SCALE);
   }
 
+  function autoTargetKmh() {
+    return ROUTE_AUTO_SPEED_KMH[selectedRouteKey] || 90;
+  }
+
+  function setAutoMode(enabled) {
+    autoMode = enabled;
+    autoActionTimer = enabled ? 0.9 : 0;
+    updateDriveUi();
+    if (enabled) {
+      showPlayBanner(`🤖 じどううんてん　${autoTargetKmh()} km/h`);
+      say(`じどううんてんを、はじめます。${autoTargetKmh()}キロまで、かそくします`);
+    } else {
+      showPlayBanner("🖐️ しゅどううんてん");
+      say("しゅどううんてんに、もどります");
+    }
+  }
+
+  function updateAutoOperations(dt) {
+    if (!autoMode || state === "select" || state === "running" || state === "coupling") return;
+    autoActionTimer -= dt;
+    if (autoActionTimer > 0) return;
+
+    if (komachiReady) {
+      startKomachiCoupling();
+      autoActionTimer = 1.2;
+    } else if (!stationDoorsDone) {
+      toggleStationDoors();
+      autoActionTimer = doorsOpen ? 2.8 : 1.2;
+    } else {
+      depart();
+      autoActionTimer = 0;
+    }
+  }
+
   function updateDriveUi() {
     const terminal = activeRoute.stations[activeRoute.terminalIndex ?? activeRoute.stations.length - 2];
     speedValue.textContent = String(displaySpeed(speed));
@@ -701,6 +745,9 @@
     btnRunningSound.setAttribute("aria-pressed", String(runningSoundEnabled));
     btnRunningSound.setAttribute("aria-label", runningSoundEnabled ? "走行音を消す" : "走行音を鳴らす");
     runningSoundIcon.textContent = runningSoundEnabled ? "🔊" : "🔇";
+    btnAutoMode.setAttribute("aria-pressed", String(autoMode));
+    btnAutoMode.setAttribute("aria-label", autoMode ? "自動運転をやめる" : "自動運転をはじめる");
+    autoModeLabel.textContent = autoMode ? `じどう ${autoTargetKmh()}` : "じどう";
   }
 
   function loadVisitedStations() {
@@ -841,6 +888,8 @@
     weather = "sunny";
     weatherTime = 0;
     driverCallIndex = 0;
+    autoMode = false;
+    autoActionTimer = 0;
     updateOnboardPanel();
     addStationStamp(activeRoute.start, false);
     renderStampBook();
@@ -866,6 +915,8 @@
   function goHome() {
     state = "select";
     speed = 0;
+    autoMode = false;
+    autoActionTimer = 0;
     stopRunningSound();
     selectScreen.classList.remove("hidden");
     runUi.classList.add("hidden");
@@ -915,7 +966,7 @@
         ? `このでんしゃは、${activeRoute.expressModeName}です。${nextStationName}は、とおりすぎます`
         : `つぎは、${nextStationName}`);
     }
-    speed = Math.max(speed, 220);
+    speed = Math.max(speed, autoMode ? 60 : 220);
     startRunningSound();
     updateDriveUi();
   }
@@ -943,6 +994,7 @@
     scheduleNextStation();
     arrivalBanner.classList.remove("hidden");
     chime();
+    if (autoMode) autoActionTimer = 1.2;
     if (isKomachiStop) {
       komachiReady = true;
       arrivalBanner.textContent = "こまちがいた！";
@@ -1314,6 +1366,10 @@
     if (runningSoundEnabled && state === "running") startRunningSound();
     else stopRunningSound();
     updateDriveUi();
+  });
+  btnAutoMode.addEventListener("click", () => {
+    ensureAudio();
+    setAutoMode(!autoMode);
   });
   btnDriver.addEventListener("click", () => {
     ensureAudio();
@@ -2190,6 +2246,8 @@
       resize();
     }
 
+    updateAutoOperations(dt);
+
     if (state === "running") {
       const distToStation = stationWorldX - distance;
       const braking = isBrakingForStation();
@@ -2198,6 +2256,13 @@
         // 駅が近づいたら自動でブレーキして、ぴったり停車する
         const decel = Math.max((speed * speed) / (2 * Math.max(distToStation, 1)), 100);
         speed = Math.max(speed - decel * dt, 0);
+      } else if (autoMode) {
+        const targetSpeed = autoTargetKmh() / SPEED_DISPLAY_SCALE;
+        if (speed < targetSpeed) {
+          speed = Math.min(targetSpeed, speed + AUTO_ACCEL_PX_PER_SEC2 * dt);
+        } else if (speed > targetSpeed) {
+          speed = Math.max(targetSpeed, speed - AUTO_OVERSPEED_DECEL_PX_PER_SEC2 * dt);
+        }
       } else {
         // 摩擦でゆるやかに減速(タップしなくても止まりはしない)
         speed = Math.max(speed - FRICTION_PX_PER_SEC2 * dt, 120);
@@ -2300,6 +2365,7 @@
           segmentNumber, routeEvent, routeEventProgress, lightsOn,
           expressMode, passingStation, braking: isBrakingForStation(),
           boostPopupCount: speedBoostPopups.length, midAnnouncementDone, runningSoundEnabled,
+          autoMode, autoActionTimer, autoTargetKmh: autoTargetKmh(),
           onboardPassengers: [...onboardPassengers],
           timeOfDay, weather, visitedStations: [...visitedStations],
           opposingTrain: opposingTrain ? {
@@ -2309,6 +2375,7 @@
           } : null,
         };
       },
+      auto(enabled) { setAutoMode(Boolean(enabled)); },
       setCars(n) {
         cars = Math.max(1, Math.min(MAX_CARS, n));
         carTypes = Array(cars).fill(trainKey);
