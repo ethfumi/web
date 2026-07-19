@@ -40,6 +40,7 @@ uniform vec2 uPan;
 uniform float uTime;
 uniform float uDistance;
 uniform vec4 uShapeParams;
+uniform vec2 uExtraParams;
 uniform float uExposure;
 uniform float uZoom;
 uniform int uIterations;
@@ -55,7 +56,15 @@ mat2 rotate2d(float angle) {
   return mat2(c, -s, s, c);
 }
 
+vec3 hsvToRgb(vec3 hsv) {
+  vec3 p = abs(fract(hsv.xxx + vec3(0.0, 0.6666667, 0.3333333)) * 6.0 - 3.0);
+  return hsv.z * mix(vec3(1.0), clamp(p - 1.0, 0.0, 1.0), hsv.y);
+}
+
 vec3 palette(float t) {
+  if (uPalette == 3) {
+    return hsvToRgb(vec3(fract(t), 0.82, 1.0));
+  }
   if (uPalette == 1) {
     return 0.55 + 0.45 * cos(6.28318 * (vec3(0.66,0.38,0.18) * t + vec3(0.05,0.12,0.22)));
   }
@@ -258,6 +267,9 @@ vec3 renderNewton(vec2 coordinate) {
 }
 
 vec3 glassPalette(float t) {
+  if (uPalette == 3) {
+    return hsvToRgb(vec3(fract(t), 0.92, 1.0));
+  }
   float w0 = 0.5 + 0.5 * cos(6.28318530718 * t);
   float w1 = 0.5 + 0.5 * cos(6.28318530718 * (t + 0.3333333));
   float w2 = 0.5 + 0.5 * cos(6.28318530718 * (t + 0.6666667));
@@ -346,12 +358,42 @@ float periodicLine(float value, float sharpness) {
   return exp(-sharpness * abs(sin(3.14159265359 * value)));
 }
 
+vec2 nearestKaleidoscopeSingularity(vec2 coordinate) {
+  float centers = floor(uExtraParams.x + 0.5);
+  float spread = uExtraParams.y;
+  if (centers < 0.5 || spread < 0.001) return coordinate;
+
+  float period = uShapeParams.y;
+  float radialIndex = floor(log(max(length(coordinate) / spread, 0.0000001)) / log(period) + 0.5);
+  vec2 nearest = coordinate;
+  float nearestDistance = dot(coordinate, coordinate);
+
+  for (int ring = -1; ring <= 1; ring++) {
+    float ringIndex = radialIndex + float(ring);
+    float ringRadius = spread * pow(period, ringIndex);
+    float stagger = mod(abs(ringIndex), 2.0) * 0.5;
+    for (int i = 0; i < 12; i++) {
+      if (float(i) >= centers) break;
+      float angle = 6.28318530718 * (float(i) + stagger) / centers;
+      vec2 center = ringRadius * vec2(cos(angle), sin(angle));
+      vec2 delta = coordinate - center;
+      float distanceSquared = dot(delta, delta);
+      if (distanceSquared < nearestDistance) {
+        nearest = delta;
+        nearestDistance = distanceSquared;
+      }
+    }
+  }
+  return nearest;
+}
+
 vec3 renderInfiniteKaleidoscope(vec2 coordinate) {
-  float radius = max(length(coordinate), 0.0000001);
+  vec2 localCoordinate = nearestKaleidoscopeSingularity(coordinate);
+  float radius = max(length(localCoordinate), 0.0000001);
   float logRadius = log(radius) / log(uShapeParams.y) - uShapeParams.w;
   float phase = fract(logRadius);
   float wedge = 6.28318530718 / uShapeParams.x;
-  float angle = atan(coordinate.y, coordinate.x) + logRadius * uShapeParams.z;
+  float angle = atan(localCoordinate.y, localCoordinate.x) + logRadius * uShapeParams.z;
   float mirrorAngle = abs(mod(angle + wedge * 0.5, wedge) - wedge * 0.5);
   float fold = mirrorAngle / (wedge * 0.5);
 
@@ -369,11 +411,13 @@ vec3 renderInfiniteKaleidoscope(vec2 coordinate) {
   float glassShift = shardId + 0.17 * sin(6.28318530718 * (phase - fold));
   vec3 glass = glassPalette(glassShift);
   vec3 reflectedGlass = glassPalette(glassShift + 0.38 + facetLight * 0.14);
-  vec3 pane = mix(glass, reflectedGlass, 0.28 + facetLight * 0.36);
+  vec3 pane = uPalette == 3
+    ? mix(glass, reflectedGlass, 0.06 + facetLight * 0.12)
+    : mix(glass, reflectedGlass, 0.28 + facetLight * 0.36);
 
   float mirrorSeam = exp(-48.0 * min(fold, 1.0 - fold));
   float jewel = pow(max(0.0, sin(6.28318530718 * phase) * cos(3.14159265359 * fold)), 10.0);
-  vec3 color = pane * (0.09 + facetLight * 0.24);
+  vec3 color = pane * (uPalette == 3 ? (0.17 + facetLight * 0.38) : (0.09 + facetLight * 0.24));
   color += pane * jewel * 0.62;
   color += mix(pane, vec3(0.82, 0.95, 1.0), 0.68) * lead * 0.42;
   color += vec3(0.72, 0.94, 1.0) * (hairline * 0.42 + mirrorSeam * 0.14);
@@ -593,7 +637,7 @@ void main() {
 
   const uniforms = {};
   [
-    "uResolution", "uOrbit", "uPan", "uTime", "uDistance", "uShapeParams",
+    "uResolution", "uOrbit", "uPan", "uTime", "uDistance", "uShapeParams", "uExtraParams",
     "uExposure", "uZoom", "uIterations", "uPalette", "uMode"
   ].forEach(name => {
     uniforms[name] = gl.getUniformLocation(program, name);
@@ -649,10 +693,12 @@ void main() {
       { key: "cReal", label: "C · REAL", description: "固定するcの実部", min: -1.5, max: 1.5, step: 0.00001, value: -0.4, digits: 5, signed: true },
       { key: "cImag", label: "C · IMAGINARY", description: "固定するcの虚部", min: -1.5, max: 1.5, step: 0.00001, value: -0.59, digits: 5, signed: true }
     ] },
-    { title: "INFINITE KALEIDOSCOPE", subtitle: "/ STAINED MIRRORS", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "対数半径で繰り返す色ガラスの断片を、中心から伸びる鏡の扇形へ折り返します。拡大しても新しい破片が現れ続ける無限ズーム万華鏡です。", note: "MIRRORSで鏡の枚数、ZOOM PERIODでガラス模様の反復倍率、TWISTで階層ごとの回転を変えられます。", parameters: [
+    { title: "INFINITE KALEIDOSCOPE", subtitle: "/ STAINED MIRRORS", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "中心と、その周囲へ対数周期で並ぶ複数の特異点から色ガラスを鏡映します。どの特異点へ寄っても新しい破片が現れ続ける無限ズーム万華鏡です。", note: "CENTERSとSPREADで追加の特異点を配置できます。RAINBOWでは面ごとに連続した多色ガラスへ切り替わります。", parameters: [
       { key: "mirrors", label: "MIRRORS", description: "放射対称の枚数", min: 4, max: 32, step: 1, value: 12, digits: 0 },
       { key: "zoomPeriod", label: "ZOOM PERIOD", description: "ガラス模様が戻る倍率", min: 1.35, max: 5, step: 0.05, value: 2.6, digits: 2, suffix: "×" },
-      { key: "twist", label: "TWIST", description: "階層ごとの回転", min: -3, max: 3, step: 0.05, value: 0.05, digits: 2, signed: true }
+      { key: "twist", label: "TWIST", description: "階層ごとの回転", min: -3, max: 3, step: 0.05, value: 0.05, digits: 2, signed: true },
+      { key: "centers", label: "CENTERS", description: "各階層の追加特異点", min: 0, max: 12, step: 1, value: 5, digits: 0 },
+      { key: "spread", label: "SPREAD", description: "特異点の広がり", min: 0.2, max: 1.4, step: 0.02, value: 0.72, digits: 2 }
     ] },
     { title: "INFINITE CRYSTAL", subtitle: "/ PRISM TUNNEL", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "対数半径と鏡映角を斜めに交差させ、拡大しても終わらない結晶格子を作ります。線の交点が次々に奥へ続く回廊になります。", note: "SIDESで結晶の面数、ZOOM PERIODで階層間隔、SHEARで回廊の傾きを調整できます。", parameters: [
       { key: "sides", label: "SIDES", description: "結晶の面数", min: 3, max: 24, step: 1, value: 8, digits: 0 },
@@ -740,7 +786,7 @@ void main() {
       case 10: return "tile(x,y, seed=" + values.seed.toFixed(1) + ") ∈ {↗, ↘}\nfine scale = coarse × " + values.layerRatio.toFixed(2);
       case 11: return "F(x,y) = sin(ax + " + values.warp.toFixed(2) + " sin(by))\n        + " + values.crossMix.toFixed(2) + " sin(cy − 0.85k sin(dx))";
       case 12: return "z₀ = pixel\nzₙ₊₁ = (|Re zₙ| + i|Im zₙ|)^" + values.exponent.toFixed(0) + "\n        + (" + complexText(values.cReal, values.cImag) + ")";
-      case 13: return "ρ = log(r) / log(" + values.zoomPeriod.toFixed(2) + ")\nφ = fract(ρ),  θ′ = θ + " + values.twist.toFixed(2) + "ρ\nK(" + values.zoomPeriod.toFixed(2) + "r, θ) = K(r, θ + " + values.twist.toFixed(2) + ")";
+      case 13: return (values.centers > 0 ? "sⱼₖ = " + values.spread.toFixed(2) + " · " + values.zoomPeriod.toFixed(2) + "ᵏ · exp(2πij/" + values.centers.toFixed(0) + ")\nw = z − nearest({0, sⱼₖ})" : "w = z  // central singularity only") + "\nρ = log|w| / log(" + values.zoomPeriod.toFixed(2) + "),  φ = fract(ρ)";
       case 14: return "ρ = log(r) / log(" + values.zoomPeriod.toFixed(2) + ")\nα = fold(θ + " + values.shear.toFixed(2) + "ρ, 2π / " + values.sides.toFixed(0) + ")\nL = lines(ρ + 2α, ρ − 2α)";
       case 15: return "ρ = log(r) / log(" + values.zoomPeriod.toFixed(2) + ")\nS± = " + values.arms.toFixed(0) + "θ ± " + values.spiral.toFixed(2) + "ρ\nK(r, θ) = lines(S+, S−)";
       default: return "";
@@ -937,13 +983,14 @@ void main() {
     gl.uniform1f(uniforms.uDistance, state.distance);
     const shapeValues = modes[state.mode].parameters.map(parameter => parameterValues[state.mode][parameter.key]);
     let shaderZoom = state.zoom;
-    let zoomCycle = shapeValues[3] || 0;
+    let zoomCycle = 0;
     if (state.mode >= 13) {
       const periodLog = Math.log(shapeValues[1]);
       zoomCycle = Math.floor(state.logZoom / periodLog);
       shaderZoom = Math.exp(state.logZoom - zoomCycle * periodLog);
     }
     gl.uniform4f(uniforms.uShapeParams, shapeValues[0] || 0, shapeValues[1] || 0, shapeValues[2] || 0, zoomCycle);
+    gl.uniform2f(uniforms.uExtraParams, shapeValues[3] || 0, shapeValues[4] || 0);
     gl.uniform1f(uniforms.uExposure, state.exposure);
     gl.uniform1f(uniforms.uZoom, shaderZoom);
     gl.uniform1i(uniforms.uIterations, state.iterations);

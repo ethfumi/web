@@ -7,17 +7,17 @@
   <meta name="description" content="色ガラスが拡大の奥へ続くリアルタイム無限ズーム万華鏡">
   <meta property="og:title" content="INFINITE KALEIDOSCOPE / STAINED MIRRORS">
   <meta property="og:description" content="鏡映された色ガラスが拡大の奥へ続くリアルタイム無限ズーム万華鏡">
-  <meta property="og:image" content="./og.png?v=1.2">
+  <meta property="og:image" content="./og.png?v=1.3">
   <meta name="twitter:card" content="summary_large_image">
   <title>INFINITE KALEIDOSCOPE / STAINED MIRRORS</title>
-  <link rel="stylesheet" href="./style.css?v=1.2">
+  <link rel="stylesheet" href="./style.css?v=1.3">
 </head>
 <body>
 <main class="app">
   <canvas id="scene" aria-label="リアルタイムで描画される無限ズーム・カレイドスコープ"></canvas>
   <div class="grain" aria-hidden="true"></div>
   <header class="topbar">
-    <div><span class="eyebrow">FRACTAL SPECIMEN · v1.2 · BY <a href="https://x.com/fumilin" target="_blank" rel="me noopener noreferrer">@fumilin ↗</a></span><h1><span id="fractalTitle">INFINITE KALEIDOSCOPE</span> <em id="fractalSubtitle">/ STAINED MIRRORS</em></h1></div>
+    <div><span class="eyebrow">FRACTAL SPECIMEN · v1.3 · BY <a href="https://x.com/fumilin" target="_blank" rel="me noopener noreferrer">@fumilin ↗</a></span><h1><span id="fractalTitle">INFINITE KALEIDOSCOPE</span> <em id="fractalSubtitle">/ STAINED MIRRORS</em></h1></div>
     <div class="readout"><i></i><span id="status">INITIALIZING</span><b id="fps">-- FPS</b><b id="gpu">GPU -- ms / 16.7 ms</b><b id="headroom">HEADROOM --%</b></div>
   </header>
   <section class="coords" aria-hidden="true"><span><i id="axisLabel">PAN</i> <b id="orbitOut">0.0000 / 0.0000</b></span><span>MAG <b id="distOut">×1.00</b></span><span><i id="shapeLabel">MIRRORS</i> <b id="powerOut">12</b></span></section><section class="zoomMeter" aria-live="polite"><span>MAGNIFICATION</span><b id="zoomBadge">×1.00</b></section>
@@ -70,7 +70,7 @@
     <section id="modeParameters" class="parameterGroup" aria-label="形状パラメータ"></section>
     <label><span><b>DETAIL</b><small>反復回数</small></span><output id="detailValue">12</output><input id="detail" type="range" min="1" max="32" step="1" value="12"></label>
     <label><span><b>EXPOSURE</b><small>発光強度</small></span><output id="exposureValue">1.00</output><input id="exposure" type="range" min=".55" max="1.65" step=".05" value="1"></label>
-    <div class="option"><span><b>SPECTRUM</b><small>観測波長</small></span><div class="swatches"><button class="active" data-palette="0" style="--c:#5df4ff" aria-label="Cyan"></button><button data-palette="1" style="--c:#b69cff" aria-label="Violet"></button><button data-palette="2" style="--c:#72ffb2" aria-label="Emerald"></button></div></div>
+    <div class="option"><span><b>SPECTRUM</b><small>観測波長</small></span><div class="swatches"><button class="active" data-palette="0" style="--c:#5df4ff" aria-label="Cyan"></button><button data-palette="1" style="--c:#b69cff" aria-label="Violet"></button><button data-palette="2" style="--c:#72ffb2" aria-label="Emerald"></button><button data-palette="3" style="--c:conic-gradient(#ff4d7d,#ffd84d,#53ff9b,#55dfff,#8f6cff,#ff4d7d)" aria-label="Rainbow"></button></div></div>
     <div class="option"><span><b>RENDER SCALE</b><small>端末性能に合わせる</small></span><div class="segments"><button data-quality=".56">ECO</button><button class="active" data-quality=".78">BAL</button><button data-quality="1">MAX</button></div></div>
   </aside>
   <nav class="dock" aria-label="再生コントロール">
@@ -81,6 +81,6 @@
   </nav>
   <div id="error" class="error" hidden><b>WEBGL2 NOT AVAILABLE</b><p>最新のSafariまたはChromeで開いてください。</p></div>
 </main>
-<script src="./app.js?v=1.2"></script>
+<script src="./app.js?v=1.3"></script>
 </body>
 </html>
