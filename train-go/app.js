@@ -144,6 +144,7 @@
     ]),
     inokashira: makeSegmentSet([
       ["しぶや", "しんせん"],
+      ["しんせん", "こまばとうだいまえ"],
     ]),
     keio: makeSegmentSet([
       ["しんじゅく", "ささづか"],
@@ -153,7 +154,8 @@
       ["きたの", "けいおうはちおうじ"],
     ]),
   };
-  const UNDERGROUND_START_STATIONS = {
+  const UNDERGROUND_STATIONS = {
+    inokashira: new Set(["しんせん"]),
     keio: new Set(["しんじゅく"]),
   };
 
@@ -1538,6 +1540,22 @@
     const segmentLength = Math.max(stationWorldX - segmentStartDistance, 1);
     routeEventProgress = (distance - segmentStartDistance) / segmentLength;
     inspectionTime += dt;
+    if (isTunnelExitSegment()) {
+      if (routeEventProgress >= 0.68) {
+        say("トンネルを、ぬけたよ〜！");
+        clearRouteEvent();
+      }
+      return;
+    }
+    if (isTunnelEntrySegment()) {
+      if (!routeEventAnnounced && routeEventProgress >= 0.42) {
+        routeEventAnnounced = true;
+        routeEventBanner.textContent = "トンネルだ！";
+        routeEventBanner.classList.remove("hidden");
+        say("トンネルに、はいったよ！");
+      }
+      return;
+    }
     if (routeEvent === "crossing") {
       const screenX = crossingScreenX();
       crossingBellTimer -= dt;
@@ -1969,22 +1987,50 @@
     ctx.restore();
   }
 
-  function isUndergroundStartView() {
-    if (!UNDERGROUND_START_STATIONS[selectedRouteKey]?.has(currentStationName)) return false;
-    return state === "stopped" || routeEvent === "tunnel";
+  function isUndergroundStationView() {
+    return state === "stopped" && UNDERGROUND_STATIONS[selectedRouteKey]?.has(currentStationName);
+  }
+
+  function isUndergroundDepartureSegment() {
+    return routeEvent === "tunnel" && UNDERGROUND_STATIONS[selectedRouteKey]?.has(currentStationName);
+  }
+
+  function isTunnelExitSegment() {
+    return selectedRouteKey === "inokashira"
+      && currentStationName === "しんせん"
+      && nextStationName === "こまばとうだいまえ"
+      && routeEvent === "tunnel";
+  }
+
+  function isTunnelEntrySegment() {
+    return selectedRouteKey === "inokashira"
+      && currentStationName === "こまばとうだいまえ"
+      && nextStationName === "しんせん"
+      && routeEvent === "tunnel";
+  }
+
+  function tunnelVisualAlpha() {
+    if (isUndergroundStationView()) return 1;
+    if (isTunnelExitSegment()) return Math.max(0, Math.min((0.68 - routeEventProgress) / 0.18, 1));
+    if (isTunnelEntrySegment()) return Math.max(0, Math.min((routeEventProgress - 0.34) / 0.18, 1));
+    if (isUndergroundDepartureSegment()) return Math.max(0, Math.min((0.8 - routeEventProgress) / 0.12, 1));
+    return routeEventAlpha();
   }
 
   function isTunnelVisible() {
-    return isUndergroundStartView() || (routeEvent === "tunnel" && routeEventAnnounced);
+    return isUndergroundStationView()
+      || isUndergroundDepartureSegment()
+      || (isTunnelEntrySegment() && routeEventProgress > 0.34)
+      || (routeEvent === "tunnel" && routeEventAnnounced);
   }
 
   function drawTunnel() {
     if (!isTunnelVisible()) return;
-    const undergroundStart = isUndergroundStartView();
+    const stationOrDepartureUnderground = isUndergroundStationView() || isUndergroundDepartureSegment();
     const { x0, x1 } = viewRange();
     const groundY = H * GROUND_R;
     ctx.save();
-    ctx.globalAlpha = 0.96 * (undergroundStart ? 1 : routeEventAlpha());
+    ctx.globalAlpha = 0.96 * tunnelVisualAlpha();
     const darkness = ctx.createLinearGradient(0, 0, 0, groundY);
     darkness.addColorStop(0, "#0b1019");
     darkness.addColorStop(0.65, "#202a37");
@@ -2011,9 +2057,9 @@
         ctx.stroke();
       }
     }
-    ctx.fillStyle = undergroundStart || headlightsAreOn() ? "#fff4ad" : "#69758a";
+    ctx.fillStyle = stationOrDepartureUnderground || isTunnelEntrySegment() || headlightsAreOn() ? "#fff4ad" : "#69758a";
     for (let x = x0 + 78 - off; x < x1 + ribSpacing; x += ribSpacing) {
-      ctx.shadowBlur = undergroundStart || headlightsAreOn() ? 18 : 4;
+      ctx.shadowBlur = stationOrDepartureUnderground || isTunnelEntrySegment() || headlightsAreOn() ? 18 : 4;
       ctx.shadowColor = ctx.fillStyle;
       ctx.fillRect(x, H * 0.205, 64, 9);
     }
@@ -2353,14 +2399,14 @@
     if (state !== "running" && state !== "stopped") return;
     const trainNoseX = W * NOSE_R;
     const screenX = worldX - distance + trainNoseX;
-    const { x0, x1 } = viewRange();
-    if (screenX - 420 > x1 || screenX + 420 < x0) return;
     const y = H * GROUND_R;
     const grade = GRAND_STATIONS.has(name) ? "grand"
       : MAJOR_STATIONS.has(name) ? "major"
         : activeRoute.cityStations.has(name) ? "city" : "local";
-    const platformW = { grand: 760, major: 620, city: 520, local: 410 }[grade];
-    const canopyW = platformW - (grade === "local" ? 100 : 80);
+    const platformW = { grand: 1800, major: 1500, city: 1250, local: 1000 }[grade];
+    const canopyW = platformW * 0.86;
+    const { x0, x1 } = viewRange();
+    if (screenX - platformW / 2 - 60 > x1 || screenX + platformW / 2 + 60 < x0) return;
     const canopyH = { grand: 168, major: 145, city: 125, local: 105 }[grade];
     const accent = ROUTE_COLORS[selectedRouteKey];
 
@@ -2387,7 +2433,7 @@
       ctx.stroke();
     }
     ctx.fillStyle = "#7b858b";
-    const columns = grade === "local" ? 2 : grade === "city" ? 3 : 4;
+    const columns = Math.max(4, Math.round(canopyW / 260));
     for (let i = 0; i < columns; i++) {
       const px = screenX - canopyW / 2 + 35 + i * (canopyW - 70) / Math.max(columns - 1, 1);
       ctx.fillRect(px - 4, roofY + 14, 8, y - roofY - 32);
