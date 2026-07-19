@@ -25,7 +25,7 @@
 <title>つなげて！でんしゃ！</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="stylesheet" href="style.css?v=56">
+<link rel="stylesheet" href="style.css?v=57">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -125,9 +125,9 @@
     </div>
   </div>
   <!-- 更新時は sw.js の CACHE バージョンと揃える -->
-  <div id="app-version" aria-label="つなげて！でんしゃ！、バージョン56、2026年7月20日8時36分更新">
+  <div id="app-version" aria-label="つなげて！でんしゃ！、バージョン57、2026年7月20日9時23分更新">
     <span class="version-title">つなげて！でんしゃ！</span>
-    <strong>v56</strong><span>2026.07.20 08:36 更新</span>
+    <strong>v57</strong><span>2026.07.20 09:23 更新</span>
   </div>
   <a id="creator-contact" href="https://x.com/fumilin" target="_blank" rel="noopener noreferrer">
     <span>3歳の息子のために作りました。</span>
@@ -155,6 +155,7 @@
 <div id="drive-panel" class="hidden">
   <div id="speed-meter" aria-label="いまのスピード、走行距離、駅までの残り距離">
     <div class="speed-row"><span id="speed-value">0</span><small>km/h</small></div>
+    <div id="tap-boost-meter">タップ ＋<strong id="tap-boost-value">5</strong> km/h</div>
     <div id="distance-meter"><small>そうこうきょり</small><div class="distance-main"><span id="distance-value">0</span><small>m</small></div><small id="distance-km-value">0.0 km</small></div>
     <div id="remaining-meter">
       <div class="remaining-row"><small id="next-station-distance-label">つぎのえきまで</small><div class="remaining-values"><div class="remaining-main"><span id="next-station-distance-value">0</span><small>m</small></div><small id="next-station-distance-km">0.0 km</small></div></div>
@@ -217,6 +218,6 @@
   <span>🔦</span><span id="headlight-label">ライトをつける</span>
 </button>
 
-<script src="app.js?v=56"></script>
+<script src="app.js?v=57"></script>
 </body>
 </html>
