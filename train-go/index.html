@@ -24,7 +24,7 @@
 <title>つなげて！でんしゃ！</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="stylesheet" href="style.css?v=46">
+<link rel="stylesheet" href="style.css?v=47">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -124,9 +124,9 @@
     </div>
   </div>
   <!-- 更新時は sw.js の CACHE バージョンと揃える -->
-  <div id="app-version" aria-label="つなげて！でんしゃ！、バージョン46、2026年7月19日20時03分更新">
+  <div id="app-version" aria-label="つなげて！でんしゃ！、バージョン47、2026年7月19日20時10分更新">
     <span class="version-title">つなげて！でんしゃ！</span>
-    <strong>v46</strong><span>2026.07.19 20:03 更新</span>
+    <strong>v47</strong><span>2026.07.19 20:10 更新</span>
   </div>
   <a id="creator-contact" href="https://x.com/fumilin" target="_blank" rel="noopener noreferrer">
     <span>3歳の息子のために作りました。</span>
@@ -160,8 +160,8 @@
       <div class="remaining-row"><small id="terminal-distance-label">しゅうてんまで</small><div class="remaining-values"><div class="remaining-main"><span id="terminal-distance-value">0</span><small>m</small></div><small id="terminal-distance-km">0.0 km</small></div></div>
     </div>
   </div>
-  <button id="btn-express" aria-label="中央特快モードにする" aria-pressed="false">
-    <span>🚄</span><span id="express-label">かくえき</span>
+  <button id="btn-express" aria-label="速達モードにする" aria-pressed="false">
+    <span id="express-icon">🚃</span><span id="express-label">かくえき</span>
   </button>
   <button id="btn-running-sound" aria-label="走行音を消す" aria-pressed="true">
     <span id="running-sound-icon">🔊</span><span>そうこうおん</span>
@@ -216,6 +216,6 @@
   <span>🔦</span><span id="headlight-label">ライトをつける</span>
 </button>
 
-<script src="app.js?v=46"></script>
+<script src="app.js?v=47"></script>
 </body>
 </html>

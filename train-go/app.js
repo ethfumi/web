@@ -660,6 +660,7 @@
   const terminalDistanceValue = document.getElementById("terminal-distance-value");
   const terminalDistanceKm = document.getElementById("terminal-distance-km");
   const btnExpress = document.getElementById("btn-express");
+  const expressIcon = document.getElementById("express-icon");
   const expressLabel = document.getElementById("express-label");
   const btnRunningSound = document.getElementById("btn-running-sound");
   const runningSoundIcon = document.getElementById("running-sound-icon");
@@ -904,6 +905,7 @@
   let lightsOn = false;
   let inspectionTime = 0;
   let expressMode = false;
+  let deadheadMode = false;
   let passingStation = false;
   let midAnnouncementDone = false;
   let runningSoundEnabled = true;
@@ -978,9 +980,24 @@
       && !komachiCoupled;
   }
 
+  function isTerminalNextStation() {
+    const terminalIndex = activeRoute.terminalIndex ?? activeRoute.stations.length - 2;
+    if (activeRoute.loopKm) return stationIdx === terminalIndex;
+    return routeDirection > 0 ? stationIdx === terminalIndex : stationIdx < 0;
+  }
+
+  function isDeadheadStopName(name) {
+    const terminal = activeRoute.stations[activeRoute.terminalIndex ?? activeRoute.stations.length - 2].name;
+    const couplingStation = train === TRAINS.hayabusa
+      && KOMACHI_COUPLING_STATIONS[selectedRouteKey] === name
+      && !komachiCoupled;
+    return name === activeRoute.start || name === terminal || couplingStation;
+  }
+
   function shouldPassNextStation() {
-    if (!expressMode || !activeRoute.supportsExpress) return false;
     const isFirstKomachiStop = isKomachiCouplingStop(nextStationName);
+    if (deadheadMode) return !isFirstKomachiStop && !isTerminalNextStation();
+    if (!expressMode || !activeRoute.supportsExpress) return false;
     return !isFirstKomachiStop && !activeRoute.expressStops.has(nextStationName);
   }
 
@@ -1082,6 +1099,7 @@
     const terminal = routeTerminalStation();
     speedValue.textContent = String(displaySpeed(speed));
     canvas.dataset.braking = String(isBrakingForStation());
+    canvas.dataset.passingStation = String(passingStation);
     canvas.dataset.speedBoostCount = String(speedBoostPopups.length);
     distanceValue.textContent = String(Math.floor(distance / PIXELS_PER_METER));
     distanceKmValue.textContent = `${(Math.floor(distance / PIXELS_PER_METER) / 1000).toFixed(1)} km`;
@@ -1093,10 +1111,25 @@
     terminalDistanceLabel.textContent = `しゅうてん ${terminal.name}まで`;
     terminalDistanceValue.textContent = remainingDistanceMeters(terminalRemaining);
     terminalDistanceKm.textContent = remainingDistanceKm(terminalRemaining);
-    btnExpress.classList.toggle("hidden", !activeRoute.supportsExpress);
-    btnExpress.setAttribute("aria-pressed", String(expressMode));
-    btnExpress.setAttribute("aria-label", expressMode ? "各駅停車モードにする" : `${activeRoute.expressModeName}モードにする`);
-    expressLabel.textContent = expressMode ? activeRoute.expressLabel : "かくえき";
+    btnExpress.classList.remove("hidden");
+    btnExpress.classList.toggle("deadhead", deadheadMode);
+    btnExpress.setAttribute("aria-pressed", String(expressMode || deadheadMode));
+    canvas.dataset.serviceMode = deadheadMode ? "deadhead" : expressMode ? "express" : "local";
+    if (deadheadMode) {
+      btnExpress.setAttribute("aria-label", "各駅停車モードにする");
+      expressIcon.textContent = "🚫";
+      expressLabel.textContent = "かいそう";
+    } else if (expressMode) {
+      btnExpress.setAttribute("aria-label", "回送モードにする");
+      expressIcon.textContent = "🚄";
+      expressLabel.textContent = activeRoute.expressLabel;
+    } else {
+      btnExpress.setAttribute("aria-label", activeRoute.supportsExpress
+        ? `${activeRoute.expressModeName}モードにする`
+        : "回送モードにする");
+      expressIcon.textContent = "🚃";
+      expressLabel.textContent = "かくえき";
+    }
     btnRunningSound.setAttribute("aria-pressed", String(runningSoundEnabled));
     btnRunningSound.setAttribute("aria-label", runningSoundEnabled ? "走行音を消す" : "走行音を鳴らす");
     runningSoundIcon.textContent = runningSoundEnabled ? "🔊" : "🔇";
@@ -1125,17 +1158,17 @@
   function renderStampBook() {
     const routeStationNames = stationNamesForRoute(activeRoute);
     const routeVisitedCount = routeStationNames.filter((name) => visitedStations.has(name)).length;
-    const showExpressStops = expressMode && activeRoute.supportsExpress;
+    const showStopPattern = deadheadMode || (expressMode && activeRoute.supportsExpress);
     stampGrid.replaceChildren();
     routeStationNames.forEach((name) => {
       const stamp = document.createElement("div");
       const visited = visitedStations.has(name);
-      const isExpressStop = activeRoute.expressStops.has(name);
-      stamp.className = `station-stamp${visited ? " visited" : ""}${showExpressStops ? (isExpressStop ? " express-stop" : " express-pass") : ""}`;
-      if (showExpressStops) {
+      const isModeStop = deadheadMode ? isDeadheadStopName(name) : activeRoute.expressStops.has(name);
+      stamp.className = `station-stamp${visited ? " visited" : ""}${showStopPattern ? (isModeStop ? " express-stop" : " express-pass") : ""}`;
+      if (showStopPattern) {
         const badge = document.createElement("span");
         badge.className = "stamp-stop-badge";
-        badge.textContent = isExpressStop ? "● とまる" : "→ とおる";
+        badge.textContent = isModeStop ? "● とまる" : "→ とおる";
         stamp.appendChild(badge);
       }
       const celebration = stationCelebrationFor(name);
@@ -1145,10 +1178,10 @@
         ? `${celebration?.stamp ? `${celebration.stamp}\n` : ""}${name}`
         : `？\n${name}`;
       stamp.appendChild(stationName);
-      stamp.setAttribute("aria-label", `${name}、${visited ? "スタンプずみ" : "まだスタンプなし"}${showExpressStops ? `、${isExpressStop ? "とまるえき" : "とおりすぎるえき"}` : ""}`);
+      stamp.setAttribute("aria-label", `${name}、${visited ? "スタンプずみ" : "まだスタンプなし"}${showStopPattern ? `、${isModeStop ? "とまるえき" : "とおりすぎるえき"}` : ""}`);
       stampGrid.appendChild(stamp);
     });
-    stampCount.textContent = `${activeRoute.name}　${routeVisitedCount} / ${routeStationNames.length} えき${showExpressStops ? "　● とまる　→ とおる" : ""}`;
+    stampCount.textContent = `${activeRoute.name}　${routeVisitedCount} / ${routeStationNames.length} えき${showStopPattern ? "　● とまる　→ とおる" : ""}`;
   }
 
   function addStationStamp(name, celebrate = true) {
@@ -1186,7 +1219,10 @@
         if (index < -1) break;
         candidate = index < 0 ? activeRoute.start : activeRoute.stations[index].name;
       }
-      if (!expressMode || activeRoute.expressStops.has(candidate)) names.push(candidate);
+      const stopsHere = deadheadMode
+        ? isDeadheadStopName(candidate)
+        : !expressMode || activeRoute.expressStops.has(candidate);
+      if (stopsHere) names.push(candidate);
     }
     return names.length > 0 ? names : [nextStationName];
   }
@@ -1282,6 +1318,7 @@
     doorsOpen = false;
     stationDoorsDone = true;
     expressMode = false;
+    deadheadMode = false;
     passingStation = false;
     midAnnouncementDone = false;
     onboardPassengers = [];
@@ -1372,7 +1409,7 @@
     if (playHorn) horn();
     if (announceNext) {
       say(passingStation
-        ? `このでんしゃは、${activeRoute.expressModeName}です。${nextStationName}は、とおりすぎます`
+        ? `このでんしゃは、${deadheadMode ? "かいそうれっしゃ" : activeRoute.expressModeName}です。${nextStationName}は、とおりすぎます`
         : `つぎは、${nextStationName}`);
     }
     speed = Math.max(speed, autoMode ? 60 : 220);
@@ -1952,19 +1989,32 @@
     say("ピカッ！ライトがついたよ！あかるいね！");
   });
   btnExpress.addEventListener("click", () => {
-    if (!activeRoute.supportsExpress) return;
     ensureAudio();
-    expressMode = !expressMode;
+    let announcement;
+    if (deadheadMode) {
+      deadheadMode = false;
+      expressMode = false;
+      announcement = "かくえきていしゃモード！ぜんぶのえきに、とまります";
+    } else if (expressMode || !activeRoute.supportsExpress) {
+      expressMode = false;
+      deadheadMode = true;
+      const couplingNote = train === TRAINS.hayabusa && !komachiCoupled
+        ? "ただし、もりおかで、こまちとれんけつします。"
+        : "";
+      announcement = `かいそうれっしゃ！${routeTerminalStation().name}まで、とまりません。${couplingNote}`;
+    } else {
+      expressMode = true;
+      deadheadMode = false;
+      announcement = routeDirection > 0 || activeRoute.loopKm
+        ? activeRoute.expressAnnouncement
+        : `${activeRoute.expressModeName}モード！${activeRoute.start}へ、もどります`;
+    }
     passingStation = shouldPassNextStation();
     midAnnouncementDone = false;
     updateDriveUi();
     renderStampBook();
     chime();
-    say(expressMode
-      ? (routeDirection > 0 || activeRoute.loopKm
-        ? activeRoute.expressAnnouncement
-        : `${activeRoute.expressModeName}モード！${activeRoute.start}へ、もどります`)
-      : "かくえきていしゃモード！ぜんぶのえきに、とまります");
+    say(announcement);
   });
   btnRunningSound.addEventListener("click", () => {
     ensureAudio();
@@ -3225,7 +3275,7 @@
           komachiCoupled, komachiReady, komachiGap,
           doorsOpen, stationDoorsDone,
           segmentNumber, routeEvent, routeEventProgress, tunnelVisualRange: isTunnelVisible() ? tunnelVisualRange() : null, lightsOn,
-          expressMode, passingStation, braking: isBrakingForStation(),
+          expressMode, deadheadMode, passingStation, braking: isBrakingForStation(),
           boostPopupCount: speedBoostPopups.length, midAnnouncementDone, runningSoundEnabled,
           autoMode, autoActionTimer, autoTargetKmh: autoTargetKmh(),
           playElapsedSeconds, motionEffect: canvas.dataset.motionEffect,
