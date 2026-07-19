@@ -316,6 +316,54 @@ vec3 renderKaleidoscope(vec2 coordinate) {
   vec3 lines = calmGeometryColor(0.18 + min(geometry, 1.25) * 0.82);
   return background + lines;
 }
+float periodicLine(float value, float sharpness) {
+  return exp(-sharpness * abs(sin(3.14159265359 * value)));
+}
+
+vec3 renderInfiniteRosette(vec2 coordinate) {
+  float radius = max(length(coordinate), 0.0000001);
+  float logRadius = log(radius) / log(uShapeParams.y) - uShapeParams.w;
+  float angle = atan(coordinate.y, coordinate.x) + logRadius * uShapeParams.z;
+  float mirrors = uShapeParams.x;
+  float folded = abs(sin(angle * mirrors * 0.5));
+  float phase = fract(logRadius);
+  float petal = abs(cos(6.28318530718 * phase) - (0.18 + 0.72 * pow(folded, 1.35)));
+  float innerPetal = abs(cos(6.28318530718 * (phase + 0.22)) - (0.52 - 0.38 * folded));
+  float rings = periodicLine(logRadius * 2.0, 30.0);
+  float spokes = exp(-42.0 * folded) * (0.35 + 0.65 * periodicLine(logRadius - 0.14, 8.0));
+  float glow = exp(-34.0 * petal) + 0.55 * exp(-45.0 * innerPetal) + 0.32 * rings + 0.4 * spokes;
+  float facets = 0.5 + 0.5 * cos(6.28318530718 * phase + folded * 4.0);
+  return calmGeometryColor(0.014 + facets * 0.026 + min(glow, 1.65) * 0.68);
+}
+
+vec3 renderInfinitePrism(vec2 coordinate) {
+  float radius = max(length(coordinate), 0.0000001);
+  float logRadius = log(radius) / log(uShapeParams.y) - uShapeParams.w;
+  float angle = atan(coordinate.y, coordinate.x) + logRadius * uShapeParams.z;
+  float wedge = 6.28318530718 / uShapeParams.x;
+  float fold = abs(mod(angle + wedge * 0.5, wedge) - wedge * 0.5) / wedge;
+  float a = logRadius + fold * 2.0;
+  float b = logRadius - fold * 2.0;
+  float lattice = periodicLine(a, 32.0) + periodicLine(b, 32.0);
+  float crossbar = periodicLine(logRadius * 2.0 + fold, 38.0);
+  float chamber = 0.5 + 0.5 * cos(6.28318530718 * logRadius) * cos(6.28318530718 * fold);
+  return calmGeometryColor(0.012 + chamber * 0.032 + min(lattice + crossbar * 0.65, 1.8) * 0.64);
+}
+
+vec3 renderInfiniteSpiral(vec2 coordinate) {
+  float radius = max(length(coordinate), 0.0000001);
+  float logRadius = log(radius) / log(uShapeParams.y) - uShapeParams.w;
+  float angle = atan(coordinate.y, coordinate.x) / 6.28318530718;
+  float arms = uShapeParams.x;
+  float spiral = uShapeParams.z;
+  float clockwise = periodicLine(angle * arms + logRadius * spiral, 28.0);
+  float counter = periodicLine(angle * arms - logRadius * (spiral * 0.62 + 0.38), 34.0);
+  float beads = periodicLine(logRadius * 2.0 + sin(angle * 6.28318530718 * arms) * 0.18, 42.0);
+  float cells = 0.5 + 0.5 * cos(6.28318530718 * (logRadius + angle * arms));
+  float glow = clockwise + counter * 0.72 + beads * clockwise * 0.82;
+  return calmGeometryColor(0.013 + cells * 0.028 + min(glow, 1.75) * 0.66);
+}
+
 vec3 renderPhyllotaxis(vec2 coordinate) {
   float spacing = 0.082;
   float radius = length(coordinate);
@@ -381,6 +429,7 @@ vec3 renderPlane(vec2 screenPoint) {
   else if (uMode == 9) planeScale = 1.55;
   else if (uMode == 10) planeScale = 1.35;
   else if (uMode == 11) planeScale = 1.65;
+  else if (uMode >= 13) planeScale = 1.75;
   vec2 coordinate = uPan + screenPoint * (planeScale / uZoom);
   vec3 color;
   if (uMode == 6) color = renderNewton(coordinate);
@@ -389,6 +438,9 @@ vec3 renderPlane(vec2 screenPoint) {
   else if (uMode == 9) color = renderPhyllotaxis(coordinate);
   else if (uMode == 10) color = renderTruchet(coordinate);
   else if (uMode == 11) color = renderHarmonicField(coordinate);
+  else if (uMode == 13) color = renderInfiniteRosette(coordinate);
+  else if (uMode == 14) color = renderInfinitePrism(coordinate);
+  else if (uMode == 15) color = renderInfiniteSpiral(coordinate);
   else color = renderEscapeSet(coordinate);
   float gridGlow = (uMode <= 6 || uMode == 12) ? exp(-70.0 * min(abs(coordinate.x), abs(coordinate.y))) / max(1.0, uZoom * 0.04) : 0.0;
   return color + vec3(0.08, 0.22, 0.27) * gridGlow;
@@ -552,11 +604,26 @@ void main() {
       { key: "exponent", label: "EXPONENT", description: "折り返し後の累乗", min: 2, max: 8, step: 1, value: 2, digits: 0 },
       { key: "cReal", label: "C · REAL", description: "固定するcの実部", min: -1.5, max: 1.5, step: 0.00001, value: -0.4, digits: 5, signed: true },
       { key: "cImag", label: "C · IMAGINARY", description: "固定するcの虚部", min: -1.5, max: 1.5, step: 0.00001, value: -0.59, digits: 5, signed: true }
+    ] },
+    { title: "INFINITE ROSETTE", subtitle: "/ SCALE BLOOM", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "半径を対数へ変換し、一定倍率ごとに同じ位相へ戻してから角度を鏡映します。拡大そのものが模様の反復になる無限ズーム・カレイドスコープです。", note: "ZOOM PERIOD倍するたびに同じ花形が次の階層として現れます。TWISTで階層間の回転量が変わります。", parameters: [
+      { key: "mirrors", label: "MIRRORS", description: "放射対称の枚数", min: 4, max: 32, step: 1, value: 12, digits: 0 },
+      { key: "zoomPeriod", label: "ZOOM PERIOD", description: "模様が戻る倍率", min: 1.35, max: 5, step: 0.05, value: 2, digits: 2, suffix: "×" },
+      { key: "twist", label: "TWIST", description: "階層ごとの回転", min: -3, max: 3, step: 0.05, value: 0.75, digits: 2, signed: true }
+    ] },
+    { title: "INFINITE CRYSTAL", subtitle: "/ PRISM TUNNEL", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "対数半径と鏡映角を斜めに交差させ、拡大しても終わらない結晶格子を作ります。線の交点が次々に奥へ続く回廊になります。", note: "SIDESで結晶の面数、ZOOM PERIODで階層間隔、SHEARで回廊の傾きを調整できます。", parameters: [
+      { key: "sides", label: "SIDES", description: "結晶の面数", min: 3, max: 24, step: 1, value: 8, digits: 0 },
+      { key: "zoomPeriod", label: "ZOOM PERIOD", description: "格子が戻る倍率", min: 1.35, max: 5, step: 0.05, value: 2.35, digits: 2, suffix: "×" },
+      { key: "shear", label: "SHEAR", description: "階層のねじれ", min: -2.5, max: 2.5, step: 0.05, value: 0.35, digits: 2, signed: true }
+    ] },
+    { title: "INFINITE SPIRAL", subtitle: "/ ENDLESS CHAMBER", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "角度と対数半径を結び、逆向きの螺旋を重ねたスケール周期パターンです。ズームすると螺旋が回転しながら同じ構造へ戻ります。", note: "ARMSで腕の本数、ZOOM PERIODで反復倍率、SPIRALで巻きの強さを変えられます。", parameters: [
+      { key: "arms", label: "ARMS", description: "螺旋の本数", min: 3, max: 24, step: 1, value: 10, digits: 0 },
+      { key: "zoomPeriod", label: "ZOOM PERIOD", description: "模様が戻る倍率", min: 1.35, max: 5, step: 0.05, value: 2, digits: 2, suffix: "×" },
+      { key: "spiral", label: "SPIRAL", description: "巻きの強さ", min: 0.25, max: 3, step: 0.05, value: 1.15, digits: 2 }
     ] }
   ];
 
   const parameterValues = modes.map(mode => Object.fromEntries(mode.parameters.map(parameter => [parameter.key, parameter.value])));
-  const DEFAULT_MODE = 2;
+  const DEFAULT_MODE = 13;
   const defaultMode = modes[DEFAULT_MODE];
 
   const state = {
@@ -597,7 +664,8 @@ void main() {
   function setMotion(active) {
     state.motion = active;
     $("#motion").textContent = active ? "Ⅱ" : "▶";
-    $("#motion").ariaLabel = active ? "自動回転を一時停止" : "自動回転を再開";
+    const action = state.mode >= 13 ? "自動ズーム" : "自動回転";
+    $("#motion").ariaLabel = active ? action + "を一時停止" : action + "を再開";
   }
 
   function formatParameter(parameter, value) {
@@ -628,6 +696,9 @@ void main() {
       case 10: return "tile(x,y, seed=" + values.seed.toFixed(1) + ") ∈ {↗, ↘}\nfine scale = coarse × " + values.layerRatio.toFixed(2);
       case 11: return "F(x,y) = sin(ax + " + values.warp.toFixed(2) + " sin(by))\n        + " + values.crossMix.toFixed(2) + " sin(cy − 0.85k sin(dx))";
       case 12: return "z₀ = pixel\nzₙ₊₁ = (|Re zₙ| + i|Im zₙ|)^" + values.exponent.toFixed(0) + "\n        + (" + complexText(values.cReal, values.cImag) + ")";
+      case 13: return "ρ = log(r) / log(" + values.zoomPeriod.toFixed(2) + ")\nφ = fract(ρ),  θ′ = θ + " + values.twist.toFixed(2) + "ρ\nK(" + values.zoomPeriod.toFixed(2) + "r, θ) = K(r, θ + " + values.twist.toFixed(2) + ")";
+      case 14: return "ρ = log(r) / log(" + values.zoomPeriod.toFixed(2) + ")\nα = fold(θ + " + values.shear.toFixed(2) + "ρ, 2π / " + values.sides.toFixed(0) + ")\nL = lines(ρ + 2α, ρ − 2α)";
+      case 15: return "ρ = log(r) / log(" + values.zoomPeriod.toFixed(2) + ")\nS± = " + values.arms.toFixed(0) + "θ ± " + values.spiral.toFixed(2) + "ρ\nK(r, θ) = lines(S+, S−)";
       default: return "";
     }
   }
@@ -683,7 +754,7 @@ void main() {
     state.targetLogZoom = 0;
     state.logZoom = 0;
     state.zoom = 1;
-    setMotion(mode.dimension === "3D");
+    setMotion(mode.dimension === "3D" || index >= 13);
 
     $("#fractalTitle").textContent = mode.title;
     $("#fractalSubtitle").textContent = mode.subtitle;
@@ -807,6 +878,8 @@ void main() {
 
     if (state.motion && state.mode < 3) {
       state.targetOrbitX += state.speed * delta * 0.18;
+    } else if (state.motion && state.mode >= 13) {
+      state.targetLogZoom += state.speed * delta * 0.7;
     }
     state.orbitX = damp(state.orbitX, state.targetOrbitX, 9.5, delta);
     state.orbitY = damp(state.orbitY, state.targetOrbitY, 9.5, delta);
@@ -819,9 +892,16 @@ void main() {
     gl.uniform1f(uniforms.uTime, now / 1000);
     gl.uniform1f(uniforms.uDistance, state.distance);
     const shapeValues = modes[state.mode].parameters.map(parameter => parameterValues[state.mode][parameter.key]);
-    gl.uniform4f(uniforms.uShapeParams, shapeValues[0] || 0, shapeValues[1] || 0, shapeValues[2] || 0, shapeValues[3] || 0);
+    let shaderZoom = state.zoom;
+    let zoomCycle = shapeValues[3] || 0;
+    if (state.mode >= 13) {
+      const periodLog = Math.log(shapeValues[1]);
+      zoomCycle = Math.floor(state.logZoom / periodLog);
+      shaderZoom = Math.exp(state.logZoom - zoomCycle * periodLog);
+    }
+    gl.uniform4f(uniforms.uShapeParams, shapeValues[0] || 0, shapeValues[1] || 0, shapeValues[2] || 0, zoomCycle);
     gl.uniform1f(uniforms.uExposure, state.exposure);
-    gl.uniform1f(uniforms.uZoom, state.zoom);
+    gl.uniform1f(uniforms.uZoom, shaderZoom);
     gl.uniform1i(uniforms.uIterations, state.iterations);
     gl.uniform1i(uniforms.uPalette, state.palette);
     gl.uniform1i(uniforms.uMode, state.mode);

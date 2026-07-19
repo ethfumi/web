@@ -4,24 +4,24 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#04070b">
-  <meta name="description" content="指先で探索するリアルタイムMenger spongeフラクタル">
-  <meta property="og:title" content="MENGER SPONGE / VOID CUBE">
-  <meta property="og:description" content="指先で探索するリアルタイム3Dフラクタルビューアー">
+  <meta name="description" content="ズームするほど咲き続けるリアルタイム無限カレイドスコープ">
+  <meta property="og:title" content="INFINITE ROSETTE / SCALE BLOOM">
+  <meta property="og:description" content="拡大そのものが模様になるリアルタイム無限ズーム・カレイドスコープ">
   <meta property="og:image" content="./og.png">
   <meta name="twitter:card" content="summary_large_image">
-  <title>MENGER SPONGE / VOID CUBE</title>
+  <title>INFINITE ROSETTE / SCALE BLOOM</title>
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 <main class="app">
-  <canvas id="scene" aria-label="リアルタイムで描画されるMenger sponge"></canvas>
+  <canvas id="scene" aria-label="リアルタイムで描画される無限ズーム・カレイドスコープ"></canvas>
   <div class="grain" aria-hidden="true"></div>
   <header class="topbar">
-    <div><span class="eyebrow">FRACTAL SPECIMEN · v1.1 · BY <a href="https://x.com/fumilin" target="_blank" rel="me noopener noreferrer">@fumilin ↗</a></span><h1><span id="fractalTitle">MENGER SPONGE</span> <em id="fractalSubtitle">/ VOID CUBE</em></h1></div>
+    <div><span class="eyebrow">FRACTAL SPECIMEN · v1.1 · BY <a href="https://x.com/fumilin" target="_blank" rel="me noopener noreferrer">@fumilin ↗</a></span><h1><span id="fractalTitle">INFINITE ROSETTE</span> <em id="fractalSubtitle">/ SCALE BLOOM</em></h1></div>
     <div class="readout"><i></i><span id="status">INITIALIZING</span><b id="fps">-- FPS</b><b id="gpu">GPU -- ms / 16.7 ms</b><b id="headroom">HEADROOM --%</b></div>
   </header>
-  <section class="coords" aria-hidden="true"><span><i id="axisLabel">ORBIT</i> <b id="orbitOut">+00 / +00</b></span><span>MAG <b id="distOut">×1.00</b></span><span><i id="shapeLabel">CELL SCALE</i> <b id="powerOut">3.00</b></span></section><section class="zoomMeter" aria-live="polite"><span>MAGNIFICATION</span><b id="zoomBadge">×1.00</b></section>
-  <section class="hint" id="hint"><strong>✦</strong><div><b>TOUCH THE FIELD</b><small>ドラッグで回転 · ピンチで深く潜る</small></div></section>
+  <section class="coords" aria-hidden="true"><span><i id="axisLabel">PAN</i> <b id="orbitOut">0.0000 / 0.0000</b></span><span>MAG <b id="distOut">×1.00</b></span><span><i id="shapeLabel">MIRRORS</i> <b id="powerOut">12</b></span></section><section class="zoomMeter" aria-live="polite"><span>MAGNIFICATION</span><b id="zoomBadge">×1.00</b></section>
+  <section class="hint" id="hint"><strong>✦</strong><div><b>TOUCH THE FIELD</b><small>ドラッグで移動 · ピンチで深く潜る</small></div></section>
   <aside class="panel open" id="panel" aria-label="フラクタル設定">
     <header><div><span>FRACTAL LIBRARY</span><b>数式標本を切り替える</b></div><button id="closePanel" aria-label="設定を閉じる">×</button></header>
 <section class="modeSection" aria-label="3Dフラクタル">
@@ -29,7 +29,7 @@
   <div class="modeGrid">
     <button data-mode="0"><b>MANDELBULB</b><small>POWER SET</small></button>
     <button data-mode="1"><b>MANDELBOX</b><small>FOLDED SPACE</small></button>
-    <button class="active" data-mode="2"><b>MENGER</b><small>VOID CUBE</small></button>
+    <button data-mode="2"><b>MENGER</b><small>VOID CUBE</small></button>
   </div>
 </section>
 <section class="modeSection" aria-label="2Dフラクタル">
@@ -42,6 +42,14 @@
     <button data-mode="6"><b>NEWTON</b><small>ROOT BASINS</small></button>
     <button data-mode="7"><b>SIERPINSKI</b><small>CLEAN CARPET</small></button>
     <button data-mode="8"><b>KALEIDOSCOPE</b><small>MIRROR TILES</small></button>
+  </div>
+</section>
+<section class="modeSection" aria-label="無限ズームカレイドスコープ">
+  <span>INFINITE ZOOM</span>
+  <div class="modeGrid">
+    <button class="active" data-mode="13"><b>ROSETTE</b><small>SCALE BLOOM</small></button>
+    <button data-mode="14"><b>CRYSTAL</b><small>PRISM TUNNEL</small></button>
+    <button data-mode="15"><b>SPIRAL</b><small>ENDLESS CHAMBER</small></button>
   </div>
 </section>
 <section class="modeSection" aria-label="生成数学パターン">
@@ -66,7 +74,7 @@
     <div class="option"><span><b>RENDER SCALE</b><small>端末性能に合わせる</small></span><div class="segments"><button data-quality=".56">ECO</button><button class="active" data-quality=".78">BAL</button><button data-quality="1">MAX</button></div></div>
   </aside>
   <nav class="dock" aria-label="再生コントロール">
-    <button id="motion" class="play" aria-label="自動回転を一時停止">Ⅱ</button>
+    <button id="motion" class="play" aria-label="自動ズームを一時停止">Ⅱ</button>
     <label class="speed"><span>SPEED</span><output id="speedValue">×0.36</output><input id="speed" type="range" min="0" max="1.4" step=".05" value=".36"></label>
     <button id="openPanel" class="dockButton" aria-label="フラクタルと数式メニューを開く"><b>⌁</b><small>LIBRARY</small></button>
     <button id="reset" class="dockButton" aria-label="視点をリセット"><b>↺</b><small>RESET</small></button>
