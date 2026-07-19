@@ -693,11 +693,11 @@ void main() {
       { key: "cReal", label: "C · REAL", description: "固定するcの実部", min: -1.5, max: 1.5, step: 0.00001, value: -0.4, digits: 5, signed: true },
       { key: "cImag", label: "C · IMAGINARY", description: "固定するcの虚部", min: -1.5, max: 1.5, step: 0.00001, value: -0.59, digits: 5, signed: true }
     ] },
-    { title: "INFINITE KALEIDOSCOPE", subtitle: "/ STAINED MIRRORS", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "中心と、その周囲へ対数周期で並ぶ複数の特異点から色ガラスを鏡映します。どの特異点へ寄っても新しい破片が現れ続ける無限ズーム万華鏡です。", note: "CENTERSとSPREADで追加の特異点を配置できます。RAINBOWでは面ごとに連続した多色ガラスへ切り替わります。", parameters: [
+    { title: "INFINITE KALEIDOSCOPE", subtitle: "/ STAINED MIRRORS", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "中心の特異点から色ガラスを鏡映する無限ズーム万華鏡です。CENTERSを増やすと、周囲の各ズーム階層にも潜り込める特異点を追加できます。", note: "初期値は中央1点。CENTERSとSPREADで追加特異点を配置でき、RAINBOWでは面ごとの多色ガラスへ切り替わります。", parameters: [
       { key: "mirrors", label: "MIRRORS", description: "放射対称の枚数", min: 4, max: 32, step: 1, value: 12, digits: 0 },
       { key: "zoomPeriod", label: "ZOOM PERIOD", description: "ガラス模様が戻る倍率", min: 1.35, max: 5, step: 0.05, value: 2.6, digits: 2, suffix: "×" },
       { key: "twist", label: "TWIST", description: "階層ごとの回転", min: -3, max: 3, step: 0.05, value: 0.05, digits: 2, signed: true },
-      { key: "centers", label: "CENTERS", description: "各階層の追加特異点", min: 0, max: 12, step: 1, value: 5, digits: 0 },
+      { key: "centers", label: "CENTERS", description: "各階層の追加特異点", min: 0, max: 12, step: 1, value: 0, digits: 0 },
       { key: "spread", label: "SPREAD", description: "特異点の広がり", min: 0.2, max: 1.4, step: 0.02, value: 0.72, digits: 2 }
     ] },
     { title: "INFINITE CRYSTAL", subtitle: "/ PRISM TUNNEL", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "対数半径と鏡映角を斜めに交差させ、拡大しても終わらない結晶格子を作ります。線の交点が次々に奥へ続く回廊になります。", note: "SIDESで結晶の面数、ZOOM PERIODで階層間隔、SHEARで回廊の傾きを調整できます。", parameters: [
