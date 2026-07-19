@@ -848,6 +848,7 @@
   let wheelAngle = 0;
   let stationWorldX = 0;   // 次の駅の位置(距離座標)
   let currentStationX = null; // いま停車中(または通過直後)の駅の位置
+  let currentStationAligned = true; // 通過駅ではなく、編成をホームへ合わせた停車駅か
   let stationIdx = -1;        // activeRoute.stations 内の次に停まる駅
   let routeDirection = 1;     // 1: くだり、-1: 終点から始発へ折り返し
   let currentLineKm = activeRoute.startKm;
@@ -1225,6 +1226,7 @@
     speed = 0;
     distance = 0;
     currentStationX = 0;
+    currentStationAligned = true;
     currentStationName = activeRoute.start;
     canvas.dataset.route = selectedRouteKey;
     canvas.dataset.routeName = activeRoute.name;
@@ -1357,6 +1359,7 @@
     stopRunningSound();
     updateDriveUi();
     currentStationX = stationWorldX;
+    currentStationAligned = true;
     currentStationName = nextStationName;
     canvas.dataset.currentStation = currentStationName;
     addStationStamp(currentStationName);
@@ -1400,6 +1403,7 @@
     const passedName = nextStationName;
     clearRouteEvent();
     currentStationX = stationWorldX;
+    currentStationAligned = false;
     currentStationName = passedName;
     scheduleNextStation();
     beginSegment(false, false);
@@ -2368,8 +2372,7 @@
   function drawStationCelebration(worldX, name) {
     const celebration = stationCelebrationFor(name);
     if (!celebration || (state !== "running" && state !== "stopped")) return;
-    const trainNoseX = W * NOSE_R;
-    const screenX = worldX - distance + trainNoseX;
+    const screenX = stationScreenX(worldX, name);
     const { x0, x1 } = viewRange();
     if (screenX - 260 > x1 || screenX + 260 < x0) return;
     const baseY = H * GROUND_R;
@@ -2395,15 +2398,47 @@
     }
   }
 
-  function drawStation(worldX, name) {
-    if (state !== "running" && state !== "stopped") return;
-    const trainNoseX = W * NOSE_R;
-    const screenX = worldX - distance + trainNoseX;
-    const y = H * GROUND_R;
-    const grade = GRAND_STATIONS.has(name) ? "grand"
+  function stationGrade(name) {
+    return GRAND_STATIONS.has(name) ? "grand"
       : MAJOR_STATIONS.has(name) ? "major"
         : activeRoute.cityStations.has(name) ? "city" : "local";
-    const platformW = { grand: 1800, major: 1500, city: 1250, local: 1000 }[grade];
+  }
+
+  function stationPlatformWidth(name) {
+    return { grand: 1800, major: 1500, city: 1250, local: 1000 }[stationGrade(name)];
+  }
+
+  function formationStationOffset(name) {
+    if (cars <= 1 && !komachiCoupled) return 0;
+    const { carW, gap } = carMetrics();
+    const rear = -(cars * carW + Math.max(cars - 1, 0) * gap);
+    const front = komachiCoupled ? komachiGap + carW * 2 + gap : 0;
+    const formationLength = front - rear;
+    const platformW = stationPlatformWidth(name);
+    return formationLength <= platformW
+      ? (rear + front) / 2
+      : front - platformW / 2;
+  }
+
+  function stationAlignmentProgress(worldX, name) {
+    if (cars <= 1 && !komachiCoupled) return 0;
+    if (currentStationAligned && worldX === currentStationX && name === currentStationName) return 1;
+    if (passingStation || worldX !== stationWorldX || name !== nextStationName) return 0;
+    const distanceToStation = stationWorldX - distance;
+    return Math.max(0, Math.min((700 - distanceToStation) / 700, 1));
+  }
+
+  function stationScreenX(worldX, name) {
+    return worldX - distance + W * NOSE_R
+      + formationStationOffset(name) * stationAlignmentProgress(worldX, name);
+  }
+
+  function drawStation(worldX, name) {
+    if (state !== "running" && state !== "stopped") return;
+    const screenX = stationScreenX(worldX, name);
+    const y = H * GROUND_R;
+    const grade = stationGrade(name);
+    const platformW = stationPlatformWidth(name);
     const canopyW = platformW * 0.86;
     const { x0, x1 } = viewRange();
     if (screenX - platformW / 2 - 60 > x1 || screenX + platformW / 2 + 60 < x0) return;
@@ -2465,17 +2500,22 @@
       ctx.stroke();
     }
 
-    // 駅名板(ひらがな)。文字数に合わせて板の幅を変える
+    // 駅名板(ひらがな)。長いホームのどこからでも駅名が見えるよう複数置く
     const bw = Math.max(110, name.length * 22 + 26);
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(screenX - bw / 2, y - 94, bw, 34);
-    ctx.strokeStyle = accent;
-    ctx.lineWidth = 3;
-    ctx.strokeRect(screenX - bw / 2, y - 94, bw, 34);
-    ctx.fillStyle = accent;
-    ctx.font = "bold 20px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText(name, screenX, y - 70);
+    const signCount = Math.max(2, Math.round(platformW / 500));
+    const signSpan = Math.min(platformW - bw - 100, (signCount - 1) * 430);
+    for (let i = 0; i < signCount; i++) {
+      const signX = screenX - signSpan / 2 + i * signSpan / (signCount - 1);
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(signX - bw / 2, y - 94, bw, 34);
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 3;
+      ctx.strokeRect(signX - bw / 2, y - 94, bw, 34);
+      ctx.fillStyle = accent;
+      ctx.font = "bold 20px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(name, signX, y - 70);
+    }
   }
 
   function drawWheel(x, y, r) {
