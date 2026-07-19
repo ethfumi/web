@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111515">
+  <meta name="description" content="明日の朝に取り壊される部屋を舞台にした短編ブラウザ脱出ゲーム。">
+  <title>明日、取り壊される部屋</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main class="game">
+    <header class="game-header">
+      <div><p class="eyebrow">SHORT ESCAPE GAME</p><h1>明日、取り壊される部屋</h1></div>
+      <button class="quiet-button" id="resetButton" type="button">最初から</button>
+    </header>
+    <section class="room-frame" aria-label="古い部屋">
+      <div class="room light-on" id="room">
+        <div class="light"></div><div class="light-beam"></div>
+        <button class="object window" data-object="window" type="button" aria-label="窓を調べる"><span class="glass"></span><span class="curtain left"></span><span class="curtain right"></span><span class="window-clue">雨　晴　雪</span></button>
+        <button class="object calendar" data-object="calendar" type="button" aria-label="カレンダーを調べる"><strong>APRIL</strong><span class="dates"><i class="snow">1</i><i>2</i><i class="rain">3</i><i>4</i><i>5</i><i>6</i><i>7</i><i>8</i><i>9</i><i>10</i><i>11</i><i>12</i><i>13</i><i>14</i><i>15</i><i>16</i><i>17</i><i class="sun">18</i><i>19</i><i>20</i><i>21</i></span></button>
+        <button class="object clock" data-object="clock" type="button" aria-label="時計を調べる"><span class="clock-face"><i class="hour-hand"></i><i class="minute-hand"></i><b></b></span></button>
+        <button class="object picture" data-object="picture" type="button" aria-label="額縁を調べる"><span>この部屋を<br>忘れない</span></button>
+        <button class="object door" data-object="door" type="button" aria-label="扉を調べる"><span class="door-panel"></span><span class="knob"></span><span class="keypad"></span></button>
+        <div class="desk"><span class="desk-top"></span><span class="leg leg-left"></span><span class="leg leg-right"></span></div>
+        <button class="object note" data-object="note" type="button" aria-label="机の紙を調べる">NOTE</button>
+        <button class="object drawer" data-object="drawer" type="button" aria-label="引き出しを調べる"><span></span></button>
+        <button class="object box" data-object="box" type="button" aria-label="木箱を調べる">3桁</button>
+        <button class="object switch" data-object="switch" type="button" aria-label="照明のスイッチを押す"><span></span></button>
+        <div class="floor"></div><p class="tap-note">気になる場所をタップ</p>
+      </div>
+    </section>
+    <section class="hud">
+      <div class="message"><span class="label">MEMORY</span><p id="messageText" aria-live="polite">机の上に、古びた紙が置かれている。</p></div>
+      <div class="inventory"><span class="label">ITEM</span><div id="inventoryItems"><span class="empty">まだ何もない</span></div></div>
+      <button class="hint-button" id="hintButton" type="button">ヒントを見る</button>
+    </section>
+  </main>
+  <div class="overlay visible" id="introOverlay"><section class="card intro" role="dialog" aria-modal="true" aria-labelledby="introTitle"><p class="eyebrow">A ROOM WITH ONE NIGHT LEFT</p><h2 id="introTitle">明日、取り壊される部屋</h2><p>この部屋は明日の朝、取り壊されます。</p><p class="accent">ただし、この文章を読んでいるあなたは、<br>昨日すでに死んでいます。</p><button class="primary-button" id="startButton" type="button">目を開ける</button><small>音は出ません・プレイ時間 約10分</small></section></div>
+  <div class="overlay" id="modalOverlay"><section class="card modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="close-button" id="modalClose" type="button" aria-label="閉じる">×</button><p class="eyebrow" id="modalEyebrow">FOUND</p><h2 id="modalTitle">調べたもの</h2><div id="modalContent"></div></section></div>
+  <div class="overlay ending-overlay" id="endingOverlay"><section class="card ending" role="dialog" aria-modal="true" aria-labelledby="endingTitle"><p class="eyebrow">LAST MEMORY</p><h2 id="endingTitle">最後の手紙</h2><div id="endingContent"></div></section></div>
+  <script src="./app.js"></script>
+</body>
+</html>
