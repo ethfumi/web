@@ -512,25 +512,30 @@
   ];
 
   const OPPOSING_TRAIN_TYPES = {
-    yamanote: { name: "やまのてせん", kind: "local", body: "#e8ecef", stripe: "#9acd32" },
-    keihinTohoku: { name: "けいひんとうほくせん", kind: "local", body: "#e8ecef", stripe: "#52b9e9" },
-    saikyo: { name: "さいきょうせん", kind: "local", body: "#e8ecef", stripe: "#35a66f" },
-    shonanShinjuku: { name: "しょうなんしんじゅくライン", kind: "local", body: "#e8ecef", stripe: "#f28c28", stripe2: "#43a36b" },
-    sobu: { name: "そうぶせん", kind: "local", body: "#e8ecef", stripe: "#ffd400" },
-    chuo: { name: "ちゅうおうせん", kind: "local", body: "#e8ecef", stripe: "#f28c28" },
-    azusa: { name: "あずさ・かいじ", kind: "local", body: "#f4f7f8", stripe: "#7a5ab6" },
-    naritaExpress: { name: "なりたエクスプレス", kind: "local", body: "#f4f4f4", stripe: "#d12f3f" },
-    nozomi: { name: "のぞみ", kind: "shinkansen", body: "#f8f8f8", stripe: "#1c48a6" },
-    hikari: { name: "ひかり", kind: "shinkansen", body: "#f8f8f8", stripe: "#1c48a6" },
-    kodama: { name: "こだま", kind: "shinkansen", body: "#f8f8f8", stripe: "#1c48a6" },
-    hayabusa: { name: "はやぶさ", kind: "shinkansen", body: "#f7f5ed", stripe: "#36a995", stripe2: "#e73d8f" },
-    komachi: { name: "こまち", kind: "shinkansen", body: "#ef3340", stripe: "#b7b7b7" },
-    yamabiko: { name: "やまびこ", kind: "shinkansen", body: "#f7f5ed", stripe: "#36a995" },
-    tozai: { name: "とうざいせん", kind: "local", body: "#e8ecef", stripe: "#3085cc", stripe2: "#32a5d2" },
-    toyoRapid: { name: "とうようこうそくせん", kind: "local", body: "#e8ecef", stripe: "#1775b8", stripe2: "#e07b25" },
-    inokashira: { name: "いのかしらせん", kind: "local", body: "#eef1f2", stripe: "#6f4aa8" },
-    keio: { name: "けいおうせん", kind: "local", body: "#e8ecef", stripe: "#d31359", stripe2: "#174f9a" },
-    freight: { name: "かもつれっしゃ", kind: "freight", body: "#40505d", stripe: "#e49a31" },
+    yamanote: { name: "やまのてせん", kind: "local", cars: 11, speedKmh: 90, body: "#e8ecef", stripe: "#9acd32" },
+    keihinTohoku: { name: "けいひんとうほくせん", kind: "local", cars: 10, speedKmh: 90, body: "#e8ecef", stripe: "#52b9e9" },
+    saikyo: { name: "さいきょうせん", kind: "local", cars: 10, speedKmh: 100, body: "#e8ecef", stripe: "#35a66f" },
+    shonanShinjuku: { name: "しょうなんしんじゅくライン", kind: "local", cars: 15, speedKmh: 110, body: "#e8ecef", stripe: "#f28c28", stripe2: "#43a36b" },
+    sobu: { name: "そうぶせん", kind: "local", cars: 10, speedKmh: 95, body: "#e8ecef", stripe: "#ffd400" },
+    chuo: { name: "ちゅうおうせん", kind: "local", cars: 12, speedKmh: 100, body: "#e8ecef", stripe: "#f28c28" },
+    azusa: { name: "あずさ・かいじ", kind: "local", cars: [9, 12], speedKmh: 130, body: "#f4f7f8", stripe: "#7a5ab6" },
+    naritaExpress: { name: "なりたエクスプレス", kind: "local", cars: [6, 12], speedKmh: 130, body: "#f4f4f4", stripe: "#d12f3f" },
+    nozomi: { name: "のぞみ", kind: "shinkansen", cars: 16, speedKmh: 285, body: "#f8f8f8", stripe: "#1c48a6" },
+    hikari: { name: "ひかり", kind: "shinkansen", cars: 16, speedKmh: 285, body: "#f8f8f8", stripe: "#1c48a6" },
+    kodama: { name: "こだま", kind: "shinkansen", cars: 16, speedKmh: 285, body: "#f8f8f8", stripe: "#1c48a6" },
+    hayabusa: { name: "はやぶさ", kind: "shinkansen", cars: 10, speedKmh: 320, body: "#f7f5ed", stripe: "#36a995", stripe2: "#e73d8f" },
+    hayabusaKomachi: {
+      name: "はやぶさ＋こまち", kind: "shinkansen", cars: 17, speedKmh: 320,
+      body: "#f7f5ed", stripe: "#36a995", stripe2: "#e73d8f", coupledAtCar: 10,
+      coupledBody: "#ef3340", coupledStripe: "#b7b7b7",
+    },
+    komachi: { name: "こまち", kind: "shinkansen", cars: 7, speedKmh: 320, body: "#ef3340", stripe: "#b7b7b7" },
+    yamabiko: { name: "やまびこ", kind: "shinkansen", cars: 10, speedKmh: 275, body: "#f7f5ed", stripe: "#36a995" },
+    tozai: { name: "とうざいせん", kind: "local", cars: 10, speedKmh: 100, body: "#e8ecef", stripe: "#3085cc", stripe2: "#32a5d2" },
+    toyoRapid: { name: "とうようこうそくせん", kind: "local", cars: 10, speedKmh: 100, body: "#e8ecef", stripe: "#1775b8", stripe2: "#e07b25" },
+    inokashira: { name: "いのかしらせん", kind: "local", cars: 5, speedKmh: 90, body: "#eef1f2", stripe: "#6f4aa8" },
+    keio: { name: "けいおうせん", kind: "local", cars: 10, speedKmh: 110, body: "#e8ecef", stripe: "#d31359", stripe2: "#174f9a" },
+    freight: { name: "かもつれっしゃ", kind: "freight", cars: 26, speedKmh: 100, body: "#40505d", stripe: "#e49a31" },
   };
 
   const CHUO_SOBU_PARALLEL_STATIONS = new Set([
@@ -574,7 +579,7 @@
       if (TOHOKU_NORTH_OF_MORIOKA.has(currentStationName) || TOHOKU_NORTH_OF_MORIOKA.has(nextStationName)) {
         return [types.hayabusa];
       }
-      return [types.hayabusa, types.komachi, types.yamabiko];
+      return [types.hayabusaKomachi, types.yamabiko];
     }
     if (selectedRouteKey === "sobu") {
       if (segmentIsWithin(CHUO_SOBU_PARALLEL_STATIONS)) return [types.sobu, types.chuo];
@@ -1228,7 +1233,7 @@
     setOnboardPanelExpanded(false);
     stationPassengers.replaceChildren();
     opposingTrain = null;
-    nextOpposingTrainIn = 2.5 + Math.random() * 4;
+    scheduleNextOpposingTrain(true);
     timeOfDay = "day";
     weather = "sunny";
     weatherTime = 0;
@@ -2097,6 +2102,13 @@
     ctx.fillRect(x0, y + 6, x1 - x0, 4);
   }
 
+  function scheduleNextOpposingTrain(initial = false) {
+    const isShinkansenRoute = selectedRouteKey === "tokaido" || selectedRouteKey === "tohoku";
+    const minimum = isShinkansenRoute ? 2.4 : 1.2;
+    const variation = isShinkansenRoute ? 3.2 : 2.6;
+    nextOpposingTrainIn = (minimum + Math.random() * variation) * (initial ? 0.7 : 1);
+  }
+
   function spawnOpposingTrain(typeIndex = null) {
     const pool = opposingTrainPoolForSegment();
     const index = typeIndex === null
@@ -2107,27 +2119,30 @@
     opposingTrain = {
       type,
       x: x1 + 180,
-      cars: type.kind === "freight"
-        ? 4 + Math.floor(Math.random() * 3)
-        : 2 + Math.floor(Math.random() * 3),
-      speed: 360 + Math.random() * 180,
+      cars: Array.isArray(type.cars)
+        ? type.cars[Math.floor(Math.random() * type.cars.length)]
+        : type.cars,
+      speed: type.speedKmh / SPEED_DISPLAY_SCALE,
     };
   }
 
   function updateOpposingTrain(dt) {
     if (state === "select") return;
     if (!opposingTrain) {
-      nextOpposingTrainIn -= dt;
+      // 速く走るほど短い時間で多くの列車と出会う。上限は描画が混みすぎないためのもの。
+      const encounterRate = 1 + Math.min(displaySpeed(speed), 1200) / 400;
+      nextOpposingTrainIn -= dt * encounterRate;
       if (nextOpposingTrainIn <= 0) spawnOpposingTrain();
       return;
     }
 
     const carW = Math.min(W * 0.13, 115);
     const { x0 } = viewRange();
-    opposingTrain.x -= (opposingTrain.speed + Math.min(speed, 1800) * 0.55) * dt;
+    // 自分と対向列車の速度を足した相対速度で、すれ違う速さを表現する。
+    opposingTrain.x -= (opposingTrain.speed + speed) * dt;
     if (opposingTrain.x + opposingTrain.cars * (carW + 5) < x0 - 120) {
       opposingTrain = null;
-      nextOpposingTrainIn = 4 + Math.random() * 7;
+      scheduleNextOpposingTrain();
     }
   }
 
@@ -2143,6 +2158,10 @@
       const left = opposingTrain.x + i * (carW + gap);
       const top = y - carH + 1;
       const isEngine = i === 0;
+      const isCoupledCar = type.coupledAtCar !== undefined && i >= type.coupledAtCar;
+      const bodyColor = isCoupledCar ? type.coupledBody : type.body;
+      const stripeColor = isCoupledCar ? type.coupledStripe : type.stripe;
+      const stripe2Color = isCoupledCar ? null : type.stripe2;
 
       if (type.kind === "freight" && !isEngine) {
         const containerColors = ["#b6533c", "#4f7892", "#9b7b3c", "#52745b"];
@@ -2151,17 +2170,17 @@
         ctx.fillStyle = "#313940";
         ctx.fillRect(left, top + carH - 3, carW, 4);
       } else {
-        ctx.fillStyle = type.body;
+        ctx.fillStyle = bodyColor;
         ctx.strokeStyle = "#56616a";
         ctx.lineWidth = 2;
         roundRect(left, top, carW, carH, type.kind === "steam" && isEngine ? 12 : 7);
         ctx.fill();
         ctx.stroke();
 
-        ctx.fillStyle = type.stripe;
+        ctx.fillStyle = stripeColor;
         ctx.fillRect(left + 2, top + carH * 0.58, carW - 4, carH * 0.16);
-        if (type.stripe2) {
-          ctx.fillStyle = type.stripe2;
+        if (stripe2Color) {
+          ctx.fillStyle = stripe2Color;
           ctx.fillRect(left + 2, top + carH * 0.76, carW - 4, carH * 0.08);
         }
 
@@ -2844,9 +2863,12 @@
           onboardPassengers: [...onboardPassengers],
           timeOfDay, weather, visitedStations: [...visitedStations],
           opposingPool: opposingTrainPoolForSegment().map((type) => type.name),
+          nextOpposingTrainIn,
           opposingTrain: opposingTrain ? {
             name: opposingTrain.type.name,
             cars: opposingTrain.cars,
+            speedKmh: displaySpeed(opposingTrain.speed),
+            relativeSpeedKmh: displaySpeed(opposingTrain.speed + speed),
             x: opposingTrain.x,
           } : null,
         };
