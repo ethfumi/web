@@ -869,6 +869,7 @@
   let cars = 1;
   let speed = 0; // px/s
   let distance = 0;
+  let visualDistance = 0;    // 折り返し後は減らし、背景や駅を反対方向へ流す
   let wheelAngle = 0;
   let stationWorldX = 0;   // 次の駅の位置(距離座標)
   let currentStationX = null; // いま停車中(または通過直後)の駅の位置
@@ -1292,6 +1293,7 @@
     cars = 1;
     speed = 0;
     distance = 0;
+    visualDistance = 0;
     currentStationX = 0;
     currentStationAligned = true;
     currentStationName = activeRoute.start;
@@ -1447,6 +1449,10 @@
     const isTurnaround = !activeRoute.loopKm
       && (stationIdx === terminalIndex || currentStationName === activeRoute.start);
     scheduleNextStation();
+    if (isTurnaround) {
+      opposingTrain = null;
+      scheduleNextOpposingTrain(true);
+    }
     updateDriveUi();
     arrivalBanner.classList.remove("hidden");
     chime();
@@ -2088,6 +2094,14 @@
     return !activeRoute.loopKm && routeDirection < 0;
   }
 
+  function travelVisualSign() {
+    return trainFacesLeft() ? -1 : 1;
+  }
+
+  function worldScreenOffset(worldX) {
+    return (worldX - distance) * travelVisualSign();
+  }
+
   function carMetrics() {
     const carW = Math.min(W * 0.22, 190);
     return { carW, carH: carW * 0.32, gap: 8 };
@@ -2135,9 +2149,12 @@
   function drawClouds(dt) {
     ctx.fillStyle = "rgba(255,255,255,0.9)";
     for (const c of clouds) {
-      c.x -= (speed * 0.18 + 8) * dt * c.s;
+      c.x -= (speed * 0.18 + 8) * dt * c.s * travelVisualSign();
       if (c.x < -160) {
         c.x = W + 160;
+        c.y = H * (0.05 + Math.random() * 0.25);
+      } else if (c.x > W + 160) {
+        c.x = -160;
         c.y = H * (0.05 + Math.random() * 0.25);
       }
       const r = 26 * c.s;
@@ -2153,7 +2170,7 @@
     const base = groundY();
     const { x0, x1 } = viewRange();
     const period = W * 0.7;
-    const off = (distance * 0.28) % (W * 1.4);
+    const off = (visualDistance * 0.28) % (W * 1.4);
     ctx.fillStyle = "#9fd48a";
     const iStart = Math.floor((x0 + off - W * 0.35 - W * 0.45) / period);
     const iEnd = Math.ceil((x1 + off - W * 0.35 + W * 0.45) / period);
@@ -2179,7 +2196,7 @@
     const cityBlend = currentCity + (nextCity - currentCity) * blend;
     const majorBlend = currentMajor + (nextMajor - currentMajor) * blend;
     const spacing = 118;
-    const scroll = distance * 0.48;
+    const scroll = visualDistance * 0.48;
     const start = Math.floor((x0 + scroll) / spacing) - 1;
     const end = Math.ceil((x1 + scroll) / spacing) + 1;
     const colors = ["#d6c4ab", "#c6d6df", "#e0b9a8", "#bcc9a8"];
@@ -2338,7 +2355,7 @@
     ctx.fillStyle = darkness;
     ctx.fillRect(x0, 0, x1 - x0, tunnelGroundY);
     const ribSpacing = 220;
-    const off = (distance * 0.75) % ribSpacing;
+    const off = (visualDistance * 0.75) % ribSpacing;
     for (let x = x0 - off; x < x1 + ribSpacing; x += ribSpacing) {
       ctx.strokeStyle = "#4a5665";
       ctx.lineWidth = 12;
@@ -2377,12 +2394,12 @@
   function crossingScreenX() {
     if (crossingWorldX === null) return Number.POSITIVE_INFINITY;
     const trainX = W * NOSE_R;
-    return trainX + (crossingWorldX - distance) * viewScale;
+    return trainX + worldScreenOffset(crossingWorldX) * viewScale;
   }
 
   function drawCrossing() {
     if (routeEvent !== "crossing" || crossingWorldX === null) return;
-    const x = crossingWorldX - distance + W * NOSE_R;
+    const x = worldScreenOffset(crossingWorldX) + W * NOSE_R;
     const { x0, x1 } = viewRange();
     if (x < x0 - 160 || x > x1 + 160) return;
     const nearY = groundY();
@@ -2461,7 +2478,7 @@
     ctx.fillRect(x0, farY - 6, x1 - x0, 24);
     ctx.fillStyle = "#756b59";
     const farSpacing = 42;
-    const farOff = (distance * 0.55) % farSpacing;
+    const farOff = (visualDistance * 0.55) % farSpacing;
     for (let x = -farOff + Math.floor((x0 + farOff) / farSpacing) * farSpacing; x < x1; x += farSpacing) {
       ctx.fillRect(x, farY - 3, 24, 18);
     }
@@ -2474,7 +2491,7 @@
     ctx.fillRect(x0, y, x1 - x0, (H - y) / viewScale);
     ctx.fillStyle = "#6d5f45";
     const spacing = 46;
-    const off = distance % spacing;
+    const off = visualDistance % spacing;
     for (let x = -off + Math.floor((x0 + off) / spacing) * spacing; x < x1; x += spacing) {
       ctx.fillRect(x, y + 10, 26, 8);
     }
@@ -2495,13 +2512,18 @@
       ? Math.floor(Math.random() * pool.length)
       : typeIndex % pool.length;
     const type = pool[index];
-    const { x1 } = viewRange();
+    const { x0, x1 } = viewRange();
+    const cars = Array.isArray(type.cars)
+      ? type.cars[Math.floor(Math.random() * type.cars.length)]
+      : type.cars;
+    const direction = trainFacesLeft() ? 1 : -1;
+    const carW = Math.min(W * 0.13, 115);
+    const trainWidth = cars * (carW + 5);
     opposingTrain = {
       type,
-      x: x1 + 180,
-      cars: Array.isArray(type.cars)
-        ? type.cars[Math.floor(Math.random() * type.cars.length)]
-        : type.cars,
+      x: direction < 0 ? x1 + 180 : x0 - trainWidth - 180,
+      cars,
+      direction,
       speed: type.speedKmh / SPEED_DISPLAY_SCALE,
     };
   }
@@ -2517,10 +2539,13 @@
     }
 
     const carW = Math.min(W * 0.13, 115);
-    const { x0 } = viewRange();
+    const { x0, x1 } = viewRange();
     // 自分と対向列車の速度を足した相対速度で、すれ違う速さを表現する。
-    opposingTrain.x -= (opposingTrain.speed + speed) * dt;
-    if (opposingTrain.x + opposingTrain.cars * (carW + 5) < x0 - 120) {
+    opposingTrain.x += opposingTrain.direction * (opposingTrain.speed + speed) * dt;
+    const trainWidth = opposingTrain.cars * (carW + 5);
+    const leftView = opposingTrain.x + trainWidth < x0 - 120;
+    const rightView = opposingTrain.x > x1 + 120;
+    if ((opposingTrain.direction < 0 && leftView) || (opposingTrain.direction > 0 && rightView)) {
       opposingTrain = null;
       scheduleNextOpposingTrain();
     }
@@ -2533,6 +2558,13 @@
     const carW = Math.min(W * 0.13, 115);
     const carH = carW * 0.34;
     const gap = 5;
+    const trainWidth = opposingTrain.cars * (carW + gap);
+    ctx.save();
+    if (opposingTrain.direction > 0) {
+      const centerX = opposingTrain.x + trainWidth / 2;
+      ctx.translate(centerX * 2, 0);
+      ctx.scale(-1, 1);
+    }
 
     for (let i = 0; i < opposingTrain.cars; i++) {
       const left = opposingTrain.x + i * (carW + gap);
@@ -2586,6 +2618,7 @@
       ctx.arc(left + carW * 0.76, y + 2, 6, 0, Math.PI * 2);
       ctx.fill();
     }
+    ctx.restore();
   }
 
   function formatTrackDistance(worldX) {
@@ -2598,12 +2631,14 @@
     const noseX = W * NOSE_R;
     const { x0, x1 } = viewRange();
     const markerSpacing = PIXELS_PER_METER * 100;
-    const worldLeft = distance + x0 - noseX;
-    const worldRight = distance + x1 - noseX;
+    const worldEdgeA = distance + (x0 - noseX) / travelVisualSign();
+    const worldEdgeB = distance + (x1 - noseX) / travelVisualSign();
+    const worldLeft = Math.min(worldEdgeA, worldEdgeB);
+    const worldRight = Math.max(worldEdgeA, worldEdgeB);
     const firstMarker = Math.max(markerSpacing, Math.ceil(worldLeft / markerSpacing) * markerSpacing);
 
     for (let worldX = firstMarker; worldX <= worldRight; worldX += markerSpacing) {
-      const x = worldX - distance + noseX;
+      const x = worldScreenOffset(worldX) + noseX;
       ctx.fillStyle = "#f7fbff";
       ctx.strokeStyle = "#2a5caa";
       ctx.lineWidth = 2;
@@ -2731,7 +2766,7 @@
   function stationScreenX(worldX, name) {
     // 駅の距離座標をホーム先端の停止位置として、ホーム全体は後ろ側へ伸ばす。
     // 車両数に応じて編成を横移動しないため、到着時の「にゅっ」とした補正がなくなる。
-    return worldX - distance + W * NOSE_R - stationPlatformWidth(name) / 2;
+    return worldScreenOffset(worldX) + W * NOSE_R - stationPlatformWidth(name) / 2;
   }
 
   function drawStation(worldX, name) {
@@ -3021,7 +3056,7 @@
     const noseX = W * NOSE_R + (komachiCoupled ? trainStationOffset() : 0);
     const connectionX = komachiCoupled
       ? noseX + komachiGap
-      : komachiStationX - distance + noseX + komachiGap;
+      : worldScreenOffset(komachiStationX) + noseX + komachiGap;
     const bob = state === "running" ? Math.sin(distance * 0.05 + 1) * 1.5 : 0;
     const top = y - carH - 10 + bob;
 
@@ -3190,8 +3225,10 @@
       }
 
       if (state === "running") {
-        distance += speed * dt;
-        wheelAngle += speed * dt * 0.08;
+        const travel = speed * dt;
+        distance += travel;
+        visualDistance += travel * travelVisualSign();
+        wheelAngle += travel * 0.08 * travelVisualSign();
         updateRouteEvent(dt);
         updateMidRouteAnnouncement();
         updateRunningSound();
@@ -3230,6 +3267,11 @@
     canvas.dataset.platformWidth = String(Math.round(stationPlatformWidth(nextStationName)));
     canvas.dataset.trainStationOffset = String(Math.round(trainStationOffset()));
     canvas.dataset.trainFacing = trainFacesLeft() ? "left" : "right";
+    canvas.dataset.worldMotion = trainFacesLeft() ? "right" : "left";
+    canvas.dataset.opposingDirection = opposingTrain
+      ? (opposingTrain.direction > 0 ? "right" : "left")
+      : "";
+    canvas.dataset.opposingX = opposingTrain ? String(Math.round(opposingTrain.x)) : "";
     canvas.dataset.stationScreenX = String(Math.round(stationScreenX(stationWorldX, nextStationName)));
     canvas.dataset.fallingStarX = fallingStar ? String(Math.round(fallingStar.x)) : "";
     canvas.dataset.fallingStarY = fallingStar ? String(Math.round(fallingStar.y)) : "";
@@ -3306,7 +3348,7 @@
       status() {
         return {
           state, selectedRouteKey, routeName: activeRoute.name, routeVariant: activeRoute.variant || "main", currentLineKm, routeDirection,
-          speed, distance, cars, carTypes: [...carTypes], viewScale,
+          speed, distance, visualDistance, cars, carTypes: [...carTypes], viewScale,
           toStation: stationWorldX - distance,
           stationScreenX: stationScreenX(stationWorldX, nextStationName),
           platformWidth: stationPlatformWidth(nextStationName),
@@ -3334,6 +3376,7 @@
             speedKmh: displaySpeed(opposingTrain.speed),
             relativeSpeedKmh: displaySpeed(opposingTrain.speed + speed),
             x: opposingTrain.x,
+            direction: opposingTrain.direction,
           } : null,
         };
       },
