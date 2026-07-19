@@ -153,6 +153,9 @@
       ["きたの", "けいおうはちおうじ"],
     ]),
   };
+  const UNDERGROUND_START_STATIONS = {
+    keio: new Set(["しんじゅく"]),
+  };
 
   // 駅間距離は各路線の営業キロを使う。山手線は周回し、ほかの路線は終点で折り返す。
   const ROUTES = {
@@ -1091,17 +1094,30 @@
   function renderStampBook() {
     const routeStationNames = stationNamesForRoute(activeRoute);
     const routeVisitedCount = routeStationNames.filter((name) => visitedStations.has(name)).length;
+    const showExpressStops = expressMode && activeRoute.supportsExpress;
     stampGrid.replaceChildren();
     routeStationNames.forEach((name) => {
       const stamp = document.createElement("div");
-      stamp.className = `station-stamp${visitedStations.has(name) ? " visited" : ""}`;
+      const visited = visitedStations.has(name);
+      const isExpressStop = activeRoute.expressStops.has(name);
+      stamp.className = `station-stamp${visited ? " visited" : ""}${showExpressStops ? (isExpressStop ? " express-stop" : " express-pass") : ""}`;
+      if (showExpressStops) {
+        const badge = document.createElement("span");
+        badge.className = "stamp-stop-badge";
+        badge.textContent = isExpressStop ? "● とまる" : "→ とおる";
+        stamp.appendChild(badge);
+      }
       const celebration = stationCelebrationFor(name);
-      stamp.textContent = visitedStations.has(name)
+      const stationName = document.createElement("span");
+      stationName.className = "station-stamp-name";
+      stationName.textContent = visited
         ? `${celebration?.stamp ? `${celebration.stamp}\n` : ""}${name}`
         : `？\n${name}`;
+      stamp.appendChild(stationName);
+      stamp.setAttribute("aria-label", `${name}、${visited ? "スタンプずみ" : "まだスタンプなし"}${showExpressStops ? `、${isExpressStop ? "とまるえき" : "とおりすぎるえき"}` : ""}`);
       stampGrid.appendChild(stamp);
     });
-    stampCount.textContent = `${activeRoute.name}　${routeVisitedCount} / ${routeStationNames.length} えき`;
+    stampCount.textContent = `${activeRoute.name}　${routeVisitedCount} / ${routeStationNames.length} えき${showExpressStops ? "　● とまる　→ とおる" : ""}`;
   }
 
   function addStationStamp(name, celebrate = true) {
@@ -1222,6 +1238,8 @@
     speedBoostPopups = [];
     accelerationEffect = 0;
     brakeEffect = 0;
+    playElapsedSeconds = 0;
+    updatePlayTimer();
     state = "stopped";
     scheduleNextStation();
     doorsOpen = false;
@@ -1725,6 +1743,7 @@
     passingStation = shouldPassNextStation();
     midAnnouncementDone = false;
     updateDriveUi();
+    renderStampBook();
     chime();
     say(expressMode
       ? (routeDirection > 0 || activeRoute.loopKm
@@ -1950,12 +1969,22 @@
     ctx.restore();
   }
 
+  function isUndergroundStartView() {
+    if (!UNDERGROUND_START_STATIONS[selectedRouteKey]?.has(currentStationName)) return false;
+    return state === "stopped" || routeEvent === "tunnel";
+  }
+
+  function isTunnelVisible() {
+    return isUndergroundStartView() || (routeEvent === "tunnel" && routeEventAnnounced);
+  }
+
   function drawTunnel() {
-    if (routeEvent !== "tunnel" || !routeEventAnnounced) return;
+    if (!isTunnelVisible()) return;
+    const undergroundStart = isUndergroundStartView();
     const { x0, x1 } = viewRange();
     const groundY = H * GROUND_R;
     ctx.save();
-    ctx.globalAlpha = 0.96 * routeEventAlpha();
+    ctx.globalAlpha = 0.96 * (undergroundStart ? 1 : routeEventAlpha());
     const darkness = ctx.createLinearGradient(0, 0, 0, groundY);
     darkness.addColorStop(0, "#0b1019");
     darkness.addColorStop(0.65, "#202a37");
@@ -1982,9 +2011,9 @@
         ctx.stroke();
       }
     }
-    ctx.fillStyle = headlightsAreOn() ? "#fff4ad" : "#69758a";
+    ctx.fillStyle = undergroundStart || headlightsAreOn() ? "#fff4ad" : "#69758a";
     for (let x = x0 + 78 - off; x < x1 + ribSpacing; x += ribSpacing) {
-      ctx.shadowBlur = headlightsAreOn() ? 18 : 4;
+      ctx.shadowBlur = undergroundStart || headlightsAreOn() ? 18 : 4;
       ctx.shadowColor = ctx.fillStyle;
       ctx.fillRect(x, H * 0.205, 64, 9);
     }
@@ -2044,7 +2073,7 @@
 
   function drawWeather(dt) {
     weatherTime += dt;
-    if (routeEvent === "tunnel" && routeEventAnnounced) return;
+    if (isTunnelVisible()) return;
     if (weather === "sunny") return;
     ctx.save();
     if (weather === "rain") {
