@@ -2568,8 +2568,11 @@
 
     for (let i = 0; i < opposingTrain.cars; i++) {
       const left = opposingTrain.x + i * (carW + gap);
+      const right = left + carW;
       const top = y - carH + 1;
       const isEngine = i === 0;
+      const isRear = i === opposingTrain.cars - 1;
+      const isEndCar = isEngine || isRear;
       const isCoupledCar = type.coupledAtCar !== undefined && i >= type.coupledAtCar;
       const bodyColor = isCoupledCar ? type.coupledBody : type.body;
       const stripeColor = isCoupledCar ? type.coupledStripe : type.stripe;
@@ -2585,27 +2588,123 @@
         ctx.fillStyle = bodyColor;
         ctx.strokeStyle = "#56616a";
         ctx.lineWidth = 2;
-        roundRect(left, top, carW, carH, type.kind === "steam" && isEngine ? 12 : 7);
+        ctx.beginPath();
+        if (type.kind === "shinkansen" && isEngine) {
+          // 左へ走る基準形。進行方向を反転する時は編成全体を鏡映する。
+          ctx.moveTo(right - 5, top);
+          ctx.lineTo(left + carW * 0.42, top);
+          ctx.quadraticCurveTo(left + carW * 0.12, top + 2, left, top + carH - 8);
+          ctx.quadraticCurveTo(left, top + carH, left + 8, top + carH);
+          ctx.lineTo(right - 5, top + carH);
+          ctx.quadraticCurveTo(right, top + carH, right, top + carH - 5);
+          ctx.lineTo(right, top + 5);
+          ctx.quadraticCurveTo(right, top, right - 5, top);
+        } else if (type.kind === "shinkansen" && isRear) {
+          ctx.moveTo(left + 5, top);
+          ctx.lineTo(right - carW * 0.42, top);
+          ctx.quadraticCurveTo(right - carW * 0.12, top + 2, right, top + carH - 8);
+          ctx.quadraticCurveTo(right, top + carH, right - 8, top + carH);
+          ctx.lineTo(left + 5, top + carH);
+          ctx.quadraticCurveTo(left, top + carH, left, top + carH - 5);
+          ctx.lineTo(left, top + 5);
+          ctx.quadraticCurveTo(left, top, left + 5, top);
+        } else if (type.kind === "freight" && isEngine) {
+          ctx.moveTo(right - 4, top);
+          ctx.lineTo(left + carW * 0.24, top);
+          ctx.lineTo(left, top + carH * 0.3);
+          ctx.lineTo(left, top + carH);
+          ctx.lineTo(right, top + carH);
+          ctx.lineTo(right, top + 4);
+          ctx.quadraticCurveTo(right, top, right - 4, top);
+        } else {
+          roundRect(left, top, carW, carH, 7);
+        }
+        ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
         ctx.fillStyle = stripeColor;
-        ctx.fillRect(left + 2, top + carH * 0.58, carW - 4, carH * 0.16);
-        if (stripe2Color) {
-          ctx.fillStyle = stripe2Color;
-          ctx.fillRect(left + 2, top + carH * 0.76, carW - 4, carH * 0.08);
-        }
-
-        if (type.kind === "steam" && isEngine) {
-          ctx.fillStyle = "#20272c";
-          ctx.fillRect(left + carW * 0.58, top - carH * 0.32, carW * 0.16, carH * 0.36);
+        if (type.kind === "shinkansen" && isEngine) {
           ctx.beginPath();
-          ctx.arc(left + carW * 0.35, top + carH * 0.54, carH * 0.28, 0, Math.PI * 2);
+          ctx.moveTo(left + carW * 0.06, top + carH * 0.75);
+          ctx.lineTo(left + carW * 0.38, top + carH * 0.44);
+          ctx.lineTo(right - 2, top + carH * 0.5);
+          ctx.lineTo(right - 2, top + carH * 0.67);
+          ctx.lineTo(left + carW * 0.08, top + carH * 0.9);
+          ctx.closePath();
+          ctx.fill();
+        } else if (type.kind === "shinkansen" && isRear) {
+          ctx.beginPath();
+          ctx.moveTo(right - carW * 0.06, top + carH * 0.75);
+          ctx.lineTo(right - carW * 0.38, top + carH * 0.44);
+          ctx.lineTo(left + 2, top + carH * 0.5);
+          ctx.lineTo(left + 2, top + carH * 0.67);
+          ctx.lineTo(right - carW * 0.08, top + carH * 0.9);
+          ctx.closePath();
           ctx.fill();
         } else {
+          ctx.fillRect(left + 2, top + carH * 0.58, carW - 4, carH * 0.16);
+        }
+        if (stripe2Color) {
+          ctx.fillStyle = stripe2Color;
+          if (type.kind === "shinkansen" && isEngine) {
+            ctx.beginPath();
+            ctx.moveTo(left + carW * 0.1, top + carH * 0.86);
+            ctx.lineTo(left + carW * 0.4, top + carH * 0.64);
+            ctx.lineTo(right - 2, top + carH * 0.7);
+            ctx.lineTo(right - 2, top + carH * 0.78);
+            ctx.lineTo(left + carW * 0.12, top + carH * 0.94);
+            ctx.closePath();
+            ctx.fill();
+          } else if (type.kind === "shinkansen" && isRear) {
+            ctx.beginPath();
+            ctx.moveTo(right - carW * 0.1, top + carH * 0.86);
+            ctx.lineTo(right - carW * 0.4, top + carH * 0.64);
+            ctx.lineTo(left + 2, top + carH * 0.7);
+            ctx.lineTo(left + 2, top + carH * 0.78);
+            ctx.lineTo(right - carW * 0.12, top + carH * 0.94);
+            ctx.closePath();
+            ctx.fill();
+          } else {
+            ctx.fillRect(left + 2, top + carH * 0.76, carW - 4, carH * 0.08);
+          }
+        }
+
+        if (type.kind === "shinkansen") {
           ctx.fillStyle = "#293947";
-          const windowCount = type.kind === "freight" ? 2 : 3;
-          for (let wi = 0; wi < windowCount; wi++) {
+          if (isEndCar) {
+            const windshieldX = isEngine ? left + carW * 0.3 : right - carW * 0.47;
+            roundRect(windshieldX, top + carH * 0.18, carW * 0.17, carH * 0.2, 3);
+            ctx.fill();
+          } else {
+            for (let wi = 0; wi < 3; wi++) {
+              roundRect(left + carW * (0.13 + wi * 0.27), top + carH * 0.2, carW * 0.17, carH * 0.24, 3);
+              ctx.fill();
+            }
+          }
+        } else if (type.kind === "local" && isEndCar) {
+          // 在来線は編成端に色付きの運転台面と大きな前面窓を付ける。
+          const cabW = carW * 0.2;
+          const cabX = isEngine ? left + 2 : right - cabW - 2;
+          ctx.fillStyle = stripeColor;
+          ctx.fillRect(cabX, top + 2, cabW, carH - 4);
+          ctx.fillStyle = "#263746";
+          roundRect(cabX + cabW * 0.16, top + carH * 0.18, cabW * 0.68, carH * 0.3, 3);
+          ctx.fill();
+          ctx.fillStyle = "#293947";
+          const sideStart = isEngine ? left + carW * 0.34 : left + carW * 0.12;
+          for (let wi = 0; wi < 2; wi++) {
+            roundRect(sideStart + wi * carW * 0.27, top + carH * 0.2, carW * 0.17, carH * 0.24, 3);
+            ctx.fill();
+          }
+        } else if (type.kind === "freight" && isEngine) {
+          ctx.fillStyle = "#20272c";
+          roundRect(left + carW * 0.18, top + carH * 0.17, carW * 0.28, carH * 0.28, 3);
+          ctx.fill();
+          ctx.fillRect(right - carW * 0.18, top - carH * 0.23, carW * 0.11, carH * 0.28);
+        } else {
+          ctx.fillStyle = "#293947";
+          for (let wi = 0; wi < 3; wi++) {
             roundRect(left + carW * (0.13 + wi * 0.27), top + carH * 0.2, carW * 0.17, carH * 0.24, 3);
             ctx.fill();
           }
