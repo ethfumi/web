@@ -67,7 +67,6 @@
   ];
   const MAX_CARS = 100;
   const KOMACHI_COUPLING_STATIONS = {
-    chuo: "おぎくぼ",
     tohoku: "もりおか",
   };
 
@@ -98,11 +97,54 @@
     "たちかわ", "はちおうじ", "たかお", "なかの", "おおてまち", "にしふなばし",
     "ちょうふ", "ふちゅう", "けいおうはちおうじ",
   ]);
-  const TUNNEL_DESTINATIONS = {
-    tokaido: new Set(["あたみ"]),
-    tohoku: new Set(["うえの", "しんあおもり"]),
-    tozai: new Set(["おちあい"]),
-    inokashira: new Set(["しんせん"]),
+  function segmentKey(stationA, stationB) {
+    return [stationA, stationB].sort().join("::");
+  }
+
+  function makeSegmentSet(pairs) {
+    return new Set(pairs.map(([stationA, stationB]) => segmentKey(stationA, stationB)));
+  }
+
+  // 実際に地下またはトンネルがある駅間だけ。駅間の一部がトンネルの場合も含む。
+  const TUNNEL_SEGMENTS = {
+    tokaido: makeSegmentSet([
+      ["しながわ", "しんよこはま"], ["しんよこはま", "おだわら"],
+      ["おだわら", "あたみ"], ["あたみ", "みしま"],
+      ["しんふじ", "しずおか"], ["しずおか", "かけがわ"],
+      ["かけがわ", "はままつ"], ["とよはし", "みかわあんじょう"],
+      ["ぎふはしま", "まいばら"], ["まいばら", "きょうと"],
+    ]),
+    tohoku: makeSegmentSet([
+      ["とうきょう", "うえの"], ["うえの", "おおみや"],
+      ["うつのみや", "なすしおばら"], ["なすしおばら", "しんしらかわ"],
+      ["しんしらかわ", "こおりやま"], ["こおりやま", "ふくしま"],
+      ["ふくしま", "しろいしざおう"], ["しろいしざおう", "せんだい"],
+      ["せんだい", "ふるかわ"], ["ふるかわ", "くりこまこうげん"],
+      ["くりこまこうげん", "いちのせき"], ["いちのせき", "みずさわえさし"],
+      ["きたかみ", "しんはなまき"],
+      ["もりおか", "いわてぬまくない"], ["いわてぬまくない", "にのへ"],
+      ["にのへ", "はちのへ"], ["はちのへ", "しちのへとわだ"],
+      ["しちのへとわだ", "しんあおもり"],
+    ]),
+    tozai: makeSegmentSet([
+      ["なかの", "おちあい"], ["おちあい", "たかだのばば"],
+      ["たかだのばば", "わせだ"], ["わせだ", "かぐらざか"],
+      ["かぐらざか", "いいだばし"], ["いいだばし", "くだんした"],
+      ["くだんした", "たけばし"], ["たけばし", "おおてまち"],
+      ["おおてまち", "にほんばし"], ["にほんばし", "かやばちょう"],
+      ["かやばちょう", "もんぜんなかちょう"], ["もんぜんなかちょう", "きば"],
+      ["きば", "とうようちょう"], ["とうようちょう", "みなみすなまち"],
+      ["みなみすなまち", "にしかさい"],
+    ]),
+    inokashira: makeSegmentSet([
+      ["しぶや", "しんせん"],
+    ]),
+    keio: makeSegmentSet([
+      ["しんじゅく", "ささづか"],
+      ["しばさき", "こくりょう"], ["こくりょう", "ふだ"],
+      ["ふだ", "ちょうふ"], ["ちょうふ", "にしちょうふ"],
+      ["きたの", "けいおうはちおうじ"],
+    ]),
   };
 
   // 駅間距離は各路線の営業キロを使う。山手線は周回し、ほかの路線は終点で折り返す。
@@ -362,14 +404,88 @@
     "🐰", "🐻", "🐧", "🐶", "🐱", "🦊", "🐼",
   ];
 
-  const OPPOSING_TRAIN_TYPES = [
-    { name: "やまのてせん", kind: "local", body: "#e8ecef", stripe: "#9acd32" },
-    { name: "そうぶせん", kind: "local", body: "#e8ecef", stripe: "#ffd400" },
-    { name: "ちゅうおうせん", kind: "local", body: "#e8ecef", stripe: "#f28c28" },
-    { name: "ローカルせん", kind: "local", body: "#d9efe8", stripe: "#42a57a" },
-    { name: "かもつれっしゃ", kind: "freight", body: "#40505d", stripe: "#e49a31" },
-    { name: "きかんしゃ", kind: "steam", body: "#28323a", stripe: "#c7443e" },
-  ];
+  const OPPOSING_TRAIN_TYPES = {
+    yamanote: { name: "やまのてせん", kind: "local", body: "#e8ecef", stripe: "#9acd32" },
+    keihinTohoku: { name: "けいひんとうほくせん", kind: "local", body: "#e8ecef", stripe: "#52b9e9" },
+    saikyo: { name: "さいきょうせん", kind: "local", body: "#e8ecef", stripe: "#35a66f" },
+    shonanShinjuku: { name: "しょうなんしんじゅくライン", kind: "local", body: "#e8ecef", stripe: "#f28c28", stripe2: "#43a36b" },
+    sobu: { name: "そうぶせん", kind: "local", body: "#e8ecef", stripe: "#ffd400" },
+    chuo: { name: "ちゅうおうせん", kind: "local", body: "#e8ecef", stripe: "#f28c28" },
+    azusa: { name: "あずさ・かいじ", kind: "local", body: "#f4f7f8", stripe: "#7a5ab6" },
+    naritaExpress: { name: "なりたエクスプレス", kind: "local", body: "#f4f4f4", stripe: "#d12f3f" },
+    nozomi: { name: "のぞみ", kind: "shinkansen", body: "#f8f8f8", stripe: "#1c48a6" },
+    hikari: { name: "ひかり", kind: "shinkansen", body: "#f8f8f8", stripe: "#1c48a6" },
+    kodama: { name: "こだま", kind: "shinkansen", body: "#f8f8f8", stripe: "#1c48a6" },
+    hayabusa: { name: "はやぶさ", kind: "shinkansen", body: "#f7f5ed", stripe: "#36a995", stripe2: "#e73d8f" },
+    komachi: { name: "こまち", kind: "shinkansen", body: "#ef3340", stripe: "#b7b7b7" },
+    yamabiko: { name: "やまびこ", kind: "shinkansen", body: "#f7f5ed", stripe: "#36a995" },
+    tozai: { name: "とうざいせん", kind: "local", body: "#e8ecef", stripe: "#3085cc", stripe2: "#32a5d2" },
+    toyoRapid: { name: "とうようこうそくせん", kind: "local", body: "#e8ecef", stripe: "#1775b8", stripe2: "#e07b25" },
+    inokashira: { name: "いのかしらせん", kind: "local", body: "#eef1f2", stripe: "#6f4aa8" },
+    keio: { name: "けいおうせん", kind: "local", body: "#e8ecef", stripe: "#d31359", stripe2: "#174f9a" },
+    freight: { name: "かもつれっしゃ", kind: "freight", body: "#40505d", stripe: "#e49a31" },
+  };
+
+  const CHUO_SOBU_PARALLEL_STATIONS = new Set([
+    "おちゃのみず", "すいどうばし", "いいだばし", "いちがや", "よつや",
+    "しなのまち", "せんだがや", "よよぎ", "しんじゅく", "おおくぼ",
+    "ひがしなかの", "なかの", "こうえんじ", "あさがや", "おぎくぼ",
+    "にしおぎくぼ", "きちじょうじ", "みたか",
+  ]);
+  const CHUO_FREIGHT_STATIONS = new Set(["たちかわ", "ひの", "とよだ", "はちおうじ", "にしはちおうじ", "たかお"]);
+  const SOBU_RAPID_PARALLEL_STATIONS = new Set([
+    "きんしちょう", "かめいど", "ひらい", "しんこいわ", "こいわ", "いちかわ",
+    "もとやわた", "しもうさなかやま", "にしふなばし", "ふなばし", "ひがしふなばし",
+    "つだぬま", "まくはりほんごう", "まくはり", "しんけみがわ", "いなげ", "にしちば", "ちば",
+  ]);
+  const TOHOKU_NORTH_OF_MORIOKA = new Set([
+    "いわてぬまくない", "にのへ", "はちのへ", "しちのへとわだ", "しんあおもり",
+  ]);
+  const YAMANOTE_KEIHIN_PARALLEL_STATIONS = new Set([
+    "とうきょう", "ゆうらくちょう", "しんばし", "はままつちょう", "たまち",
+    "たかなわゲートウェイ", "しながわ", "たばた", "にしにっぽり", "にっぽり",
+    "うぐいすだに", "うえの", "おかちまち", "あきはばら", "かんだ",
+  ]);
+  const YAMANOTE_SAIKYO_PARALLEL_STATIONS = new Set([
+    "おおさき", "ごたんだ", "めぐろ", "えびす", "しぶや", "はらじゅく",
+    "よよぎ", "しんじゅく", "しんおおくぼ", "たかだのばば", "めじろ", "いけぶくろ",
+  ]);
+
+  function segmentIsWithin(stations) {
+    return stations.has(currentStationName) && stations.has(nextStationName);
+  }
+
+  function opposingTrainPoolForSegment() {
+    const types = OPPOSING_TRAIN_TYPES;
+    if (selectedRouteKey === "chuo") {
+      if (segmentIsWithin(CHUO_FREIGHT_STATIONS)) return [types.chuo, types.azusa, types.freight];
+      if (segmentIsWithin(CHUO_SOBU_PARALLEL_STATIONS)) return [types.chuo, types.sobu, types.azusa];
+      return [types.chuo, types.azusa];
+    }
+    if (selectedRouteKey === "tokaido") return [types.nozomi, types.hikari, types.kodama];
+    if (selectedRouteKey === "tohoku") {
+      if (TOHOKU_NORTH_OF_MORIOKA.has(currentStationName) || TOHOKU_NORTH_OF_MORIOKA.has(nextStationName)) {
+        return [types.hayabusa];
+      }
+      return [types.hayabusa, types.komachi, types.yamabiko];
+    }
+    if (selectedRouteKey === "sobu") {
+      if (segmentIsWithin(CHUO_SOBU_PARALLEL_STATIONS)) return [types.sobu, types.chuo];
+      if (segmentIsWithin(SOBU_RAPID_PARALLEL_STATIONS)) return [types.sobu, types.naritaExpress];
+      return [types.sobu];
+    }
+    if (selectedRouteKey === "tozai") return [types.tozai, types.toyoRapid];
+    if (selectedRouteKey === "inokashira") return [types.inokashira];
+    if (selectedRouteKey === "keio") return [types.keio];
+    if (selectedRouteKey === "yamanote") {
+      if (segmentIsWithin(YAMANOTE_KEIHIN_PARALLEL_STATIONS)) return [types.yamanote, types.keihinTohoku];
+      if (segmentIsWithin(YAMANOTE_SAIKYO_PARALLEL_STATIONS)) {
+        return [types.yamanote, types.saikyo, types.shonanShinjuku];
+      }
+      return [types.yamanote];
+    }
+    return [types.chuo];
+  }
 
 
   const DRIVER_CALLS = ["しんごうよし！", "ドアよし！", "しゅっぱつしんこう！", "じこくよし！"];
@@ -731,7 +847,7 @@
   function routeEventForSegment() {
     if (selectedRouteKey === "tokaido" && train === TRAINS.nozomi && nextStationName === "しんふじ") return "fuji";
     if (selectedRouteKey === "tokaido" && train === TRAINS.doctoryellow && segmentNumber === 1) return "inspection";
-    if (TUNNEL_DESTINATIONS[selectedRouteKey]?.has(nextStationName)) return "tunnel";
+    if (TUNNEL_SEGMENTS[selectedRouteKey]?.has(segmentKey(currentStationName, nextStationName))) return "tunnel";
     if (activeRoute.allowCrossings && segmentNumber % 4 === 0) return "crossing";
     return "";
   }
@@ -1850,10 +1966,11 @@
   }
 
   function spawnOpposingTrain(typeIndex = null) {
+    const pool = opposingTrainPoolForSegment();
     const index = typeIndex === null
-      ? Math.floor(Math.random() * OPPOSING_TRAIN_TYPES.length)
-      : typeIndex % OPPOSING_TRAIN_TYPES.length;
-    const type = OPPOSING_TRAIN_TYPES[index];
+      ? Math.floor(Math.random() * pool.length)
+      : typeIndex % pool.length;
+    const type = pool[index];
     const { x1 } = viewRange();
     opposingTrain = {
       type,
@@ -1911,6 +2028,10 @@
 
         ctx.fillStyle = type.stripe;
         ctx.fillRect(left + 2, top + carH * 0.58, carW - 4, carH * 0.16);
+        if (type.stripe2) {
+          ctx.fillStyle = type.stripe2;
+          ctx.fillRect(left + 2, top + carH * 0.76, carW - 4, carH * 0.08);
+        }
 
         if (type.kind === "steam" && isEngine) {
           ctx.fillStyle = "#20272c";
@@ -2565,6 +2686,7 @@
           playElapsedSeconds, motionEffect: canvas.dataset.motionEffect,
           onboardPassengers: [...onboardPassengers],
           timeOfDay, weather, visitedStations: [...visitedStations],
+          opposingPool: opposingTrainPoolForSegment().map((type) => type.name),
           opposingTrain: opposingTrain ? {
             name: opposingTrain.type.name,
             cars: opposingTrain.cars,
