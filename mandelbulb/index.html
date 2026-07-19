@@ -4,32 +4,32 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#04070b">
-  <meta name="description" content="指先で探索するリアルタイム3D Mandelbulb">
-  <meta property="og:title" content="MANDELBULB / DEEP FIELD">
-  <meta property="og:description" content="指先で探索するリアルタイム3Dフラクタル">
+  <meta name="description" content="指先で探索するリアルタイムMenger spongeフラクタル">
+  <meta property="og:title" content="MENGER SPONGE / VOID CUBE">
+  <meta property="og:description" content="指先で探索するリアルタイム3Dフラクタルビューアー">
   <meta property="og:image" content="./og.png">
   <meta name="twitter:card" content="summary_large_image">
-  <title>MANDELBULB / DEEP FIELD</title>
+  <title>MENGER SPONGE / VOID CUBE</title>
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 <main class="app">
-  <canvas id="scene" aria-label="リアルタイムで描画されるMandelbulb"></canvas>
+  <canvas id="scene" aria-label="リアルタイムで描画されるMenger sponge"></canvas>
   <div class="grain" aria-hidden="true"></div>
   <header class="topbar">
-    <div><span class="eyebrow">FRACTAL SPECIMEN / NO. 008</span><h1><span id="fractalTitle">MANDELBULB</span> <em id="fractalSubtitle">/ DEEP FIELD</em></h1></div>
+    <div><span class="eyebrow">FRACTAL SPECIMEN / NO. 008</span><h1><span id="fractalTitle">MENGER SPONGE</span> <em id="fractalSubtitle">/ VOID CUBE</em></h1></div>
     <div class="readout"><i></i><span id="status">INITIALIZING</span><b id="fps">-- FPS</b><b id="gpu">GPU -- ms / 16.7 ms</b><b id="headroom">HEADROOM --%</b></div>
   </header>
-  <section class="coords" aria-hidden="true"><span><i id="axisLabel">ORBIT</i> <b id="orbitOut">+00 / +00</b></span><span>MAG <b id="distOut">×1.00</b></span><span><i id="shapeLabel">POWER</i> <b id="powerOut">8.0</b></span></section><section class="zoomMeter" aria-live="polite"><span>MAGNIFICATION</span><b id="zoomBadge">×1.00</b></section>
+  <section class="coords" aria-hidden="true"><span><i id="axisLabel">ORBIT</i> <b id="orbitOut">+00 / +00</b></span><span>MAG <b id="distOut">×1.00</b></span><span><i id="shapeLabel">CELL SCALE</i> <b id="powerOut">3.00</b></span></section><section class="zoomMeter" aria-live="polite"><span>MAGNIFICATION</span><b id="zoomBadge">×1.00</b></section>
   <section class="hint" id="hint"><strong>✦</strong><div><b>TOUCH THE FIELD</b><small>ドラッグで回転 · ピンチで深く潜る</small></div></section>
   <aside class="panel open" id="panel" aria-label="フラクタル設定">
     <header><div><span>FRACTAL LIBRARY</span><b>数式標本を切り替える</b></div><button id="closePanel" aria-label="設定を閉じる">×</button></header>
 <section class="modeSection" aria-label="3Dフラクタル">
   <span>3D FIELD</span>
   <div class="modeGrid">
-    <button class="active" data-mode="0"><b>MANDELBULB</b><small>POWER SET</small></button>
+    <button data-mode="0"><b>MANDELBULB</b><small>POWER SET</small></button>
     <button data-mode="1"><b>MANDELBOX</b><small>FOLDED SPACE</small></button>
-    <button data-mode="2"><b>MENGER</b><small>VOID CUBE</small></button>
+    <button class="active" data-mode="2"><b>MENGER</b><small>VOID CUBE</small></button>
   </div>
 </section>
 <section class="modeSection" aria-label="2Dフラクタル">
@@ -54,7 +54,7 @@
 </section>
     <section class="theory" id="theory" aria-live="polite">
       <span>FORMULA / HOW IT WORKS</span>
-      <h2 id="theoryTitle">MANDELBULB</h2>
+      <h2 id="theoryTitle">MENGER SPONGE</h2>
       <code id="formula"></code>
       <p id="theoryText"></p>
       <small id="theoryNote"></small>
@@ -71,6 +71,7 @@
     <button id="openPanel" class="dockButton" aria-label="フラクタルと数式メニューを開く"><b>⌁</b><small>LIBRARY</small></button>
     <button id="reset" class="dockButton" aria-label="視点をリセット"><b>↺</b><small>RESET</small></button>
   </nav>
+  <footer class="credits"><span>FRACTAL FIELD v1.1.0</span><a href="https://x.com/fumilin" target="_blank" rel="me noopener noreferrer">BY @FUMILIN ↗</a></footer>
   <div id="error" class="error" hidden><b>WEBGL2 NOT AVAILABLE</b><p>最新のSafariまたはChromeで開いてください。</p></div>
 </main>
 <script src="./app.js"></script>
