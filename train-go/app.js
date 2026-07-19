@@ -2058,6 +2058,10 @@
   }
   const NOSE_R = 0.62;   // 先頭車の画面上の位置(画面幅比)
 
+  function trainFacesLeft() {
+    return !activeRoute.loopKm && routeDirection < 0;
+  }
+
   function carMetrics() {
     const carW = Math.min(W * 0.22, 190);
     return { carW, carH: carW * 0.32, gap: 8 };
@@ -2815,7 +2819,15 @@
     ctx.font = `bold ${Math.max(14, radius * 1.25)}px sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
+    ctx.save();
+    if (trainFacesLeft()) {
+      // 編成全体の反転中も、車両番号だけは読みやすい向きを保つ。
+      ctx.translate(x, 0);
+      ctx.scale(-1, 1);
+      ctx.translate(-x, 0);
+    }
     ctx.fillText(String(number), x, y + 1);
+    ctx.restore();
     ctx.textBaseline = "alphabetic";
   }
 
@@ -3191,6 +3203,7 @@
     canvas.dataset.cars = String(totalCarCount());
     canvas.dataset.platformWidth = String(Math.round(stationPlatformWidth(nextStationName)));
     canvas.dataset.trainStationOffset = String(Math.round(trainStationOffset()));
+    canvas.dataset.trainFacing = trainFacesLeft() ? "left" : "right";
     canvas.dataset.stationScreenX = String(Math.round(stationScreenX(stationWorldX, nextStationName)));
     canvas.dataset.fallingStarX = fallingStar ? String(Math.round(fallingStar.x)) : "";
     canvas.dataset.fallingStarY = fallingStar ? String(Math.round(fallingStar.y)) : "";
@@ -3217,10 +3230,18 @@
       drawDistanceMarkers();
       drawInspectionEffect();
       drawStations();
+      if (trainFacesLeft()) {
+        // 外側のカメラ拡縮後も画面中央を軸に見えるよう、座標系側の反転軸を補正する。
+        const mirrorCenterX = ax + (W * 0.5 - ax) / Math.max(viewScale, 0.001);
+        ctx.save();
+        ctx.translate(mirrorCenterX * 2, 0);
+        ctx.scale(-1, 1);
+      }
       drawHeadlight();
       drawTrainMotionEffects();
       drawTrain();
       drawKomachi();
+      if (trainFacesLeft()) ctx.restore();
       ctx.restore();
     }
     drawWeather(dt);
