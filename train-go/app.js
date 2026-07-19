@@ -55,6 +55,10 @@
       name: "ちゅうおうせん", kind: "commuter", body: "#e8ecef", stripe: "#f28c28",
       face: "#f28c28", edge: "#aeb8be", callName: "ちゅうおうせん",
     },
+    keio: {
+      name: "けいおうせん", kind: "commuter", body: "#e8ecef", stripe: "#d31359", stripe2: "#174f9a",
+      face: "#d31359", edge: "#aeb8be", callName: "けいおうせん",
+    },
   };
 
   const CAR_COUNT_WORDS = [
@@ -81,17 +85,18 @@
   const SPEED_DISPLAY_SCALE = KMH_PER_MPS / PIXELS_PER_METER;
   const ROUTE_COLORS = {
     chuo: "#f28c28", tokaido: "#2362b8", tohoku: "#2a9b82",
-    sobu: "#f0c928", tozai: "#3085cc", inokashira: "#8156a6", yamanote: "#9acd32",
+    sobu: "#f0c928", tozai: "#3085cc", inokashira: "#8156a6", keio: "#d31359", yamanote: "#9acd32",
   };
   const ROUTE_AUTO_SPEED_KMH = {
     chuo: 100, tokaido: 285, tohoku: 320, sobu: 95,
-    tozai: 100, inokashira: 90, yamanote: 90,
+    tozai: 100, inokashira: 90, keio: 110, yamanote: 90,
   };
   const GRAND_STATIONS = new Set(["とうきょう", "しんじゅく", "しぶや", "しんおおさか"]);
   const MAJOR_STATIONS = new Set([
     "しながわ", "しんよこはま", "なごや", "きょうと", "うえの", "おおみや",
     "せんだい", "もりおか", "しんあおもり", "きちじょうじ", "みたか",
     "たちかわ", "はちおうじ", "たかお", "なかの", "おおてまち", "にしふなばし",
+    "ちょうふ", "ふちゅう", "けいおうはちおうじ",
   ]);
   const TUNNEL_DESTINATIONS = {
     tokaido: new Set(["あたみ"]),
@@ -100,7 +105,7 @@
     inokashira: new Set(["しんせん"]),
   };
 
-  // 駅間距離は各路線の営業キロを使う。終点の次は始発駅へ戻る周回コース。
+  // 駅間距離は各路線の営業キロを使う。山手線は周回し、ほかの路線は終点で折り返す。
   const ROUTES = {
     chuo: {
       name: "ちゅうおうせん",
@@ -268,6 +273,44 @@
       ],
       expressStops: new Set(["しぶや", "しもきたざわ", "めいだいまえ", "えいふくちょう", "くがやま", "きちじょうじ"]),
       cityStations: new Set(["しぶや", "しもきたざわ", "めいだいまえ", "えいふくちょう", "きちじょうじ"]),
+    },
+    keio: {
+      name: "けいおうせん",
+      start: "しんじゅく",
+      startKm: 0,
+      supportsExpress: true,
+      expressLabel: "とっきゅう",
+      expressModeName: "けいおうせんとっきゅう",
+      expressAnnouncement: "けいおうせん、とっきゅうモード！ささづか、めいだいまえ、ちとせからすやま、ちょうふ、ふちゅう、ぶばいがわら、せいせきさくらがおか、たかはたふどう、きたのにとまって、けいおうはちおうじへいきます",
+      allowCrossings: true,
+      stations: [
+        { name: "ささづか", km: 3.6 }, { name: "だいたばし", km: 4.4 },
+        { name: "めいだいまえ", km: 5.2 }, { name: "しもたかいど", km: 6.1 },
+        { name: "さくらじょうすい", km: 7.0 }, { name: "かみきたざわ", km: 7.8 },
+        { name: "はちまんやま", km: 8.4 }, { name: "ろかこうえん", km: 9.1 },
+        { name: "ちとせからすやま", km: 9.9 }, { name: "せんがわ", km: 11.5 },
+        { name: "つつじがおか", km: 12.5 }, { name: "しばさき", km: 13.3 },
+        { name: "こくりょう", km: 14.2 }, { name: "ふだ", km: 14.9 },
+        { name: "ちょうふ", km: 15.5 }, { name: "にしちょうふ", km: 17.0 },
+        { name: "とびたきゅう", km: 17.7 }, { name: "むさしのだい", km: 18.8 },
+        { name: "たまれいえん", km: 19.6 }, { name: "ひがしふちゅう", km: 20.4 },
+        { name: "ふちゅう", km: 21.9 }, { name: "ぶばいがわら", km: 23.1 },
+        { name: "なかがわら", km: 24.7 }, { name: "せいせきさくらがおか", km: 26.3 },
+        { name: "もぐさえん", km: 28.0 }, { name: "たかはたふどう", km: 29.7 },
+        { name: "みなみだいら", km: 32.1 }, { name: "ひらやまじょうしこうえん", km: 33.4 },
+        { name: "ながぬま", km: 34.9 }, { name: "きたの", km: 36.1 },
+        { name: "けいおうはちおうじ", km: 37.9 }, { name: "しんじゅく", km: 0 },
+      ],
+      expressStops: new Set([
+        "しんじゅく", "ささづか", "めいだいまえ", "ちとせからすやま", "ちょうふ",
+        "ふちゅう", "ぶばいがわら", "せいせきさくらがおか", "たかはたふどう",
+        "きたの", "けいおうはちおうじ",
+      ]),
+      cityStations: new Set([
+        "しんじゅく", "ささづか", "めいだいまえ", "ちとせからすやま", "ちょうふ",
+        "ふちゅう", "ぶばいがわら", "せいせきさくらがおか", "たかはたふどう",
+        "きたの", "けいおうはちおうじ",
+      ]),
     },
     yamanote: {
       name: "やまのてせん",
@@ -573,6 +616,7 @@
   let stationWorldX = 0;   // 次の駅の位置(距離座標)
   let currentStationX = null; // いま停車中(または通過直後)の駅の位置
   let stationIdx = -1;        // activeRoute.stations 内の次に停まる駅
+  let routeDirection = 1;     // 1: くだり、-1: 終点から始発へ折り返し
   let currentLineKm = activeRoute.startKm;
   let nextStationName = "";
   let currentStationName = "";
@@ -628,12 +672,37 @@
   initClouds();
 
   function scheduleNextStation() {
-    stationIdx = (stationIdx + 1) % activeRoute.stations.length;
-    const nextStation = activeRoute.stations[stationIdx];
+    const terminalIndex = activeRoute.terminalIndex ?? activeRoute.stations.length - 2;
+    let nextStation;
+    if (activeRoute.loopKm) {
+      stationIdx = (stationIdx + 1) % activeRoute.stations.length;
+      nextStation = activeRoute.stations[stationIdx];
+    } else if (routeDirection > 0) {
+      if (stationIdx >= terminalIndex) {
+        routeDirection = -1;
+        stationIdx = terminalIndex - 1;
+      } else {
+        stationIdx += 1;
+      }
+      nextStation = stationIdx >= 0
+        ? activeRoute.stations[stationIdx]
+        : { name: activeRoute.start, km: activeRoute.startKm };
+    } else if (stationIdx === 0) {
+      stationIdx = -1;
+      nextStation = { name: activeRoute.start, km: activeRoute.startKm };
+    } else if (stationIdx < 0) {
+      routeDirection = 1;
+      stationIdx = 0;
+      nextStation = activeRoute.stations[stationIdx];
+    } else {
+      stationIdx -= 1;
+      nextStation = activeRoute.stations[stationIdx];
+    }
     let intervalKm = nextStation.km - currentLineKm;
     if (intervalKm < 0 && activeRoute.loopKm) intervalKm += activeRoute.loopKm;
     const intervalMeters = Math.round(Math.abs(intervalKm) * 1000);
     nextStationName = nextStation.name;
+    canvas.dataset.routeDirection = routeDirection > 0 ? "outbound" : "return";
     canvas.dataset.nextStation = nextStationName;
     canvas.dataset.nextStationMeters = String(intervalMeters);
     stationWorldX = distance + intervalMeters * PIXELS_PER_METER;
@@ -682,6 +751,12 @@
 
   function terminalRemainingMeters() {
     const terminalIndex = activeRoute.terminalIndex ?? activeRoute.stations.length - 2;
+    if (!activeRoute.loopKm && routeDirection < 0) {
+      const remainingAfterNext = stationIdx < 0
+        ? 0
+        : Math.max(0, (activeRoute.stations[stationIdx].km - activeRoute.startKm) * 1000);
+      return nextStationRemainingMeters() + remainingAfterNext;
+    }
     if (stationIdx < 0) {
       return Math.max(0, (activeRoute.stations[terminalIndex].km - activeRoute.startKm) * 1000);
     }
@@ -691,6 +766,13 @@
       (activeRoute.stations[terminalIndex].km - activeRoute.stations[stationIdx].km) * 1000,
     );
     return nextStationRemainingMeters() + remainingAfterNext;
+  }
+
+  function routeTerminalStation() {
+    if (!activeRoute.loopKm && routeDirection < 0) {
+      return { name: activeRoute.start, km: activeRoute.startKm };
+    }
+    return activeRoute.stations[activeRoute.terminalIndex ?? activeRoute.stations.length - 2];
   }
 
   function displaySpeed(value) {
@@ -732,7 +814,7 @@
   }
 
   function updateDriveUi() {
-    const terminal = activeRoute.stations[activeRoute.terminalIndex ?? activeRoute.stations.length - 2];
+    const terminal = routeTerminalStation();
     speedValue.textContent = String(displaySpeed(speed));
     canvas.dataset.braking = String(isBrakingForStation());
     canvas.dataset.speedBoostCount = String(speedBoostPopups.length);
@@ -809,8 +891,20 @@
 
   function futureDestinationNames() {
     const names = [];
+    const terminalIndex = activeRoute.terminalIndex ?? activeRoute.stations.length - 2;
     for (let offset = 0; offset < activeRoute.stations.length && names.length < 5; offset++) {
-      const candidate = activeRoute.stations[(stationIdx + offset) % activeRoute.stations.length].name;
+      let candidate;
+      if (activeRoute.loopKm) {
+        candidate = activeRoute.stations[(stationIdx + offset) % activeRoute.stations.length].name;
+      } else if (routeDirection > 0) {
+        const index = stationIdx + offset;
+        if (index > terminalIndex) break;
+        candidate = activeRoute.stations[index].name;
+      } else {
+        const index = stationIdx - offset;
+        if (index < -1) break;
+        candidate = index < 0 ? activeRoute.start : activeRoute.stations[index].name;
+      }
       if (!expressMode || activeRoute.expressStops.has(candidate)) names.push(candidate);
     }
     return names.length > 0 ? names : [nextStationName];
@@ -873,6 +967,7 @@
     canvas.dataset.routeName = activeRoute.name;
     canvas.dataset.currentStation = currentStationName;
     stationIdx = -1;
+    routeDirection = 1;
     currentLineKm = activeRoute.startKm;
     komachiCoupled = false;
     komachiReady = false;
@@ -1005,7 +1100,11 @@
     btnStationDoors.classList.add("hidden");
     stationPassengers.classList.add("hidden");
     const isKomachiStop = isKomachiCouplingStop(currentStationName);
+    const terminalIndex = activeRoute.terminalIndex ?? activeRoute.stations.length - 2;
+    const isTurnaround = !activeRoute.loopKm
+      && (stationIdx === terminalIndex || currentStationName === activeRoute.start);
     scheduleNextStation();
+    updateDriveUi();
     arrivalBanner.classList.remove("hidden");
     chime();
     if (autoMode) autoActionTimer = 1.2;
@@ -1015,9 +1114,11 @@
       btnKomachiCouple.classList.remove("hidden");
       say(`${currentStationName}にとうちゃく！こまちがまっているよ。れんけつしよう！`);
     } else {
-      arrivalBanner.textContent = "とうちゃく〜！";
+      arrivalBanner.textContent = isTurnaround ? "おりかえし〜！" : "とうちゃく〜！";
       showStationDoorPrompt();
-      say(`${currentStationName}〜、${currentStationName}〜、とうちゃく！ドアをあけてみよう！`);
+      say(isTurnaround
+        ? `${currentStationName}にとうちゃく！おりかえして、${routeTerminalStation().name}へいくよ。ドアをあけてみよう！`
+        : `${currentStationName}〜、${currentStationName}〜、とうちゃく！ドアをあけてみよう！`);
     }
     spawnConfetti();
   }
@@ -1373,7 +1474,9 @@
     updateDriveUi();
     chime();
     say(expressMode
-      ? activeRoute.expressAnnouncement
+      ? (routeDirection > 0 || activeRoute.loopKm
+        ? activeRoute.expressAnnouncement
+        : `${activeRoute.expressModeName}モード！${activeRoute.start}へ、もどります`)
       : "かくえきていしゃモード！ぜんぶのえきに、とまります");
   });
   btnRunningSound.addEventListener("click", () => {
@@ -2449,7 +2552,7 @@
       skipToStation() { distance = stationWorldX - 600; },
       status() {
         return {
-          state, selectedRouteKey, routeName: activeRoute.name, currentLineKm,
+          state, selectedRouteKey, routeName: activeRoute.name, currentLineKm, routeDirection,
           speed, distance, cars, carTypes: [...carTypes], viewScale,
           toStation: stationWorldX - distance,
           nextStationName, currentStationName,
@@ -2588,6 +2691,32 @@
       routeEventBanner.classList.add("hidden");
     });
     document.body.appendChild(debugCrossingButton);
+
+    const debugTurnaroundButton = document.createElement("button");
+    debugTurnaroundButton.type = "button";
+    debugTurnaroundButton.className = "debug-control";
+    debugTurnaroundButton.textContent = "テスト: おりかえし";
+    debugTurnaroundButton.setAttribute("aria-label", "テストで終点の折り返しを確認する");
+    Object.assign(debugTurnaroundButton.style, {
+      position: "fixed", left: "45%", top: "272px", zIndex: "99",
+      padding: "8px", fontSize: "14px",
+    });
+    debugTurnaroundButton.addEventListener("click", () => {
+      if (activeRoute.loopKm) return;
+      const terminalIndex = activeRoute.terminalIndex ?? activeRoute.stations.length - 2;
+      if (routeDirection > 0) {
+        stationIdx = terminalIndex;
+        currentLineKm = activeRoute.stations[terminalIndex].km;
+        nextStationName = activeRoute.stations[terminalIndex].name;
+      } else {
+        stationIdx = -1;
+        currentLineKm = activeRoute.startKm;
+        nextStationName = activeRoute.start;
+      }
+      stationWorldX = distance;
+      arrive();
+    });
+    document.body.appendChild(debugTurnaroundButton);
   }
 
   // ---- PWA ----

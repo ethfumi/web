@@ -179,7 +179,7 @@ html, body {
   bottom: max(2vmin, env(safe-area-inset-bottom));
   transform: translateX(-50%);
   display: grid;
-  grid-template-columns: repeat(9, 8vmin);
+  grid-template-columns: repeat(10, 8vmin);
   gap: 0.9vmin;
   z-index: 5;
 }
@@ -204,7 +204,7 @@ html, body {
 }
 
 #btn-remove {
-  grid-column: 9;
+  grid-column: 10;
   grid-row: 2;
 }
 
