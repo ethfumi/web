@@ -84,9 +84,24 @@
   const PIXELS_PER_METER = 12;
   const KMH_PER_MPS = 3.6;
   const TAP_BOOST_PX_PER_SEC = 75;       // 発進後の連打は細かく加速できるようにする
-  const STAR_BOOST_MULTIPLIER = 3;
-  const STAR_BOOST_SECONDS = 15;
   const STAR_SPAWN_MIN_SECONDS = 9;
+  const FALLING_STAR_TYPES = [
+    {
+      key: "gold", chance: 0.7, multiplier: 3, seconds: 15, scale: 1, speed: 1,
+      icon: "🌟", name: "きいろいほし", fill: "#ffd83d", inner: "#fff7b2",
+      glow: "#fff08a", trail: "255,232,92", badge: "#fff8cc", accent: "#f2a51f", text: "#c15f00",
+    },
+    {
+      key: "green", chance: 0.22, multiplier: 4, seconds: 12, scale: 0.74, speed: 1.3,
+      icon: "💫", name: "みどりのほし", fill: "#62e687", inner: "#d7ffe0",
+      glow: "#8dffac", trail: "98,230,135", badge: "#ddffe6", accent: "#31ad58", text: "#137132",
+    },
+    {
+      key: "blue", chance: 0.08, multiplier: 5, seconds: 10, scale: 0.48, speed: 1.85,
+      icon: "🔵", name: "あおいほし", fill: "#48a9ff", inner: "#d9f2ff",
+      glow: "#72c7ff", trail: "72,169,255", badge: "#dff3ff", accent: "#2789df", text: "#135b9b",
+    },
+  ];
   const FRICTION_PX_PER_SEC2 = 18;       // 自然減速は小さく、連打の加速感を残す
   const AUTO_ACCEL_PX_PER_SEC2 = 40;     // 自動運転は遊びやすい時間に圧縮しつつ滑らかに加速
   const AUTO_OVERSPEED_DECEL_PX_PER_SEC2 = 90;
@@ -863,6 +878,8 @@
   let fallingStar = null;
   let nextFallingStarIn = 5;
   let starBoostTime = 0;
+  let starBoostMultiplier = 1;
+  let starBoostType = FALLING_STAR_TYPES[0];
   let accelerationEffect = 0;
   let brakeEffect = 0;
   let clouds = [];
@@ -1249,6 +1266,8 @@
     fallingStar = null;
     nextFallingStarIn = 5 + Math.random() * 5;
     starBoostTime = 0;
+    starBoostMultiplier = 1;
+    starBoostType = FALLING_STAR_TYPES[0];
     accelerationEffect = 0;
     brakeEffect = 0;
     playElapsedSeconds = 0;
@@ -1663,12 +1682,19 @@
     }
   }
   function spawnFallingStar() {
-    const radius = Math.max(24, Math.min(38, W * 0.035));
+    const roll = Math.random();
+    let chance = 0;
+    const type = FALLING_STAR_TYPES.find((candidate) => {
+      chance += candidate.chance;
+      return roll <= chance;
+    }) || FALLING_STAR_TYPES[0];
+    const radius = Math.max(24, Math.min(38, W * 0.035)) * type.scale;
     fallingStar = {
+      type,
       x: W * (0.62 + Math.random() * 0.28),
       y: H * (0.08 + Math.random() * 0.12),
-      vx: -W * (0.09 + Math.random() * 0.07),
-      vy: H * (0.11 + Math.random() * 0.07),
+      vx: -W * (0.09 + Math.random() * 0.07) * type.speed,
+      vy: H * (0.11 + Math.random() * 0.07) * type.speed,
       radius,
       rotation: Math.random() * Math.PI,
     };
@@ -1681,7 +1707,14 @@
       return;
     }
 
+    const boostWasActive = starBoostTime > 0;
     starBoostTime = Math.max(0, starBoostTime - dt);
+    if (boostWasActive && starBoostTime === 0) {
+      starBoostMultiplier = 1;
+      starBoostType = FALLING_STAR_TYPES[0];
+      canvas.dataset.starBoostMultiplier = "1";
+      canvas.dataset.starType = "";
+    }
     canvas.dataset.starBoostSeconds = starBoostTime > 0 ? String(Math.ceil(starBoostTime)) : "0";
     if (!fallingStar) {
       nextFallingStarIn -= dt;
@@ -1714,11 +1747,11 @@
 
   function drawFallingStar() {
     if (!fallingStar) return;
-    const { x, y, radius, rotation } = fallingStar;
+    const { x, y, radius, rotation, type } = fallingStar;
     ctx.save();
     const trail = ctx.createLinearGradient(x, y, x + radius * 4, y - radius * 3);
-    trail.addColorStop(0, "rgba(255,232,92,0.9)");
-    trail.addColorStop(1, "rgba(255,232,92,0)");
+    trail.addColorStop(0, `rgba(${type.trail},0.9)`);
+    trail.addColorStop(1, `rgba(${type.trail},0)`);
     ctx.strokeStyle = trail;
     ctx.lineWidth = radius * 0.5;
     ctx.lineCap = "round";
@@ -1727,12 +1760,12 @@
     ctx.lineTo(x + radius * 4, y - radius * 3);
     ctx.stroke();
 
-    ctx.shadowColor = "#fff08a";
+    ctx.shadowColor = type.glow;
     ctx.shadowBlur = radius;
-    ctx.fillStyle = "#ffd83d";
+    ctx.fillStyle = type.fill;
     drawStarPath(x, y, radius, radius * 0.46, rotation);
     ctx.fill();
-    ctx.fillStyle = "#fff7b2";
+    ctx.fillStyle = type.inner;
     drawStarPath(x, y, radius * 0.5, radius * 0.22, rotation);
     ctx.fill();
     ctx.restore();
@@ -1741,20 +1774,20 @@
   function drawStarPowerBadge() {
     if (starBoostTime <= 0) return;
     const seconds = Math.ceil(starBoostTime);
-    const text = `🌟 タップかそく ${STAR_BOOST_MULTIPLIER}ばい！ ${seconds}びょう`;
+    const text = `${starBoostType.icon} タップかそく ${starBoostMultiplier}ばい！ ${seconds}びょう`;
     const width = Math.min(W * 0.62, 390);
     const height = Math.max(44, Math.min(62, H * 0.08));
     const x = W / 2;
     const y = Math.max(height * 0.7, H * 0.08);
     ctx.save();
     ctx.globalAlpha = 0.94;
-    ctx.fillStyle = "#fff8cc";
-    ctx.strokeStyle = "#f2a51f";
+    ctx.fillStyle = starBoostType.badge;
+    ctx.strokeStyle = starBoostType.accent;
     ctx.lineWidth = 5;
     roundRect(x - width / 2, y - height / 2, width, height, height / 2);
     ctx.fill();
     ctx.stroke();
-    ctx.fillStyle = "#c15f00";
+    ctx.fillStyle = starBoostType.text;
     ctx.font = `bold ${Math.max(19, Math.min(30, W * 0.027))}px sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -1767,16 +1800,21 @@
     const rect = canvas.getBoundingClientRect();
     const px = event.offsetX * W / Math.max(rect.width, 1);
     const py = event.offsetY * H / Math.max(rect.height, 1);
-    const hitRadius = Math.max(58, fallingStar.radius * 2);
+    const hitRadius = Math.max(fallingStar.type.key === "blue" ? 42 : 52, fallingStar.radius * 2);
     if (Math.hypot(px - fallingStar.x, py - fallingStar.y) > hitRadius) return false;
 
     ensureAudio();
+    const collectedType = fallingStar.type;
     fallingStar = null;
     nextFallingStarIn = STAR_SPAWN_MIN_SECONDS + Math.random() * 10;
-    starBoostTime = STAR_BOOST_SECONDS;
-    canvas.dataset.starBoostSeconds = String(STAR_BOOST_SECONDS);
-    showPlayBanner(`🌟 タップかそく ${STAR_BOOST_MULTIPLIER}ばい！`, 2600);
-    say(`ながれぼし、ゲット！${STAR_BOOST_SECONDS}びょうかん、タップかそく、${STAR_BOOST_MULTIPLIER}ばい！`);
+    starBoostTime = collectedType.seconds;
+    starBoostMultiplier = collectedType.multiplier;
+    starBoostType = collectedType;
+    canvas.dataset.starBoostSeconds = String(collectedType.seconds);
+    canvas.dataset.starBoostMultiplier = String(collectedType.multiplier);
+    canvas.dataset.starType = collectedType.key;
+    showPlayBanner(`${collectedType.icon} ${collectedType.name}！ タップかそく ${collectedType.multiplier}ばい！`, 2600);
+    say(`${collectedType.name}、ゲット！${collectedType.seconds}びょうかん、タップかそく、${collectedType.multiplier}ばい！`);
     chime();
     spawnConfetti(35);
     return true;
@@ -1849,7 +1887,7 @@
     } else if (state === "running") {
       if (isBrakingForStation()) return;
       const previousSpeed = displaySpeed(speed);
-      const boost = TAP_BOOST_PX_PER_SEC * (starBoostTime > 0 ? STAR_BOOST_MULTIPLIER : 1);
+      const boost = TAP_BOOST_PX_PER_SEC * (starBoostTime > 0 ? starBoostMultiplier : 1);
       speed += boost;
       accelerationEffect = 1;
       showSpeedBoost(displaySpeed(speed) - previousSpeed, event);
@@ -2570,22 +2608,16 @@
 
   function trainStationOffset() {
     if (cars <= 1 && !komachiCoupled) return 0;
-    if (state !== "running" && currentStationAligned && currentStationX !== null) {
-      return -formationStationOffset(currentStationName);
-    }
+    const from = -formationStationOffset(currentStationName);
+    if (state !== "running" || passingStation) return from;
 
-    const approachProgress = passingStation
-      ? 0
-      : Math.max(0, Math.min((700 - (stationWorldX - distance)) / 700, 1));
-    if (approachProgress > 0) {
-      return -formationStationOffset(nextStationName) * approachProgress;
-    }
-
-    if (currentStationAligned && currentStationX !== null) {
-      const departureProgress = Math.max(0, Math.min((700 - (distance - currentStationX)) / 700, 1));
-      return -formationStationOffset(currentStationName) * departureProgress;
-    }
-    return 0;
+    // 発車時に停車位置補正を0へ戻すと、長編成が一度後ろへ下がって見える。
+    // 区間全体で次のホーム位置へゆっくり引き継ぎ、発車直後の後ずさりをなくす。
+    const to = -formationStationOffset(nextStationName);
+    const segmentLength = Math.max(stationWorldX - segmentStartDistance, 1);
+    const rawProgress = Math.max(0, Math.min((distance - segmentStartDistance) / segmentLength, 1));
+    const smoothProgress = rawProgress * rawProgress * (3 - 2 * rawProgress);
+    return from + (to - from) * smoothProgress;
   }
 
   function stationScreenX(worldX) {
@@ -3150,7 +3182,7 @@
           onboardPassengers: [...onboardPassengers],
           timeOfDay, weather, visitedStations: [...visitedStations],
           fallingStar: fallingStar ? { ...fallingStar } : null,
-          starBoostTime,
+          starBoostTime, starBoostMultiplier, starBoostType: starBoostType.key,
           opposingPool: opposingTrainPoolForSegment().map((type) => type.name),
           nextOpposingTrainIn,
           opposingTrain: opposingTrain ? {
@@ -3167,8 +3199,11 @@
         cars = Math.max(1, Math.min(MAX_CARS, n));
         carTypes = Array(cars).fill(trainKey);
       },
-      forceFallingStar() {
+      forceFallingStar(typeKey = "gold") {
         spawnFallingStar();
+        const forcedType = FALLING_STAR_TYPES.find((type) => type.key === typeKey) || FALLING_STAR_TYPES[0];
+        fallingStar.type = forcedType;
+        fallingStar.radius = Math.max(24, Math.min(38, W * 0.035)) * forcedType.scale;
         fallingStar.x = W * 0.72;
         fallingStar.y = H * 0.25;
         fallingStar.vx = 0;
@@ -3260,6 +3295,18 @@
     });
     debugStarButton.addEventListener("click", () => window.__tg.forceFallingStar());
     document.body.appendChild(debugStarButton);
+
+    const debugBlueStarButton = document.createElement("button");
+    debugBlueStarButton.type = "button";
+    debugBlueStarButton.className = "debug-control";
+    debugBlueStarButton.textContent = "テスト: あおいほし";
+    debugBlueStarButton.setAttribute("aria-label", "テストでレアな青い星を出す");
+    Object.assign(debugBlueStarButton.style, {
+      position: "fixed", left: "58%", top: "360px", zIndex: "99",
+      padding: "8px", fontSize: "14px",
+    });
+    debugBlueStarButton.addEventListener("click", () => window.__tg.forceFallingStar("blue"));
+    document.body.appendChild(debugBlueStarButton);
     const debugLongTrainButton = document.createElement("button");
     debugLongTrainButton.type = "button";
     debugLongTrainButton.className = "debug-control";
