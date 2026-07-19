@@ -296,9 +296,12 @@
       ],
       expressStops: new Set(),
       cityStations: new Set([
-        "とうきょう", "しんばし", "しながわ", "おおさき", "しぶや", "はらじゅく",
-        "よよぎ", "しんじゅく", "しんおおくぼ", "たかだのばば", "いけぶくろ",
-        "うえの", "あきはばら", "かんだ",
+        "とうきょう", "ゆうらくちょう", "しんばし", "はままつちょう", "たまち",
+        "たかなわゲートウェイ", "しながわ", "おおさき", "ごたんだ", "めぐろ",
+        "えびす", "しぶや", "はらじゅく", "よよぎ", "しんじゅく", "しんおおくぼ",
+        "たかだのばば", "めじろ", "いけぶくろ", "おおつか", "すがも", "こまごめ",
+        "たばた", "にしにっぽり", "にっぽり", "うぐいすだに", "うえの",
+        "おかちまち", "あきはばら", "かんだ",
       ]),
     },
   };
@@ -1489,12 +1492,16 @@
   function drawCityscape() {
     const base = H * GROUND_R;
     const { x0, x1 } = viewRange();
-    const segmentProgress = (distance - segmentStartDistance) / Math.max(stationWorldX - segmentStartDistance, 1);
-    const leavingCity = activeRoute.cityStations.has(currentStationName) && segmentProgress < 0.2;
-    const city = activeRoute.cityStations.has(nextStationName) || leavingCity;
-    const major = GRAND_STATIONS.has(nextStationName) || MAJOR_STATIONS.has(nextStationName)
-      || (leavingCity && (GRAND_STATIONS.has(currentStationName) || MAJOR_STATIONS.has(currentStationName)));
-    const spacing = city ? 118 : 235;
+    const rawProgress = (distance - segmentStartDistance) / Math.max(stationWorldX - segmentStartDistance, 1);
+    const progress = Math.max(0, Math.min(rawProgress, 1));
+    const blend = progress * progress * (3 - 2 * progress);
+    const currentCity = activeRoute.cityStations.has(currentStationName) ? 1 : 0;
+    const nextCity = activeRoute.cityStations.has(nextStationName) ? 1 : 0;
+    const currentMajor = GRAND_STATIONS.has(currentStationName) || MAJOR_STATIONS.has(currentStationName) ? 1 : 0;
+    const nextMajor = GRAND_STATIONS.has(nextStationName) || MAJOR_STATIONS.has(nextStationName) ? 1 : 0;
+    const cityBlend = currentCity + (nextCity - currentCity) * blend;
+    const majorBlend = currentMajor + (nextMajor - currentMajor) * blend;
+    const spacing = 118;
     const scroll = distance * 0.48;
     const start = Math.floor((x0 + scroll) / spacing) - 1;
     const end = Math.ceil((x1 + scroll) / spacing) + 1;
@@ -1503,13 +1510,23 @@
     for (let i = start; i <= end; i++) {
       const x = i * spacing - scroll;
       const seed = Math.abs((i * 47) % 97);
-      const width = city ? 72 + seed % 38 : 62 + seed % 45;
-      const height = city
-        ? H * (0.11 + (seed % (major ? 8 : 5)) * 0.025)
-        : H * (0.065 + (seed % 3) * 0.018);
+      const localWidth = 62 + seed % 45;
+      const cityWidth = 72 + seed % 38;
+      const width = localWidth + (cityWidth - localWidth) * cityBlend;
+      const localHeight = H * (0.065 + (seed % 3) * 0.018);
+      const cityHeight = H * (0.11 + (seed % 5) * 0.025);
+      const majorHeight = H * (0.11 + (seed % 8) * 0.025);
+      const urbanHeight = cityHeight + (majorHeight - cityHeight) * majorBlend;
+      const height = localHeight + (urbanHeight - localHeight) * cityBlend;
+      const buildingAlpha = Math.abs(i % 2) === 1 ? cityBlend : 1;
+      if (buildingAlpha < 0.02) continue;
+      ctx.save();
+      ctx.globalAlpha = buildingAlpha;
       ctx.fillStyle = colors[seed % colors.length];
       ctx.fillRect(x, base - height, width, height);
-      if (!city) {
+      if (cityBlend < 0.98) {
+        ctx.save();
+        ctx.globalAlpha = buildingAlpha * (1 - cityBlend);
         ctx.fillStyle = ["#b84f43", "#4f6e7d", "#8a6847"][seed % 3];
         ctx.beginPath();
         ctx.moveTo(x - 7, base - height);
@@ -1517,6 +1534,7 @@
         ctx.lineTo(x + width + 7, base - height);
         ctx.closePath();
         ctx.fill();
+        ctx.restore();
       }
       ctx.fillStyle = "rgba(255, 248, 196, 0.8)";
       for (let wy = base - height + 18; wy < base - 18; wy += 24) {
@@ -1526,14 +1544,18 @@
       }
       ctx.fillStyle = "#667b88";
       ctx.fillRect(x + width * 0.42, base - height - 8, width * 0.16, 8);
-      if (!city && seed % 2 === 0) {
+      if (cityBlend < 0.98 && seed % 2 === 0) {
+        ctx.save();
+        ctx.globalAlpha = buildingAlpha * (1 - cityBlend);
         ctx.fillStyle = "#5f9b55";
         ctx.beginPath();
         ctx.arc(x + width + 20, base - 22, 20, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = "#76533a";
         ctx.fillRect(x + width + 17, base - 18, 6, 18);
+        ctx.restore();
       }
+      ctx.restore();
     }
   }
 
