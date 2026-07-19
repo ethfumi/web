@@ -17,7 +17,7 @@
   <canvas id="scene" aria-label="リアルタイムで描画されるMenger sponge"></canvas>
   <div class="grain" aria-hidden="true"></div>
   <header class="topbar">
-    <div><span class="eyebrow">FRACTAL SPECIMEN / NO. 008</span><h1><span id="fractalTitle">MENGER SPONGE</span> <em id="fractalSubtitle">/ VOID CUBE</em></h1></div>
+    <div><span class="eyebrow">FRACTAL SPECIMEN / NO. 008 · v1.0 · BY <a href="https://x.com/fumilin" target="_blank" rel="me noopener noreferrer">@fumilin ↗</a></span><h1><span id="fractalTitle">MENGER SPONGE</span> <em id="fractalSubtitle">/ VOID CUBE</em></h1></div>
     <div class="readout"><i></i><span id="status">INITIALIZING</span><b id="fps">-- FPS</b><b id="gpu">GPU -- ms / 16.7 ms</b><b id="headroom">HEADROOM --%</b></div>
   </header>
   <section class="coords" aria-hidden="true"><span><i id="axisLabel">ORBIT</i> <b id="orbitOut">+00 / +00</b></span><span>MAG <b id="distOut">×1.00</b></span><span><i id="shapeLabel">CELL SCALE</i> <b id="powerOut">3.00</b></span></section><section class="zoomMeter" aria-live="polite"><span>MAGNIFICATION</span><b id="zoomBadge">×1.00</b></section>
@@ -71,7 +71,6 @@
     <button id="openPanel" class="dockButton" aria-label="フラクタルと数式メニューを開く"><b>⌁</b><small>LIBRARY</small></button>
     <button id="reset" class="dockButton" aria-label="視点をリセット"><b>↺</b><small>RESET</small></button>
   </nav>
-  <footer class="credits"><span>FRACTAL FIELD v1.1.0</span><a href="https://x.com/fumilin" target="_blank" rel="me noopener noreferrer">BY @FUMILIN ↗</a></footer>
   <div id="error" class="error" hidden><b>WEBGL2 NOT AVAILABLE</b><p>最新のSafariまたはChromeで開いてください。</p></div>
 </main>
 <script src="./app.js"></script>
