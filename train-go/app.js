@@ -7,57 +7,57 @@
   // ---- 車両定義 ----
   const TRAINS = {
     nozomi: {
-      name: "のぞみ",
+      name: "しろいしんかんせん",
       body: "#f8f8f8",
       stripe: "#1c48a6",
       edge: "#c8c8c8",
-      callName: "のぞみ",
+      callName: "しろいしんかんせん",
     },
     doctoryellow: {
-      name: "ドクターイエロー",
+      name: "きいろいけんさしゃ",
       body: "#ffd900",
       stripe: "#1c48a6",
       edge: "#d4b400",
-      callName: "ドクターイエロー",
+      callName: "きいろいけんさしゃ",
     },
     hayabusa: {
-      name: "はやぶさ",
+      name: "みどりのしんかんせん",
       body: "#f7f5ed",
       upper: "#36a995",
       stripe: "#e73d8f",
       edge: "#218b7a",
-      callName: "はやぶさ",
+      callName: "みどりのしんかんせん",
     },
     komachi: {
-      name: "こまち",
+      name: "あかいしんかんせん",
       body: "#ef3340",
       stripe: "#b7b7b7",
       edge: "#b51f2a",
-      callName: "こまち",
+      callName: "あかいしんかんせん",
     },
     yamanote: {
-      name: "やまのてせん", kind: "commuter", body: "#e8ecef", stripe: "#9acd32",
-      face: "#9acd32", edge: "#aeb8be", callName: "やまのてせん",
+      name: "みどりのでんしゃ", kind: "commuter", body: "#e8ecef", stripe: "#9acd32",
+      face: "#9acd32", edge: "#aeb8be", callName: "みどりのでんしゃ",
     },
     inokashira: {
-      name: "いのかしらせん", kind: "commuter", body: "#eef1f2", stripe: "#6f4aa8",
-      face: "#6f4aa8", edge: "#aeb8be", callName: "いのかしらせん",
+      name: "むらさきのでんしゃ", kind: "commuter", body: "#eef1f2", stripe: "#6f4aa8",
+      face: "#6f4aa8", edge: "#aeb8be", callName: "むらさきのでんしゃ",
     },
     tozai: {
-      name: "とうざいせん", kind: "commuter", body: "#e8ecef", stripe: "#32a5d2", stripe2: "#2362a8",
-      face: "#3085cc", edge: "#aeb8be", callName: "とうざいせん",
+      name: "みずいろのでんしゃ", kind: "commuter", body: "#e8ecef", stripe: "#32a5d2", stripe2: "#2362a8",
+      face: "#3085cc", edge: "#aeb8be", callName: "みずいろのでんしゃ",
     },
     sobu: {
-      name: "そうぶせん", kind: "commuter", body: "#e8ecef", stripe: "#f0c928",
-      face: "#f0c928", edge: "#aeb8be", callName: "そうぶせん",
+      name: "きいろのでんしゃ", kind: "commuter", body: "#e8ecef", stripe: "#f0c928",
+      face: "#f0c928", edge: "#aeb8be", callName: "きいろのでんしゃ",
     },
     chuo: {
-      name: "ちゅうおうせん", kind: "commuter", body: "#e8ecef", stripe: "#f28c28",
-      face: "#f28c28", edge: "#aeb8be", callName: "ちゅうおうせん",
+      name: "オレンジのでんしゃ", kind: "commuter", body: "#e8ecef", stripe: "#f28c28",
+      face: "#f28c28", edge: "#aeb8be", callName: "オレンジのでんしゃ",
     },
     keio: {
-      name: "けいおうせん", kind: "commuter", body: "#e8ecef", stripe: "#d31359", stripe2: "#174f9a",
-      face: "#d31359", edge: "#aeb8be", callName: "けいおうせん",
+      name: "あかとあおのでんしゃ", kind: "commuter", body: "#e8ecef", stripe: "#d31359", stripe2: "#174f9a",
+      face: "#d31359", edge: "#aeb8be", callName: "あかとあおのでんしゃ",
     },
   };
 
@@ -226,9 +226,9 @@
       start: "とうきょう",
       startKm: 0,
       supportsExpress: true,
-      expressLabel: "のぞみ",
-      expressModeName: "のぞみ",
-      expressAnnouncement: "のぞみモード！しながわ、しんよこはま、なごや、きょうとにとまって、しんおおさかへいきます",
+      expressLabel: "とっきゅう",
+      expressModeName: "とっきゅう",
+      expressAnnouncement: "とっきゅうモード！しながわ、しんよこはま、なごや、きょうとにとまって、しんおおさかへいきます",
       allowCrossings: false,
       stations: [
         { name: "しながわ", km: 6.8 }, { name: "しんよこはま", km: 28.8 },
@@ -249,9 +249,9 @@
       start: "とうきょう",
       startKm: 0,
       supportsExpress: true,
-      expressLabel: "はやぶさ",
-      expressModeName: "はやぶさ",
-      expressAnnouncement: "はやぶさモード！うえの、おおみや、せんだい、もりおか、はちのへにとまって、しんあおもりへいきます",
+      expressLabel: "とっきゅう",
+      expressModeName: "とっきゅう",
+      expressAnnouncement: "とっきゅうモード！うえの、おおみや、せんだい、もりおか、はちのへにとまって、しんあおもりへいきます",
       allowCrossings: false,
       stations: [
         { name: "うえの", km: 3.6 }, { name: "おおみや", km: 30.3 },
@@ -543,29 +543,29 @@
   ];
 
   const OPPOSING_TRAIN_TYPES = {
-    yamanote: { name: "やまのてせん", kind: "local", cars: 11, speedKmh: 90, body: "#e8ecef", stripe: "#9acd32" },
-    keihinTohoku: { name: "けいひんとうほくせん", kind: "local", cars: 10, speedKmh: 90, body: "#e8ecef", stripe: "#52b9e9" },
-    saikyo: { name: "さいきょうせん", kind: "local", cars: 10, speedKmh: 100, body: "#e8ecef", stripe: "#35a66f" },
-    shonanShinjuku: { name: "しょうなんしんじゅくライン", kind: "local", cars: 15, speedKmh: 110, body: "#e8ecef", stripe: "#f28c28", stripe2: "#43a36b" },
-    sobu: { name: "そうぶせん", kind: "local", cars: 10, speedKmh: 95, body: "#e8ecef", stripe: "#ffd400" },
-    chuo: { name: "ちゅうおうせん", kind: "local", cars: 12, speedKmh: 100, body: "#e8ecef", stripe: "#f28c28" },
-    azusa: { name: "あずさ・かいじ", kind: "local", cars: [9, 12], speedKmh: 130, body: "#f4f7f8", stripe: "#7a5ab6" },
-    naritaExpress: { name: "なりたエクスプレス", kind: "local", cars: [6, 12], speedKmh: 130, body: "#f4f4f4", stripe: "#d12f3f" },
-    nozomi: { name: "のぞみ", kind: "shinkansen", cars: 16, speedKmh: 285, body: "#f8f8f8", stripe: "#1c48a6" },
-    hikari: { name: "ひかり", kind: "shinkansen", cars: 16, speedKmh: 285, body: "#f8f8f8", stripe: "#1c48a6" },
-    kodama: { name: "こだま", kind: "shinkansen", cars: 16, speedKmh: 285, body: "#f8f8f8", stripe: "#1c48a6" },
-    hayabusa: { name: "はやぶさ", kind: "shinkansen", cars: 10, speedKmh: 320, body: "#f7f5ed", stripe: "#36a995", stripe2: "#e73d8f" },
+    yamanote: { name: "みどりのでんしゃ", kind: "local", cars: 11, speedKmh: 90, body: "#e8ecef", stripe: "#9acd32" },
+    keihinTohoku: { name: "みずいろのでんしゃ", kind: "local", cars: 10, speedKmh: 90, body: "#e8ecef", stripe: "#52b9e9" },
+    saikyo: { name: "みどりのでんしゃ", kind: "local", cars: 10, speedKmh: 100, body: "#e8ecef", stripe: "#35a66f" },
+    shonanShinjuku: { name: "オレンジとみどりのでんしゃ", kind: "local", cars: 15, speedKmh: 110, body: "#e8ecef", stripe: "#f28c28", stripe2: "#43a36b" },
+    sobu: { name: "きいろのでんしゃ", kind: "local", cars: 10, speedKmh: 95, body: "#e8ecef", stripe: "#ffd400" },
+    chuo: { name: "オレンジのでんしゃ", kind: "local", cars: 12, speedKmh: 100, body: "#e8ecef", stripe: "#f28c28" },
+    azusa: { name: "むらさきのとっきゅう", kind: "local", cars: [9, 12], speedKmh: 130, body: "#f4f7f8", stripe: "#7a5ab6" },
+    naritaExpress: { name: "あかいとっきゅう", kind: "local", cars: [6, 12], speedKmh: 130, body: "#f4f4f4", stripe: "#d12f3f" },
+    nozomi: { name: "しろいしんかんせん", kind: "shinkansen", cars: 16, speedKmh: 285, body: "#f8f8f8", stripe: "#1c48a6" },
+    hikari: { name: "しろいしんかんせん", kind: "shinkansen", cars: 16, speedKmh: 285, body: "#f8f8f8", stripe: "#1c48a6" },
+    kodama: { name: "しろいしんかんせん", kind: "shinkansen", cars: 16, speedKmh: 285, body: "#f8f8f8", stripe: "#1c48a6" },
+    hayabusa: { name: "みどりのしんかんせん", kind: "shinkansen", cars: 10, speedKmh: 320, body: "#f7f5ed", stripe: "#36a995", stripe2: "#e73d8f" },
     hayabusaKomachi: {
-      name: "はやぶさ＋こまち", kind: "shinkansen", cars: 17, speedKmh: 320,
+      name: "みどりとあかのしんかんせん", kind: "shinkansen", cars: 17, speedKmh: 320,
       body: "#f7f5ed", stripe: "#36a995", stripe2: "#e73d8f", coupledAtCar: 10,
       coupledBody: "#ef3340", coupledStripe: "#b7b7b7",
     },
-    komachi: { name: "こまち", kind: "shinkansen", cars: 7, speedKmh: 320, body: "#ef3340", stripe: "#b7b7b7" },
-    yamabiko: { name: "やまびこ", kind: "shinkansen", cars: 10, speedKmh: 275, body: "#f7f5ed", stripe: "#36a995" },
-    tozai: { name: "とうざいせん", kind: "local", cars: 10, speedKmh: 100, body: "#e8ecef", stripe: "#3085cc", stripe2: "#32a5d2" },
-    toyoRapid: { name: "とうようこうそくせん", kind: "local", cars: 10, speedKmh: 100, body: "#e8ecef", stripe: "#1775b8", stripe2: "#e07b25" },
-    inokashira: { name: "いのかしらせん", kind: "local", cars: 5, speedKmh: 90, body: "#eef1f2", stripe: "#6f4aa8" },
-    keio: { name: "けいおうせん", kind: "local", cars: 10, speedKmh: 110, body: "#e8ecef", stripe: "#d31359", stripe2: "#174f9a" },
+    komachi: { name: "あかいしんかんせん", kind: "shinkansen", cars: 7, speedKmh: 320, body: "#ef3340", stripe: "#b7b7b7" },
+    yamabiko: { name: "みどりのしんかんせん", kind: "shinkansen", cars: 10, speedKmh: 275, body: "#f7f5ed", stripe: "#36a995" },
+    tozai: { name: "みずいろのでんしゃ", kind: "local", cars: 10, speedKmh: 100, body: "#e8ecef", stripe: "#3085cc", stripe2: "#32a5d2" },
+    toyoRapid: { name: "あおいでんしゃ", kind: "local", cars: 10, speedKmh: 100, body: "#e8ecef", stripe: "#1775b8", stripe2: "#e07b25" },
+    inokashira: { name: "むらさきのでんしゃ", kind: "local", cars: 5, speedKmh: 90, body: "#eef1f2", stripe: "#6f4aa8" },
+    keio: { name: "あかとあおのでんしゃ", kind: "local", cars: 10, speedKmh: 110, body: "#e8ecef", stripe: "#d31359", stripe2: "#174f9a" },
     freight: { name: "かもつれっしゃ", kind: "freight", cars: 26, speedKmh: 100, body: "#40505d", stripe: "#e49a31" },
   };
 
@@ -1468,9 +1468,9 @@
     if (autoMode) autoActionTimer = 1.2;
     if (isKomachiStop) {
       komachiReady = true;
-      arrivalBanner.textContent = "こまちがいた！";
+      arrivalBanner.textContent = "あかいしんかんせんがいた！";
       btnKomachiCouple.classList.remove("hidden");
-      say(`${currentStationName}にとうちゃく！こまちがまっているよ。れんけつしよう！`);
+      say(`${currentStationName}にとうちゃく！あかいしんかんせんがまっているよ。れんけつしよう！`);
     } else if (celebration) {
       arrivalBanner.textContent = celebration.banner;
       showStationDoorPrompt();
@@ -1511,7 +1511,7 @@
     state = "coupling";
     btnKomachiCouple.classList.add("hidden");
     arrivalBanner.textContent = "れんけつするよ〜！";
-    say("こまちと、れんけつするよ〜！");
+    say("あかいしんかんせんと、れんけつするよ〜！");
   }
 
   function finishKomachiCoupling() {
@@ -1523,7 +1523,7 @@
     arrivalBanner.textContent = "れんけつ！";
     chime();
     spawnConfetti(90);
-    say(`ガチャン！はやぶさと、こまち、れんけつ！ぜんぶで、${carWord(totalCarCount())}！`);
+    say(`ガチャン！みどりと、あかのしんかんせん、れんけつ！ぜんぶで、${carWord(totalCarCount())}！`);
     showStationDoorPrompt();
   }
 
@@ -1669,7 +1669,7 @@
         say("みてみて！おおきな、ふじさんがみえるよ！");
       } else if (routeEvent === "inspection") {
         routeEventBanner.textContent = "せんろを けんさちゅう！";
-        say("ドクターイエロー、せんろをけんさちゅうです！");
+        say("きいろいけんさしゃ、せんろをけんさちゅうです！");
       } else if (routeEvent === "tunnel") {
         routeEventBanner.textContent = "トンネルだ！";
         if (headlightsAreOn()) {
@@ -2051,7 +2051,7 @@
       expressMode = false;
       deadheadMode = true;
       const couplingNote = train === TRAINS.hayabusa && !komachiCoupled
-        ? "ただし、もりおかで、こまちとれんけつします。"
+        ? "ただし、もりおかで、あかいしんかんせんとれんけつします。"
         : "";
       announcement = `かいそうれっしゃ！${routeTerminalStation().name}まで、とまりません。${couplingNote}`;
     } else {
@@ -3185,7 +3185,7 @@
       ctx.lineWidth = 2;
       ctx.beginPath();
       if (i === 0) {
-        // はやぶさ側を向く、連結用の先頭車。
+        // 緑の新幹線側を向く、連結用の先頭車。
         ctx.moveTo(left, top + carH - 8);
         ctx.quadraticCurveTo(left + carW * 0.1, top + 2, left + carW * 0.45, top);
         ctx.lineTo(right - 10, top);
