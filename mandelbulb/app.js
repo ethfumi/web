@@ -717,7 +717,7 @@ void main() {
     targetLogZoom: 0,
     iterations: 12,
     exposure: 1,
-    colorDrift: 0.08,
+    colorDrift: 0,
     palette: 3,
     quality: 0.78,
     speed: 0.36,
