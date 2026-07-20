@@ -113,7 +113,7 @@ html, body {
 .train-btn {
   display: flex;
   align-items: center;
-  gap: 1.8vmin;
+  justify-content: center;
   padding: 1.7vmin 3vmin;
   border: none;
   border-radius: 4vmin;
@@ -129,16 +129,11 @@ html, body {
 }
 
 .train-btn svg {
-  width: 45%;
+  width: 68%;
   height: auto;
   flex-shrink: 0;
 }
 
-.train-btn span {
-  font-size: 4vmin;
-  font-weight: bold;
-  color: #444;
-}
 
 #app-version {
   position: static;
@@ -190,6 +185,11 @@ html, body {
   outline-offset: 2px;
 }
 
+#unofficial-note {
+  color: #60798c;
+  font-size: clamp(10px, 1.6vmin, 14px);
+}
+
 @media (min-aspect-ratio: 4/3) {
   #select-screen { gap: 1.3vmin; padding-top: max(1.5vmin, env(safe-area-inset-top)); }
   .train-buttons {
@@ -198,9 +198,8 @@ html, body {
     gap: 1.2vmin;
     width: min(92vw, 960px);
   }
-  .train-btn { flex-direction: column; gap: 0.2vmin; padding: 0.8vmin 2vmin; }
-  .train-btn svg { width: 62%; }
-  .train-btn span { font-size: 2.7vmin; }
+  .train-btn { padding: 0.8vmin 2vmin; }
+  .train-btn svg { width: 78%; }
 }
 
 @media (max-width: 560px) {
@@ -502,7 +501,7 @@ html, body {
   white-space: nowrap;
 }
 
-/* --- はやぶさ＋こまち特別連結 --- */
+/* --- 東北方面の新幹線どうしの特別連結 --- */
 #btn-komachi-couple {
   position: fixed;
   left: 50%;
