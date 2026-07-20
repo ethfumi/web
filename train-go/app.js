@@ -1468,9 +1468,9 @@
     if (autoMode) autoActionTimer = 1.2;
     if (isKomachiStop) {
       komachiReady = true;
-      arrivalBanner.textContent = "あかいしんかんせんがいた！";
+      arrivalBanner.textContent = "れんけつするでんしゃがいた！";
       btnKomachiCouple.classList.remove("hidden");
-      say(`${currentStationName}にとうちゃく！あかいしんかんせんがまっているよ。れんけつしよう！`);
+      say(`${currentStationName}にとうちゃく！れんけつしよう！`);
     } else if (celebration) {
       arrivalBanner.textContent = celebration.banner;
       showStationDoorPrompt();
@@ -1511,7 +1511,7 @@
     state = "coupling";
     btnKomachiCouple.classList.add("hidden");
     arrivalBanner.textContent = "れんけつするよ〜！";
-    say("あかいしんかんせんと、れんけつするよ〜！");
+    say("れんけつするよ〜！");
   }
 
   function finishKomachiCoupling() {
@@ -1523,7 +1523,7 @@
     arrivalBanner.textContent = "れんけつ！";
     chime();
     spawnConfetti(90);
-    say(`ガチャン！みどりと、あかのしんかんせん、れんけつ！ぜんぶで、${carWord(totalCarCount())}！`);
+    say(`ガチャン！れんけつ！ぜんぶで、${carWord(totalCarCount())}！`);
     showStationDoorPrompt();
   }
 
@@ -1669,7 +1669,7 @@
         say("みてみて！おおきな、ふじさんがみえるよ！");
       } else if (routeEvent === "inspection") {
         routeEventBanner.textContent = "せんろを けんさちゅう！";
-        say("きいろいけんさしゃ、せんろをけんさちゅうです！");
+        say("せんろを、けんさちゅうです！");
       } else if (routeEvent === "tunnel") {
         routeEventBanner.textContent = "トンネルだ！";
         if (headlightsAreOn()) {
@@ -1710,7 +1710,7 @@
     }
     carTypes.push(typeKey);
     cars = carTypes.length;
-    say(`${TRAINS[typeKey].callName}を、れんけつ！ぜんぶで、${carWord(totalCarCount())}！`);
+    say(`れんけつ！ぜんぶで、${carWord(totalCarCount())}！`);
     spawnConfetti(12);
   }
 
@@ -1948,8 +1948,8 @@
 
     ensureAudio();
     passingSound();
-    showPlayBanner(`🚆 ${opposingTrain.type.name}・${opposingTrain.cars}りょう！`, 2200);
-    say(`${opposingTrain.type.name}、${opposingTrain.cars}りょう！みつけたね！`);
+    showPlayBanner(`🚆 ${opposingTrain.cars}りょう！`, 2200);
+    say(`${opposingTrain.cars}りょう！みつけたね！`);
     spawnConfetti(14);
     return true;
   }
@@ -2051,7 +2051,7 @@
       expressMode = false;
       deadheadMode = true;
       const couplingNote = train === TRAINS.hayabusa && !komachiCoupled
-        ? "ただし、もりおかで、あかいしんかんせんとれんけつします。"
+        ? "ただし、もりおかで、れんけつします。"
         : "";
       announcement = `かいそうれっしゃ！${routeTerminalStation().name}まで、とまりません。${couplingNote}`;
     } else {
