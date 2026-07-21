@@ -4,6 +4,8 @@
 (() => {
   "use strict";
 
+  const isDebug = new URLSearchParams(location.search).has("debug");
+
   // ---- 車両定義 ----
   const TRAINS = {
     nozomi: {
@@ -111,6 +113,13 @@
       glow: "#ffffff", trail: "255,91,115", badge: "#f4e8ff", accent: "#9b51e0", text: "#63319b",
     },
   ];
+  const SKY_PALETTES = {
+    day: ["#8fd4ff", "#d8f2ff", "#c2ecb0"],
+    sunset: ["#715d9d", "#ff9d73", "#f4c77b"],
+    night: ["#101b4c", "#263c72", "#49678a"],
+  };
+  const BUILDING_COLORS = ["#d6c4ab", "#c6d6df", "#e0b9a8", "#bcc9a8"];
+  const ROOF_COLORS = ["#b84f43", "#4f6e7d", "#8a6847"];
   const FRICTION_PX_PER_SEC2 = 18;       // 自然減速は小さく、連打の加速感を残す
   const AUTO_ACCEL_PX_PER_SEC2 = 40;     // 自動運転は遊びやすい時間に圧縮しつつ滑らかに加速
   const AUTO_OVERSPEED_DECEL_PX_PER_SEC2 = 90;
@@ -1102,17 +1111,22 @@
     }
   }
 
-  function updateDriveUi() {
+  let lastDriveUiUpdate = -Infinity;
+  function updateDriveUi(force = true, now = performance.now()) {
+    if (!force && now - lastDriveUiUpdate < 100) return;
+    lastDriveUiUpdate = now;
     const terminal = routeTerminalStation();
     speedValue.textContent = String(displaySpeed(speed));
     tapBoostValue.textContent = String(currentTapBoostKmh());
-    canvas.dataset.tapBoostKmh = String(currentTapBoostKmh());
-    canvas.dataset.deliveredPassengers = String(deliveredPassengers);
-    canvas.dataset.braking = String(isBrakingForStation());
-    canvas.dataset.passingStation = String(passingStation);
-    canvas.dataset.tunnelProgress = routeEvent === "tunnel" ? routeEventProgress.toFixed(3) : "";
-    canvas.dataset.tunnelAlpha = tunnelVisualAlpha().toFixed(3);
-    canvas.dataset.speedBoostCount = String(speedBoostPopups.length);
+    if (isDebug) {
+      canvas.dataset.tapBoostKmh = String(currentTapBoostKmh());
+      canvas.dataset.deliveredPassengers = String(deliveredPassengers);
+      canvas.dataset.braking = String(isBrakingForStation());
+      canvas.dataset.passingStation = String(passingStation);
+      canvas.dataset.tunnelProgress = routeEvent === "tunnel" ? routeEventProgress.toFixed(3) : "";
+      canvas.dataset.tunnelAlpha = tunnelVisualAlpha().toFixed(3);
+      canvas.dataset.speedBoostCount = String(speedBoostPopups.length);
+    }
     distanceValue.textContent = String(Math.floor(distance / PIXELS_PER_METER));
     distanceKmValue.textContent = `${(Math.floor(distance / PIXELS_PER_METER) / 1000).toFixed(1)} km`;
     const nextRemaining = nextStationRemainingMeters();
@@ -1126,7 +1140,7 @@
     btnExpress.classList.remove("hidden");
     btnExpress.classList.toggle("deadhead", deadheadMode);
     btnExpress.setAttribute("aria-pressed", String(expressMode || deadheadMode));
-    canvas.dataset.serviceMode = deadheadMode ? "deadhead" : expressMode ? "express" : "local";
+    if (isDebug) canvas.dataset.serviceMode = deadheadMode ? "deadhead" : expressMode ? "express" : "local";
     if (deadheadMode) {
       btnExpress.setAttribute("aria-label", "各駅停車モードにする");
       expressIcon.textContent = "🚫";
@@ -1326,7 +1340,7 @@
     accelerationEffect = 0;
     brakeEffect = 0;
     playElapsedSeconds = 0;
-    updatePlayTimer();
+    updatePlayTimer(true);
     state = "stopped";
     scheduleNextStation();
     doorsOpen = false;
@@ -1785,7 +1799,7 @@
     if (state !== "running") {
       if (state === "stopped") missFallingStar();
       else fallingStar = null;
-      canvas.dataset.starBoostSeconds = starBoostTime > 0 ? String(Math.ceil(starBoostTime)) : "0";
+      if (isDebug) canvas.dataset.starBoostSeconds = starBoostTime > 0 ? String(Math.ceil(starBoostTime)) : "0";
       return;
     }
 
@@ -1794,10 +1808,12 @@
     if (boostWasActive && starBoostTime === 0) {
       starBoostMultiplier = 1;
       starBoostType = FALLING_STAR_TYPES[0];
-      canvas.dataset.starBoostMultiplier = "1";
-      canvas.dataset.starType = "";
+      if (isDebug) {
+        canvas.dataset.starBoostMultiplier = "1";
+        canvas.dataset.starType = "";
+      }
     }
-    canvas.dataset.starBoostSeconds = starBoostTime > 0 ? String(Math.ceil(starBoostTime)) : "0";
+    if (isDebug) canvas.dataset.starBoostSeconds = starBoostTime > 0 ? String(Math.ceil(starBoostTime)) : "0";
     if (!fallingStar) {
       nextFallingStarIn -= dt;
       if (nextFallingStarIn <= 0) spawnFallingStar();
@@ -2120,29 +2136,35 @@
     return (worldX - distance) * travelVisualSign();
   }
 
+  const cachedCarMetrics = { carW: 0, carH: 0, gap: 8 };
   function carMetrics() {
-    const carW = Math.min(W * 0.22, 190);
-    return { carW, carH: carW * 0.32, gap: 8 };
+    cachedCarMetrics.carW = Math.min(W * 0.22, 190);
+    cachedCarMetrics.carH = cachedCarMetrics.carW * 0.32;
+    return cachedCarMetrics;
   }
 
   // カメラを引いた時に描画が必要になる、スケール座標系での画面左右端
+  const cachedViewRange = { x0: 0, x1: 0 };
   function viewRange() {
     const ax = W * NOSE_R;
-    return { x0: ax - ax / viewScale, x1: ax + (W - ax) / viewScale };
+    cachedViewRange.x0 = ax - ax / viewScale;
+    cachedViewRange.x1 = ax + (W - ax) / viewScale;
+    return cachedViewRange;
   }
 
+  let skyGradient = null;
+  let skyGradientKey = "";
   function drawSky() {
-    const palettes = {
-      day: ["#8fd4ff", "#d8f2ff", "#c2ecb0"],
-      sunset: ["#715d9d", "#ff9d73", "#f4c77b"],
-      night: ["#101b4c", "#263c72", "#49678a"],
-    };
-    const colors = palettes[timeOfDay];
-    const g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, colors[0]);
-    g.addColorStop(0.6, colors[1]);
-    g.addColorStop(1, colors[2]);
-    ctx.fillStyle = g;
+    const gradientKey = `${timeOfDay}:${H}`;
+    if (skyGradientKey !== gradientKey) {
+      const colors = SKY_PALETTES[timeOfDay];
+      skyGradient = ctx.createLinearGradient(0, 0, 0, H);
+      skyGradient.addColorStop(0, colors[0]);
+      skyGradient.addColorStop(0.6, colors[1]);
+      skyGradient.addColorStop(1, colors[2]);
+      skyGradientKey = gradientKey;
+    }
+    ctx.fillStyle = skyGradient;
     ctx.fillRect(0, 0, W, H);
 
     if (timeOfDay === "sunset") {
@@ -2217,8 +2239,6 @@
     const scroll = visualDistance * 0.48;
     const start = Math.floor((x0 + scroll) / spacing) - 1;
     const end = Math.ceil((x1 + scroll) / spacing) + 1;
-    const colors = ["#d6c4ab", "#c6d6df", "#e0b9a8", "#bcc9a8"];
-
     for (let i = start; i <= end; i++) {
       const x = i * spacing - scroll;
       const seed = Math.abs((i * 47) % 97);
@@ -2234,12 +2254,12 @@
       if (buildingAlpha < 0.02) continue;
       ctx.save();
       ctx.globalAlpha = buildingAlpha;
-      ctx.fillStyle = colors[seed % colors.length];
+      ctx.fillStyle = BUILDING_COLORS[seed % BUILDING_COLORS.length];
       ctx.fillRect(x, base - height, width, height);
       if (cityBlend < 0.98) {
         ctx.save();
         ctx.globalAlpha = buildingAlpha * (1 - cityBlend);
-        ctx.fillStyle = ["#b84f43", "#4f6e7d", "#8a6847"][seed % 3];
+        ctx.fillStyle = ROOF_COLORS[seed % ROOF_COLORS.length];
         ctx.beginPath();
         ctx.moveTo(x - 7, base - height);
         ctx.lineTo(x + width / 2, base - height - 24);
@@ -3009,14 +3029,17 @@
     ctx.textBaseline = "alphabetic";
   }
 
-  function drawTrainWindows(drawWindows) {
+  function drawTrainWindows(winStart, top, carW, carH, winCount, winStep = carW * 0.28) {
     ctx.save();
     ctx.fillStyle = timeOfDay === "night" ? "#ffe58a" : "#333";
     if (timeOfDay === "night") {
       ctx.shadowColor = "rgba(255, 221, 112, 0.9)";
       ctx.shadowBlur = 8;
     }
-    drawWindows();
+    for (let wi = 0; wi < winCount; wi++) {
+      roundRect(winStart + wi * winStep, top + carH * 0.18, carW * 0.18, carH * 0.22, 4);
+      ctx.fill();
+    }
     ctx.restore();
   }
 
@@ -3050,13 +3073,15 @@
       ctx.shadowColor = "#ff3d20";
       ctx.shadowBlur = 12;
       const wheelY = y - 7;
-      const points = [noseX - carW * 0.22, noseX - carW * 0.72, tailX + carW * 0.2];
-      points.forEach((x, index) => {
+      for (let index = 0; index < 3; index++) {
+        const x = index === 0
+          ? noseX - carW * 0.22
+          : index === 1 ? noseX - carW * 0.72 : tailX + carW * 0.2;
         const r = 3 + ((Math.floor(distance / 12) + index) % 3);
         ctx.beginPath();
         ctx.arc(x, wheelY + (index % 2) * 3, r, 0, Math.PI * 2);
         ctx.fill();
-      });
+      }
       ctx.restore();
     }
   }
@@ -3144,12 +3169,7 @@
       // 窓
       const winCount = i === 0 || isTail ? 2 : 3;
       const winStart = isTail ? left + carW * 0.38 : left + carW * 0.12;
-      drawTrainWindows(() => {
-        for (let wi = 0; wi < winCount; wi++) {
-          roundRect(winStart + wi * carW * 0.28, top + carH * 0.18, carW * 0.18, carH * 0.22, 4);
-          ctx.fill();
-        }
-      });
+      drawTrainWindows(winStart, top, carW, carH, winCount);
 
       // 連結器
       if (i > 0) {
@@ -3212,12 +3232,7 @@
       ctx.fillRect(left + carW * 0.08, top + carH * 0.52, carW * 0.84, carH * 0.14);
 
       const windowStart = left + carW * 0.2;
-      drawTrainWindows(() => {
-        for (let wi = 0; wi < 2; wi++) {
-          roundRect(windowStart + wi * carW * 0.3, top + carH * 0.18, carW * 0.18, carH * 0.22, 4);
-          ctx.fill();
-        }
-      });
+      drawTrainWindows(windowStart, top, carW, carH, 2, carW * 0.3);
 
       if (i === 0) {
         ctx.fillStyle = "#666";
@@ -3286,8 +3301,11 @@
     ctx.restore();
   }
 
-  function updatePlayTimer() {
+  let displayedPlaySeconds = -1;
+  function updatePlayTimer(force = false) {
     const totalSeconds = Math.floor(playElapsedSeconds);
+    if (!force && totalSeconds === displayedPlaySeconds) return;
+    displayedPlaySeconds = totalSeconds;
     const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
     const seconds = String(totalSeconds % 60).padStart(2, "0");
     playTimeValue.textContent = `${minutes}:${seconds}`;
@@ -3354,9 +3372,9 @@
 
     brakeEffect += ((braking ? 1 : 0) - brakeEffect) * Math.min(dt * 10, 1);
     accelerationEffect = Math.max(0, accelerationEffect - dt * 1.7);
-    canvas.dataset.motionEffect = braking ? "braking" : (accelerationEffect > 0.08 ? "accelerating" : "");
+    if (isDebug) canvas.dataset.motionEffect = braking ? "braking" : (accelerationEffect > 0.08 ? "accelerating" : "");
 
-    updateDriveUi();
+    updateDriveUi(false, now);
     updateOpposingTrain(dt);
 
     if (state === "coupling") {
@@ -3379,32 +3397,34 @@
       viewScale += (targetScale - viewScale) * Math.min(dt * 3, 1);
     }
 
-    canvas.dataset.groundY = String(Math.round(groundY()));
-    canvas.dataset.cars = String(totalCarCount());
-    canvas.dataset.platformWidth = String(Math.round(stationPlatformWidth(nextStationName)));
-    canvas.dataset.trainStationOffset = String(Math.round(trainStationOffset()));
-    canvas.dataset.trainFacing = trainFacesLeft() ? "left" : "right";
-    canvas.dataset.worldMotion = trainFacesLeft() ? "right" : "left";
-    canvas.dataset.opposingDirection = opposingTrain
-      ? (opposingTrain.direction > 0 ? "right" : "left")
-      : "";
-    canvas.dataset.opposingX = opposingTrain ? String(Math.round(opposingTrain.x)) : "";
-    canvas.dataset.stationScreenX = String(Math.round(stationScreenX(stationWorldX, nextStationName)));
-    canvas.dataset.fallingStarX = fallingStar ? String(Math.round(fallingStar.x)) : "";
-    canvas.dataset.fallingStarY = fallingStar ? String(Math.round(fallingStar.y)) : "";
-    canvas.dataset.fallingStarType = fallingStar?.type.key || "";
-    canvas.dataset.fallingStarRadius = fallingStar ? String(Math.round(fallingStar.radius * 10) / 10) : "";
-    canvas.dataset.fallingStarSpeed = fallingStar ? String(fallingStar.type.speed) : "";
-    canvas.dataset.fallingStarTrailLength = fallingStar
-      ? String(Math.round(fallingStar.radius * 5 * fallingStar.type.trailScale))
-      : "";
-    const starWeights = currentStarWeights();
-    canvas.dataset.starWeightGold = String(starWeights.gold);
-    canvas.dataset.starWeightGreen = String(starWeights.green);
-    canvas.dataset.starWeightBlue = String(starWeights.blue);
-    canvas.dataset.starWeightRainbow = String(starWeights.rainbow);
-    canvas.dataset.starMissBlue = String(missedRareStars.blue);
-    canvas.dataset.starMissRainbow = String(missedRareStars.rainbow);
+    if (isDebug) {
+      canvas.dataset.groundY = String(Math.round(groundY()));
+      canvas.dataset.cars = String(totalCarCount());
+      canvas.dataset.platformWidth = String(Math.round(stationPlatformWidth(nextStationName)));
+      canvas.dataset.trainStationOffset = String(Math.round(trainStationOffset()));
+      canvas.dataset.trainFacing = trainFacesLeft() ? "left" : "right";
+      canvas.dataset.worldMotion = trainFacesLeft() ? "right" : "left";
+      canvas.dataset.opposingDirection = opposingTrain
+        ? (opposingTrain.direction > 0 ? "right" : "left")
+        : "";
+      canvas.dataset.opposingX = opposingTrain ? String(Math.round(opposingTrain.x)) : "";
+      canvas.dataset.stationScreenX = String(Math.round(stationScreenX(stationWorldX, nextStationName)));
+      canvas.dataset.fallingStarX = fallingStar ? String(Math.round(fallingStar.x)) : "";
+      canvas.dataset.fallingStarY = fallingStar ? String(Math.round(fallingStar.y)) : "";
+      canvas.dataset.fallingStarType = fallingStar?.type.key || "";
+      canvas.dataset.fallingStarRadius = fallingStar ? String(Math.round(fallingStar.radius * 10) / 10) : "";
+      canvas.dataset.fallingStarSpeed = fallingStar ? String(fallingStar.type.speed) : "";
+      canvas.dataset.fallingStarTrailLength = fallingStar
+        ? String(Math.round(fallingStar.radius * 5 * fallingStar.type.trailScale))
+        : "";
+      const starWeights = currentStarWeights();
+      canvas.dataset.starWeightGold = String(starWeights.gold);
+      canvas.dataset.starWeightGreen = String(starWeights.green);
+      canvas.dataset.starWeightBlue = String(starWeights.blue);
+      canvas.dataset.starWeightRainbow = String(starWeights.rainbow);
+      canvas.dataset.starMissBlue = String(missedRareStars.blue);
+      canvas.dataset.starMissRainbow = String(missedRareStars.rainbow);
+    }
     drawSky();
     drawClouds(dt);
     drawFallingStar();
@@ -3458,7 +3478,6 @@
   scheduleFrame();
 
   // ---- デバッグフック (?debug 付きで開いた時だけ) ----
-  const isDebug = new URLSearchParams(location.search).has("debug");
   if (isDebug) {
     window.__tg = {
       skipToStation() { distance = stationWorldX - 600; },
