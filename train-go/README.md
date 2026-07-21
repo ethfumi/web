@@ -58,6 +58,7 @@
 - 車両選択画面の下に、反映確認用のバージョンと更新日時を表示。更新時は index.html と sw.js のバージョンを揃える
 - Xなどで共有した時にタイトル・説明・アイコンを表示するOGPと、作者・感想・不具合の連絡先リンクを車両選択画面に表示する
 - アイコン生成: `python make_icons.py` (要 Pillow)
+- 山手線では「ちず」から、実際の駅位置を簡略化した通信不要の地図へ切り替えられる。地図データ: © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright) / ODbL 1.0
 
 ## 動作確認 (ローカル)
 

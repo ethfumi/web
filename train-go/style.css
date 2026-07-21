@@ -733,6 +733,11 @@ html, body {
 }
 #play-controls button span:first-child { font-size: 5vmin; line-height: 1; }
 #play-controls button:active { transform: translateY(0.8vmin); box-shadow: 0 0.4vmin 0 #a8bfd1; }
+#btn-map-mode[aria-pressed="true"] {
+  color: #fff;
+  background: #55a630;
+  box-shadow: 0 1.2vmin 0 #32751b, 0 1.5vmin 2vmin rgba(0,0,0,0.2);
+}
 
 @media (orientation: portrait) and (max-width: 700px) {
   #run-ui {
