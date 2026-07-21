@@ -185,11 +185,6 @@ html, body {
   outline-offset: 2px;
 }
 
-#unofficial-note {
-  color: #60798c;
-  font-size: clamp(10px, 1.6vmin, 14px);
-}
-
 @media (min-aspect-ratio: 4/3) {
   #select-screen { gap: 1.3vmin; padding-top: max(1.5vmin, env(safe-area-inset-top)); }
   .train-buttons {
