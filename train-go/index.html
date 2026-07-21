@@ -25,7 +25,7 @@
 <title>つなげて！でんしゃ！</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="stylesheet" href="style.css?v=59">
+<link rel="stylesheet" href="style.css?v=63">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -114,10 +114,21 @@
       </button>
     </div>
   </div>
-  <!-- 更新時は sw.js の CACHE バージョンと揃える -->
-  <div id="app-version" aria-label="つなげて！でんしゃ！、バージョン62、2026年7月22日7時39分更新">
-    <span class="version-title">つなげて！でんしゃ！</span>
-    <strong>v62</strong><span>2026.07.22 07:39 更新</span>
+  <div id="release-info">
+    <!-- 更新時は sw.js の CACHE バージョンと揃える -->
+    <div id="app-version" aria-label="つなげて！でんしゃ！、バージョン63、2026年7月22日8時11分更新">
+      <span class="version-title">つなげて！でんしゃ！</span>
+      <strong>v63</strong><span>2026.07.22 08:11 更新</span>
+    </div>
+    <details id="update-history">
+      <summary>🆕 こうしん</summary>
+      <div class="update-history-list" aria-label="こうしんりれき">
+        <span><time datetime="2026-07-22">7/22</time> やまのてせんの ちずを ついか</span>
+        <span><time datetime="2026-07-21">7/21</time> 100りょうでも なめらかに</span>
+        <span><time datetime="2026-07-20">7/20</time> おきゃくさんで かそくアップ</span>
+        <span><time datetime="2026-07-19">7/19</time> しゅうてんから おりかえし</span>
+      </div>
+    </details>
   </div>
   <a id="creator-contact" href="https://x.com/fumilin" target="_blank" rel="noopener noreferrer">
     <span>3歳の息子のために作りました。</span>
@@ -209,7 +220,7 @@
   <span>🔦</span><span id="headlight-label">ライトをつける</span>
 </button>
 
-<script src="app.js?v=62"></script>
+<script src="app.js?v=63"></script>
 <!-- Cloudflare Web Analytics: Cookieを使用せず、個人を識別しないアクセス集計 -->
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"ca5e1fbb318447b3ac9409f3da1cad2a"}'></script>
 </body>

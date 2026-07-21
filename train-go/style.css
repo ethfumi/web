@@ -135,6 +135,14 @@ html, body {
 }
 
 
+#release-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1vmin;
+  flex-wrap: wrap;
+}
+
 #app-version {
   position: static;
   display: flex;
@@ -152,6 +160,59 @@ html, body {
 #app-version strong {
   color: #2a5caa;
   font-size: 1.15em;
+}
+
+#update-history {
+  position: relative;
+  z-index: 5;
+  color: #45637b;
+  font-size: clamp(12px, 2.1vmin, 18px);
+}
+
+#update-history summary {
+  padding: 0.8vmin 1.5vmin;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+  font-weight: 800;
+  list-style: none;
+  white-space: nowrap;
+}
+
+#update-history summary::-webkit-details-marker {
+  display: none;
+}
+
+#update-history summary:focus-visible {
+  outline: 3px solid #2a5caa;
+  outline-offset: 2px;
+}
+
+.update-history-list {
+  position: absolute;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  bottom: calc(100% + 1vmin);
+  display: grid;
+  gap: 0.55em;
+  width: max-content;
+  max-width: min(84vw, 420px);
+  padding: 1em 1.2em;
+  border: 2px solid rgba(69, 99, 123, 0.16);
+  border-radius: 1.2em;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 0.6em 1.5em rgba(45, 76, 96, 0.2);
+  color: #36516a;
+  text-align: left;
+  line-height: 1.35;
+}
+
+.update-history-list time {
+  display: inline-block;
+  min-width: 3.4em;
+  color: #2a5caa;
+  font-weight: 800;
 }
 
 .version-title {
