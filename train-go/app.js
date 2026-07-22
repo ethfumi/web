@@ -929,6 +929,8 @@
   let starBoostTime = 0;
   let starBoostMultiplier = 1;
   let starBoostType = FALLING_STAR_TYPES[0];
+  const mapPowerStarScreenPoint = { x: NaN, y: NaN, radius: 0 };
+  const mapPowerStarRoutePosition = {};
   let missedRareStars = { blue: 0, rainbow: 0 };
   let accelerationEffect = 0;
   let brakeEffect = 0;
@@ -1419,6 +1421,7 @@
 
   function goHome() {
     mapMode = "scenery";
+    document.body.classList.remove("map-view-active");
     state = "select";
     speed = 0;
     autoMode = false;
@@ -1923,7 +1926,7 @@
   }
 
   function drawStarPowerBadge() {
-    if (starBoostTime <= 0) return;
+    if (starBoostTime <= 0 || mapMode !== "scenery") return;
     const seconds = Math.ceil(starBoostTime);
     const text = `${starBoostType.icon} タップかそく ${starBoostMultiplier}ばい！ ${seconds}びょう`;
     const width = Math.min(W * 0.62, 390);
@@ -1951,10 +1954,13 @@
     const rect = canvas.getBoundingClientRect();
     const px = event.offsetX * W / Math.max(rect.width, 1);
     const py = event.offsetY * H / Math.max(rect.height, 1);
-    const hitRadius = Math.max({
+    const mapStarVisible = mapMode !== "scenery" && Number.isFinite(mapPowerStarScreenPoint.x);
+    const targetX = mapStarVisible ? mapPowerStarScreenPoint.x : fallingStar.x;
+    const targetY = mapStarVisible ? mapPowerStarScreenPoint.y : fallingStar.y;
+    const hitRadius = mapStarVisible ? mapPowerStarScreenPoint.radius : Math.max({
       gold: 52, green: 48, blue: 42, rainbow: 36,
     }[fallingStar.type.key] || 48, fallingStar.radius * 2);
-    if (Math.hypot(px - fallingStar.x, py - fallingStar.y) > hitRadius) return false;
+    if (Math.hypot(px - targetX, py - targetY) > hitRadius) return false;
 
     ensureAudio();
     const collectedType = fallingStar.type;
@@ -2153,6 +2159,12 @@
     mapModeLabel.textContent = nextLabel;
     btnMapMode.setAttribute("aria-pressed", String(active));
     btnMapMode.setAttribute("aria-label", nextAria);
+    document.body.classList.toggle("map-view-active", active);
+    if (!active) {
+      mapPowerStarScreenPoint.x = NaN;
+      mapPowerStarScreenPoint.y = NaN;
+      mapPowerStarScreenPoint.radius = 0;
+    }
     if (isDebug) canvas.dataset.viewMode = mapMode;
     if (!announce) return;
     const message = mapMode === "follow"
@@ -2750,6 +2762,77 @@
     return point;
   }
 
+  function drawMapPowerStar(scene, position, labelSize) {
+    if (!fallingStar) {
+      mapPowerStarScreenPoint.x = NaN;
+      mapPowerStarScreenPoint.y = NaN;
+      mapPowerStarScreenPoint.radius = 0;
+      return;
+    }
+
+    const map = activeRouteMap();
+    const firstKm = map.points[0].km;
+    const lastKm = map.points[map.points.length - 1].km;
+    const desiredScreenDistance = scene.mode === "follow"
+      ? Math.min(W * 0.18, 180)
+      : Math.min(W * 0.12, 130);
+    const aheadKm = Math.max(0.18, desiredScreenDistance / Math.max(scene.scale, 0.001) / 1000);
+    let markerKm = position.km + routeDirection * aheadKm;
+    if (!map.loopKm) markerKm = Math.max(firstKm, Math.min(lastKm, markerKm));
+    const markerPosition = yamanoteMapPositionAt(markerKm, mapPowerStarRoutePosition, map);
+    const point = mapScenePoint(scene, markerPosition.worldX, markerPosition.worldY, mapPowerStarScreenPoint);
+    const side = routeDirection < 0 ? -1 : 1;
+    const offset = Math.max(24, Math.min(38, labelSize * 2.1));
+    point.x += -Math.sin(markerPosition.angle) * offset * side;
+    point.y += Math.cos(markerPosition.angle) * offset * side;
+    const radius = Math.max(24, Math.min(36, labelSize * 1.65));
+    point.x = Math.max(scene.left + radius + 8, Math.min(scene.right - radius - 8, point.x));
+    point.y = Math.max(scene.top + radius + 8, Math.min(scene.bottom - radius * 1.4 - 8, point.y));
+    point.radius = radius + 12;
+
+    const { type } = fallingStar;
+    ctx.save();
+    ctx.translate(point.x, point.y);
+    ctx.shadowColor = type.glow;
+    ctx.shadowBlur = radius * 0.7;
+    ctx.fillStyle = "rgba(255,255,255,0.94)";
+    ctx.strokeStyle = type.accent;
+    ctx.lineWidth = Math.max(4, radius * 0.14);
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    if (type.key === "rainbow") {
+      const rainbow = ctx.createLinearGradient(-radius, -radius, radius, radius);
+      ["#ff4d67", "#ff9f43", "#ffe052", "#50da7d", "#48a9ff", "#9a5bff"].forEach((color, index, colors) => {
+        rainbow.addColorStop(index / (colors.length - 1), color);
+      });
+      ctx.fillStyle = rainbow;
+    } else {
+      ctx.fillStyle = type.fill;
+    }
+    drawStarPath(0, -radius * 0.08, radius * 0.52, radius * 0.24, fallingStar.rotation);
+    ctx.fill();
+    ctx.fillStyle = type.inner;
+    drawStarPath(0, -radius * 0.08, radius * 0.25, radius * 0.11, fallingStar.rotation);
+    ctx.fill();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    const boostText = `×${type.multiplier}`;
+    ctx.font = `bold ${Math.max(11, radius * 0.55)}px sans-serif`;
+    const pillWidth = ctx.measureText(boostText).width + radius * 0.75;
+    ctx.fillStyle = type.badge;
+    ctx.strokeStyle = type.accent;
+    ctx.lineWidth = 2;
+    roundRect(-pillWidth / 2, radius * 0.5, pillWidth, radius * 0.72, radius * 0.36);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = type.text;
+    ctx.fillText(boostText, 0, radius * 0.86);
+    ctx.restore();
+  }
+
   function drawYamanoteMap() {
     const scene = mapMode === "follow" ? yamanoteFollowScene() : yamanoteOverviewScene();
     const labelSize = Math.max(10, Math.min(W, H) * (scene.portrait ? 0.024 : 0.021));
@@ -2767,12 +2850,19 @@
     } else {
       trainPoint = drawYamanoteOverviewMarker(scene, labelSize, position);
     }
+    drawMapPowerStar(scene, position, labelSize);
 
     ctx.font = "bold " + (labelSize * 0.86) + "px sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     const modeText = scene.mode === "follow" ? "うえから" : "ぜんたい";
-    const badgeText = modeText + "　" + (Math.round(position.km * 10) / 10) + " km　🚃 " + totalCarCount() + "りょう　🧭 きた↑";
+    const boostText = starBoostTime > 0
+      ? `　${starBoostType.icon} ×${starBoostMultiplier} ${Math.ceil(starBoostTime)}びょう`
+      : "";
+    const roundedKm = Math.round(position.km * 10) / 10;
+    const badgeText = scene.portrait
+      ? `${modeText}　${roundedKm}km　🚃${totalCarCount()}　🧭↑${boostText}`
+      : modeText + "　" + roundedKm + " km　🚃 " + totalCarCount() + "りょう　🧭 きた↑" + boostText;
     const badgeWidth = ctx.measureText(badgeText).width + labelSize * 1.6;
     ctx.fillStyle = "rgba(255,255,255,0.91)";
     roundRect(W * 0.5 - badgeWidth / 2, H * 0.022, badgeWidth, labelSize * 1.8, labelSize * 0.8);
@@ -2793,6 +2883,9 @@
       canvas.dataset.mapTrainY = String(Math.round(trainPoint.y));
       canvas.dataset.mapScale = scene.scale.toFixed(4);
       canvas.dataset.mapTrainCount = String(scene.mode === "follow" ? scene.carPositions.length : 1);
+      canvas.dataset.mapPowerStarX = Number.isFinite(mapPowerStarScreenPoint.x) ? String(Math.round(mapPowerStarScreenPoint.x)) : "";
+      canvas.dataset.mapPowerStarY = Number.isFinite(mapPowerStarScreenPoint.y) ? String(Math.round(mapPowerStarScreenPoint.y)) : "";
+      canvas.dataset.mapPowerStarRadius = mapPowerStarScreenPoint.radius ? String(Math.round(mapPowerStarScreenPoint.radius)) : "";
       if (scene.mode === "follow") {
         let minTrainX = Infinity;
         let maxTrainX = -Infinity;
@@ -3917,6 +4010,7 @@
     for (const popup of speedBoostPopups) {
       popup.life -= dt;
       popup.y -= 55 * dt;
+      if (mapMode !== "scenery") continue;
       ctx.globalAlpha = Math.min(1, Math.max(0, popup.life * 1.8));
       ctx.font = `bold ${Math.max(30, Math.min(52, W * 0.04))}px sans-serif`;
       ctx.lineWidth = 8;
@@ -4056,7 +4150,6 @@
     const routeMapActive = mapMode !== "scenery" && activeRouteMap() && state !== "select";
     if (routeMapActive) {
       drawYamanoteMap();
-      drawFallingStar();
     } else {
       drawSky();
       if (isDebug) canvas.dataset.viewMode = "scenery";
