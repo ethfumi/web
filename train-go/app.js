@@ -146,13 +146,7 @@
   const MAP_REFERENCE_LATITUDE = (YAMANOTE_MAP_BOUNDS.minLat + YAMANOTE_MAP_BOUNDS.maxLat) / 2;
   const MAP_METERS_PER_LONGITUDE = MAP_METERS_PER_LATITUDE * Math.cos(MAP_REFERENCE_LATITUDE * Math.PI / 180);
   const MAP_REFERENCE_LONGITUDE = (YAMANOTE_MAP_BOUNDS.minLon + YAMANOTE_MAP_BOUNDS.maxLon) / 2;
-  const YAMANOTE_MAP_GRID_LINES = [];
-  for (let lon = 139.65; lon <= 139.83; lon += 0.01) {
-    YAMANOTE_MAP_GRID_LINES.push([[lon, 35.58], [lon, 35.79]]);
-  }
-  for (let lat = 35.58; lat <= 35.79; lat += 0.01) {
-    YAMANOTE_MAP_GRID_LINES.push([[139.65, lat], [139.83, lat]]);
-  }
+
   const ROUTE_AUTO_SPEED_KMH = {
     chuo: 100, tokaido: 285, tohoku: 320, sobu: 95,
     tozai: 100, inokashira: 90, keio: 110, yamanote: 90,
@@ -2500,6 +2494,46 @@
     ctx.restore();
   }
 
+  function drawMapLocalGrid(scene) {
+    if (scene.mode !== "follow" || scene.scale <= 0) return;
+    const minWorldX = scene.centerWorldX + (scene.left - scene.screenCenterX) / scene.scale;
+    const maxWorldX = scene.centerWorldX + (scene.right - scene.screenCenterX) / scene.scale;
+    const minWorldY = scene.centerWorldY + (scene.top - scene.screenCenterY) / scene.scale;
+    const maxWorldY = scene.centerWorldY + (scene.bottom - scene.screenCenterY) / scene.scale;
+    const targetStep = 115 / scene.scale;
+    const steps = [100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000];
+    const step = steps.find((candidate) => candidate >= targetStep) || steps[steps.length - 1];
+    ctx.beginPath();
+    for (let worldX = Math.floor(minWorldX / step) * step; worldX <= maxWorldX; worldX += step) {
+      const x = scene.screenCenterX + (worldX - scene.centerWorldX) * scene.scale;
+      ctx.moveTo(x, scene.top);
+      ctx.lineTo(x, scene.bottom);
+    }
+    for (let worldY = Math.floor(minWorldY / step) * step; worldY <= maxWorldY; worldY += step) {
+      const y = scene.screenCenterY + (worldY - scene.centerWorldY) * scene.scale;
+      ctx.moveTo(scene.left, y);
+      ctx.lineTo(scene.right, y);
+    }
+    ctx.strokeStyle = timeOfDay === "night" ? "rgba(194,210,224,0.09)" : "rgba(255,255,255,0.48)";
+    ctx.lineWidth = Math.max(1, Math.min(W, H) * 0.002);
+    ctx.stroke();
+  }
+
+  function drawMapPrefectureLabels(scene) {
+    if (scene.mode !== "overview") return;
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = "bold " + Math.max(11, Math.min(22, Math.min(W, H) * 0.022)) + "px sans-serif";
+    ctx.fillStyle = timeOfDay === "night" ? "rgba(222,235,238,0.28)" : "rgba(72,103,91,0.34)";
+    for (const prefecture of MAP_GEOGRAPHY.prefectures) {
+      const x = scene.screenCenterX + (mapWorldX(prefecture.lon) - scene.centerWorldX) * scene.scale;
+      const y = scene.screenCenterY + (mapWorldY(prefecture.lat) - scene.centerWorldY) * scene.scale;
+      if (mapPointIsVisible(scene, x, y, 30)) ctx.fillText(prefecture.name, x, y);
+    }
+    ctx.restore();
+  }
+
   function drawYamanoteMapBackground(scene) {
     const mapGradient = ctx.createLinearGradient(0, 0, 0, H);
     mapGradient.addColorStop(0, timeOfDay === "night" ? "#17344a" : "#d9f0f6");
@@ -2517,13 +2551,8 @@
       ctx.stroke();
     }
 
-    // 緯度・経度に沿う簡略道路。追従表示では地図と一緒に流れる。
-    ctx.strokeStyle = timeOfDay === "night" ? "rgba(194,210,224,0.10)" : "rgba(255,255,255,0.58)";
-    ctx.lineWidth = Math.max(1, Math.min(W, H) * 0.0025);
-    for (const roadLine of YAMANOTE_MAP_GRID_LINES) {
-      drawMapGeoPath(scene, roadLine);
-      ctx.stroke();
-    }
+    // 追従表示の格子は現在地へ合わせて生成し、東京だけに固定しない。
+    drawMapLocalGrid(scene);
 
     ctx.fillStyle = timeOfDay === "night" ? "#315f78" : "#80c8e2";
     ctx.strokeStyle = timeOfDay === "night" ? "#4c829c" : "#62b4d6";
@@ -2560,16 +2589,22 @@
       }
     }
 
-    const palaceX = scene.screenCenterX + (mapWorldX(139.7528) - scene.centerWorldX) * scene.scale;
-    const palaceY = scene.screenCenterY + (mapWorldY(35.6852) - scene.centerWorldY) * scene.scale;
-    ctx.fillStyle = timeOfDay === "night" ? "#315842" : "#a7d58b";
-    ctx.beginPath();
-    ctx.ellipse(
-      palaceX, palaceY,
-      Math.max(10, 700 * scene.scale), Math.max(8, 550 * scene.scale),
-      -0.15, 0, Math.PI * 2,
-    );
-    ctx.fill();
+    drawMapPrefectureLabels(scene);
+
+    if (scene.mode === "follow" && scene.scale >= 0.04) {
+      const palaceX = scene.screenCenterX + (mapWorldX(139.7528) - scene.centerWorldX) * scene.scale;
+      const palaceY = scene.screenCenterY + (mapWorldY(35.6852) - scene.centerWorldY) * scene.scale;
+      if (mapPointIsVisible(scene, palaceX, palaceY, 50)) {
+        ctx.fillStyle = timeOfDay === "night" ? "#315842" : "#a7d58b";
+        ctx.beginPath();
+        ctx.ellipse(
+          palaceX, palaceY,
+          Math.min(58, 480 * scene.scale), Math.min(44, 360 * scene.scale),
+          -0.15, 0, Math.PI * 2,
+        );
+        ctx.fill();
+      }
+    }
   }
 
   function drawYamanoteRelatedLines(scene, labelSize) {
