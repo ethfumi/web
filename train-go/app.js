@@ -131,44 +131,9 @@
     maps: ROUTE_MAPS,
     drawOrder: MAP_ROUTE_DRAW_ORDER,
     laneOffsets: MAP_ROUTE_LANE_OFFSETS,
+    geography: MAP_GEOGRAPHY,
   } = window.TRAIN_GO_MAP_DATA;
-  // 地図タイルを通信せずに遊べる、全路線共通の簡略地図データ。
-  // 駅位置は実際の緯度経度を小数4桁へ丸め、線路は駅間を直線で結ぶ。
-  // Source: OpenStreetMap route=train relation 1972920 (ODbL 1.0)
-  const YAMANOTE_MAP_POINTS = [
-    { name: "とうきょう", km: 0, lon: 139.7671, lat: 35.6812 },
-    { name: "ゆうらくちょう", km: 0.8, lon: 139.7638, lat: 35.6751 },
-    { name: "しんばし", km: 1.9, lon: 139.7586, lat: 35.6663 },
-    { name: "はままつちょう", km: 3.1, lon: 139.7570, lat: 35.6556 },
-    { name: "たまち", km: 4.6, lon: 139.7476, lat: 35.6457 },
-    { name: "たかなわゲートウェイ", km: 5.9, lon: 139.7407, lat: 35.6355 },
-    { name: "しながわ", km: 6.8, lon: 139.7388, lat: 35.6285 },
-    { name: "おおさき", km: 8.8, lon: 139.7286, lat: 35.6197 },
-    { name: "ごたんだ", km: 9.7, lon: 139.7238, lat: 35.6259 },
-    { name: "めぐろ", km: 10.9, lon: 139.7158, lat: 35.6339 },
-    { name: "えびす", km: 12.4, lon: 139.7101, lat: 35.6467 },
-    { name: "しぶや", km: 14.0, lon: 139.7016, lat: 35.6580 },
-    { name: "はらじゅく", km: 15.2, lon: 139.7027, lat: 35.6702 },
-    { name: "よよぎ", km: 16.7, lon: 139.7020, lat: 35.6830 },
-    { name: "しんじゅく", km: 17.4, lon: 139.7003, lat: 35.6909 },
-    { name: "しんおおくぼ", km: 18.7, lon: 139.7000, lat: 35.7013 },
-    { name: "たかだのばば", km: 20.1, lon: 139.7037, lat: 35.7126 },
-    { name: "めじろ", km: 21.0, lon: 139.7066, lat: 35.7212 },
-    { name: "いけぶくろ", km: 22.2, lon: 139.7109, lat: 35.7289 },
-    { name: "おおつか", km: 24.0, lon: 139.7287, lat: 35.7314 },
-    { name: "すがも", km: 25.1, lon: 139.7390, lat: 35.7334 },
-    { name: "こまごめ", km: 25.8, lon: 139.7469, lat: 35.7365 },
-    { name: "たばた", km: 27.4, lon: 139.7608, lat: 35.7381 },
-    { name: "にしにっぽり", km: 28.2, lon: 139.7668, lat: 35.7321 },
-    { name: "にっぽり", km: 28.7, lon: 139.7706, lat: 35.7280 },
-    { name: "うぐいすだに", km: 29.8, lon: 139.7788, lat: 35.7215 },
-    { name: "うえの", km: 30.9, lon: 139.7774, lat: 35.7142 },
-    { name: "おかちまち", km: 31.5, lon: 139.7747, lat: 35.7074 },
-    { name: "あきはばら", km: 32.5, lon: 139.7731, lat: 35.6984 },
-    { name: "かんだ", km: 33.2, lon: 139.7709, lat: 35.6917 },
-    { name: "とうきょう", km: 34.5, lon: 139.7671, lat: 35.6812 },
-  ];
-  const YAMANOTE_ROUTE_COORDS = YAMANOTE_MAP_POINTS.map((point) => [point.lon, point.lat]);
+  // 地図投影の基準は首都圏。路線・地形の座標本体は map-data.js に置く。
   const YAMANOTE_MAP_BOUNDS = { minLon: 139.689, maxLon: 139.791, minLat: 35.609, maxLat: 35.748 };
   const YAMANOTE_MAP_LANDMARKS = [
     { icon: "🏯", name: "こうきょ", lon: 139.7528, lat: 35.6852 },
@@ -176,47 +141,6 @@
     { icon: "🌲", name: "めいじじんぐう", lon: 139.6993, lat: 35.6764 },
     { icon: "🗼", name: "とうきょうタワー", lon: 139.7454, lat: 35.6586 },
     { icon: "🌊", name: "とうきょうわん", lon: 139.7780, lat: 35.6310 },
-  ];
-  const YAMANOTE_MAJOR_LABELS = new Set(["とうきょう", "しながわ", "しぶや", "しんじゅく", "いけぶくろ", "うえの"]);
-  // 山手線から見える接続関係を軽量に示すための簡略線。座標は駅付近を小数4桁へ丸めている。
-  const YAMANOTE_RELATED_LINES = [
-    {
-      name: "けいひんとうほく", color: "#52b9e9", label: [139.7760, 35.7040],
-      points: [
-        [139.7209, 35.7778], [139.7608, 35.7381], [139.7774, 35.7142],
-        [139.7731, 35.6984], [139.7671, 35.6812], [139.7586, 35.6663],
-        [139.7476, 35.6457], [139.7388, 35.6285], [139.6969, 35.5313],
-      ],
-    },
-    {
-      name: "ちゅうおう・そうぶ", color: "#f0c928", outline: "#f28c28", label: [139.7460, 35.7005],
-      points: [
-        [139.6658, 35.7058], [139.7003, 35.6909], [139.7020, 35.6830],
-        [139.7320, 35.6917], [139.7568, 35.7000], [139.7650, 35.6999],
-        [139.7731, 35.6984], [139.8140, 35.6967],
-      ],
-    },
-    {
-      name: "さいきょう", color: "#35a66f", label: [139.6990, 35.7045],
-      points: [
-        [139.7209, 35.7778], [139.7109, 35.7289], [139.7003, 35.6909],
-        [139.7016, 35.6580], [139.7286, 35.6197],
-      ],
-    },
-    {
-      name: "とうかいどう", color: "#2362b8", label: [139.7520, 35.6540],
-      points: [
-        [139.7671, 35.6812], [139.7586, 35.6663], [139.7476, 35.6457],
-        [139.7388, 35.6285], [139.6969, 35.5313],
-      ],
-    },
-    {
-      name: "とうざい", color: "#3085cc", label: [139.7210, 35.7115],
-      points: [
-        [139.6658, 35.7058], [139.7037, 35.7126], [139.7350, 35.7020],
-        [139.7528, 35.6848], [139.7747, 35.6820], [139.7965, 35.6719],
-      ],
-    },
   ];
   const MAP_METERS_PER_LATITUDE = 111320;
   const MAP_REFERENCE_LATITUDE = (YAMANOTE_MAP_BOUNDS.minLat + YAMANOTE_MAP_BOUNDS.maxLat) / 2;
@@ -229,14 +153,6 @@
   for (let lat = 35.58; lat <= 35.79; lat += 0.01) {
     YAMANOTE_MAP_GRID_LINES.push([[139.65, lat], [139.83, lat]]);
   }
-  const YAMANOTE_MAP_BAY = [
-    [139.760, 35.609], [139.820, 35.609], [139.820, 35.675],
-    [139.791, 35.673], [139.781, 35.664], [139.774, 35.648], [139.767, 35.633],
-  ];
-  const YAMANOTE_MAP_RIVER = [
-    [139.786, 35.780], [139.786, 35.748], [139.782, 35.721],
-    [139.783, 35.695], [139.786, 35.670], [139.795, 35.650],
-  ];
   const ROUTE_AUTO_SPEED_KMH = {
     chuo: 100, tokaido: 285, tohoku: 320, sobu: 95,
     tozai: 100, inokashira: 90, keio: 110, yamanote: 90,
@@ -2574,10 +2490,20 @@
 
   function drawYamanoteMapBackground(scene) {
     const mapGradient = ctx.createLinearGradient(0, 0, 0, H);
-    mapGradient.addColorStop(0, timeOfDay === "night" ? "#263858" : "#eef5dc");
-    mapGradient.addColorStop(1, timeOfDay === "night" ? "#17283d" : "#dcecc9");
+    mapGradient.addColorStop(0, timeOfDay === "night" ? "#17344a" : "#d9f0f6");
+    mapGradient.addColorStop(1, timeOfDay === "night" ? "#10283c" : "#b9dfea");
     ctx.fillStyle = mapGradient;
     ctx.fillRect(0, 0, W, H);
+
+    ctx.fillStyle = timeOfDay === "night" ? "#263f47" : "#e4f0cf";
+    ctx.strokeStyle = timeOfDay === "night" ? "rgba(139,180,185,0.72)" : "rgba(81,130,139,0.66)";
+    ctx.lineWidth = Math.max(1.2, Math.min(W, H) * 0.0023);
+    for (const coastline of MAP_GEOGRAPHY.coastlines) {
+      drawMapGeoPath(scene, coastline);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
 
     // 緯度・経度に沿う簡略道路。追従表示では地図と一緒に流れる。
     ctx.strokeStyle = timeOfDay === "night" ? "rgba(194,210,224,0.10)" : "rgba(255,255,255,0.58)";
@@ -2587,15 +2513,40 @@
       ctx.stroke();
     }
 
-    ctx.fillStyle = timeOfDay === "night" ? "#244a68" : "#9edcf1";
-    drawMapGeoPath(scene, YAMANOTE_MAP_BAY);
-    ctx.closePath();
-    ctx.fill();
+    ctx.fillStyle = timeOfDay === "night" ? "#315f78" : "#80c8e2";
+    ctx.strokeStyle = timeOfDay === "night" ? "#4c829c" : "#62b4d6";
+    ctx.lineWidth = Math.max(1, Math.min(3.5, scene.scale * 40));
+    for (const lake of MAP_GEOGRAPHY.lakes) {
+      drawMapGeoPath(scene, lake.points);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+    ctx.strokeStyle = timeOfDay === "night" ? "#4c829c" : "#72bfdc";
+    ctx.lineWidth = Math.max(1.2, Math.min(4, scene.scale * 28));
+    for (const river of MAP_GEOGRAPHY.rivers) {
+      drawMapGeoPath(scene, river.points);
+      ctx.stroke();
+    }
 
-    ctx.strokeStyle = timeOfDay === "night" ? "#3d7393" : "#82cbe7";
-    ctx.lineWidth = Math.max(4, Math.min(W, H) * 0.009);
-    drawMapGeoPath(scene, YAMANOTE_MAP_RIVER);
-    ctx.stroke();
+    if (scene.scale >= 0.0015) {
+      ctx.font = "bold " + Math.max(9, Math.min(W, H) * 0.014) + "px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "bottom";
+      ctx.fillStyle = timeOfDay === "night" ? "rgba(205,231,245,0.82)" : "rgba(45,112,145,0.84)";
+      for (const lake of MAP_GEOGRAPHY.lakes) {
+        const point = lake.points[Math.floor(lake.points.length / 2)];
+        const x = scene.screenCenterX + (mapWorldX(point[0]) - scene.centerWorldX) * scene.scale;
+        const y = scene.screenCenterY + (mapWorldY(point[1]) - scene.centerWorldY) * scene.scale;
+        if (mapPointIsVisible(scene, x, y, 20)) ctx.fillText(lake.name, x, y - 3);
+      }
+      for (const river of MAP_GEOGRAPHY.rivers) {
+        const point = river.points[Math.floor(river.points.length / 2)];
+        const x = scene.screenCenterX + (mapWorldX(point[0]) - scene.centerWorldX) * scene.scale;
+        const y = scene.screenCenterY + (mapWorldY(point[1]) - scene.centerWorldY) * scene.scale;
+        if (mapPointIsVisible(scene, x, y, 20)) ctx.fillText(river.name, x, y - 3);
+      }
+    }
 
     const palaceX = scene.screenCenterX + (mapWorldX(139.7528) - scene.centerWorldX) * scene.scale;
     const palaceY = scene.screenCenterY + (mapWorldY(35.6852) - scene.centerWorldY) * scene.scale;
@@ -2704,6 +2655,16 @@
       ctx.font = "bold " + Math.max(8, labelSize * 0.68) + "px sans-serif";
       ctx.fillStyle = timeOfDay === "night" ? "#e9eef6" : "#51606f";
       ctx.fillText(landmark.name, x, y + labelSize * 0.95);
+    }
+    for (const landmark of MAP_GEOGRAPHY.landmarks) {
+      const x = scene.screenCenterX + (mapWorldX(landmark.lon) - scene.centerWorldX) * scene.scale;
+      const y = scene.screenCenterY + (mapWorldY(landmark.lat) - scene.centerWorldY) * scene.scale;
+      if (!mapPointIsVisible(scene, x, y, 60)) continue;
+      ctx.font = Math.max(18, labelSize * 1.7) + "px sans-serif";
+      ctx.fillText(landmark.icon, x, y - labelSize * 0.3);
+      ctx.font = "bold " + Math.max(9, labelSize * 0.72) + "px sans-serif";
+      ctx.fillStyle = timeOfDay === "night" ? "#eef5ff" : "#526578";
+      ctx.fillText(landmark.name, x, y + labelSize * 1.15);
     }
     ctx.restore();
   }
