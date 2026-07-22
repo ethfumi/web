@@ -800,6 +800,48 @@ html, body {
   box-shadow: 0 1.2vmin 0 #32751b, 0 1.5vmin 2vmin rgba(0,0,0,0.2);
 }
 
+#map-camera-controls {
+  position: fixed;
+  top: 17vmin;
+  right: 2vmin;
+  z-index: 11;
+  display: grid;
+  gap: 0.8vmin;
+  justify-items: end;
+  pointer-events: auto;
+}
+#map-camera-controls > button,
+#map-zoom-buttons button {
+  min-width: 13vmin;
+  min-height: 6.5vmin;
+  padding: 0.6vmin 1.2vmin;
+  border: 0.45vmin solid rgba(82,112,141,0.35);
+  border-radius: 3.3vmin;
+  color: #263247;
+  background: rgba(255,253,244,0.94);
+  box-shadow: 0 0.7vmin 0 rgba(82,112,141,0.3);
+  font-family: inherit;
+  font-size: clamp(11px, 1.8vmin, 17px);
+  font-weight: bold;
+}
+#map-camera-controls > button[aria-pressed="true"] {
+  color: #fff;
+  background: #568ec5;
+}
+#map-camera-controls > button span:first-child { margin-right: 0.5vmin; }
+#map-zoom-buttons { display: flex; gap: 0.8vmin; }
+#map-zoom-buttons button {
+  min-width: 6.5vmin;
+  width: 6.5vmin;
+  padding: 0;
+  font-size: clamp(20px, 3.5vmin, 34px);
+}
+body.map-camera-pan-manual #game {
+  touch-action: none;
+  cursor: grab;
+}
+body.map-camera-pan-manual #game:active { cursor: grabbing; }
+
 /* 地図でも運転操作は残し、地図上では使わない大きな演出だけ隠す。 */
 body.map-view-active #route-event-banner,
 body.map-view-active #play-banner,
@@ -810,6 +852,20 @@ body.map-view-active #btn-headlight {
 }
 
 @media (orientation: portrait) and (max-width: 700px) {
+  #map-camera-controls {
+    top: 23vmin;
+    right: 2vmin;
+  }
+  #map-camera-controls > button {
+    min-width: 24vmin;
+    min-height: 8vmin;
+    font-size: 2.8vmin;
+  }
+  #map-zoom-buttons button {
+    min-width: 11.5vmin;
+    width: 11.5vmin;
+    min-height: 9vmin;
+  }
   #run-ui {
     bottom: max(2vmin, env(safe-area-inset-bottom));
     grid-template-columns: repeat(6, 12vmin);

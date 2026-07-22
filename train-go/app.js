@@ -708,6 +708,15 @@
   const btnStamps = document.getElementById("btn-stamps");
   const btnMapMode = document.getElementById("btn-map-mode");
   const mapModeLabel = document.getElementById("map-mode-label");
+  const mapCameraControls = document.getElementById("map-camera-controls");
+  const btnMapScroll = document.getElementById("btn-map-scroll");
+  const mapScrollLabel = document.getElementById("map-scroll-label");
+  const btnMapZoom = document.getElementById("btn-map-zoom");
+  const mapZoomLabel = document.getElementById("map-zoom-label");
+  const mapZoomButtons = document.getElementById("map-zoom-buttons");
+  const btnMapZoomOut = document.getElementById("btn-map-zoom-out");
+  const btnMapZoomIn = document.getElementById("btn-map-zoom-in");
+  const btnMapRecenter = document.getElementById("btn-map-recenter");
   const stampBook = document.getElementById("stamp-book");
   const btnCloseStamps = document.getElementById("btn-close-stamps");
   const stampCount = document.getElementById("stamp-count");
@@ -898,6 +907,13 @@
   let state = "select"; // select | running | stopped | coupling
   let selectedRouteKey = "tokaido";
   let mapMode = "scenery";
+  let mapScrollAuto = true;
+  let mapZoomAuto = true;
+  let mapManualCenterWorldX = NaN;
+  let mapManualCenterWorldY = NaN;
+  let mapManualScale = NaN;
+  const lastMapScene = { centerWorldX: NaN, centerWorldY: NaN, scale: NaN };
+  const mapPanGesture = { pointerId: null, startX: 0, startY: 0, lastX: 0, lastY: 0, moved: false };
   let activeRoute = ROUTES[selectedRouteKey];
   let train = TRAINS.nozomi;
   let trainKey = "nozomi";
@@ -1334,6 +1350,7 @@
 
   function startGame(key) {
     mapMode = "scenery";
+    resetMapCamera();
     activeRoute = routeForGameStart();
     trainKey = key;
     train = TRAINS[key];
@@ -1415,6 +1432,7 @@
 
   function goHome() {
     mapMode = "scenery";
+    resetMapCamera();
     document.body.classList.remove("map-view-active");
     state = "select";
     speed = 0;
@@ -2035,7 +2053,7 @@
     return currentTapBoostKmh() / SPEED_DISPLAY_SCALE;
   }
 
-  canvas.addEventListener("pointerdown", (event) => {
+  function handleCanvasTap(event) {
     if (collectFallingStar(event)) return;
     if (identifyOpposingTrain(event)) return;
     ensureAudio();
@@ -2056,7 +2074,57 @@
       accelerationEffect = 1;
       showSpeedBoost(displaySpeed(speed) - previousSpeed, event);
     }
+  }
+
+  canvas.addEventListener("pointerdown", (event) => {
+    if (mapMode !== "scenery" && !mapScrollAuto) {
+      if (collectFallingStar(event)) return;
+      mapPanGesture.pointerId = event.pointerId;
+      mapPanGesture.startX = event.clientX;
+      mapPanGesture.startY = event.clientY;
+      mapPanGesture.lastX = event.clientX;
+      mapPanGesture.lastY = event.clientY;
+      mapPanGesture.moved = false;
+      canvas.setPointerCapture?.(event.pointerId);
+      event.preventDefault();
+      return;
+    }
+    handleCanvasTap(event);
   });
+
+  canvas.addEventListener("pointermove", (event) => {
+    if (event.pointerId !== mapPanGesture.pointerId) return;
+    const totalX = event.clientX - mapPanGesture.startX;
+    const totalY = event.clientY - mapPanGesture.startY;
+    if (!mapPanGesture.moved && Math.hypot(totalX, totalY) < 6) return;
+    const dx = mapPanGesture.moved ? event.clientX - mapPanGesture.lastX : totalX;
+    const dy = mapPanGesture.moved ? event.clientY - mapPanGesture.lastY : totalY;
+    mapPanGesture.lastX = event.clientX;
+    mapPanGesture.lastY = event.clientY;
+    mapPanGesture.moved = true;
+    const scale = Math.max(lastMapScene.scale, 0.0001);
+    mapManualCenterWorldX -= dx / scale;
+    mapManualCenterWorldY -= dy / scale;
+    event.preventDefault();
+  });
+
+  function finishMapPan(event) {
+    if (event.pointerId !== mapPanGesture.pointerId) return;
+    const wasTap = !mapPanGesture.moved;
+    mapPanGesture.pointerId = null;
+    canvas.releasePointerCapture?.(event.pointerId);
+    if (wasTap) handleCanvasTap(event);
+  }
+  canvas.addEventListener("pointerup", finishMapPan);
+  canvas.addEventListener("pointercancel", (event) => {
+    if (event.pointerId === mapPanGesture.pointerId) mapPanGesture.pointerId = null;
+  });
+
+  canvas.addEventListener("wheel", (event) => {
+    if (mapMode === "scenery" || mapZoomAuto) return;
+    event.preventDefault();
+    changeMapZoom(event.deltaY < 0 ? 1.2 : 1 / 1.2);
+  }, { passive: false });
 
   btnCouple.addEventListener("click", () => {
     ensureAudio();
@@ -2143,8 +2211,44 @@
     stampBook.classList.remove("hidden");
   });
   const MAP_MODE_SEQUENCE = ["scenery", "follow", "overview"];
+  function updateMapCameraControls() {
+    const active = mapMode !== "scenery";
+    mapCameraControls.classList.toggle("hidden", !active);
+    btnMapScroll.setAttribute("aria-pressed", String(!mapScrollAuto));
+    btnMapZoom.setAttribute("aria-pressed", String(!mapZoomAuto));
+    btnMapScroll.setAttribute("aria-label", mapScrollAuto ? "カメラをてどうにする" : "カメラをじどうにする");
+    btnMapZoom.setAttribute("aria-label", mapZoomAuto ? "ズームをてどうにする" : "ズームをじどうにする");
+    mapScrollLabel.textContent = `カメラ ${mapScrollAuto ? "じどう" : "てどう"}`;
+    mapZoomLabel.textContent = `ズーム ${mapZoomAuto ? "じどう" : "てどう"}`;
+    mapZoomButtons.classList.toggle("hidden", mapZoomAuto);
+    btnMapRecenter.classList.toggle("hidden", mapScrollAuto && mapZoomAuto);
+    document.body.classList.toggle("map-camera-pan-manual", active && !mapScrollAuto);
+  }
+  function resetMapCamera() {
+    mapScrollAuto = true;
+    mapZoomAuto = true;
+    mapManualCenterWorldX = NaN;
+    mapManualCenterWorldY = NaN;
+    mapManualScale = NaN;
+    mapPanGesture.pointerId = null;
+    updateMapCameraControls();
+  }
+  function seedManualMapCamera() {
+    if (!Number.isFinite(lastMapScene.centerWorldX)) return;
+    mapManualCenterWorldX = lastMapScene.centerWorldX;
+    mapManualCenterWorldY = lastMapScene.centerWorldY;
+    mapManualScale = lastMapScene.scale;
+  }
+  function changeMapZoom(multiplier) {
+    if (mapZoomAuto) return;
+    if (!Number.isFinite(mapManualScale)) seedManualMapCamera();
+    if (!Number.isFinite(mapManualScale)) return;
+    mapManualScale = Math.max(0.00035, Math.min(6, mapManualScale * multiplier));
+  }
   function setMapMode(nextMode, announce = false) {
+    const previousMode = mapMode;
     mapMode = MAP_MODE_SEQUENCE.includes(nextMode) ? nextMode : "scenery";
+    if (mapMode !== previousMode) resetMapCamera();
     const active = mapMode !== "scenery";
     const nextLabel = mapMode === "scenery" ? "うえから" : mapMode === "follow" ? "ぜんたい" : "よこから";
     const nextAria = mapMode === "scenery"
@@ -2154,6 +2258,7 @@
     btnMapMode.setAttribute("aria-pressed", String(active));
     btnMapMode.setAttribute("aria-label", nextAria);
     document.body.classList.toggle("map-view-active", active);
+    updateMapCameraControls();
     if (!active) {
       mapPowerStarScreenPoint.x = NaN;
       mapPowerStarScreenPoint.y = NaN;
@@ -2171,6 +2276,19 @@
     const currentIndex = MAP_MODE_SEQUENCE.indexOf(mapMode);
     setMapMode(MAP_MODE_SEQUENCE[(currentIndex + 1) % MAP_MODE_SEQUENCE.length], true);
   });
+  btnMapScroll.addEventListener("click", () => {
+    if (mapScrollAuto) seedManualMapCamera();
+    mapScrollAuto = !mapScrollAuto;
+    updateMapCameraControls();
+  });
+  btnMapZoom.addEventListener("click", () => {
+    if (mapZoomAuto) seedManualMapCamera();
+    mapZoomAuto = !mapZoomAuto;
+    updateMapCameraControls();
+  });
+  btnMapZoomOut.addEventListener("click", () => changeMapZoom(1 / 1.3));
+  btnMapZoomIn.addEventListener("click", () => changeMapZoom(1.3));
+  btnMapRecenter.addEventListener("click", resetMapCamera);
   onboardPanel.addEventListener("click", () => {
     setOnboardPanelExpanded(onboardPanel.getAttribute("aria-expanded") !== "true");
   });
@@ -2399,6 +2517,18 @@
       screenCenterY: (top + bottom) / 2,
       carPositions: yamanoteFollowCarPositions,
     };
+  }
+
+  function applyManualMapCamera(scene) {
+    if (!mapScrollAuto && Number.isFinite(mapManualCenterWorldX)) {
+      scene.centerWorldX = mapManualCenterWorldX;
+      scene.centerWorldY = mapManualCenterWorldY;
+    }
+    if (!mapZoomAuto && Number.isFinite(mapManualScale)) scene.scale = mapManualScale;
+    lastMapScene.centerWorldX = scene.centerWorldX;
+    lastMapScene.centerWorldY = scene.centerWorldY;
+    lastMapScene.scale = scene.scale;
+    return scene;
   }
 
   function drawMapGeoPath(scene, points, pixelOffset = 0) {
@@ -2897,7 +3027,8 @@
   }
 
   function drawYamanoteMap() {
-    const scene = mapMode === "follow" ? yamanoteFollowScene() : yamanoteOverviewScene();
+    const automaticScene = mapMode === "follow" ? yamanoteFollowScene() : yamanoteOverviewScene();
+    const scene = applyManualMapCamera(automaticScene);
     const labelSize = Math.max(10, Math.min(W, H) * (scene.portrait ? 0.024 : 0.021));
     drawYamanoteMapBackground(scene);
     drawMapTownscape(scene);
@@ -2945,6 +3076,10 @@
       canvas.dataset.mapTrainX = String(Math.round(trainPoint.x));
       canvas.dataset.mapTrainY = String(Math.round(trainPoint.y));
       canvas.dataset.mapScale = scene.scale.toFixed(4);
+      canvas.dataset.mapScrollMode = mapScrollAuto ? "auto" : "manual";
+      canvas.dataset.mapZoomMode = mapZoomAuto ? "auto" : "manual";
+      canvas.dataset.mapCenterX = scene.centerWorldX.toFixed(1);
+      canvas.dataset.mapCenterY = scene.centerWorldY.toFixed(1);
       canvas.dataset.mapTrainCount = String(scene.mode === "follow" ? scene.carPositions.length : 1);
       canvas.dataset.mapPowerStarX = Number.isFinite(mapPowerStarScreenPoint.x) ? String(Math.round(mapPowerStarScreenPoint.x)) : "";
       canvas.dataset.mapPowerStarY = Number.isFinite(mapPowerStarScreenPoint.y) ? String(Math.round(mapPowerStarScreenPoint.y)) : "";
