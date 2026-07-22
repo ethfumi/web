@@ -25,7 +25,7 @@
 <title>つなげて！でんしゃ！</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="stylesheet" href="style.css?v=74">
+<link rel="stylesheet" href="style.css?v=75">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -116,13 +116,14 @@
   </div>
   <div id="release-info">
     <!-- 更新時は sw.js の CACHE バージョンと揃える -->
-    <div id="app-version" aria-label="つなげて！でんしゃ！、バージョン74、2026年7月23日5時45分更新">
+    <div id="app-version" aria-label="つなげて！でんしゃ！、バージョン75、2026年7月23日8時30分更新">
       <span class="version-title">つなげて！でんしゃ！</span>
-      <strong>v74</strong><span>2026.07.23 05:45 更新</span>
+      <strong>v75</strong><span>2026.07.23 08:30 更新</span>
     </div>
     <details id="update-history">
       <summary>🆕 こうしん</summary>
       <div class="update-history-list" aria-label="こうしんりれき">
+        <span><time datetime="2026-07-23">7/23</time> ちずを てどうでうごかせるように</span>
         <span><time datetime="2026-07-23">7/23</time> ちゅうおうせんと そうぶせんをならべてひょうじ</span>
         <span><time datetime="2026-07-23">7/23</time> ちずでも タップかそくをひょうじ</span>
         <span><time datetime="2026-07-23">7/23</time> けんざかいと かわ・たかおさんをついか</span>
@@ -213,6 +214,16 @@
   <button id="btn-map-mode" class="hidden" aria-label="うえからのちずをひらく" aria-pressed="false"><span>🗺️</span><span id="map-mode-label">うえから</span></button>
 </div>
 
+<div id="map-camera-controls" class="hidden" aria-label="ちずのカメラそうさ">
+  <button id="btn-map-scroll" type="button" aria-pressed="false"><span>🎯</span><span id="map-scroll-label">カメラ じどう</span></button>
+  <button id="btn-map-zoom" type="button" aria-pressed="false"><span>🔍</span><span id="map-zoom-label">ズーム じどう</span></button>
+  <div id="map-zoom-buttons" class="hidden">
+    <button id="btn-map-zoom-out" type="button" aria-label="ちずをちいさくする">−</button>
+    <button id="btn-map-zoom-in" type="button" aria-label="ちずをおおきくする">＋</button>
+  </div>
+  <button id="btn-map-recenter" class="hidden" type="button" aria-label="でんしゃのいちにもどる"><span>🚃</span><span>でんしゃへ</span></button>
+</div>
+
 <div id="stamp-book" class="hidden" role="dialog" aria-modal="true" aria-labelledby="stamp-title">
   <div class="stamp-sheet">
     <button id="btn-close-stamps" aria-label="スタンプちょうをとじる">×</button>
@@ -230,8 +241,8 @@
   <span>🔦</span><span id="headlight-label">ライトをつける</span>
 </button>
 
-<script src="map-data.js?v=74"></script>
-<script src="app.js?v=74"></script>
+<script src="map-data.js?v=75"></script>
+<script src="app.js?v=75"></script>
 <!-- Cloudflare Web Analytics: Cookieを使用せず、個人を識別しないアクセス集計 -->
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"ca5e1fbb318447b3ac9409f3da1cad2a"}'></script>
 </body>
