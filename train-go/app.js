@@ -2216,10 +2216,10 @@
     mapCameraControls.classList.toggle("hidden", !active);
     btnMapScroll.setAttribute("aria-pressed", String(!mapScrollAuto));
     btnMapZoom.setAttribute("aria-pressed", String(!mapZoomAuto));
-    btnMapScroll.setAttribute("aria-label", mapScrollAuto ? "カメラをてどうにする" : "カメラをじどうにする");
-    btnMapZoom.setAttribute("aria-label", mapZoomAuto ? "ズームをてどうにする" : "ズームをじどうにする");
-    mapScrollLabel.textContent = `カメラ ${mapScrollAuto ? "じどう" : "てどう"}`;
-    mapZoomLabel.textContent = `ズーム ${mapZoomAuto ? "じどう" : "てどう"}`;
+    btnMapScroll.setAttribute("aria-label", mapScrollAuto ? "カメラをしゅどうにする" : "カメラをじどうにする");
+    btnMapZoom.setAttribute("aria-label", mapZoomAuto ? "ズームをしゅどうにする" : "ズームをじどうにする");
+    mapScrollLabel.textContent = `カメラ ${mapScrollAuto ? "じどう" : "しゅどう"}`;
+    mapZoomLabel.textContent = `ズーム ${mapZoomAuto ? "じどう" : "しゅどう"}`;
     mapZoomButtons.classList.toggle("hidden", mapZoomAuto);
     btnMapRecenter.classList.toggle("hidden", mapScrollAuto && mapZoomAuto);
     document.body.classList.toggle("map-camera-pan-manual", active && !mapScrollAuto);
