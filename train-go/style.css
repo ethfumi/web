@@ -800,33 +800,13 @@ html, body {
   box-shadow: 0 1.2vmin 0 #32751b, 0 1.5vmin 2vmin rgba(0,0,0,0.2);
 }
 
-/* 地図では線路と編成を主役にし、表示切替に必要な操作だけ残す。 */
-body.map-view-active #drive-panel,
-body.map-view-active #run-ui,
-body.map-view-active #play-controls button:not(#btn-map-mode),
+/* 地図でも運転操作は残し、地図上では使わない大きな演出だけ隠す。 */
 body.map-view-active #route-event-banner,
 body.map-view-active #play-banner,
 body.map-view-active #arrival-banner,
-body.map-view-active #btn-komachi-couple,
-body.map-view-active #btn-station-doors,
 body.map-view-active #station-passengers,
 body.map-view-active #btn-headlight {
   display: none !important;
-}
-
-body.map-view-active #play-controls {
-  left: max(2.5vmin, env(safe-area-inset-left));
-  bottom: max(2.5vmin, env(safe-area-inset-bottom));
-}
-
-body.map-view-active #btn-map-mode {
-  width: 11vmin;
-  height: 11vmin;
-  font-size: 2.2vmin;
-}
-
-body.map-view-active #btn-map-mode span:first-child {
-  font-size: 4vmin;
 }
 
 @media (orientation: portrait) and (max-width: 700px) {
@@ -850,15 +830,6 @@ body.map-view-active #btn-map-mode span:first-child {
     transform: none;
     animation: none;
   }
-  body.map-view-active #play-controls {
-    bottom: max(2.5vmin, env(safe-area-inset-bottom));
-  }
-  body.map-view-active #btn-map-mode {
-    width: 15vmin;
-    height: 15vmin;
-    font-size: 2.8vmin;
-  }
-  body.map-view-active #btn-map-mode span:first-child { font-size: 5vmin; }
 }
 
 #stamp-book {

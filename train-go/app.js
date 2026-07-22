@@ -2873,7 +2873,7 @@
     ctx.font = Math.max(9, labelSize * 0.62) + "px sans-serif";
     ctx.textAlign = "right";
     ctx.fillStyle = timeOfDay === "night" ? "rgba(255,255,255,0.72)" : "rgba(38,50,71,0.70)";
-    ctx.fillText("© OpenStreetMap contributors", W - 8, H - 8);
+    ctx.fillText("© OpenStreetMap contributors / Natural Earth", W - 8, H - 8);
 
     if (isDebug) {
       canvas.dataset.viewMode = mapMode;
