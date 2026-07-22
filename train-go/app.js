@@ -4055,11 +4055,15 @@
   function showSpeedBoost(amount, event) {
     if (amount <= 0) return;
     const rect = canvas.getBoundingClientRect();
+    const mapAnchored = mapMode !== "scenery"
+      && Number.isFinite(yamanoteTrainScreenPoint.x)
+      && Number.isFinite(yamanoteTrainScreenPoint.y);
     speedBoostPopups.push({
       amount: Math.round(amount),
-      x: event.offsetX * W / Math.max(rect.width, 1),
-      y: event.offsetY * H / Math.max(rect.height, 1) - 28,
+      x: mapAnchored ? yamanoteTrainScreenPoint.x : event.offsetX * W / Math.max(rect.width, 1),
+      y: (mapAnchored ? yamanoteTrainScreenPoint.y : event.offsetY * H / Math.max(rect.height, 1)) - 28,
       life: 1,
+      mapAnchored,
     });
     speedBoostPopups = speedBoostPopups.slice(-8);
   }
@@ -4073,10 +4077,12 @@
     for (const popup of speedBoostPopups) {
       popup.life -= dt;
       popup.y -= 55 * dt;
-      if (mapMode !== "scenery") continue;
       ctx.globalAlpha = Math.min(1, Math.max(0, popup.life * 1.8));
-      ctx.font = `bold ${Math.max(30, Math.min(52, W * 0.04))}px sans-serif`;
-      ctx.lineWidth = 8;
+      const fontSize = popup.mapAnchored
+        ? Math.max(22, Math.min(38, W * 0.03))
+        : Math.max(30, Math.min(52, W * 0.04));
+      ctx.font = `bold ${fontSize}px sans-serif`;
+      ctx.lineWidth = popup.mapAnchored ? 6 : 8;
       ctx.strokeStyle = "rgba(255,255,255,0.95)";
       ctx.fillStyle = "#f06a22";
       const text = `＋${popup.amount} km/h`;
