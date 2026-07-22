@@ -2551,6 +2551,19 @@
       ctx.stroke();
     }
 
+    // 県境は全体図と広域の追従表示だけに出し、近距離では線路を邪魔しない。
+    if (scene.mode === "overview" || scene.scale < 0.08) {
+      ctx.save();
+      ctx.setLineDash([5, 5]);
+      ctx.strokeStyle = timeOfDay === "night" ? "rgba(195,214,207,0.32)" : "rgba(91,124,105,0.46)";
+      ctx.lineWidth = Math.max(1, Math.min(2, Math.min(W, H) * 0.0018));
+      for (const border of MAP_GEOGRAPHY.borders) {
+        drawMapGeoPath(scene, border);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
     // 追従表示の格子は現在地へ合わせて生成し、東京だけに固定しない。
     drawMapLocalGrid(scene);
 
@@ -2569,6 +2582,14 @@
       drawMapGeoPath(scene, river.points);
       ctx.stroke();
     }
+    if (((scene.mode === "overview" && scene.scale >= 0.025) || (scene.mode === "follow" && scene.scale >= 0.08))) {
+      ctx.strokeStyle = timeOfDay === "night" ? "#69a5c4" : "#4ca4cb";
+      ctx.lineWidth = Math.max(2, Math.min(5, scene.scale * 34));
+      for (const moat of MAP_GEOGRAPHY.moats) {
+        drawMapGeoPath(scene, moat.points);
+        ctx.stroke();
+      }
+    }
 
     if (scene.scale >= 0.0015) {
       ctx.font = "bold " + Math.max(9, Math.min(W, H) * 0.014) + "px sans-serif";
@@ -2586,6 +2607,14 @@
         const x = scene.screenCenterX + (mapWorldX(point[0]) - scene.centerWorldX) * scene.scale;
         const y = scene.screenCenterY + (mapWorldY(point[1]) - scene.centerWorldY) * scene.scale;
         if (mapPointIsVisible(scene, x, y, 20)) ctx.fillText(river.name, x, y - 3);
+      }
+      if (((scene.mode === "overview" && scene.scale >= 0.025) || (scene.mode === "follow" && scene.scale >= 0.08))) {
+        for (const moat of MAP_GEOGRAPHY.moats) {
+          const point = moat.points[1];
+          const x = scene.screenCenterX + (mapWorldX(point[0]) - scene.centerWorldX) * scene.scale;
+          const y = scene.screenCenterY + (mapWorldY(point[1]) - scene.centerWorldY) * scene.scale;
+          if (mapPointIsVisible(scene, x, y, 30)) ctx.fillText(moat.name, x, y - 4);
+        }
       }
     }
 
