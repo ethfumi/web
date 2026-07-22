@@ -2628,7 +2628,7 @@
     const stationList = [{ name: activeRoute.start, km: activeRoute.startKm }, ...activeRoute.stations.slice(0, -1)];
     while (routeStationMapPositions.length < stationList.length) routeStationMapPositions.push({});
     ctx.font = "bold " + labelSize + "px sans-serif";
-    ctx.textBaseline = "middle";
+    ctx.textBaseline = "bottom";
     for (let index = 0; index < stationList.length; index++) {
       const station = stationList[index];
       const position = yamanoteMapPositionAt(station.km, routeStationMapPositions[index], map);
@@ -2646,10 +2646,9 @@
       ctx.fill();
       ctx.stroke();
       if (!showLabel) continue;
-      const leftHalf = index < stationList.length / 2;
       ctx.fillStyle = timeOfDay === "night" ? "#f4f7fb" : "#344054";
-      ctx.textAlign = leftHalf ? "right" : "left";
-      ctx.fillText(station.name, x + (leftHalf ? -labelSize * 0.75 : labelSize * 0.75), y);
+      ctx.textAlign = "center";
+      ctx.fillText(station.name, x, y - labelSize * 0.55);
     }
     ctx.restore();
   }
