@@ -127,7 +127,12 @@
     chuo: "#f28c28", tokaido: "#2362b8", tohoku: "#2a9b82",
     sobu: "#f0c928", tozai: "#3085cc", inokashira: "#8156a6", keio: "#d31359", yamanote: "#9acd32",
   };
-  // 地図タイルを通信せずに遊べる、山手線試作用の簡略地図データ。
+  const {
+    maps: ROUTE_MAPS,
+    drawOrder: MAP_ROUTE_DRAW_ORDER,
+    laneOffsets: MAP_ROUTE_LANE_OFFSETS,
+  } = window.TRAIN_GO_MAP_DATA;
+  // 地図タイルを通信せずに遊べる、全路線共通の簡略地図データ。
   // 駅位置は実際の緯度経度を小数4桁へ丸め、線路は駅間を直線で結ぶ。
   // Source: OpenStreetMap route=train relation 1972920 (ODbL 1.0)
   const YAMANOTE_MAP_POINTS = [
@@ -1475,7 +1480,7 @@
     renderStampBook();
     segmentNumber = 0;
     segmentStartDistance = 0;
-    btnMapMode.classList.toggle("hidden", selectedRouteKey !== "yamanote");
+    btnMapMode.classList.remove("hidden");
     setMapMode("scenery");
     selectScreen.classList.add("hidden");
     runUi.classList.remove("hidden");
@@ -2057,7 +2062,7 @@
 
 
   function identifyOpposingTrain(event) {
-    if (!opposingTrain || state === "select") return false;
+    if (!opposingTrain || state === "select" || mapMode !== "scenery") return false;
     const rect = canvas.getBoundingClientRect();
     const px = event.offsetX * W / Math.max(rect.width, 1);
     const py = event.offsetY * H / Math.max(rect.height, 1);
@@ -2225,10 +2230,10 @@
   function setMapMode(nextMode, announce = false) {
     mapMode = MAP_MODE_SEQUENCE.includes(nextMode) ? nextMode : "scenery";
     const active = mapMode !== "scenery";
-    const nextLabel = mapMode === "scenery" ? "うえから" : mapMode === "follow" ? "ぜんたい" : "けしき";
+    const nextLabel = mapMode === "scenery" ? "うえから" : mapMode === "follow" ? "ぜんたい" : "よこから";
     const nextAria = mapMode === "scenery"
       ? "うえからのちずをひらく"
-      : mapMode === "follow" ? "ぜんたいちずをひらく" : "いつものけしきにもどす";
+      : mapMode === "follow" ? "ぜんたいちずをひらく" : "よこからのけしきにもどす";
     mapModeLabel.textContent = nextLabel;
     btnMapMode.setAttribute("aria-pressed", String(active));
     btnMapMode.setAttribute("aria-label", nextAria);
@@ -2236,11 +2241,11 @@
     if (!announce) return;
     const message = mapMode === "follow"
       ? "🚃 うえから へんせいを みてみよう！"
-      : mapMode === "overview" ? "🗺️ ぜんたいちず！" : "🌆 いつもの けしき！";
+      : mapMode === "overview" ? "🗺️ ぜんたいちず！" : "🌆 よこから！";
     showPlayBanner(message, 2200);
   }
   btnMapMode.addEventListener("click", () => {
-    if (selectedRouteKey !== "yamanote") return;
+    if (!activeRouteMap()) return;
     const currentIndex = MAP_MODE_SEQUENCE.indexOf(mapMode);
     setMapMode(MAP_MODE_SEQUENCE[(currentIndex + 1) % MAP_MODE_SEQUENCE.length], true);
   });
@@ -2323,11 +2328,24 @@
     }
   }
 
+  function activeRouteMapKey() {
+    return selectedRouteKey === "keio" && activeRoute.variant === "hashimoto"
+      ? "keioSagamihara"
+      : selectedRouteKey;
+  }
+
+  function activeRouteMap() {
+    return ROUTE_MAPS[activeRouteMapKey()] || null;
+  }
+
   function yamanoteMapKm() {
     const next = activeRoute.stations[stationIdx];
-    if (!next || !activeRoute.loopKm) return 0;
+    if (!next) return activeRoute.startKm || 0;
     const remainingKm = Math.max(0, stationWorldX - distance) / PIXELS_PER_METER / 1000;
-    return (next.km - remainingKm + activeRoute.loopKm) % activeRoute.loopKm;
+    if (activeRoute.loopKm) {
+      return (next.km - remainingKm + activeRoute.loopKm) % activeRoute.loopKm;
+    }
+    return next.km - routeDirection * remainingKm;
   }
 
   const YAMANOTE_CAR_LENGTH_METERS = 20;
@@ -2337,6 +2355,7 @@
   const yamanoteAheadMapPosition = {};
   const yamanoteTrainScreenPoint = {};
   const yamanoteFollowCarPositions = [];
+  const routeStationMapPositions = [];
 
   function mapWorldX(lon) {
     return (lon - MAP_REFERENCE_LONGITUDE) * MAP_METERS_PER_LONGITUDE;
@@ -2346,14 +2365,17 @@
     return (MAP_REFERENCE_LATITUDE - lat) * MAP_METERS_PER_LATITUDE;
   }
 
-  function yamanoteMapPositionAt(rawKm, target = {}) {
-    const loopKm = activeRoute.loopKm || 34.5;
-    const km = ((rawKm % loopKm) + loopKm) % loopKm;
-    let nextIndex = YAMANOTE_MAP_POINTS.findIndex((point) => point.km >= km);
-    if (nextIndex < 1) nextIndex = 1;
-    const previous = YAMANOTE_MAP_POINTS[nextIndex - 1];
-    const next = YAMANOTE_MAP_POINTS[nextIndex];
-    const progress = Math.max(0, Math.min(1, (km - previous.km) / Math.max(next.km - previous.km, 0.001)));
+  function yamanoteMapPositionAt(rawKm, target = {}, map = activeRouteMap()) {
+    if (!map) return target;
+    let km = rawKm;
+    if (map.loopKm) km = ((km % map.loopKm) + map.loopKm) % map.loopKm;
+    const points = map.points;
+    let nextIndex = points.findIndex((point) => point.km >= km);
+    if (nextIndex < 0) nextIndex = points.length - 1;
+    else if (nextIndex === 0) nextIndex = 1;
+    const previous = points[nextIndex - 1];
+    const next = points[nextIndex];
+    const progress = (km - previous.km) / Math.max(next.km - previous.km, 0.001);
     const previousX = mapWorldX(previous.lon);
     const previousY = mapWorldY(previous.lat);
     const nextX = mapWorldX(next.lon);
@@ -2366,7 +2388,6 @@
     target.angle = Math.atan2(nextY - previousY, nextX - previousX);
     return target;
   }
-
   function yamanoteMapPosition() {
     return yamanoteMapPositionAt(yamanoteMapKm(), yamanoteLeadMapPosition);
   }
@@ -2378,18 +2399,21 @@
   }
 
   function yamanoteOverviewScene() {
+    const map = activeRouteMap();
     const portrait = H > W;
     const left = W * (portrait ? 0.055 : 0.14);
     const right = W * 0.96;
     const top = H * (portrait ? 0.08 : 0.07);
     const bottom = H * (portrait ? 0.84 : 0.92);
-    const minWorldX = mapWorldX(YAMANOTE_MAP_BOUNDS.minLon);
-    const maxWorldX = mapWorldX(YAMANOTE_MAP_BOUNDS.maxLon);
-    const minWorldY = mapWorldY(YAMANOTE_MAP_BOUNDS.maxLat);
-    const maxWorldY = mapWorldY(YAMANOTE_MAP_BOUNDS.minLat);
+    const minWorldX = mapWorldX(map.minLon);
+    const maxWorldX = mapWorldX(map.maxLon);
+    const minWorldY = mapWorldY(map.maxLat);
+    const maxWorldY = mapWorldY(map.minLat);
+    const span = Math.max(maxWorldX - minWorldX, maxWorldY - minWorldY, 1000);
+    const padding = Math.max(700, span * 0.07);
     const scale = Math.min(
-      (right - left) / Math.max(maxWorldX - minWorldX, 1),
-      (bottom - top) / Math.max(maxWorldY - minWorldY, 1),
+      (right - left) / Math.max(maxWorldX - minWorldX + padding * 2, 1),
+      (bottom - top) / Math.max(maxWorldY - minWorldY + padding * 2, 1),
     );
     return {
       mode: "overview", portrait, left, right, top, bottom, scale,
@@ -2400,7 +2424,6 @@
       carPositions: null,
     };
   }
-
   function yamanoteFollowScene() {
     const portrait = H > W;
     const left = W * (portrait ? 0.055 : 0.14);
@@ -2456,20 +2479,97 @@
     };
   }
 
-  function drawMapGeoPath(scene, points) {
+  function drawMapGeoPath(scene, points, pixelOffset = 0) {
     ctx.beginPath();
     for (let index = 0; index < points.length; index++) {
-      const lon = points[index][0];
-      const lat = points[index][1];
-      const x = scene.screenCenterX + (mapWorldX(lon) - scene.centerWorldX) * scene.scale;
-      const y = scene.screenCenterY + (mapWorldY(lat) - scene.centerWorldY) * scene.scale;
+      const point = points[index];
+      const previous = points[Math.max(0, index - 1)];
+      const next = points[Math.min(points.length - 1, index + 1)];
+      let x = scene.screenCenterX + (mapWorldX(point[0]) - scene.centerWorldX) * scene.scale;
+      let y = scene.screenCenterY + (mapWorldY(point[1]) - scene.centerWorldY) * scene.scale;
+      if (pixelOffset) {
+        const dx = (mapWorldX(next[0]) - mapWorldX(previous[0])) * scene.scale;
+        const dy = (mapWorldY(next[1]) - mapWorldY(previous[1])) * scene.scale;
+        const length = Math.max(Math.hypot(dx, dy), 0.001);
+        x += -dy / length * pixelOffset;
+        y += dx / length * pixelOffset;
+      }
       if (index) ctx.lineTo(x, y);
       else ctx.moveTo(x, y);
     }
   }
-
   function mapPointIsVisible(scene, x, y, margin = 30) {
     return x >= -margin && x <= W + margin && y >= -margin && y <= H + margin;
+  }
+
+  const MAP_TOWN_BLOCKS = [];
+  let mapTownBlocksReady = false;
+
+  function ensureMapTownBlocks() {
+    if (mapTownBlocksReady) return;
+    mapTownBlocksReady = true;
+    let routeNumber = 0;
+    for (const mapKey of MAP_ROUTE_DRAW_ORDER) {
+      const map = ROUTE_MAPS[mapKey];
+      const stepKm = map.endKm > 100 ? 10 : 1.8;
+      const position = {};
+      for (let km = 0; km <= map.endKm; km += stepKm) {
+        yamanoteMapPositionAt(km, position, map);
+        for (let blockIndex = 0; blockIndex < 4; blockIndex++) {
+          const seed = routeNumber * 97 + Math.round(km * 10) * 13 + blockIndex * 31;
+          const side = blockIndex % 2 ? 1 : -1;
+          const lateral = side * (90 + seed % 170);
+          const along = (seed * 17) % 360 - 180;
+          const cos = Math.cos(position.angle);
+          const sin = Math.sin(position.angle);
+          MAP_TOWN_BLOCKS.push({
+            worldX: position.worldX + cos * along - sin * lateral,
+            worldY: position.worldY + sin * along + cos * lateral,
+            width: 28 + seed % 45,
+            height: 22 + (seed * 7) % 38,
+            colorIndex: seed % BUILDING_COLORS.length,
+            park: seed % 17 === 0,
+          });
+        }
+      }
+      routeNumber++;
+    }
+  }
+
+  function drawMapTownscape(scene) {
+    ensureMapTownBlocks();
+    ctx.save();
+    for (let index = 0; index < MAP_TOWN_BLOCKS.length; index++) {
+      const block = MAP_TOWN_BLOCKS[index];
+      const x = scene.screenCenterX + (block.worldX - scene.centerWorldX) * scene.scale;
+      const y = scene.screenCenterY + (block.worldY - scene.centerWorldY) * scene.scale;
+      if (!mapPointIsVisible(scene, x, y, 35)) continue;
+      if (scene.scale < 0.007) {
+        if (index % 12) continue;
+        ctx.fillStyle = timeOfDay === "night" ? "rgba(255,220,120,0.62)" : "rgba(151,164,152,0.58)";
+        ctx.beginPath();
+        ctx.arc(x, y, 2.3, 0, Math.PI * 2);
+        ctx.fill();
+        continue;
+      }
+      const width = Math.max(4, Math.min(30, block.width * scene.scale));
+      const height = Math.max(4, Math.min(26, block.height * scene.scale));
+      if (block.park) {
+        ctx.fillStyle = timeOfDay === "night" ? "#244c3d" : "#9dcc7a";
+        ctx.beginPath();
+        ctx.ellipse(x, y, width * 0.8, height * 0.72, 0, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.fillStyle = timeOfDay === "night"
+          ? ["#46505a", "#3f4d59", "#554b50", "#445148"][block.colorIndex]
+          : BUILDING_COLORS[block.colorIndex];
+        ctx.fillRect(x - width / 2, y - height / 2, width, height);
+        ctx.strokeStyle = timeOfDay === "night" ? "rgba(255,222,130,0.40)" : "rgba(95,105,110,0.20)";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x - width / 2, y - height / 2, width, height);
+      }
+    }
+    ctx.restore();
   }
 
   function drawYamanoteMapBackground(scene) {
@@ -2510,65 +2610,69 @@
   }
 
   function drawYamanoteRelatedLines(scene, labelSize) {
+    const currentKey = activeRouteMapKey();
+    const routeWidth = scene.mode === "follow"
+      ? Math.max(2, Math.min(4.5, scene.scale * 3.2))
+      : Math.max(2, Math.min(6, scene.scale * 6));
     ctx.save();
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
-    const routeWidth = scene.mode === "follow"
-      ? Math.max(2.5, Math.min(5, scene.scale * 3.5))
-      : Math.max(2.5, Math.min(7, scene.scale * 7));
-    for (const line of YAMANOTE_RELATED_LINES) {
+    for (const mapKey of MAP_ROUTE_DRAW_ORDER) {
+      if (mapKey === currentKey) continue;
+      const map = ROUTE_MAPS[mapKey];
+      const offset = MAP_ROUTE_LANE_OFFSETS[mapKey] || 0;
       ctx.strokeStyle = "rgba(255,255,255,0.78)";
-      ctx.lineWidth = routeWidth + 4;
-      drawMapGeoPath(scene, line.points);
+      ctx.lineWidth = routeWidth + 3.5;
+      drawMapGeoPath(scene, map.coords, offset);
       ctx.stroke();
-      if (line.outline) {
-        ctx.strokeStyle = line.outline;
-        ctx.lineWidth = routeWidth + 1.8;
-        drawMapGeoPath(scene, line.points);
-        ctx.stroke();
-      }
-      ctx.strokeStyle = line.color;
+      ctx.strokeStyle = map.color;
+      ctx.globalAlpha = 0.76;
       ctx.lineWidth = routeWidth;
-      drawMapGeoPath(scene, line.points);
+      drawMapGeoPath(scene, map.coords, offset);
       ctx.stroke();
+      ctx.globalAlpha = 1;
 
-      const labelX = scene.screenCenterX + (mapWorldX(line.label[0]) - scene.centerWorldX) * scene.scale;
-      const labelY = scene.screenCenterY + (mapWorldY(line.label[1]) - scene.centerWorldY) * scene.scale;
-      if (!mapPointIsVisible(scene, labelX, labelY) || (scene.mode === "follow" && scene.scale < 0.18)) continue;
-      ctx.font = "bold " + Math.max(9, labelSize * 0.58) + "px sans-serif";
+      const labelPoint = map.points[Math.floor(map.points.length / 2)];
+      const labelX = scene.screenCenterX + (mapWorldX(labelPoint.lon) - scene.centerWorldX) * scene.scale;
+      const labelY = scene.screenCenterY + (mapWorldY(labelPoint.lat) - scene.centerWorldY) * scene.scale;
+      if (!mapPointIsVisible(scene, labelX, labelY) || scene.scale < 0.02 || (scene.mode === "follow" && scene.scale < 0.12)) continue;
+      ctx.font = "bold " + Math.max(9, labelSize * 0.56) + "px sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "bottom";
       ctx.fillStyle = timeOfDay === "night" ? "rgba(244,247,251,0.82)" : "rgba(48,62,80,0.78)";
-      ctx.fillText(line.name, labelX, labelY - 5);
+      ctx.fillText(map.name, labelX, labelY - 5);
     }
     ctx.restore();
   }
 
   function drawYamanoteRoute(scene, labelSize) {
+    const map = activeRouteMap();
     ctx.save();
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
     const routeWidth = scene.mode === "follow"
       ? Math.max(4, Math.min(8, scene.scale * 5))
       : Math.max(5, Math.min(13, scene.scale * 10));
-    const routePoints = YAMANOTE_ROUTE_COORDS;
     ctx.strokeStyle = "rgba(255,255,255,0.95)";
     ctx.lineWidth = routeWidth + 7;
-    drawMapGeoPath(scene, routePoints);
+    drawMapGeoPath(scene, map.coords);
     ctx.stroke();
-    ctx.strokeStyle = "#8fc31f";
+    ctx.strokeStyle = map.color;
     ctx.lineWidth = routeWidth;
-    drawMapGeoPath(scene, routePoints);
+    drawMapGeoPath(scene, map.coords);
     ctx.stroke();
 
+    const stationList = [{ name: activeRoute.start, km: activeRoute.startKm }, ...activeRoute.stations.slice(0, -1)];
+    while (routeStationMapPositions.length < stationList.length) routeStationMapPositions.push({});
     ctx.font = "bold " + labelSize + "px sans-serif";
     ctx.textBaseline = "middle";
-    for (let index = 0; index < YAMANOTE_MAP_POINTS.length - 1; index++) {
-      const station = YAMANOTE_MAP_POINTS[index];
-      const x = scene.screenCenterX + (mapWorldX(station.lon) - scene.centerWorldX) * scene.scale;
-      const y = scene.screenCenterY + (mapWorldY(station.lat) - scene.centerWorldY) * scene.scale;
+    for (let index = 0; index < stationList.length; index++) {
+      const station = stationList[index];
+      const position = yamanoteMapPositionAt(station.km, routeStationMapPositions[index], map);
+      const x = scene.screenCenterX + (position.worldX - scene.centerWorldX) * scene.scale;
+      const y = scene.screenCenterY + (position.worldY - scene.centerWorldY) * scene.scale;
       if (!mapPointIsVisible(scene, x, y)) continue;
-      const important = YAMANOTE_MAJOR_LABELS.has(station.name)
+      const important = activeRoute.cityStations.has(station.name)
         || station.name === currentStationName || station.name === nextStationName;
       const showLabel = scene.mode === "overview" ? important : important || scene.scale >= 0.7;
       ctx.fillStyle = important ? "#ffffff" : "#dfe8d7";
@@ -2579,10 +2683,10 @@
       ctx.fill();
       ctx.stroke();
       if (!showLabel) continue;
-      const offsetX = station.lon < 139.73 ? -labelSize * 0.9 : labelSize * 0.9;
+      const leftHalf = index < stationList.length / 2;
       ctx.fillStyle = timeOfDay === "night" ? "#f4f7fb" : "#344054";
-      ctx.textAlign = station.lon < 139.73 ? "right" : "left";
-      ctx.fillText(station.name, x + offsetX, y);
+      ctx.textAlign = leftHalf ? "right" : "left";
+      ctx.fillText(station.name, x + (leftHalf ? -labelSize * 0.75 : labelSize * 0.75), y);
     }
     ctx.restore();
   }
@@ -2689,6 +2793,7 @@
     const scene = mapMode === "follow" ? yamanoteFollowScene() : yamanoteOverviewScene();
     const labelSize = Math.max(10, Math.min(W, H) * (scene.portrait ? 0.024 : 0.021));
     drawYamanoteMapBackground(scene);
+    drawMapTownscape(scene);
     drawYamanoteRelatedLines(scene, labelSize);
     drawYamanoteRoute(scene, labelSize);
     drawYamanoteLandmarks(scene, labelSize);
@@ -2721,6 +2826,7 @@
 
     if (isDebug) {
       canvas.dataset.viewMode = mapMode;
+      canvas.dataset.mapRoute = activeRouteMapKey();
       canvas.dataset.mapKm = position.km.toFixed(3);
       canvas.dataset.mapTrainX = String(Math.round(trainPoint.x));
       canvas.dataset.mapTrainY = String(Math.round(trainPoint.y));
@@ -3128,7 +3234,7 @@
   }
 
   function updateOpposingTrain(dt) {
-    if (state === "select") return;
+    if (state === "select" || mapMode !== "scenery") return;
     if (!opposingTrain) {
       // 速く走るほど短い時間で多くの列車と出会う。上限は描画が混みすぎないためのもの。
       const encounterRate = 1 + Math.min(displaySpeed(speed), 1200) / 400;
@@ -3986,12 +4092,12 @@
       canvas.dataset.starMissBlue = String(missedRareStars.blue);
       canvas.dataset.starMissRainbow = String(missedRareStars.rainbow);
     }
-    drawSky();
-    const yamanoteMapActive = mapMode !== "scenery" && selectedRouteKey === "yamanote" && state !== "select";
-    if (yamanoteMapActive) {
+    const routeMapActive = mapMode !== "scenery" && activeRouteMap() && state !== "select";
+    if (routeMapActive) {
       drawYamanoteMap();
       drawFallingStar();
     } else {
+      drawSky();
       if (isDebug) canvas.dataset.viewMode = "scenery";
       drawClouds(dt);
       drawFallingStar();
@@ -4053,7 +4159,7 @@
         return {
           state, selectedRouteKey, routeName: activeRoute.name, routeVariant: activeRoute.variant || "main", currentLineKm, routeDirection,
           speed, distance, visualDistance, cars, carTypes: [...carTypes], viewScale,
-          mapMode, mapKm: selectedRouteKey === "yamanote" ? yamanoteMapKm() : null,
+          mapMode, mapRoute: activeRouteMapKey(), mapKm: activeRouteMap() ? yamanoteMapKm() : null,
           toStation: stationWorldX - distance,
           stationScreenX: stationScreenX(stationWorldX, nextStationName),
           platformWidth: stationPlatformWidth(nextStationName),
@@ -4087,7 +4193,7 @@
       },
       auto(enabled) { setAutoMode(Boolean(enabled)); },
       map(mode) {
-        if (selectedRouteKey !== "yamanote") return false;
+        if (!activeRouteMap()) return false;
         const nextMode = mode === true ? "follow" : mode === false ? "scenery" : mode;
         setMapMode(nextMode);
         return mapMode;
