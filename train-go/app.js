@@ -62,6 +62,7 @@
       face: "#d31359", edge: "#aeb8be", callName: "あかとあおのでんしゃ",
     },
   };
+  Object.assign(TRAINS, window.TRAIN_GO_EXTRA?.trains || {});
 
   const CAR_COUNT_WORDS = [
     "いちりょう", "にりょう", "さんりょう", "よんりょう", "ごりょう",
@@ -127,6 +128,9 @@
     chuo: "#f28c28", tokaido: "#2362b8", tohoku: "#2a9b82",
     sobu: "#f0c928", tozai: "#3085cc", inokashira: "#8156a6", keio: "#d31359", yamanote: "#9acd32",
   };
+  Object.assign(ROUTE_COLORS, Object.fromEntries(
+    (window.TRAIN_GO_EXTRA?.metadata || []).map(({key,color}) => [key,color]),
+  ));
   const {
     maps: ROUTE_MAPS,
     drawOrder: MAP_ROUTE_DRAW_ORDER,
@@ -493,6 +497,13 @@
       ]),
     },
   };
+  Object.assign(ROUTES, window.TRAIN_GO_EXTRA?.routes || {});
+  for (const key of [
+    "ginza","marunouchi","hibiya","chiyoda","yurakucho","hanzomon","namboku","fukutoshin",
+    "asakusa","mita","shinjukuSubway","oedo",
+  ]) {
+    UNDERGROUND_STATIONS[key] = new Set(stationNamesForRoute(ROUTES[key]));
+  }
 
   const STATION_CELEBRATIONS = {
     chuo: {
@@ -597,6 +608,14 @@
     keio: { name: "あかとあおのでんしゃ", kind: "local", cars: 10, speedKmh: 110, body: "#e8ecef", stripe: "#d31359", stripe2: "#174f9a" },
     freight: { name: "かもつれっしゃ", kind: "freight", cars: 26, speedKmh: 100, body: "#40505d", stripe: "#e49a31" },
   };
+  for (const {key} of window.TRAIN_GO_EXTRA?.metadata || []) {
+    const type = TRAINS[key];
+    OPPOSING_TRAIN_TYPES[key] = {
+      name:type.name, kind:"local", cars:key === "osakaLoop" ? 8 : 10,
+      speedKmh:key === "odakyu" || key === "toyoko" || key === "keikyu" ? 110 : 90,
+      body:type.body, stripe:type.stripe, stripe2:type.stripe2,
+    };
+  }
 
   const CHUO_SOBU_PARALLEL_STATIONS = new Set([
     "おちゃのみず", "すいどうばし", "いいだばし", "いちがや", "よつや",
@@ -656,7 +675,7 @@
       }
       return [types.yamanote];
     }
-    return [types.chuo];
+    return [types[selectedRouteKey] || types.chuo];
   }
 
 
@@ -1451,6 +1470,7 @@
     autoActionTimer = 0;
     stopRunningSound();
     selectScreen.classList.remove("hidden");
+    showRouteSelection();
     runUi.classList.add("hidden");
     btnHome.classList.add("hidden");
     playTimer.classList.add("hidden");
@@ -2034,6 +2054,67 @@
     return true;
   }
 
+  function createCommuterPreview(type) {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 200 70");
+    svg.innerHTML = `<rect x="10" y="16" width="180" height="44" rx="8" fill="${type.body}" stroke="${type.edge}" stroke-width="2"/><rect x="168" y="18" width="20" height="40" rx="5" fill="${type.face}"/><rect x="12" y="45" width="176" height="8" fill="${type.stripe}"/><rect x="25" y="25" width="28" height="14" rx="3" fill="#333"/><rect x="65" y="25" width="28" height="14" rx="3" fill="#333"/><rect x="105" y="25" width="28" height="14" rx="3" fill="#333"/><circle cx="55" cy="60" r="7" fill="#555"/><circle cx="145" cy="60" r="7" fill="#555"/>`;
+    return svg;
+  }
+
+  function buildExtraSelectionChoices() {
+    const routeButtons = document.querySelector(".route-buttons");
+    const trainButtons = document.querySelector(".train-buttons");
+    for (const {key,name,color,trainKey} of window.TRAIN_GO_EXTRA?.metadata || []) {
+      const routeButton = document.createElement("button");
+      routeButton.className = "route-btn";
+      routeButton.dataset.route = key;
+      routeButton.setAttribute("aria-pressed", "false");
+      const marker = document.createElement("span");
+      marker.className = "route-color-marker";
+      marker.style.background = color;
+      routeButton.append(marker, name);
+      routeButtons.appendChild(routeButton);
+
+      const group = document.createElement("div");
+      group.className = "train-choice-group";
+      const trainButton = document.createElement("button");
+      trainButton.className = "train-btn";
+      trainButton.dataset.train = trainKey;
+      trainButton.setAttribute("aria-label", TRAINS[trainKey].callName);
+      trainButton.appendChild(createCommuterPreview(TRAINS[trainKey]));
+      group.appendChild(trainButton);
+      trainButtons.appendChild(group);
+    }
+  }
+
+  const routeSelectPage = document.getElementById("route-select-page");
+  const trainSelectPage = document.getElementById("train-select-page");
+  const btnBackToRoutes = document.getElementById("btn-back-to-routes");
+
+  function showRouteSelection() {
+    routeSelectPage.classList.remove("hidden");
+    trainSelectPage.classList.add("hidden");
+    selectScreen.classList.remove("selecting-train");
+    selectScreen.scrollTop = 0;
+  }
+
+  function showTrainSelection(routeKey) {
+    routeSelectPage.classList.add("hidden");
+    trainSelectPage.classList.remove("hidden");
+    selectScreen.classList.add("selecting-train");
+    const recommendedKey = window.TRAIN_GO_EXTRA?.metadata.find(({key}) => key === routeKey)?.trainKey
+      || ({tokaido:"nozomi",tohoku:"hayabusa"}[routeKey] || routeKey);
+    document.querySelectorAll(".train-btn").forEach((button) => {
+      const recommended = button.dataset.train === recommendedKey;
+      button.classList.toggle("recommended", recommended);
+      button.style.order = recommended ? "-1" : "";
+    });
+    selectScreen.scrollTop = 0;
+  }
+
+  buildExtraSelectionChoices();
+  btnBackToRoutes.addEventListener("click", showRouteSelection);
+
   // ---- 入力 ----
   document.querySelectorAll(".route-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -2046,6 +2127,7 @@
         routeButton.setAttribute("aria-pressed", String(selected));
       });
       say(`${activeRoute.name}！`);
+      showTrainSelection(selectedRouteKey);
     });
   });
 
