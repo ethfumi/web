@@ -671,6 +671,8 @@
     centerWorldX: NaN, centerWorldY: NaN, scale: NaN,
     screenCenterX: NaN, screenCenterY: NaN,
   };
+  const MAP_GESTURE_MOVE_THRESHOLD_PX = 6;
+  const MAP_PINCH_DISTANCE_THRESHOLD_PX = 8;
   const mapPanGesture = { pointerId: null, startX: 0, startY: 0, lastX: 0, lastY: 0, moved: false };
   const mapTouchPoints = new Map();
   const mapPinchGesture = {
@@ -1998,10 +2000,22 @@
     }
   }
 
+  function captureCanvasPointer(pointerId) {
+    try { canvas.setPointerCapture?.(pointerId); } catch { /* synthetic debug events have no active native pointer */ }
+  }
+
+  function releaseCanvasPointer(pointerId) {
+    try { canvas.releasePointerCapture?.(pointerId); } catch { /* the pointer may already be released */ }
+  }
+
   canvas.addEventListener("pointerdown", (event) => {
     if (mapMode !== "scenery" && event.pointerType === "touch") {
       if (collectFallingStar(event)) return;
-      mapTouchPoints.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      mapTouchPoints.set(event.pointerId, {
+        x: event.clientX, y: event.clientY,
+        startX: event.clientX, startY: event.clientY,
+        moved: false,
+      });
       if (mapTouchPoints.size === 1) {
         mapPanGesture.pointerId = event.pointerId;
         mapPanGesture.startX = event.clientX;
@@ -2010,9 +2024,9 @@
         mapPanGesture.lastY = event.clientY;
         mapPanGesture.moved = false;
       } else if (mapTouchPoints.size === 2) {
-        beginMapPinch();
+        prepareMapPinch();
       }
-      canvas.setPointerCapture?.(event.pointerId);
+      captureCanvasPointer(event.pointerId);
       event.preventDefault();
       return;
     }
@@ -2024,7 +2038,7 @@
       mapPanGesture.lastX = event.clientX;
       mapPanGesture.lastY = event.clientY;
       mapPanGesture.moved = false;
-      canvas.setPointerCapture?.(event.pointerId);
+      captureCanvasPointer(event.pointerId);
       event.preventDefault();
       return;
     }
@@ -2033,17 +2047,22 @@
 
   canvas.addEventListener("pointermove", (event) => {
     if (mapMode !== "scenery" && event.pointerType === "touch" && mapTouchPoints.has(event.pointerId)) {
-      mapTouchPoints.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      const point = mapTouchPoints.get(event.pointerId);
+      point.x = event.clientX;
+      point.y = event.clientY;
+      if (!point.moved && Math.hypot(point.x - point.startX, point.y - point.startY) >= MAP_GESTURE_MOVE_THRESHOLD_PX) {
+        point.moved = true;
+      }
       if (mapTouchPoints.size >= 2) {
-        if (!mapPinchGesture.active) beginMapPinch();
-        updateMapPinch();
+        if (!mapPinchGesture.active) activateMapPinchIfMoved();
+        if (mapPinchGesture.active) updateMapPinch();
         event.preventDefault();
         return;
       }
       if (event.pointerId !== mapPanGesture.pointerId) return;
       const totalX = event.clientX - mapPanGesture.startX;
       const totalY = event.clientY - mapPanGesture.startY;
-      if (!mapPanGesture.moved && Math.hypot(totalX, totalY) < 6) return;
+      if (!mapPanGesture.moved && Math.hypot(totalX, totalY) < MAP_GESTURE_MOVE_THRESHOLD_PX) return;
       const dx = mapPanGesture.moved ? event.clientX - mapPanGesture.lastX : totalX;
       const dy = mapPanGesture.moved ? event.clientY - mapPanGesture.lastY : totalY;
       mapPanGesture.lastX = event.clientX;
@@ -2060,7 +2079,7 @@
     if (event.pointerId !== mapPanGesture.pointerId) return;
     const totalX = event.clientX - mapPanGesture.startX;
     const totalY = event.clientY - mapPanGesture.startY;
-    if (!mapPanGesture.moved && Math.hypot(totalX, totalY) < 6) return;
+    if (!mapPanGesture.moved && Math.hypot(totalX, totalY) < MAP_GESTURE_MOVE_THRESHOLD_PX) return;
     const dx = mapPanGesture.moved ? event.clientX - mapPanGesture.lastX : totalX;
     const dy = mapPanGesture.moved ? event.clientY - mapPanGesture.lastY : totalY;
     mapPanGesture.lastX = event.clientX;
@@ -2076,35 +2095,37 @@
     if (event.pointerId !== mapPanGesture.pointerId) return;
     const wasTap = !mapPanGesture.moved;
     mapPanGesture.pointerId = null;
-    canvas.releasePointerCapture?.(event.pointerId);
+    releaseCanvasPointer(event.pointerId);
     if (wasTap) handleCanvasTap(event);
   }
   function finishMapTouch(event, cancelled = false) {
-    if (!mapTouchPoints.has(event.pointerId)) return;
-    const wasTap = !cancelled
-      && mapTouchPoints.size === 1
-      && event.pointerId === mapPanGesture.pointerId
-      && !mapPanGesture.moved;
+    const point = mapTouchPoints.get(event.pointerId);
+    if (!point) return;
+    const wasTap = !cancelled && !mapPinchGesture.active && !point.moved;
     mapTouchPoints.delete(event.pointerId);
-    canvas.releasePointerCapture?.(event.pointerId);
+    releaseCanvasPointer(event.pointerId);
+
     if (mapPinchGesture.active && mapTouchPoints.size >= 2) {
-      beginMapPinch();
-    } else if (mapPinchGesture.active) {
-      mapPinchGesture.active = false;
+      restartMapPinch();
+    } else {
+      if (mapPinchGesture.active) {
+        mapPinchGesture.active = false;
+        for (const remainingPoint of mapTouchPoints.values()) remainingPoint.moved = true;
+      } else if (mapTouchPoints.size >= 2) {
+        prepareMapPinch();
+      }
       const remaining = mapTouchPoints.entries().next().value;
       if (remaining) {
-        const [pointerId, point] = remaining;
+        const [pointerId, remainingPoint] = remaining;
         mapPanGesture.pointerId = pointerId;
-        mapPanGesture.startX = point.x;
-        mapPanGesture.startY = point.y;
-        mapPanGesture.lastX = point.x;
-        mapPanGesture.lastY = point.y;
-        mapPanGesture.moved = true;
+        mapPanGesture.startX = remainingPoint.x;
+        mapPanGesture.startY = remainingPoint.y;
+        mapPanGesture.lastX = remainingPoint.x;
+        mapPanGesture.lastY = remainingPoint.y;
+        mapPanGesture.moved = remainingPoint.moved;
       } else {
         mapPanGesture.pointerId = null;
       }
-    } else if (event.pointerId === mapPanGesture.pointerId) {
-      mapPanGesture.pointerId = null;
     }
     if (wasTap) handleCanvasTap(event);
   }
@@ -2255,23 +2276,29 @@
     const points = Array.from(mapTouchPoints.values());
     return points.length >= 2 ? [points[0], points[1]] : null;
   }
-  function beginMapPinch() {
+  function mapPinchDistance(pair) {
+    return pair ? Math.hypot(pair[1].x - pair[0].x, pair[1].y - pair[0].y) : 0;
+  }
+  function prepareMapPinch() {
+    const distance = mapPinchDistance(mapPinchPair());
+    mapPinchGesture.active = false;
+    mapPinchGesture.startDistance = distance >= 1 ? distance : 0;
+  }
+  function startMapPinch(startDistance) {
     const pair = mapPinchPair();
-    if (!pair) return;
-    const distance = Math.hypot(pair[1].x - pair[0].x, pair[1].y - pair[0].y);
-    if (distance < 1) return;
+    if (!pair || startDistance < 1) return false;
     if (mapZoomAuto) {
       seedManualMapCamera();
       mapZoomAuto = false;
       updateMapCameraControls();
     }
     if (!Number.isFinite(mapManualScale)) seedManualMapCamera();
-    if (!Number.isFinite(mapManualScale)) return;
+    if (!Number.isFinite(mapManualScale)) return false;
     const rect = canvas.getBoundingClientRect();
     const midpointX = (pair[0].x + pair[1].x) / 2 - rect.left;
     const midpointY = (pair[0].y + pair[1].y) / 2 - rect.top;
     mapPinchGesture.active = true;
-    mapPinchGesture.startDistance = distance;
+    mapPinchGesture.startDistance = startDistance;
     mapPinchGesture.startScale = mapManualScale;
     if (!mapScrollAuto) {
       mapPinchGesture.anchorWorldX = mapManualCenterWorldX
@@ -2282,7 +2309,20 @@
       mapPinchGesture.anchorWorldX = NaN;
       mapPinchGesture.anchorWorldY = NaN;
     }
+    for (const point of mapTouchPoints.values()) point.moved = true;
     mapPanGesture.moved = true;
+    return true;
+  }
+  function activateMapPinchIfMoved() {
+    const pair = mapPinchPair();
+    const distance = mapPinchDistance(pair);
+    if (!pair || mapPinchGesture.startDistance < 1
+      || Math.abs(distance - mapPinchGesture.startDistance) < MAP_PINCH_DISTANCE_THRESHOLD_PX) return false;
+    return startMapPinch(mapPinchGesture.startDistance);
+  }
+  function restartMapPinch() {
+    const distance = mapPinchDistance(mapPinchPair());
+    return startMapPinch(distance);
   }
   function updateMapPinch() {
     const pair = mapPinchPair();
@@ -5002,6 +5042,42 @@
       arrive();
     });
     document.body.appendChild(debugCelebrationButton);
+
+    const debugMapMultitapButton = document.createElement("button");
+    debugMapMultitapButton.type = "button";
+    debugMapMultitapButton.className = "debug-control";
+    debugMapMultitapButton.textContent = "テスト: ちずマルチタップ";
+    debugMapMultitapButton.setAttribute("aria-label", "地図のマルチタップとピンチを確認する");
+    Object.assign(debugMapMultitapButton.style, {
+      position: "fixed", left: "58%", top: "448px", zIndex: "99",
+      padding: "8px", fontSize: "14px",
+    });
+    debugMapMultitapButton.addEventListener("click", () => {
+      if (mapMode === "scenery") setMapMode("follow");
+      const previousState = state;
+      const previousSpeed = speed;
+      state = "running";
+      const popupStart = speedBoostPopups.length;
+      const dispatchTouch = (type, pointerId, clientX, clientY) => canvas.dispatchEvent(new PointerEvent(type, {
+        bubbles: true, cancelable: true, pointerType: "touch", pointerId, clientX, clientY,
+      }));
+      for (let i = 0; i < 4; i++) dispatchTouch("pointerdown", 101 + i, 320 + i * 45, 280);
+      for (let i = 0; i < 4; i++) dispatchTouch("pointerup", 101 + i, 320 + i * 45, 280);
+      const multitapBoosts = speedBoostPopups.length - popupStart;
+      const tapZoomMode = mapZoomAuto ? "auto" : "manual";
+      const pinchPopupStart = speedBoostPopups.length;
+      dispatchTouch("pointerdown", 201, 420, 320);
+      dispatchTouch("pointerdown", 202, 520, 320);
+      dispatchTouch("pointermove", 202, 560, 320);
+      dispatchTouch("pointerup", 202, 560, 320);
+      dispatchTouch("pointerup", 201, 420, 320);
+      const pinchBoosts = speedBoostPopups.length - pinchPopupStart;
+      canvas.dataset.mapGestureTest = JSON.stringify({ multitapBoosts, tapZoomMode, pinchBoosts, pinchZoomMode: mapZoomAuto ? "auto" : "manual" });
+      speedBoostPopups.splice(popupStart);
+      speed = previousSpeed;
+      state = previousState;
+    });
+    document.body.appendChild(debugMapMultitapButton);
   }
 
   // ---- PWA ----
