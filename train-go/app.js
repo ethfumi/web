@@ -912,8 +912,19 @@
   let mapManualCenterWorldX = NaN;
   let mapManualCenterWorldY = NaN;
   let mapManualScale = NaN;
-  const lastMapScene = { centerWorldX: NaN, centerWorldY: NaN, scale: NaN };
+  const lastMapScene = {
+    centerWorldX: NaN, centerWorldY: NaN, scale: NaN,
+    screenCenterX: NaN, screenCenterY: NaN,
+  };
   const mapPanGesture = { pointerId: null, startX: 0, startY: 0, lastX: 0, lastY: 0, moved: false };
+  const mapTouchPoints = new Map();
+  const mapPinchGesture = {
+    active: false,
+    startDistance: 0,
+    startScale: NaN,
+    anchorWorldX: NaN,
+    anchorWorldY: NaN,
+  };
   let activeRoute = ROUTES[selectedRouteKey];
   let train = TRAINS.nozomi;
   let trainKey = "nozomi";
@@ -2077,6 +2088,23 @@
   }
 
   canvas.addEventListener("pointerdown", (event) => {
+    if (mapMode !== "scenery" && event.pointerType === "touch") {
+      if (collectFallingStar(event)) return;
+      mapTouchPoints.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      if (mapTouchPoints.size === 1) {
+        mapPanGesture.pointerId = event.pointerId;
+        mapPanGesture.startX = event.clientX;
+        mapPanGesture.startY = event.clientY;
+        mapPanGesture.lastX = event.clientX;
+        mapPanGesture.lastY = event.clientY;
+        mapPanGesture.moved = false;
+      } else if (mapTouchPoints.size === 2) {
+        beginMapPinch();
+      }
+      canvas.setPointerCapture?.(event.pointerId);
+      event.preventDefault();
+      return;
+    }
     if (mapMode !== "scenery" && !mapScrollAuto) {
       if (collectFallingStar(event)) return;
       mapPanGesture.pointerId = event.pointerId;
@@ -2093,6 +2121,31 @@
   });
 
   canvas.addEventListener("pointermove", (event) => {
+    if (mapMode !== "scenery" && event.pointerType === "touch" && mapTouchPoints.has(event.pointerId)) {
+      mapTouchPoints.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      if (mapTouchPoints.size >= 2) {
+        if (!mapPinchGesture.active) beginMapPinch();
+        updateMapPinch();
+        event.preventDefault();
+        return;
+      }
+      if (event.pointerId !== mapPanGesture.pointerId) return;
+      const totalX = event.clientX - mapPanGesture.startX;
+      const totalY = event.clientY - mapPanGesture.startY;
+      if (!mapPanGesture.moved && Math.hypot(totalX, totalY) < 6) return;
+      const dx = mapPanGesture.moved ? event.clientX - mapPanGesture.lastX : totalX;
+      const dy = mapPanGesture.moved ? event.clientY - mapPanGesture.lastY : totalY;
+      mapPanGesture.lastX = event.clientX;
+      mapPanGesture.lastY = event.clientY;
+      mapPanGesture.moved = true;
+      if (!mapScrollAuto) {
+        const scale = Math.max(lastMapScene.scale, 0.0001);
+        mapManualCenterWorldX -= dx / scale;
+        mapManualCenterWorldY -= dy / scale;
+      }
+      event.preventDefault();
+      return;
+    }
     if (event.pointerId !== mapPanGesture.pointerId) return;
     const totalX = event.clientX - mapPanGesture.startX;
     const totalY = event.clientY - mapPanGesture.startY;
@@ -2115,8 +2168,44 @@
     canvas.releasePointerCapture?.(event.pointerId);
     if (wasTap) handleCanvasTap(event);
   }
-  canvas.addEventListener("pointerup", finishMapPan);
+  function finishMapTouch(event, cancelled = false) {
+    if (!mapTouchPoints.has(event.pointerId)) return;
+    const wasTap = !cancelled
+      && mapTouchPoints.size === 1
+      && event.pointerId === mapPanGesture.pointerId
+      && !mapPanGesture.moved;
+    mapTouchPoints.delete(event.pointerId);
+    canvas.releasePointerCapture?.(event.pointerId);
+    if (mapPinchGesture.active && mapTouchPoints.size >= 2) {
+      beginMapPinch();
+    } else if (mapPinchGesture.active) {
+      mapPinchGesture.active = false;
+      const remaining = mapTouchPoints.entries().next().value;
+      if (remaining) {
+        const [pointerId, point] = remaining;
+        mapPanGesture.pointerId = pointerId;
+        mapPanGesture.startX = point.x;
+        mapPanGesture.startY = point.y;
+        mapPanGesture.lastX = point.x;
+        mapPanGesture.lastY = point.y;
+        mapPanGesture.moved = true;
+      } else {
+        mapPanGesture.pointerId = null;
+      }
+    } else if (event.pointerId === mapPanGesture.pointerId) {
+      mapPanGesture.pointerId = null;
+    }
+    if (wasTap) handleCanvasTap(event);
+  }
+  canvas.addEventListener("pointerup", (event) => {
+    if (event.pointerType === "touch") finishMapTouch(event);
+    else finishMapPan(event);
+  });
   canvas.addEventListener("pointercancel", (event) => {
+    if (event.pointerType === "touch") {
+      finishMapTouch(event, true);
+      return;
+    }
     if (event.pointerId === mapPanGesture.pointerId) mapPanGesture.pointerId = null;
   });
 
@@ -2231,6 +2320,8 @@
     mapManualCenterWorldY = NaN;
     mapManualScale = NaN;
     mapPanGesture.pointerId = null;
+    mapTouchPoints.clear();
+    mapPinchGesture.active = false;
     updateMapCameraControls();
   }
   function seedManualMapCamera() {
@@ -2239,11 +2330,65 @@
     mapManualCenterWorldY = lastMapScene.centerWorldY;
     mapManualScale = lastMapScene.scale;
   }
+  function clampMapScale(scale) {
+    return Math.max(0.00035, Math.min(6, scale));
+  }
   function changeMapZoom(multiplier) {
     if (mapZoomAuto) return;
     if (!Number.isFinite(mapManualScale)) seedManualMapCamera();
     if (!Number.isFinite(mapManualScale)) return;
-    mapManualScale = Math.max(0.00035, Math.min(6, mapManualScale * multiplier));
+    mapManualScale = clampMapScale(mapManualScale * multiplier);
+  }
+  function mapPinchPair() {
+    const points = Array.from(mapTouchPoints.values());
+    return points.length >= 2 ? [points[0], points[1]] : null;
+  }
+  function beginMapPinch() {
+    const pair = mapPinchPair();
+    if (!pair) return;
+    const distance = Math.hypot(pair[1].x - pair[0].x, pair[1].y - pair[0].y);
+    if (distance < 1) return;
+    if (mapZoomAuto) {
+      seedManualMapCamera();
+      mapZoomAuto = false;
+      updateMapCameraControls();
+    }
+    if (!Number.isFinite(mapManualScale)) seedManualMapCamera();
+    if (!Number.isFinite(mapManualScale)) return;
+    const rect = canvas.getBoundingClientRect();
+    const midpointX = (pair[0].x + pair[1].x) / 2 - rect.left;
+    const midpointY = (pair[0].y + pair[1].y) / 2 - rect.top;
+    mapPinchGesture.active = true;
+    mapPinchGesture.startDistance = distance;
+    mapPinchGesture.startScale = mapManualScale;
+    if (!mapScrollAuto) {
+      mapPinchGesture.anchorWorldX = mapManualCenterWorldX
+        + (midpointX - lastMapScene.screenCenterX) / mapManualScale;
+      mapPinchGesture.anchorWorldY = mapManualCenterWorldY
+        + (midpointY - lastMapScene.screenCenterY) / mapManualScale;
+    } else {
+      mapPinchGesture.anchorWorldX = NaN;
+      mapPinchGesture.anchorWorldY = NaN;
+    }
+    mapPanGesture.moved = true;
+  }
+  function updateMapPinch() {
+    const pair = mapPinchPair();
+    if (!pair || !mapPinchGesture.active) return;
+    const distance = Math.hypot(pair[1].x - pair[0].x, pair[1].y - pair[0].y);
+    const nextScale = clampMapScale(
+      mapPinchGesture.startScale * distance / Math.max(mapPinchGesture.startDistance, 1),
+    );
+    if (!mapScrollAuto && Number.isFinite(mapPinchGesture.anchorWorldX)) {
+      const rect = canvas.getBoundingClientRect();
+      const midpointX = (pair[0].x + pair[1].x) / 2 - rect.left;
+      const midpointY = (pair[0].y + pair[1].y) / 2 - rect.top;
+      mapManualCenterWorldX = mapPinchGesture.anchorWorldX
+        - (midpointX - lastMapScene.screenCenterX) / nextScale;
+      mapManualCenterWorldY = mapPinchGesture.anchorWorldY
+        - (midpointY - lastMapScene.screenCenterY) / nextScale;
+    }
+    mapManualScale = nextScale;
   }
   function setMapMode(nextMode, announce = false) {
     const previousMode = mapMode;
@@ -2528,6 +2673,8 @@
     lastMapScene.centerWorldX = scene.centerWorldX;
     lastMapScene.centerWorldY = scene.centerWorldY;
     lastMapScene.scale = scene.scale;
+    lastMapScene.screenCenterX = scene.screenCenterX;
+    lastMapScene.screenCenterY = scene.screenCenterY;
     return scene;
   }
 
