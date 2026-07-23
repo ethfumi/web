@@ -95,7 +95,7 @@
       ["もりおか",535.3,141.1360,39.7010],["にのへ",601.0,141.3040,40.2590],["はちのへ",631.9,141.4310,40.5090],
       ["しちのへとわだ",668.0,141.1540,40.7190],["しんあおもり",713.7,140.6930,40.8270]]},
   };
-  Object.assign(maps, window.TRAIN_GO_EXTRA?.maps || {});
+  Object.assign(maps, window.TRAIN_GO_ROUTE_DATA?.maps || {});
   for (const map of Object.values(maps)) {
     map.points = map.points.map(([name,km,lon,lat]) => ({name,km,lon,lat}));
     map.coords = map.points.map((point) => [point.lon,point.lat]);
@@ -108,7 +108,7 @@
   window.TRAIN_GO_MAP_DATA = {
     maps,
     drawOrder:["tokaido","tohoku","chuo","sobu","tozai","keio","keioSagamihara","inokashira","yamanote",
-      ...(window.TRAIN_GO_EXTRA?.metadata || []).map(({key}) => key)],
+      ...(window.TRAIN_GO_ROUTE_DATA?.metadata || []).map(({key}) => key)],
     laneOffsets:{tokaido:1.5,tohoku:1.5,chuo:-5,sobu:5,tozai:2.5,keio:0,keioSagamihara:0,inokashira:2,yamanote:0},
     geography:{
       // 県境: Natural Earth Admin 1 (public domain) を沿線周辺だけ簡略化。

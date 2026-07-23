@@ -25,7 +25,7 @@
 <title>つなげて！でんしゃ！</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="stylesheet" href="style.css?v=85">
+<link rel="stylesheet" href="style.css?v=86">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -47,7 +47,7 @@
   </section>
   <section id="train-select-page" class="select-page hidden">
   <button id="btn-back-to-routes" type="button" aria-label="ろせんえらびにもどる">← もどる</button>
-  <div class="train-select-title">どの でんしゃに のる？</div>
+  <div id="vehicle-select-title" class="train-select-title">どの でんしゃに のる？</div>
   <div class="train-buttons">
     <div class="train-choice-group">
       <button class="train-btn" data-train="chuo" aria-label="オレンジのでんしゃ">
@@ -121,13 +121,14 @@
   </section>
   <div id="release-info">
     <!-- 更新時は sw.js の CACHE バージョンと揃える -->
-    <div id="app-version" aria-label="つなげて！でんしゃ！、バージョン85、2026年7月23日22時52分更新">
+    <div id="app-version" aria-label="つなげて！でんしゃ！、バージョン86、2026年7月24日7時43分更新">
       <span class="version-title">つなげて！でんしゃ！</span>
-      <strong>v85</strong><span>2026.07.23 22:52 更新</span>
+      <strong>v86</strong><span>2026.07.24 07:43 更新</span>
     </div>
     <details id="update-history">
       <summary>🆕 こうしん</summary>
       <div class="update-history-list" aria-label="こうしんりれき">
+        <span><time datetime="2026-07-24">7/24</time> ひこうきの とびかたと ジェットきりゅうをついか</span>
         <span><time datetime="2026-07-23">7/23</time> おおさか・ほっかいどう・おきなわへの そらをついか</span>
         <span><time datetime="2026-07-23">7/23</time> ろせんと でんしゃを 2ページでえらべるように</span>
         <span><time datetime="2026-07-23">7/23</time> ちかてつ・おおさかなど 19ろせんをついか</span>
@@ -250,10 +251,10 @@
   <span>🔦</span><span id="headlight-label">ライトをつける</span>
 </button>
 
-<script src="extra-route-data.js?v=85"></script>
-<script src="air-route-data.js?v=85"></script>
-<script src="map-data.js?v=85"></script>
-<script src="app.js?v=85"></script>
+<script src="train-route-data.js?v=86"></script>
+<script src="air-route-data.js?v=86"></script>
+<script src="map-data.js?v=86"></script>
+<script src="app.js?v=86"></script>
 <!-- Cloudflare Web Analytics: Cookieを使用せず、個人を識別しないアクセス集計 -->
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"ca5e1fbb318447b3ac9409f3da1cad2a"}'></script>
 </body>

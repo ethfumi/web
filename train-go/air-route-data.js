@@ -3,10 +3,10 @@
 (() => {
   "use strict";
 
-  const extra = window.TRAIN_GO_EXTRA;
-  if (!extra) return;
+  const routeData = window.TRAIN_GO_ROUTE_DATA;
+  if (!routeData) return;
 
-  extra.trains.airplane = {
+  routeData.trains.airplane = {
     name: "しろいひこうき",
     kind: "airplane",
     body: "#f8fbff",
@@ -60,7 +60,7 @@
   ];
 
   for (const flight of flights) {
-    extra.routes[flight.key] = {
+    routeData.routes[flight.key] = {
       name: flight.name,
       kind: "air",
       start: "はねだくうこう",
@@ -74,13 +74,13 @@
       expressStops: new Set(),
       cityStations: new Set(["はねだくうこう", flight.destination]),
     };
-    extra.maps[flight.key] = {
+    routeData.maps[flight.key] = {
       name: flight.name,
       kind: "air",
       color: flight.color,
       points: flight.points,
     };
-    extra.metadata.push({
+    routeData.metadata.push({
       key: flight.key,
       name: flight.name,
       color: flight.color,
