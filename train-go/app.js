@@ -102,6 +102,11 @@
   const ROUTE_AUTO_SPEED_KMH = {
     chuo: 100, tokaido: 285, tohoku: 320, sobu: 95,
     tozai: 100, inokashira: 90, keio: 110, yamanote: 90,
+    ...Object.fromEntries(
+      (window.TRAIN_GO_ROUTE_DATA?.metadata || [])
+        .filter(({speedKmh}) => Number.isFinite(speedKmh))
+        .map(({key, speedKmh}) => [key, speedKmh]),
+    ),
   };
   const GRAND_STATIONS = new Set(["とうきょう", "しんじゅく", "しぶや", "しんおおさか"]);
   const MAJOR_STATIONS = new Set([
@@ -161,6 +166,9 @@
       ["きたの", "けいおうはちおうじ"],
     ]),
   };
+  for (const [key, route] of Object.entries(ROUTES)) {
+    if (route.tunnelPairs?.length) TUNNEL_SEGMENTS[key] = makeSegmentSet(route.tunnelPairs);
+  }
   const UNDERGROUND_STATIONS = {
     inokashira: new Set(["しんせん"]),
     keio: new Set(["しんじゅく"]),
@@ -212,6 +220,14 @@
         announcement: "にじとほしがきらきら、ゆめいっぱいのまちだよ！",
         symbols: ["🌈", "⭐", "🎈"],
         stamp: "🌈",
+      },
+    },
+    hankyuTakarazuka: {
+      "たからづか": {
+        banner: "🌹 はなやかな まち！",
+        announcement: "きらきらのぶたいと、おんがくがいっぱいのまちだよ！",
+        symbols: ["🌹", "✨", "🎭"],
+        stamp: "🌹",
       },
     },
     yamanote: {
@@ -276,12 +292,13 @@
     keio: { name: "あかとあおのでんしゃ", kind: "local", cars: 10, speedKmh: 110, body: "#e8ecef", stripe: "#d31359", stripe2: "#174f9a" },
     freight: { name: "かもつれっしゃ", kind: "freight", cars: 26, speedKmh: 100, body: "#40505d", stripe: "#e49a31" },
   };
-  for (const {key,trainKey,kind} of window.TRAIN_GO_ROUTE_DATA?.metadata || []) {
+  for (const {key,trainKey,kind,cars,speedKmh} of window.TRAIN_GO_ROUTE_DATA?.metadata || []) {
     if (kind === "air") continue;
     const type = TRAINS[trainKey || key];
     OPPOSING_TRAIN_TYPES[key] = {
-      name:type.name, kind:"local", cars:key === "osakaLoop" ? 8 : 10,
-      speedKmh:key === "odakyu" || key === "toyoko" || key === "keikyu" ? 110 : 90,
+      name:type.name, kind:kind === "shinkansen" ? "shinkansen" : "local",
+      cars:cars || (key === "osakaLoop" ? 8 : 10),
+      speedKmh:speedKmh || (key === "odakyu" || key === "toyoko" || key === "keikyu" ? 110 : 90),
       body:type.body, stripe:type.stripe, stripe2:type.stripe2,
     };
   }
@@ -1815,9 +1832,26 @@
     return svg;
   }
 
-  function createVehiclePreview(type) {
-    return type.kind === "airplane" ? createAirplanePreview(type) : createCommuterPreview(type);
+  function createShinkansenPreview(type) {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 200 70");
+    const upper = type.upper || type.body;
+    svg.innerHTML = `<path d="M8 47 Q17 24 60 18 H181 Q192 18 194 31 V54 H20 Q8 54 8 47Z" fill="${type.body}" stroke="${type.edge}" stroke-width="2"/><path d="M12 43 Q28 25 63 21 H184 V31 H57 Q28 31 12 43Z" fill="${upper}"/><path d="M14 46 H190" stroke="${type.stripe}" stroke-width="5"/><rect x="83" y="27" width="22" height="10" rx="3" fill="#333"/><rect x="113" y="27" width="22" height="10" rx="3" fill="#333"/><rect x="143" y="27" width="22" height="10" rx="3" fill="#333"/><circle cx="55" cy="55" r="6" fill="#555"/><circle cx="155" cy="55" r="6" fill="#555"/>`;
+    return svg;
   }
+
+  function createVehiclePreview(type) {
+    if (type.kind === "airplane") return createAirplanePreview(type);
+    if (type.kind === "shinkansen") return createShinkansenPreview(type);
+    return createCommuterPreview(type);
+  }
+
+  const ROUTE_SELECTION_ORDER = [
+    "tokaido", "sanyo", "kyushu", "nishiKyushu", "tohoku", "hokkaido",
+    "akita", "yamagata", "joetsu", "hokuriku",
+    "yamanote", "chuo", "sobu", "tozai", "keio", "inokashira",
+    "osakaLoop", "hankyuTakarazuka",
+  ];
 
   function buildExtraSelectionChoices() {
     const routeButtons = document.querySelector(".route-buttons");
@@ -1835,6 +1869,8 @@
         marker.style.background = color;
       }
       routeButton.append(marker, name);
+      const routeOrder = ROUTE_SELECTION_ORDER.indexOf(key);
+      routeButton.style.order = String(routeOrder >= 0 ? routeOrder : 100 + (window.TRAIN_GO_ROUTE_DATA?.metadata || []).findIndex((item) => item.key === key));
       routeButtons.appendChild(routeButton);
 
       if (trainButtons.querySelector(`.train-btn[data-train="${trainKey}"]`)) continue;
@@ -1888,6 +1924,10 @@
   }
 
   buildExtraSelectionChoices();
+  document.querySelectorAll(".route-btn").forEach((button, fallbackIndex) => {
+    const routeOrder = ROUTE_SELECTION_ORDER.indexOf(button.dataset.route);
+    button.style.order = String(routeOrder >= 0 ? routeOrder : 100 + fallbackIndex);
+  });
   btnBackToRoutes.addEventListener("click", showRouteSelection);
 
   // ---- 入力 ----
