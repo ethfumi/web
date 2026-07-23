@@ -25,14 +25,15 @@
 <title>つなげて！でんしゃ！</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="stylesheet" href="style.css?v=79">
+<link rel="stylesheet" href="style.css?v=80">
 </head>
 <body>
 <canvas id="game"></canvas>
 
 <!-- 車両えらび画面 -->
 <div id="select-screen">
-  <div class="select-title">どこを はしる？</div>
+  <section id="route-select-page" class="select-page">
+  <div class="select-title">どの ろせんに のる？</div>
   <div class="route-buttons" role="group" aria-label="はしるろせん">
     <button class="route-btn selected" data-route="tokaido" aria-pressed="true"><span>🗻</span>とうかいどう</button>
     <button class="route-btn" data-route="tohoku" aria-pressed="false"><span>🌲</span>とうほく</button>
@@ -43,7 +44,10 @@
     <button class="route-btn" data-route="keio" aria-pressed="false"><span>🟥</span>けいおうせん</button>
     <button class="route-btn" data-route="inokashira" aria-pressed="false"><span>🌈</span>いのかしらせん</button>
   </div>
-  <div class="train-select-title">どれに のる？</div>
+  </section>
+  <section id="train-select-page" class="select-page hidden">
+  <button id="btn-back-to-routes" type="button" aria-label="ろせんえらびにもどる">← もどる</button>
+  <div class="train-select-title">どの でんしゃに のる？</div>
   <div class="train-buttons">
     <div class="train-choice-group">
       <button class="train-btn" data-train="chuo" aria-label="オレンジのでんしゃ">
@@ -114,15 +118,18 @@
       </button>
     </div>
   </div>
+  </section>
   <div id="release-info">
     <!-- 更新時は sw.js の CACHE バージョンと揃える -->
-    <div id="app-version" aria-label="つなげて！でんしゃ！、バージョン79、2026年7月23日21時30分更新">
+    <div id="app-version" aria-label="つなげて！でんしゃ！、バージョン80、2026年7月23日22時19分更新">
       <span class="version-title">つなげて！でんしゃ！</span>
-      <strong>v79</strong><span>2026.07.23 21:30 更新</span>
+      <strong>v80</strong><span>2026.07.23 22:19 更新</span>
     </div>
     <details id="update-history">
       <summary>🆕 こうしん</summary>
       <div class="update-history-list" aria-label="こうしんりれき">
+        <span><time datetime="2026-07-23">7/23</time> ろせんと でんしゃを 2ページでえらべるように</span>
+        <span><time datetime="2026-07-23">7/23</time> ちかてつ・おおさかなど 19ろせんをついか</span>
         <span><time datetime="2026-07-23">7/23</time> ちずを 2ほんゆびで おおきく・ちいさく</span>
         <span><time datetime="2026-07-23">7/23</time> ちずを しゅどうでうごかせるように</span>
         <span><time datetime="2026-07-23">7/23</time> ちゅうおうせんと そうぶせんをならべてひょうじ</span>
@@ -242,8 +249,9 @@
   <span>🔦</span><span id="headlight-label">ライトをつける</span>
 </button>
 
-<script src="map-data.js?v=79"></script>
-<script src="app.js?v=79"></script>
+<script src="extra-route-data.js?v=80"></script>
+<script src="map-data.js?v=80"></script>
+<script src="app.js?v=80"></script>
 <!-- Cloudflare Web Analytics: Cookieを使用せず、個人を識別しないアクセス集計 -->
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"ca5e1fbb318447b3ac9409f3da1cad2a"}'></script>
 </body>

@@ -43,6 +43,42 @@ html, body {
   z-index: 10;
 }
 
+.select-page {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.2vmin;
+}
+
+#select-screen::-webkit-scrollbar { width: 12px; }
+#select-screen::-webkit-scrollbar-track { background: rgba(255,255,255,0.35); }
+#select-screen::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: rgba(42,92,170,0.55);
+  background-clip: padding-box;
+}
+
+#btn-back-to-routes {
+  position: sticky;
+  top: max(1vmin, env(safe-area-inset-top));
+  align-self: flex-start;
+  z-index: 2;
+  margin-left: min(4vw, 32px);
+  padding: 1.1vmin 2.2vmin;
+  border: 0;
+  border-radius: 999px;
+  color: #36516a;
+  background: rgba(255,255,255,0.94);
+  box-shadow: 0 0.6vmin 0 rgba(70,110,140,0.22);
+  font-size: clamp(15px, 2.6vmin, 23px);
+  font-weight: 800;
+}
+
+#select-screen.selecting-train #release-info,
+#select-screen.selecting-train #creator-contact { display: none; }
+
 .select-title {
   font-size: 5.5vmin;
   font-weight: bold;
@@ -65,7 +101,7 @@ html, body {
 
 .route-btn {
   display: flex;
-  min-height: 8vmin;
+  min-height: max(8vmin, 44px);
   align-items: center;
   justify-content: center;
   gap: 1vmin;
@@ -80,6 +116,13 @@ html, body {
 }
 
 .route-btn span { font-size: 1.25em; }
+.route-btn .route-color-marker {
+  width: 1.15em;
+  height: 1.15em;
+  flex: 0 0 auto;
+  border: 2px solid rgba(0,0,0,0.08);
+  border-radius: 0.25em;
+}
 .route-btn.selected {
   border-color: #2a73c8;
   color: #fff;
@@ -121,6 +164,11 @@ html, body {
   box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
   cursor: pointer;
   transition: transform 0.1s;
+}
+
+.train-btn.recommended {
+  outline: 0.7vmin solid #f28c28;
+  box-shadow: 0 6px 0 rgba(210,95,20,0.3), 0 0 0 1.2vmin rgba(255,255,255,0.75);
 }
 
 .train-btn:active {
@@ -860,7 +908,7 @@ body.map-view-active #btn-headlight {
   }
   #map-camera-controls > button {
     min-width: 24vmin;
-    min-height: 8vmin;
+    min-height: max(8vmin, 44px);
     font-size: 2.8vmin;
   }
   #map-zoom-buttons button {
