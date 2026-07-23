@@ -836,8 +836,10 @@ html, body {
   padding: 0;
   font-size: clamp(20px, 3.5vmin, 34px);
 }
-body.map-camera-pan-manual #game {
+body.map-view-active #game {
   touch-action: none;
+}
+body.map-camera-pan-manual #game {
   cursor: grab;
 }
 body.map-camera-pan-manual #game:active { cursor: grabbing; }
