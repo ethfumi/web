@@ -36,6 +36,7 @@
   const BASE_TAP_BOOST_KMH = 5;
   const AIR_BASE_TAP_BOOST_KMH = 50;
   const AIR_JETSTREAM_BOOST_KMH = 180;
+  const AIR_MAX_BRAKING_DISTANCE_METERS = 20000;
   const PASSENGER_TAP_BONUS_KMH = 1;
   const DEPARTURE_SPEED_PX_PER_SEC = DEPARTURE_SPEED_KMH / SPEED_DISPLAY_SCALE;
   const AIR_DEPARTURE_SPEED_PX_PER_SEC = AIR_DEPARTURE_SPEED_KMH / SPEED_DISPLAY_SCALE;
@@ -829,7 +830,11 @@
   function isBrakingForStation() {
     if (state !== "running" || passingStation) return false;
     const distToStation = stationWorldX - distance;
-    return distToStation < speed * speed / (2 * 300) + 50;
+    const physicalBrakingDistance = speed * speed / (2 * 300) + 50;
+    const brakingDistance = activeRoute.kind === "air"
+      ? Math.min(physicalBrakingDistance, AIR_MAX_BRAKING_DISTANCE_METERS * PIXELS_PER_METER)
+      : physicalBrakingDistance;
+    return distToStation < brakingDistance;
   }
 
   function routeEventForSegment() {
@@ -5078,6 +5083,40 @@
       state = previousState;
     });
     document.body.appendChild(debugMapMultitapButton);
+
+    const debugAirBrakingButton = document.createElement("button");
+    debugAirBrakingButton.type = "button";
+    debugAirBrakingButton.className = "debug-control";
+    debugAirBrakingButton.textContent = "テスト: こうそくちゃくりく";
+    debugAirBrakingButton.setAttribute("aria-label", "飛行機の高速着陸ブレーキを確認する");
+    Object.assign(debugAirBrakingButton.style, {
+      position: "fixed", left: "72%", top: "448px", zIndex: "99",
+      padding: "8px", fontSize: "14px",
+    });
+    debugAirBrakingButton.addEventListener("click", () => {
+      if (activeRoute.kind !== "air") return;
+      const previousState = state;
+      const previousSpeed = speed;
+      const previousDistance = distance;
+      state = "running";
+      speed = 25000 / SPEED_DISPLAY_SCALE;
+      distance = stationWorldX - 500000 * PIXELS_PER_METER;
+      const brakingAt500Km = isBrakingForStation();
+      distance = stationWorldX - 15000 * PIXELS_PER_METER;
+      const brakingAt15Km = isBrakingForStation();
+      speed = 900 / SPEED_DISPLAY_SCALE;
+      distance = stationWorldX - 2000 * PIXELS_PER_METER;
+      const normalBrakingAt2Km = isBrakingForStation();
+      distance = stationWorldX - 1000 * PIXELS_PER_METER;
+      const normalBrakingAt1Km = isBrakingForStation();
+      canvas.dataset.airBrakingTest = JSON.stringify({
+        brakingAt500Km, brakingAt15Km, normalBrakingAt2Km, normalBrakingAt1Km,
+      });
+      distance = previousDistance;
+      speed = previousSpeed;
+      state = previousState;
+    });
+    document.body.appendChild(debugAirBrakingButton);
   }
 
   // ---- PWA ----
