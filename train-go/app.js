@@ -172,6 +172,11 @@
   const UNDERGROUND_STATIONS = {
     inokashira: new Set(["しんせん"]),
     keio: new Set(["しんじゅく"]),
+    osakaChuo: new Set([
+      "ながた", "たかいだ", "ふかえばし", "みどりばし", "もりのみや",
+      "たにまちよんちょうめ", "さかいすじほんまち", "ほんまち", "あわざ",
+      "コスモスクエア", "ゆめしま",
+    ]),
   };
 
   for (const key of [
@@ -228,6 +233,14 @@
         announcement: "きらきらのぶたいと、おんがくがいっぱいのまちだよ！",
         symbols: ["🌹", "✨", "🎭"],
         stamp: "🌹",
+      },
+    },
+    osakaChuo: {
+      "ゆめしま": {
+        banner: "🌌 みらいの しま！",
+        announcement: "うみのうえの、みらいみたいなえきだよ！",
+        symbols: ["🌊", "✨", "🚇"],
+        stamp: "🌌",
       },
     },
     yamanote: {
@@ -1850,7 +1863,7 @@
     "tokaido", "sanyo", "kyushu", "nishiKyushu", "tohoku", "hokkaido",
     "akita", "yamagata", "joetsu", "hokuriku",
     "yamanote", "chuo", "sobu", "tozai", "keio", "inokashira",
-    "osakaLoop", "hankyuTakarazuka",
+    "osakaLoop", "osakaChuo", "hankyuTakarazuka",
   ];
 
   function buildExtraSelectionChoices() {
