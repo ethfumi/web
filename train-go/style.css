@@ -132,26 +132,16 @@ html, body {
 .route-btn:active { transform: translateY(0.5vmin); box-shadow: 0 0.25vmin 0 rgba(70, 110, 140, 0.25); }
 
 .train-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 1.8vmin;
-  width: min(80vw, 560px);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2vmin;
+  width: min(92vw, 960px);
 }
 
 .train-choice-group {
   display: contents;
 }
 
-.train-btn[data-train="nozomi"] { order: 1; }
-.train-btn[data-train="doctoryellow"] { order: 2; }
-.train-btn[data-train="hayabusa"] { order: 3; }
-.train-btn[data-train="komachi"] { order: 4; }
-.train-btn[data-train="yamanote"] { order: 5; }
-.train-btn[data-train="chuo"] { order: 6; }
-.train-btn[data-train="sobu"] { order: 7; }
-.train-btn[data-train="tozai"] { order: 8; }
-.train-btn[data-train="keio"] { order: 9; }
-.train-btn[data-train="inokashira"] { order: 10; }
 
 .train-btn {
   display: flex;
@@ -296,12 +286,7 @@ html, body {
 
 @media (min-aspect-ratio: 4/3) {
   #select-screen { gap: 1.3vmin; padding-top: max(1.5vmin, env(safe-area-inset-top)); }
-  .train-buttons {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.2vmin;
-    width: min(92vw, 960px);
-  }
+
   .train-btn { padding: 0.8vmin 2vmin; }
   .train-btn svg { width: 78%; }
 }

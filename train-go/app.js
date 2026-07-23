@@ -6,63 +6,7 @@
 
   const isDebug = new URLSearchParams(location.search).has("debug");
 
-  // ---- 車両定義 ----
-  const TRAINS = {
-    nozomi: {
-      name: "しろいしんかんせん",
-      body: "#f8f8f8",
-      stripe: "#1c48a6",
-      edge: "#c8c8c8",
-      callName: "しろいしんかんせん",
-    },
-    doctoryellow: {
-      name: "きいろいけんさしゃ",
-      body: "#ffd900",
-      stripe: "#1c48a6",
-      edge: "#d4b400",
-      callName: "きいろいけんさしゃ",
-    },
-    hayabusa: {
-      name: "みどりのしんかんせん",
-      body: "#f7f5ed",
-      upper: "#36a995",
-      stripe: "#e73d8f",
-      edge: "#218b7a",
-      callName: "みどりのしんかんせん",
-    },
-    komachi: {
-      name: "あかいしんかんせん",
-      body: "#ef3340",
-      stripe: "#b7b7b7",
-      edge: "#b51f2a",
-      callName: "あかいしんかんせん",
-    },
-    yamanote: {
-      name: "みどりのでんしゃ", kind: "commuter", body: "#e8ecef", stripe: "#9acd32",
-      face: "#9acd32", edge: "#aeb8be", callName: "みどりのでんしゃ",
-    },
-    inokashira: {
-      name: "むらさきのでんしゃ", kind: "commuter", body: "#eef1f2", stripe: "#6f4aa8",
-      face: "#6f4aa8", edge: "#aeb8be", callName: "むらさきのでんしゃ",
-    },
-    tozai: {
-      name: "みずいろのでんしゃ", kind: "commuter", body: "#e8ecef", stripe: "#32a5d2", stripe2: "#2362a8",
-      face: "#3085cc", edge: "#aeb8be", callName: "みずいろのでんしゃ",
-    },
-    sobu: {
-      name: "きいろのでんしゃ", kind: "commuter", body: "#e8ecef", stripe: "#f0c928",
-      face: "#f0c928", edge: "#aeb8be", callName: "きいろのでんしゃ",
-    },
-    chuo: {
-      name: "オレンジのでんしゃ", kind: "commuter", body: "#e8ecef", stripe: "#f28c28",
-      face: "#f28c28", edge: "#aeb8be", callName: "オレンジのでんしゃ",
-    },
-    keio: {
-      name: "あかとあおのでんしゃ", kind: "commuter", body: "#e8ecef", stripe: "#d31359", stripe2: "#174f9a",
-      face: "#d31359", edge: "#aeb8be", callName: "あかとあおのでんしゃ",
-    },
-  };
-  Object.assign(TRAINS, window.TRAIN_GO_EXTRA?.trains || {});
+  const {trains: TRAINS, routes: ROUTES} = window.TRAIN_GO_ROUTE_DATA;
 
   const CAR_COUNT_WORDS = [
     "いちりょう", "にりょう", "さんりょう", "よんりょう", "ごりょう",
@@ -88,9 +32,13 @@
   const KMH_PER_MPS = 3.6;
   const SPEED_DISPLAY_SCALE = KMH_PER_MPS / PIXELS_PER_METER;
   const DEPARTURE_SPEED_KMH = 30;
+  const AIR_DEPARTURE_SPEED_KMH = 250;
   const BASE_TAP_BOOST_KMH = 5;
+  const AIR_BASE_TAP_BOOST_KMH = 50;
+  const AIR_JETSTREAM_BOOST_KMH = 180;
   const PASSENGER_TAP_BONUS_KMH = 1;
   const DEPARTURE_SPEED_PX_PER_SEC = DEPARTURE_SPEED_KMH / SPEED_DISPLAY_SCALE;
+  const AIR_DEPARTURE_SPEED_PX_PER_SEC = AIR_DEPARTURE_SPEED_KMH / SPEED_DISPLAY_SCALE;
   const STAR_SPAWN_MIN_SECONDS = 9;
   const FALLING_STAR_TYPES = [
     {
@@ -129,7 +77,7 @@
     sobu: "#f0c928", tozai: "#3085cc", inokashira: "#8156a6", keio: "#d31359", yamanote: "#9acd32",
   };
   Object.assign(ROUTE_COLORS, Object.fromEntries(
-    (window.TRAIN_GO_EXTRA?.metadata || []).map(({key,color}) => [key,color]),
+    (window.TRAIN_GO_ROUTE_DATA?.metadata || []).map(({key,color}) => [key,color]),
   ));
   const {
     maps: ROUTE_MAPS,
@@ -154,6 +102,11 @@
   const ROUTE_AUTO_SPEED_KMH = {
     chuo: 100, tokaido: 285, tohoku: 320, sobu: 95,
     tozai: 100, inokashira: 90, keio: 110, yamanote: 90,
+    ...Object.fromEntries(
+      (window.TRAIN_GO_ROUTE_DATA?.metadata || [])
+        .filter(({speedKmh}) => Number.isFinite(speedKmh))
+        .map(({key, speedKmh}) => [key, speedKmh]),
+    ),
   };
   const GRAND_STATIONS = new Set(["とうきょう", "しんじゅく", "しぶや", "しんおおさか"]);
   const MAJOR_STATIONS = new Set([
@@ -213,291 +166,19 @@
       ["きたの", "けいおうはちおうじ"],
     ]),
   };
+  for (const [key, route] of Object.entries(ROUTES)) {
+    if (route.tunnelPairs?.length) TUNNEL_SEGMENTS[key] = makeSegmentSet(route.tunnelPairs);
+  }
   const UNDERGROUND_STATIONS = {
     inokashira: new Set(["しんせん"]),
     keio: new Set(["しんじゅく"]),
+    osakaChuo: new Set([
+      "ながた", "たかいだ", "ふかえばし", "みどりばし", "もりのみや",
+      "たにまちよんちょうめ", "さかいすじほんまち", "ほんまち", "あわざ",
+      "コスモスクエア", "ゆめしま",
+    ]),
   };
 
-  // 駅間距離は各路線の営業キロを使う。山手線は周回し、ほかの路線は終点で折り返す。
-  const ROUTES = {
-    chuo: {
-      name: "ちゅうおうせん",
-      start: "とうきょう",
-      startKm: 0,
-      supportsExpress: true,
-      expressLabel: "とっかい",
-      expressModeName: "ちゅうおうとっかい",
-      expressAnnouncement: "ちゅうおうとっかいモード！しんじゅく、きちじょうじ、みたか、こくぶんじ、たちかわにとまって、たかおへいきます",
-      allowCrossings: true,
-      stations: [
-        { name: "かんだ", km: 1.3 }, { name: "おちゃのみず", km: 2.6 },
-        { name: "よつや", km: 6.6 }, { name: "しんじゅく", km: 10.3 },
-        { name: "なかの", km: 14.7 }, { name: "こうえんじ", km: 16.1 },
-        { name: "あさがや", km: 17.3 }, { name: "おぎくぼ", km: 18.7 },
-        { name: "にしおぎくぼ", km: 20.6 }, { name: "きちじょうじ", km: 22.5 },
-        { name: "みたか", km: 24.1 }, { name: "むさしさかい", km: 25.7 },
-        { name: "ひがしこがねい", km: 27.4 }, { name: "むさしこがねい", km: 29.1 },
-        { name: "こくぶんじ", km: 31.4 }, { name: "にしこくぶんじ", km: 32.8 },
-        { name: "くにたち", km: 34.5 }, { name: "たちかわ", km: 37.5 },
-        { name: "ひの", km: 40.8 }, { name: "とよだ", km: 43.1 },
-        { name: "はちおうじ", km: 47.4 }, { name: "にしはちおうじ", km: 49.8 },
-        { name: "たかお", km: 53.1 }, { name: "とうきょう", km: 0 },
-      ],
-      expressStops: new Set([
-        "とうきょう", "かんだ", "おちゃのみず", "よつや", "しんじゅく", "なかの",
-        "きちじょうじ", "みたか", "こくぶんじ", "たちかわ", "ひの", "とよだ",
-        "はちおうじ", "にしはちおうじ", "たかお",
-      ]),
-      cityStations: new Set([
-        "とうきょう", "かんだ", "おちゃのみず", "よつや", "しんじゅく", "なかの",
-        "こうえんじ", "あさがや", "おぎくぼ", "にしおぎくぼ", "きちじょうじ", "みたか",
-        "たちかわ", "はちおうじ", "にしはちおうじ",
-      ]),
-    },
-    tokaido: {
-      name: "とうかいどうしんかんせん",
-      start: "とうきょう",
-      startKm: 0,
-      supportsExpress: true,
-      expressLabel: "とっきゅう",
-      expressModeName: "とっきゅう",
-      expressAnnouncement: "とっきゅうモード！しながわ、しんよこはま、なごや、きょうとにとまって、しんおおさかへいきます",
-      allowCrossings: false,
-      stations: [
-        { name: "しながわ", km: 6.8 }, { name: "しんよこはま", km: 28.8 },
-        { name: "おだわら", km: 83.9 }, { name: "あたみ", km: 104.6 },
-        { name: "みしま", km: 120.7 }, { name: "しんふじ", km: 146.2 },
-        { name: "しずおか", km: 180.2 }, { name: "かけがわ", km: 229.3 },
-        { name: "はままつ", km: 257.1 }, { name: "とよはし", km: 293.6 },
-        { name: "みかわあんじょう", km: 336.3 }, { name: "なごや", km: 366.0 },
-        { name: "ぎふはしま", km: 396.3 }, { name: "まいばら", km: 445.9 },
-        { name: "きょうと", km: 513.6 }, { name: "しんおおさか", km: 552.6 },
-        { name: "とうきょう", km: 0 },
-      ],
-      expressStops: new Set(["とうきょう", "しながわ", "しんよこはま", "なごや", "きょうと", "しんおおさか"]),
-      cityStations: new Set(["とうきょう", "しながわ", "しんよこはま", "なごや", "きょうと", "しんおおさか"]),
-    },
-    tohoku: {
-      name: "とうほくしんかんせん",
-      start: "とうきょう",
-      startKm: 0,
-      supportsExpress: true,
-      expressLabel: "とっきゅう",
-      expressModeName: "とっきゅう",
-      expressAnnouncement: "とっきゅうモード！うえの、おおみや、せんだい、もりおか、はちのへにとまって、しんあおもりへいきます",
-      allowCrossings: false,
-      stations: [
-        { name: "うえの", km: 3.6 }, { name: "おおみや", km: 30.3 },
-        { name: "おやま", km: 80.6 }, { name: "うつのみや", km: 109.5 },
-        { name: "なすしおばら", km: 157.8 }, { name: "しんしらかわ", km: 185.4 },
-        { name: "こおりやま", km: 226.7 }, { name: "ふくしま", km: 272.8 },
-        { name: "しろいしざおう", km: 306.8 }, { name: "せんだい", km: 351.8 },
-        { name: "ふるかわ", km: 395.0 }, { name: "くりこまこうげん", km: 416.2 },
-        { name: "いちのせき", km: 445.1 }, { name: "みずさわえさし", km: 470.1 },
-        { name: "きたかみ", km: 487.5 }, { name: "しんはなまき", km: 500.0 },
-        { name: "もりおか", km: 535.3 }, { name: "いわてぬまくない", km: 566.4 },
-        { name: "にのへ", km: 601.0 }, { name: "はちのへ", km: 631.9 },
-        { name: "しちのへとわだ", km: 668.0 }, { name: "しんあおもり", km: 713.7 },
-        { name: "とうきょう", km: 0 },
-      ],
-      expressStops: new Set(["とうきょう", "うえの", "おおみや", "せんだい", "もりおか", "はちのへ", "しんあおもり"]),
-      cityStations: new Set(["とうきょう", "うえの", "おおみや", "せんだい", "もりおか", "しんあおもり"]),
-    },
-    sobu: {
-      name: "そうぶせん",
-      start: "みたか",
-      startKm: 0,
-      supportsExpress: false,
-      allowCrossings: true,
-      stations: [
-        { name: "きちじょうじ", km: 1.6 }, { name: "にしおぎくぼ", km: 3.5 },
-        { name: "おぎくぼ", km: 5.4 }, { name: "あさがや", km: 6.8 },
-        { name: "こうえんじ", km: 8.0 }, { name: "なかの", km: 9.4 },
-        { name: "ひがしなかの", km: 10.6 }, { name: "おおくぼ", km: 11.3 },
-        { name: "しんじゅく", km: 13.8 }, { name: "よよぎ", km: 14.5 },
-        { name: "せんだがや", km: 15.5 }, { name: "しなのまち", km: 16.2 },
-        { name: "よつや", km: 17.5 }, { name: "いちがや", km: 18.3 },
-        { name: "いいだばし", km: 19.8 }, { name: "すいどうばし", km: 20.7 },
-        { name: "おちゃのみず", km: 21.5 }, { name: "あきはばら", km: 22.4 },
-        { name: "あさくさばし", km: 23.5 }, { name: "りょうごく", km: 24.3 },
-        { name: "きんしちょう", km: 25.8 }, { name: "かめいど", km: 27.3 },
-        { name: "ひらい", km: 29.2 }, { name: "しんこいわ", km: 31.0 },
-        { name: "こいわ", km: 33.8 }, { name: "いちかわ", km: 36.4 },
-        { name: "もとやわた", km: 38.4 }, { name: "しもうさなかやま", km: 40.0 },
-        { name: "にしふなばし", km: 41.6 }, { name: "ふなばし", km: 44.2 },
-        { name: "ひがしふなばし", km: 46.0 }, { name: "つだぬま", km: 47.7 },
-        { name: "まくはりほんごう", km: 50.6 }, { name: "まくはり", km: 52.7 },
-        { name: "しんけみがわ", km: 54.3 }, { name: "いなげ", km: 57.0 },
-        { name: "にしちば", km: 58.8 }, { name: "ちば", km: 60.2 },
-        { name: "みたか", km: 0 },
-      ],
-      expressStops: new Set(),
-      cityStations: new Set(["みたか", "きちじょうじ", "なかの", "しんじゅく", "あきはばら", "きんしちょう", "ふなばし", "ちば"]),
-    },
-    tozai: {
-      name: "とうざいせん",
-      start: "なかの",
-      startKm: 0,
-      supportsExpress: true,
-      expressLabel: "かいそく",
-      expressModeName: "とうざいせんかいそく",
-      expressAnnouncement: "とうざいせん、かいそくモード！とうようちょうから、うらやすまで、ぐーんととばします",
-      allowCrossings: false,
-      stations: [
-        { name: "おちあい", km: 2.0 }, { name: "たかだのばば", km: 3.9 },
-        { name: "わせだ", km: 6.0 }, { name: "かぐらざか", km: 7.2 },
-        { name: "いいだばし", km: 8.4 }, { name: "くだんした", km: 9.1 },
-        { name: "たけばし", km: 10.1 }, { name: "おおてまち", km: 11.1 },
-        { name: "にほんばし", km: 12.4 }, { name: "かやばちょう", km: 12.9 },
-        { name: "もんぜんなかちょう", km: 14.7 }, { name: "きば", km: 16.0 },
-        { name: "とうようちょう", km: 17.1 }, { name: "みなみすなまち", km: 18.3 },
-        { name: "にしかさい", km: 21.3 }, { name: "かさい", km: 22.5 },
-        { name: "うらやす", km: 24.4 }, { name: "みなみぎょうとく", km: 25.6 },
-        { name: "ぎょうとく", km: 27.0 }, { name: "みょうでん", km: 28.3 },
-        { name: "ばらきなかやま", km: 30.0 }, { name: "にしふなばし", km: 30.8 },
-        { name: "なかの", km: 0 },
-      ],
-      expressStops: new Set([
-        "なかの", "おちあい", "たかだのばば", "わせだ", "かぐらざか", "いいだばし",
-        "くだんした", "たけばし", "おおてまち", "にほんばし", "かやばちょう",
-        "もんぜんなかちょう", "きば", "とうようちょう", "うらやす", "にしふなばし",
-      ]),
-      cityStations: new Set(["なかの", "たかだのばば", "おおてまち", "にほんばし", "とうようちょう", "にしふなばし"]),
-    },
-    inokashira: {
-      name: "いのかしらせん",
-      start: "しぶや",
-      startKm: 0,
-      supportsExpress: true,
-      expressLabel: "きゅうこう",
-      expressModeName: "いのかしらせんきゅうこう",
-      expressAnnouncement: "いのかしらせん、きゅうこうモード！しもきたざわ、めいだいまえ、えいふくちょう、くがやまにとまって、きちじょうじへいきます",
-      allowCrossings: true,
-      stations: [
-        { name: "しんせん", km: 0.5 }, { name: "こまばとうだいまえ", km: 1.4 },
-        { name: "いけのうえ", km: 2.4 }, { name: "しもきたざわ", km: 3.0 },
-        { name: "しんだいた", km: 3.5 }, { name: "ひがしまつばら", km: 4.0 },
-        { name: "めいだいまえ", km: 4.9 }, { name: "えいふくちょう", km: 6.0 },
-        { name: "にしえいふく", km: 6.7 }, { name: "はまだやま", km: 7.5 },
-        { name: "たかいど", km: 8.7 }, { name: "ふじみがおか", km: 9.4 },
-        { name: "くがやま", km: 10.2 }, { name: "みたかだい", km: 11.2 },
-        { name: "いのかしらこうえん", km: 12.1 }, { name: "きちじょうじ", km: 12.7 },
-        { name: "しぶや", km: 0 },
-      ],
-      expressStops: new Set(["しぶや", "しもきたざわ", "めいだいまえ", "えいふくちょう", "くがやま", "きちじょうじ"]),
-      cityStations: new Set(["しぶや", "しもきたざわ", "めいだいまえ", "えいふくちょう", "きちじょうじ"]),
-    },
-    keio: {
-      name: "けいおうせん",
-      start: "しんじゅく",
-      startKm: 0,
-      supportsExpress: true,
-      expressLabel: "とっきゅう",
-      expressModeName: "けいおうせんとっきゅう",
-      expressAnnouncement: "けいおうせん、とっきゅうモード！ささづか、めいだいまえ、ちとせからすやま、ちょうふ、ふちゅう、ぶばいがわら、せいせきさくらがおか、たかはたふどう、きたのにとまって、けいおうはちおうじへいきます",
-      allowCrossings: true,
-      stations: [
-        { name: "ささづか", km: 3.6 }, { name: "だいたばし", km: 4.4 },
-        { name: "めいだいまえ", km: 5.2 }, { name: "しもたかいど", km: 6.1 },
-        { name: "さくらじょうすい", km: 7.0 }, { name: "かみきたざわ", km: 7.8 },
-        { name: "はちまんやま", km: 8.4 }, { name: "ろかこうえん", km: 9.1 },
-        { name: "ちとせからすやま", km: 9.9 }, { name: "せんがわ", km: 11.5 },
-        { name: "つつじがおか", km: 12.5 }, { name: "しばさき", km: 13.3 },
-        { name: "こくりょう", km: 14.2 }, { name: "ふだ", km: 14.9 },
-        { name: "ちょうふ", km: 15.5 }, { name: "にしちょうふ", km: 17.0 },
-        { name: "とびたきゅう", km: 17.7 }, { name: "むさしのだい", km: 18.8 },
-        { name: "たまれいえん", km: 19.6 }, { name: "ひがしふちゅう", km: 20.4 },
-        { name: "ふちゅう", km: 21.9 }, { name: "ぶばいがわら", km: 23.1 },
-        { name: "なかがわら", km: 24.7 }, { name: "せいせきさくらがおか", km: 26.3 },
-        { name: "もぐさえん", km: 28.0 }, { name: "たかはたふどう", km: 29.7 },
-        { name: "みなみだいら", km: 32.1 }, { name: "ひらやまじょうしこうえん", km: 33.4 },
-        { name: "ながぬま", km: 34.9 }, { name: "きたの", km: 36.1 },
-        { name: "けいおうはちおうじ", km: 37.9 }, { name: "しんじゅく", km: 0 },
-      ],
-      expressStops: new Set([
-        "しんじゅく", "ささづか", "めいだいまえ", "ちとせからすやま", "ちょうふ",
-        "ふちゅう", "ぶばいがわら", "せいせきさくらがおか", "たかはたふどう",
-        "きたの", "けいおうはちおうじ",
-      ]),
-      cityStations: new Set([
-        "しんじゅく", "ささづか", "めいだいまえ", "ちとせからすやま", "ちょうふ",
-        "ふちゅう", "ぶばいがわら", "せいせきさくらがおか", "たかはたふどう",
-        "きたの", "けいおうはちおうじ",
-      ]),
-    },
-    keioSagamihara: {
-      name: "けいおうさがみはらせん",
-      start: "しんじゅく",
-      startKm: 0,
-      supportsExpress: true,
-      expressLabel: "とっきゅう",
-      expressModeName: "けいおうせんとっきゅう",
-      expressAnnouncement: "けいおうせん、とっきゅうモード！ささづか、めいだいまえ、ちとせからすやま、ちょうふ、けいおういなだづつみ、けいおうながやま、けいおうたまセンター、みなみおおさわにとまって、はしもとへいきます",
-      allowCrossings: true,
-      variant: "hashimoto",
-      stations: [
-        { name: "ささづか", km: 3.6 }, { name: "だいたばし", km: 4.4 },
-        { name: "めいだいまえ", km: 5.2 }, { name: "しもたかいど", km: 6.1 },
-        { name: "さくらじょうすい", km: 7.0 }, { name: "かみきたざわ", km: 7.8 },
-        { name: "はちまんやま", km: 8.4 }, { name: "ろかこうえん", km: 9.1 },
-        { name: "ちとせからすやま", km: 9.9 }, { name: "せんがわ", km: 11.5 },
-        { name: "つつじがおか", km: 12.5 }, { name: "しばさき", km: 13.3 },
-        { name: "こくりょう", km: 14.2 }, { name: "ふだ", km: 14.9 },
-        { name: "ちょうふ", km: 15.5 }, { name: "けいおうたまがわ", km: 16.7 },
-        { name: "けいおういなだづつみ", km: 18.0 }, { name: "けいおうよみうりランド", km: 19.4 },
-        { name: "いなぎ", km: 21.0 }, { name: "わかばだい", km: 24.3 },
-        { name: "けいおうながやま", km: 26.9 }, { name: "けいおうたまセンター", km: 29.2 },
-        { name: "けいおうほりのうち", km: 31.5 }, { name: "みなみおおさわ", km: 33.8 },
-        { name: "たまさかい", km: 35.6 }, { name: "はしもと", km: 38.1 },
-        { name: "しんじゅく", km: 0 },
-      ],
-      expressStops: new Set([
-        "しんじゅく", "ささづか", "めいだいまえ", "ちとせからすやま", "ちょうふ",
-        "けいおういなだづつみ", "けいおうながやま", "けいおうたまセンター",
-        "みなみおおさわ", "はしもと",
-      ]),
-      cityStations: new Set([
-        "しんじゅく", "ささづか", "めいだいまえ", "ちとせからすやま", "ちょうふ",
-        "けいおうたまセンター", "みなみおおさわ", "はしもと",
-      ]),
-    },
-    yamanote: {
-      name: "やまのてせん",
-      start: "とうきょう",
-      startKm: 0,
-      supportsExpress: false,
-      allowCrossings: false,
-      loopKm: 34.5,
-      terminalIndex: 29,
-      stations: [
-        { name: "ゆうらくちょう", km: 0.8 }, { name: "しんばし", km: 1.9 },
-        { name: "はままつちょう", km: 3.1 }, { name: "たまち", km: 4.6 },
-        { name: "たかなわゲートウェイ", km: 5.9 }, { name: "しながわ", km: 6.8 },
-        { name: "おおさき", km: 8.8 }, { name: "ごたんだ", km: 9.7 },
-        { name: "めぐろ", km: 10.9 }, { name: "えびす", km: 12.4 },
-        { name: "しぶや", km: 14.0 }, { name: "はらじゅく", km: 15.2 },
-        { name: "よよぎ", km: 16.7 }, { name: "しんじゅく", km: 17.4 },
-        { name: "しんおおくぼ", km: 18.7 }, { name: "たかだのばば", km: 20.1 },
-        { name: "めじろ", km: 21.0 }, { name: "いけぶくろ", km: 22.2 },
-        { name: "おおつか", km: 24.0 }, { name: "すがも", km: 25.1 },
-        { name: "こまごめ", km: 25.8 }, { name: "たばた", km: 27.4 },
-        { name: "にしにっぽり", km: 28.2 }, { name: "にっぽり", km: 28.7 },
-        { name: "うぐいすだに", km: 29.8 }, { name: "うえの", km: 30.9 },
-        { name: "おかちまち", km: 31.5 }, { name: "あきはばら", km: 32.5 },
-        { name: "かんだ", km: 33.2 }, { name: "とうきょう", km: 34.5 },
-      ],
-      expressStops: new Set(),
-      cityStations: new Set([
-        "とうきょう", "ゆうらくちょう", "しんばし", "はままつちょう", "たまち",
-        "たかなわゲートウェイ", "しながわ", "おおさき", "ごたんだ", "めぐろ",
-        "えびす", "しぶや", "はらじゅく", "よよぎ", "しんじゅく", "しんおおくぼ",
-        "たかだのばば", "めじろ", "いけぶくろ", "おおつか", "すがも", "こまごめ",
-        "たばた", "にしにっぽり", "にっぽり", "うぐいすだに", "うえの",
-        "おかちまち", "あきはばら", "かんだ",
-      ]),
-    },
-  };
-  Object.assign(ROUTES, window.TRAIN_GO_EXTRA?.routes || {});
   for (const key of [
     "ginza","marunouchi","hibiya","chiyoda","yurakucho","hanzomon","namboku","fukutoshin",
     "asakusa","mita","shinjukuSubway","oedo",
@@ -544,6 +225,22 @@
         announcement: "にじとほしがきらきら、ゆめいっぱいのまちだよ！",
         symbols: ["🌈", "⭐", "🎈"],
         stamp: "🌈",
+      },
+    },
+    hankyuTakarazuka: {
+      "たからづか": {
+        banner: "🌹 はなやかな まち！",
+        announcement: "きらきらのぶたいと、おんがくがいっぱいのまちだよ！",
+        symbols: ["🌹", "✨", "🎭"],
+        stamp: "🌹",
+      },
+    },
+    osakaChuo: {
+      "ゆめしま": {
+        banner: "🌌 みらいの しま！",
+        announcement: "うみのうえの、みらいみたいなえきだよ！",
+        symbols: ["🌊", "✨", "🚇"],
+        stamp: "🌌",
       },
     },
     yamanote: {
@@ -608,12 +305,13 @@
     keio: { name: "あかとあおのでんしゃ", kind: "local", cars: 10, speedKmh: 110, body: "#e8ecef", stripe: "#d31359", stripe2: "#174f9a" },
     freight: { name: "かもつれっしゃ", kind: "freight", cars: 26, speedKmh: 100, body: "#40505d", stripe: "#e49a31" },
   };
-  for (const {key,trainKey,kind} of window.TRAIN_GO_EXTRA?.metadata || []) {
+  for (const {key,trainKey,kind,cars,speedKmh} of window.TRAIN_GO_ROUTE_DATA?.metadata || []) {
     if (kind === "air") continue;
     const type = TRAINS[trainKey || key];
     OPPOSING_TRAIN_TYPES[key] = {
-      name:type.name, kind:"local", cars:key === "osakaLoop" ? 8 : 10,
-      speedKmh:key === "odakyu" || key === "toyoko" || key === "keikyu" ? 110 : 90,
+      name:type.name, kind:kind === "shinkansen" ? "shinkansen" : "local",
+      cars:cars || (key === "osakaLoop" ? 8 : 10),
+      speedKmh:speedKmh || (key === "odakyu" || key === "toyoko" || key === "keikyu" ? 110 : 90),
       body:type.body, stripe:type.stripe, stripe2:type.stripe2,
     };
   }
@@ -764,6 +462,9 @@
   let audioCtx = null;
   let runningOsc = null;
   let runningRailOsc = null;
+  let runningNoiseSource = null;
+  let runningNoiseFilter = null;
+  let runningNoiseBuffer = null;
   let runningGain = null;
   function ensureAudio() {
     if (!audioCtx) {
@@ -878,12 +579,36 @@
     runningOsc = audioCtx.createOscillator();
     runningRailOsc = audioCtx.createOscillator();
     runningGain = audioCtx.createGain();
-    runningOsc.type = "triangle";
-    runningRailOsc.type = "triangle";
-    runningOsc.frequency.value = 85;
-    runningRailOsc.frequency.value = 210;
+
+    if (activeRoute.kind === "air") {
+      runningOsc.type = "sawtooth";
+      runningRailOsc.type = "sine";
+      runningOsc.frequency.value = 48;
+      runningRailOsc.frequency.value = 145;
+
+      if (!runningNoiseBuffer) {
+        runningNoiseBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate, audioCtx.sampleRate);
+        const noise = runningNoiseBuffer.getChannelData(0);
+        for (let index = 0; index < noise.length; index++) noise[index] = Math.random() * 2 - 1;
+      }
+      runningNoiseSource = audioCtx.createBufferSource();
+      runningNoiseFilter = audioCtx.createBiquadFilter();
+      runningNoiseSource.buffer = runningNoiseBuffer;
+      runningNoiseSource.loop = true;
+      runningNoiseFilter.type = "lowpass";
+      runningNoiseFilter.frequency.value = 650;
+      runningNoiseFilter.Q.value = 0.7;
+      runningNoiseSource.connect(runningNoiseFilter).connect(runningGain);
+      runningNoiseSource.start(t);
+    } else {
+      runningOsc.type = "triangle";
+      runningRailOsc.type = "triangle";
+      runningOsc.frequency.value = 85;
+      runningRailOsc.frequency.value = 210;
+    }
+
     runningGain.gain.setValueAtTime(0.001, t);
-    runningGain.gain.linearRampToValueAtTime(0.04, t + 0.25);
+    runningGain.gain.linearRampToValueAtTime(activeRoute.kind === "air" ? 0.032 : 0.04, t + 0.25);
     runningOsc.connect(runningGain);
     runningRailOsc.connect(runningGain);
     runningGain.connect(audioCtx.destination);
@@ -894,6 +619,14 @@
   function updateRunningSound() {
     if (!audioCtx || !runningOsc || !runningRailOsc || !runningGain) return;
     const t = audioCtx.currentTime;
+    if (activeRoute.kind === "air") {
+      const soundSpeedKmh = Math.min(displaySpeed(speed), 1400);
+      runningOsc.frequency.setTargetAtTime(42 + soundSpeedKmh * 0.035, t, 0.16);
+      runningRailOsc.frequency.setTargetAtTime(120 + soundSpeedKmh * 0.24, t, 0.16);
+      runningNoiseFilter?.frequency.setTargetAtTime(450 + soundSpeedKmh * 0.55, t, 0.16);
+      runningGain.gain.setTargetAtTime(state === "running" ? 0.026 + soundSpeedKmh / 24000 : 0.001, t, 0.12);
+      return;
+    }
     const soundSpeed = Math.min(speed, 2400);
     runningOsc.frequency.setTargetAtTime(70 + soundSpeed * 0.07, t, 0.12);
     runningRailOsc.frequency.setTargetAtTime(180 + soundSpeed * 0.16, t, 0.12);
@@ -902,18 +635,19 @@
 
   function stopRunningSound() {
     if (!audioCtx || !runningOsc || !runningGain) return;
-    const oscillators = [runningOsc, runningRailOsc].filter(Boolean);
+    const sources = [runningOsc, runningRailOsc, runningNoiseSource].filter(Boolean);
     const gain = runningGain;
     runningOsc = null;
     runningRailOsc = null;
+    runningNoiseSource = null;
+    runningNoiseFilter = null;
     runningGain = null;
     const t = audioCtx.currentTime;
     gain.gain.cancelScheduledValues(t);
     gain.gain.setValueAtTime(Math.max(gain.gain.value, 0.001), t);
     gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
-    oscillators.forEach((osc) => osc.stop(t + 0.2));
+    sources.forEach((source) => source.stop(t + 0.2));
   }
-
   function say(text) {
     if (!("speechSynthesis" in window)) return;
     speechSynthesis.cancel();
@@ -1097,6 +831,7 @@
   }
 
   function routeEventForSegment() {
+    if (activeRoute.kind === "air") return "jetstream";
     if (selectedRouteKey === "tokaido" && train === TRAINS.nozomi && nextStationName === "しんふじ") return "fuji";
     if (selectedRouteKey === "tokaido" && train === TRAINS.doctoryellow && segmentNumber === 1) return "inspection";
     if (TUNNEL_SEGMENTS[selectedRouteKey]?.has(segmentKey(currentStationName, nextStationName))) return "tunnel";
@@ -1549,7 +1284,10 @@
           : `つぎは、${nextStationName}`);
       }
     }
-    speed = Math.max(speed, autoMode ? 60 : DEPARTURE_SPEED_PX_PER_SEC);
+    const departureSpeed = activeRoute.kind === "air"
+      ? AIR_DEPARTURE_SPEED_PX_PER_SEC
+      : (autoMode ? 60 : DEPARTURE_SPEED_PX_PER_SEC);
+    speed = Math.max(speed, departureSpeed);
     startRunningSound();
     updateDriveUi();
   }
@@ -1797,6 +1535,11 @@
       } else if (routeEvent === "inspection") {
         routeEventBanner.textContent = "せんろを けんさちゅう！";
         say("せんろを、けんさちゅうです！");
+      } else if (routeEvent === "jetstream") {
+        routeEventBanner.textContent = `ジェットきりゅう！ +${AIR_JETSTREAM_BOOST_KMH} km/h`;
+        speed += AIR_JETSTREAM_BOOST_KMH / SPEED_DISPLAY_SCALE;
+        accelerationEffect = 1;
+        say("ジェットきりゅうに、のったよ！ぐんぐんすすむよ！");
       } else if (routeEvent === "tunnel") {
         routeEventBanner.textContent = "トンネルだ！";
         if (headlightsAreOn()) {
@@ -1812,6 +1555,8 @@
       if (routeEvent === "inspection") {
         say("けんさ、おわり！せんろ、いじょうなし！");
         spawnConfetti(24);
+      } else if (routeEvent === "jetstream") {
+        say("ジェットきりゅうを、ぬけたよ！");
       } else if (routeEvent === "tunnel") {
         say("トンネルを、ぬけたよ〜！");
       }
@@ -2100,26 +1845,45 @@
     return svg;
   }
 
-  function createVehiclePreview(type) {
-    return type.kind === "airplane" ? createAirplanePreview(type) : createCommuterPreview(type);
+  function createShinkansenPreview(type) {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 200 70");
+    const upper = type.upper || type.body;
+    svg.innerHTML = `<path d="M8 47 Q17 24 60 18 H181 Q192 18 194 31 V54 H20 Q8 54 8 47Z" fill="${type.body}" stroke="${type.edge}" stroke-width="2"/><path d="M12 43 Q28 25 63 21 H184 V31 H57 Q28 31 12 43Z" fill="${upper}"/><path d="M14 46 H190" stroke="${type.stripe}" stroke-width="5"/><rect x="83" y="27" width="22" height="10" rx="3" fill="#333"/><rect x="113" y="27" width="22" height="10" rx="3" fill="#333"/><rect x="143" y="27" width="22" height="10" rx="3" fill="#333"/><circle cx="55" cy="55" r="6" fill="#555"/><circle cx="155" cy="55" r="6" fill="#555"/>`;
+    return svg;
   }
+
+  function createVehiclePreview(type) {
+    if (type.kind === "airplane") return createAirplanePreview(type);
+    if (type.kind === "shinkansen") return createShinkansenPreview(type);
+    return createCommuterPreview(type);
+  }
+
+  const ROUTE_SELECTION_ORDER = [
+    "tokaido", "sanyo", "kyushu", "nishiKyushu", "tohoku", "hokkaido",
+    "akita", "yamagata", "joetsu", "hokuriku",
+    "yamanote", "chuo", "sobu", "tozai", "keio", "inokashira",
+    "osakaLoop", "osakaChuo", "hankyuTakarazuka",
+  ];
 
   function buildExtraSelectionChoices() {
     const routeButtons = document.querySelector(".route-buttons");
     const trainButtons = document.querySelector(".train-buttons");
-    for (const {key,name,color,trainKey} of window.TRAIN_GO_EXTRA?.metadata || []) {
+    for (const {key,name,color,trainKey} of window.TRAIN_GO_ROUTE_DATA?.metadata || []) {
       const routeButton = document.createElement("button");
       routeButton.className = "route-btn";
       routeButton.dataset.route = key;
       routeButton.setAttribute("aria-pressed", "false");
       const marker = document.createElement("span");
-      if (window.TRAIN_GO_EXTRA.metadata.find((item) => item.key === key)?.icon) {
-        marker.textContent = window.TRAIN_GO_EXTRA.metadata.find((item) => item.key === key).icon;
+      if (window.TRAIN_GO_ROUTE_DATA.metadata.find((item) => item.key === key)?.icon) {
+        marker.textContent = window.TRAIN_GO_ROUTE_DATA.metadata.find((item) => item.key === key).icon;
       } else {
         marker.className = "route-color-marker";
         marker.style.background = color;
       }
       routeButton.append(marker, name);
+      const routeOrder = ROUTE_SELECTION_ORDER.indexOf(key);
+      routeButton.style.order = String(routeOrder >= 0 ? routeOrder : 100 + (window.TRAIN_GO_ROUTE_DATA?.metadata || []).findIndex((item) => item.key === key));
       routeButtons.appendChild(routeButton);
 
       if (trainButtons.querySelector(`.train-btn[data-train="${trainKey}"]`)) continue;
@@ -2137,7 +1901,13 @@
 
   const routeSelectPage = document.getElementById("route-select-page");
   const trainSelectPage = document.getElementById("train-select-page");
+  const vehicleSelectTitle = document.getElementById("vehicle-select-title");
   const btnBackToRoutes = document.getElementById("btn-back-to-routes");
+  const TRAIN_SELECTION_ORDER = [
+    "nozomi", "doctoryellow", "hayabusa", "komachi",
+    "yamanote", "chuo", "sobu", "tozai", "keio", "inokashira",
+    ...(window.TRAIN_GO_ROUTE_DATA?.metadata || []).map(({trainKey}) => trainKey),
+  ].filter((key, index, keys) => keys.indexOf(key) === index);
 
   function showRouteSelection() {
     routeSelectPage.classList.remove("hidden");
@@ -2150,19 +1920,27 @@
     routeSelectPage.classList.add("hidden");
     trainSelectPage.classList.remove("hidden");
     selectScreen.classList.add("selecting-train");
-    const recommendedKey = window.TRAIN_GO_EXTRA?.metadata.find(({key}) => key === routeKey)?.trainKey
+    const recommendedKey = window.TRAIN_GO_ROUTE_DATA?.metadata.find(({key}) => key === routeKey)?.trainKey
       || ({tokaido:"nozomi",tohoku:"hayabusa"}[routeKey] || routeKey);
+    vehicleSelectTitle.textContent = activeRoute.kind === "air"
+      ? "どの ひこうきに のる？"
+      : "どの でんしゃに のる？";
     document.querySelectorAll(".train-btn").forEach((button) => {
       const airChoice = button.dataset.train === "airplane";
       button.classList.toggle("hidden", activeRoute.kind === "air" ? !airChoice : airChoice);
       const recommended = button.dataset.train === recommendedKey;
+      const routeOrder = TRAIN_SELECTION_ORDER.indexOf(button.dataset.train);
       button.classList.toggle("recommended", recommended);
-      button.style.order = recommended ? "-1" : "";
+      button.style.order = String(recommended ? 0 : (routeOrder >= 0 ? routeOrder + 1 : 999));
     });
     selectScreen.scrollTop = 0;
   }
 
   buildExtraSelectionChoices();
+  document.querySelectorAll(".route-btn").forEach((button, fallbackIndex) => {
+    const routeOrder = ROUTE_SELECTION_ORDER.indexOf(button.dataset.route);
+    button.style.order = String(routeOrder >= 0 ? routeOrder : 100 + fallbackIndex);
+  });
   btnBackToRoutes.addEventListener("click", showRouteSelection);
 
   // ---- 入力 ----
@@ -2189,6 +1967,7 @@
   });
 
   function currentTapBoostKmh() {
+    if (activeRoute.kind === "air") return AIR_BASE_TAP_BOOST_KMH;
     return BASE_TAP_BOOST_KMH + deliveredPassengers * PASSENGER_TAP_BONUS_KMH;
   }
 
@@ -3084,8 +2863,48 @@
     ctx.restore();
   }
 
+  function drawMapAirports(scene, map) {
+    if (activeRoute.kind !== "air" || map.points.length < 2) return;
+    const endpointIndexes = [0, map.points.length - 1];
+    ctx.save();
+    for (const index of endpointIndexes) {
+      const point = map.points[index];
+      const neighbor = map.points[index === 0 ? 1 : index - 1];
+      const x = scene.screenCenterX + (mapWorldX(point.lon) - scene.centerWorldX) * scene.scale;
+      const y = scene.screenCenterY + (mapWorldY(point.lat) - scene.centerWorldY) * scene.scale;
+      if (!mapPointIsVisible(scene, x, y, 100)) continue;
+      const neighborX = scene.screenCenterX + (mapWorldX(neighbor.lon) - scene.centerWorldX) * scene.scale;
+      const neighborY = scene.screenCenterY + (mapWorldY(neighbor.lat) - scene.centerWorldY) * scene.scale;
+      const angle = Math.atan2(neighborY - y, neighborX - x);
+      const length = scene.mode === "follow" ? 96 : 42;
+      const width = scene.mode === "follow" ? 34 : 18;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+      ctx.fillStyle = timeOfDay === "night" ? "#60725d" : "#e4edcf";
+      ctx.strokeStyle = timeOfDay === "night" ? "#8ca592" : "#9db48d";
+      ctx.lineWidth = 2;
+      roundRect(-length * 0.58, -width * 0.78, length * 1.16, width * 1.56, width * 0.45);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#6f7880";
+      roundRect(-length * 0.48, -width * 0.2, length * 0.96, width * 0.4, width * 0.12);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,0.9)";
+      ctx.lineWidth = Math.max(1, width * 0.08);
+      ctx.setLineDash([length * 0.09, length * 0.07]);
+      ctx.beginPath();
+      ctx.moveTo(-length * 0.4, 0);
+      ctx.lineTo(length * 0.4, 0);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+    }
+    ctx.restore();
+  }
   function drawYamanoteRoute(scene, labelSize) {
     const map = activeRouteMap();
+    drawMapAirports(scene, map);
     ctx.save();
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
@@ -4344,11 +4163,38 @@
       ctx.restore();
     }
   }
-  function airFlightAltitude() {
+  function drawJetStream() {
+    if (routeEvent !== "jetstream" || state !== "running" || routeEventProgress < 0.1 || routeEventProgress > 0.84) return;
+    const strength = Math.min(1, (routeEventProgress - 0.1) * 8, (0.84 - routeEventProgress) * 8);
+    const yCenter = groundY() - H * 0.36;
+    ctx.save();
+    ctx.globalAlpha = 0.22 + strength * 0.48;
+    ctx.lineCap = "round";
+    for (let line = 0; line < 9; line++) {
+      const phase = (inspectionTime * (260 + line * 15) + line * W * 0.17) % (W * 1.35);
+      const x = W * 1.15 - phase;
+      const y = yCenter + (line - 4) * H * 0.045 + Math.sin(inspectionTime * 2.2 + line) * H * 0.012;
+      const length = W * (0.1 + (line % 3) * 0.025);
+      ctx.strokeStyle = line % 2 ? "#d9f8ff" : "#79d9ff";
+      ctx.lineWidth = Math.max(2, H * (0.004 + (line % 2) * 0.002));
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.bezierCurveTo(x - length * 0.3, y - H * 0.018, x - length * 0.7, y + H * 0.018, x - length, y);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+  function airFlightProgress() {
     if (state !== "running") return 0;
     const segmentLength = Math.max(stationWorldX - segmentStartDistance, 1);
-    const progress = Math.max(0, Math.min(1, (distance - segmentStartDistance) / segmentLength));
-    return Math.pow(Math.sin(progress * Math.PI), 0.38);
+    return Math.max(0, Math.min(1, (distance - segmentStartDistance) / segmentLength));
+  }
+
+  function airFlightAltitude() {
+    const progress = airFlightProgress();
+    const routeEnvelope = Math.pow(Math.max(0, Math.sin(progress * Math.PI)), 0.48);
+    const speedLift = Math.max(0, Math.min(1, (displaySpeed(speed) - 180) / 520));
+    return routeEnvelope * (0.25 + speedLift * 0.75);
   }
 
   function drawAirportAt(worldX, name) {
@@ -4389,8 +4235,9 @@
     const planeH = planeW * 0.28;
     const x = W * NOSE_R;
     const y = groundY() - planeH * 0.55 - 22 - altitude * H * 0.42;
+    const flightProgress = airFlightProgress();
     const tilt = state === "running"
-      ? (altitude < 0.3 ? -0.08 : (stationWorldX - distance < (stationWorldX - segmentStartDistance) * 0.18 ? 0.06 : 0))
+      ? (flightProgress < 0.2 ? -0.09 : (flightProgress > 0.82 ? 0.07 : 0))
       : 0;
     ctx.save();
     ctx.translate(x, y);
@@ -4710,8 +4557,8 @@
         } else if (speed > targetSpeed) {
           speed = Math.max(targetSpeed, speed - AUTO_OVERSPEED_DECEL_PX_PER_SEC2 * dt);
         }
-      } else {
-        // 摩擦でゆるやかに減速(タップしなくても止まりはしない)
+      } else if (activeRoute.kind !== "air") {
+        // 電車は摩擦でゆるやかに減速する。飛行機は巡航速度をそのまま保つ。
         speed = Math.max(speed - FRICTION_PX_PER_SEC2 * dt, 120);
       }
 
@@ -4809,6 +4656,7 @@
         drawCityscape();
         if (activeRoute.kind === "air") {
           drawAirports();
+          drawJetStream();
           if (trainFacesLeft()) {
             const mirrorCenterX = ax + (W * 0.5 - ax) / Math.max(viewScale, 0.001);
             ctx.save();
