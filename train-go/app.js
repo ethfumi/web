@@ -38,6 +38,11 @@
   const AIR_JETSTREAM_BOOST_KMH = 180;
   const AIR_MAX_BRAKING_DISTANCE_METERS = 20000;
   const PASSENGER_TAP_BONUS_KMH = 1;
+  const MAX_ONBOARD_PASSENGERS = 16;
+  const TRAIN_BOARDING_MIN = 2;
+  const TRAIN_BOARDING_MAX = 6;
+  const AIR_BOARDING_MIN = 6;
+  const AIR_BOARDING_MAX = 12;
   const DEPARTURE_SPEED_PX_PER_SEC = DEPARTURE_SPEED_KMH / SPEED_DISPLAY_SCALE;
   const AIR_DEPARTURE_SPEED_PX_PER_SEC = AIR_DEPARTURE_SPEED_KMH / SPEED_DISPLAY_SCALE;
   const STAR_SPAWN_MIN_SECONDS = 9;
@@ -276,8 +281,9 @@
     Object.values(ROUTES).flatMap((route) => stationNamesForRoute(route)),
   )];
   const PASSENGER_POOL = [
-    "🧒", "👧", "👦", "👩", "👨", "👵", "👴",
-    "🐰", "🐻", "🐧", "🐶", "🐱", "🦊", "🐼",
+    "🧒", "👧", "👦", "👩", "👨", "👵", "👴", "👶", "🧑", "🧔",
+    "🐰", "🐻", "🐧", "🐶", "🐱", "🦊", "🐼", "🐨", "🐯", "🐸",
+    "🐵", "🐥", "🦄", "🐷",
   ];
 
   const OPPOSING_TRAIN_TYPES = {
@@ -1147,8 +1153,28 @@
     const destinations = futureDestinationNames();
     return pickPassengers(count).map((icon) => ({
       icon,
+      origin: currentStationName,
       destination: destinations[Math.floor(Math.random() * destinations.length)],
     }));
+  }
+
+  function randomBoardingCount(maxSeats) {
+    if (maxSeats <= 0) return 0;
+    const isAir = activeRoute.kind === "air";
+    const min = isAir ? AIR_BOARDING_MIN : TRAIN_BOARDING_MIN;
+    const max = isAir ? AIR_BOARDING_MAX : TRAIN_BOARDING_MAX;
+    const desired = min + Math.floor(Math.random() * (max - min + 1));
+    return Math.min(maxSeats, desired);
+  }
+
+  function boardPassengersAtCurrentStation(count = randomBoardingCount(MAX_ONBOARD_PASSENGERS - onboardPassengers.length)) {
+    const availableSeats = Math.max(0, MAX_ONBOARD_PASSENGERS - onboardPassengers.length);
+    const boardingCount = Math.min(availableSeats, count);
+    if (boardingCount <= 0) return [];
+    const boarding = makeBoardingPassengers(boardingCount);
+    onboardPassengers.push(...boarding);
+    updateOnboardPanel();
+    return boarding;
   }
 
   function cycleWeatherAndTime() {
@@ -1236,7 +1262,6 @@
     driverCallIndex = 0;
     autoMode = false;
     autoActionTimer = 0;
-    updateOnboardPanel();
     addStationStamp(activeRoute.start, false);
     renderStampBook();
     segmentNumber = 0;
@@ -1258,7 +1283,6 @@
     stationPassengers.classList.add("hidden");
     populateQuickAddButtons();
     runUi.classList.toggle("hidden", activeRoute.kind === "air");
-    onboardPanel.classList.toggle("hidden", activeRoute.kind === "air");
     btnDriver.querySelector("span:first-child").textContent = activeRoute.kind === "air" ? "👩‍✈️" : "🧑‍✈️";
     btnDriver.querySelector("span:last-child").textContent = activeRoute.kind === "air" ? "パイロット" : "うんてんし";
     btnMapRecenter.querySelector("span:first-child").textContent = activeRoute.kind === "air" ? "✈️" : "🚃";
@@ -1268,6 +1292,10 @@
     clearRouteEvent();
     updateDriveUi();
     arrivalBanner.textContent = "とうちゃく〜！";
+    const initialBoarding = boardPassengersAtCurrentStation();
+    if (activeRoute.kind === "air" && initialBoarding.length > 0) {
+      showPlayBanner(`✈️ ${initialBoarding.length}にん ごじょうしゃ！`, 2200);
+    }
     announceInitialDeparture();
   }
 
@@ -1384,9 +1412,8 @@
     if (autoMode) autoActionTimer = 1.2;
     if (activeRoute.kind === "air") {
       stationDoorsDone = true;
-      arrivalBanner.textContent = isTurnaround ? "✈️ おりかえし〜！" : "✈️ ちゃくりく〜！";
-      say(`${currentStationName}に、ちゃくりく！${isTurnaround ? `おりかえして、${routeTerminalStation().name}へいくよ。` : ""}がめんをタップすると、またとべるよ`);
-      if (autoMode) autoActionTimer = 2.4;
+      exchangePassengers();
+      if (autoMode) autoActionTimer = 2.8;
     } else if (isKomachiStop) {
       komachiReady = true;
       arrivalBanner.textContent = "れんけつするでんしゃがいた！";
@@ -1464,17 +1491,7 @@
     });
   }
 
-  function exchangePassengers() {
-    const alighting = onboardPassengers.filter((passenger) => passenger.destination === currentStationName);
-    onboardPassengers = onboardPassengers.filter((passenger) => passenger.destination !== currentStationName);
-    deliveredPassengers += alighting.length;
-
-    const availableSeats = Math.max(0, 7 - onboardPassengers.length);
-    const boardingCount = Math.min(availableSeats, 1 + Math.floor(Math.random() * 3));
-    const boarding = makeBoardingPassengers(boardingCount);
-    onboardPassengers.push(...boarding);
-    updateOnboardPanel();
-
+  function renderPassengerExchange(alighting, boarding) {
     stationPassengers.replaceChildren();
     [...alighting.map((passenger) => ({ ...passenger, direction: "alight" })),
       ...boarding.map((passenger) => ({ ...passenger, direction: "board" }))]
@@ -1483,12 +1500,30 @@
         span.textContent = passenger.icon;
         span.className = `passenger-${passenger.direction}`;
         span.title = `${passenger.destination}へいくよ`;
-        span.style.setProperty("--passenger-delay", `${index * 0.18}s`);
+        span.style.setProperty("--passenger-delay", `${index * 0.12}s`);
         stationPassengers.appendChild(span);
       });
+    stationPassengers.classList.toggle("hidden", alighting.length + boarding.length === 0);
+  }
 
-    stationPassengers.classList.remove("hidden");
+  function exchangePassengers() {
+    const alighting = onboardPassengers.filter((passenger) => passenger.destination === currentStationName);
+    onboardPassengers = onboardPassengers.filter((passenger) => passenger.destination !== currentStationName);
+    deliveredPassengers += alighting.length;
+
+    const boarding = boardPassengersAtCurrentStation();
+    renderPassengerExchange(alighting, boarding);
+
     arrivalBanner.classList.add("passenger-exchange");
+    if (activeRoute.kind === "air") {
+      arrivalBanner.textContent = alighting.length > 0
+        ? `✈️ ${alighting.length}にん おとどけ！ ${boarding.length}にん ごじょうしゃ！`
+        : `✈️ ${boarding.length}にん ごじょうしゃ！`;
+      say(alighting.length > 0
+        ? `${currentStationName}にとうちゃく。${alighting.length}にんおりました。${boarding.length}にんごじょうしゃです`
+        : `${boarding.length}にんごじょうしゃです。つぎのくうこうへいきましょう`);
+      return;
+    }
     arrivalBanner.textContent = alighting.length > 0
       ? `${alighting.length}にん おとどけ！ タップかそく ＋${alighting.length} km/h`
       : `${boarding.length}にん ごじょうしゃ！`;
