@@ -2125,12 +2125,13 @@
     "tokaido", "sanyo", "kyushu", "nishiKyushu", "tohoku", "hokkaido",
     "akita", "yamagata", "joetsu", "hokuriku",
     "yamanote", "keihinTohoku", "chuo", "sobu", "keiyo", "tozai",
-    "keio", "inokashira", "yurikamome", "rinkai", "saikyo",
+    "keio", "inokashira", "yurikamome", "rinkai", "saikyo", "yokosuka", "uchibo",
     "osakaLoop", "osakaChuo", "hankyuTakarazuka",
     "airOsaka", "airHokkaido", "airOkinawa", "airFukuoka", "airKomatsu",
     "airHachijo", "airIshigaki", "airMiyako", "airYakushima", "airAmami",
     "airHonolulu", "airGuam",
-    "ferryMiyajima", "ferrySakurajima", "ferrySeikan",
+    "ferryMiyajima", "ferrySakurajima", "ferrySeikan", "ferryTokyoBay",
+    "ferryOgasawara", "ferryTaiheiyo", "ferryShinnihonkai",
   ];
 
   function buildExtraSelectionChoices() {
