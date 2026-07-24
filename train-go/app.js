@@ -431,6 +431,8 @@
   const totalMoneyCard = document.getElementById("total-money-card");
   const totalMoneyValue = document.getElementById("total-money-value");
   const sessionMoneyValue = document.getElementById("session-money-value");
+  const moneyMeter = document.getElementById("money-meter");
+  const runMoneyValue = document.getElementById("run-money-value");
   const nextStationDistanceLabel = document.getElementById("next-station-distance-label");
   const nextStationDistanceValue = document.getElementById("next-station-distance-value");
   const nextStationDistanceKm = document.getElementById("next-station-distance-km");
@@ -1048,12 +1050,16 @@
   function renderTotalMoney() {
     const yen = Math.max(0, Math.floor(totalMoneyYen));
     const sessionYen = Math.max(0, Math.floor(sessionMoneyYen));
-    totalMoneyValue.textContent = yen.toLocaleString("ja-JP");
+    const formattedYen = yen.toLocaleString("ja-JP");
+    totalMoneyValue.textContent = formattedYen;
     sessionMoneyValue.textContent = `きょう ＋${sessionYen.toLocaleString("ja-JP")} えん`;
     totalMoneyCard.setAttribute("aria-label", `いままでの運賃、${yen}円、この端末を開いてから${sessionYen}円`);
+    if (runMoneyValue) runMoneyValue.textContent = formattedYen;
+    if (moneyMeter) moneyMeter.setAttribute("aria-label", `いままでの運賃、${yen}円`);
     if (isDebug) {
       totalMoneyCard.dataset.totalYen = String(yen);
       totalMoneyCard.dataset.sessionYen = String(sessionYen);
+      if (moneyMeter) moneyMeter.dataset.totalYen = String(yen);
     }
   }
 
