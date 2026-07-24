@@ -1002,11 +1002,15 @@
 
   function renderTotalTravelDistance() {
     const meters = Math.max(0, Math.floor(totalTravelMeters));
-    const miles = Math.floor(meters / METERS_PER_MILE);
+    const miles = meters / METERS_PER_MILE;
     const kilometers = Math.floor(meters / 1000);
-    totalMilesValue.textContent = miles.toLocaleString("ja-JP");
+    const formattedMiles = miles.toLocaleString("ja-JP", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    totalMilesValue.textContent = formattedMiles;
     totalKmValue.textContent = `${kilometers.toLocaleString("ja-JP")} km`;
-    totalDistanceCard.setAttribute("aria-label", `いままでの走行距離、${miles}マイル、${kilometers}キロメートル`);
+    totalDistanceCard.setAttribute("aria-label", `いままでの走行距離、${formattedMiles}マイル、${kilometers}キロメートル`);
     if (isDebug) totalDistanceCard.dataset.totalMeters = String(meters);
   }
 
