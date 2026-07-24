@@ -384,6 +384,8 @@
   const TIMES_OF_DAY = ["day", "sunset", "night"];
   const WEATHERS = ["sunny", "rain", "snow"];
   const STAMP_STORAGE_KEY = "train-go-station-stamps-v1";
+  const TOTAL_DISTANCE_STORAGE_KEY = "train-go-total-distance-meters-v1";
+  const METERS_PER_MILE = 1609.344;
 
   // ---- 要素 ----
   const canvas = document.getElementById("game");
@@ -406,6 +408,9 @@
   const tapBoostValue = document.getElementById("tap-boost-value");
   const distanceValue = document.getElementById("distance-value");
   const distanceKmValue = document.getElementById("distance-km-value");
+  const totalDistanceCard = document.getElementById("total-distance-card");
+  const totalMilesValue = document.getElementById("total-miles-value");
+  const totalKmValue = document.getElementById("total-km-value");
   const nextStationDistanceLabel = document.getElementById("next-station-distance-label");
   const nextStationDistanceValue = document.getElementById("next-station-distance-value");
   const nextStationDistanceKm = document.getElementById("next-station-distance-km");
@@ -691,6 +696,8 @@
   let speed = 0; // px/s
   let distance = 0;
   let visualDistance = 0;    // 折り返し後は減らし、背景や駅を反対方向へ流す
+  let totalTravelMeters = loadTotalTravelMeters();
+  let lastTotalDistanceSaveAt = performance.now();
   let wheelAngle = 0;
   let stationWorldX = 0;   // 次の駅の位置(距離座標)
   let currentStationX = null; // いま停車中(または通過直後)の駅の位置
@@ -984,6 +991,42 @@
     autoModeLabel.textContent = autoMode ? `じどう ${autoTargetKmh()}` : "じどう";
   }
 
+  function loadTotalTravelMeters() {
+    try {
+      const saved = Number(localStorage.getItem(TOTAL_DISTANCE_STORAGE_KEY) || 0);
+      return Number.isFinite(saved) && saved >= 0 ? Math.min(saved, Number.MAX_SAFE_INTEGER) : 0;
+    } catch {
+      return 0;
+    }
+  }
+
+  function renderTotalTravelDistance() {
+    const meters = Math.max(0, Math.floor(totalTravelMeters));
+    const miles = Math.floor(meters / METERS_PER_MILE);
+    const kilometers = Math.floor(meters / 1000);
+    totalMilesValue.textContent = miles.toLocaleString("ja-JP");
+    totalKmValue.textContent = `${kilometers.toLocaleString("ja-JP")} km`;
+    totalDistanceCard.setAttribute("aria-label", `いままでの走行距離、${miles}マイル、${kilometers}キロメートル`);
+    if (isDebug) totalDistanceCard.dataset.totalMeters = String(meters);
+  }
+
+  function saveTotalTravelDistance() {
+    try {
+      localStorage.setItem(TOTAL_DISTANCE_STORAGE_KEY, String(Math.floor(totalTravelMeters)));
+    } catch {
+      // 保存できない環境でも、その回の走行距離は数え続ける。
+    }
+    lastTotalDistanceSaveAt = performance.now();
+  }
+
+  function recordTotalTravel(travelPixels, now) {
+    if (!Number.isFinite(travelPixels) || travelPixels <= 0) return;
+    totalTravelMeters += travelPixels / PIXELS_PER_METER;
+    if (now - lastTotalDistanceSaveAt >= 5000) saveTotalTravelDistance();
+  }
+
+  renderTotalTravelDistance();
+
   function loadVisitedStations() {
     try {
       const saved = JSON.parse(localStorage.getItem(STAMP_STORAGE_KEY) || "[]");
@@ -1225,6 +1268,8 @@
   }
 
   function goHome() {
+    saveTotalTravelDistance();
+    renderTotalTravelDistance();
     mapMode = "scenery";
     resetMapCamera();
     document.body.classList.remove("map-view-active");
@@ -1917,6 +1962,7 @@
   ].filter((key, index, keys) => keys.indexOf(key) === index);
 
   function showRouteSelection() {
+    renderTotalTravelDistance();
     routeSelectPage.classList.remove("hidden");
     trainSelectPage.classList.add("hidden");
     selectScreen.classList.remove("selecting-train");
@@ -4617,6 +4663,7 @@
 
       if (state === "running") {
         const travel = speed * dt;
+        recordTotalTravel(travel, now);
         distance += travel;
         visualDistance += travel * travelVisualSign();
         wheelAngle += travel * 0.08 * travelVisualSign();
@@ -5118,6 +5165,11 @@
     });
     document.body.appendChild(debugAirBrakingButton);
   }
+
+  window.addEventListener("pagehide", saveTotalTravelDistance);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) saveTotalTravelDistance();
+  });
 
   // ---- PWA ----
   const canUseServiceWorker = location.protocol === "https:"
