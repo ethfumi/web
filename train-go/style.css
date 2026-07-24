@@ -964,18 +964,23 @@ html, body {
   padding: 0;
   font-size: clamp(20px, 3.5vmin, 34px);
 }
-/* 空路では鉄道専用の連結・ドア・ライト操作を隠す（乗客パネルは表示）。 */
+/* 空路・海路では鉄道専用の連結・ドア・ライト操作を隠す（乗客パネルは表示）。 */
 body.air-mode #run-ui,
 body.air-mode #btn-station-doors,
-body.air-mode #btn-headlight {
+body.air-mode #btn-headlight,
+body.sea-mode #run-ui,
+body.sea-mode #btn-station-doors,
+body.sea-mode #btn-headlight {
   display: none !important;
 }
 
-body.air-mode #station-passengers {
+body.air-mode #station-passengers,
+body.sea-mode #station-passengers {
   display: flex !important;
 }
 
-body.air-mode .train-btn[data-train="airplane"] svg {
+body.air-mode .train-btn[data-train="airplane"] svg,
+body.sea-mode .train-btn[data-train="ferry"] svg {
   width: min(48vmin, 300px);
 }
 

@@ -8,6 +8,16 @@
 
   const {trains: TRAINS, routes: ROUTES} = window.TRAIN_GO_ROUTE_DATA;
 
+  function isAirRoute(route = activeRoute) {
+    return route?.kind === "air";
+  }
+  function isSeaRoute(route = activeRoute) {
+    return route?.kind === "sea";
+  }
+  function isNonRailRoute(route = activeRoute) {
+    return isAirRoute(route) || isSeaRoute(route);
+  }
+
   const CAR_COUNT_WORDS = [
     "いちりょう", "にりょう", "さんりょう", "よんりょう", "ごりょう",
     "ろくりょう", "ななりょう", "はちりょう", "きゅうりょう", "じゅうりょう",
@@ -45,6 +55,12 @@
   const AIR_BOARDING_MAX = 12;
   const DEPARTURE_SPEED_PX_PER_SEC = DEPARTURE_SPEED_KMH / SPEED_DISPLAY_SCALE;
   const AIR_DEPARTURE_SPEED_PX_PER_SEC = AIR_DEPARTURE_SPEED_KMH / SPEED_DISPLAY_SCALE;
+  const SEA_DEPARTURE_SPEED_KMH = 28;
+  const SEA_BASE_TAP_BOOST_KMH = 8;
+  const SEA_MAX_BRAKING_DISTANCE_METERS = 8000;
+  const SEA_BOARDING_MIN = 4;
+  const SEA_BOARDING_MAX = 10;
+  const SEA_DEPARTURE_SPEED_PX_PER_SEC = SEA_DEPARTURE_SPEED_KMH / SPEED_DISPLAY_SCALE;
   const STAR_SPAWN_MIN_SECONDS = 9;
   const FALLING_STAR_TYPES = [
     {
@@ -323,7 +339,7 @@
     freight: { name: "かもつれっしゃ", kind: "freight", cars: 26, speedKmh: 100, body: "#40505d", stripe: "#e49a31" },
   };
   for (const {key,trainKey,kind,cars,speedKmh} of window.TRAIN_GO_ROUTE_DATA?.metadata || []) {
-    if (kind === "air") continue;
+    if (kind === "air" || kind === "sea") continue;
     const type = TRAINS[trainKey || key];
     OPPOSING_TRAIN_TYPES[key] = {
       name:type.name, kind:kind === "shinkansen" ? "shinkansen" : "local",
@@ -397,6 +413,7 @@
 
   const DRIVER_CALLS = ["しんごうよし！", "ドアよし！", "しゅっぱつしんこう！", "じこくよし！"];
   const PILOT_CALLS = ["りりくします！", "じゅんこうこうどです！", "ちゃくりくたいせい！", "しんろよし！"];
+  const CAPTAIN_CALLS = ["いかりよし！", "ほういよし！", "エンジンよし！", "きゃくしつよし！", "てんこうよし！"];
   const TIMES_OF_DAY = ["day", "sunset", "night"];
   const WEATHERS = ["sunny", "rain", "snow"];
   const STAMP_STORAGE_KEY = "train-go-station-stamps-v1";
@@ -608,7 +625,7 @@
     runningRailOsc = audioCtx.createOscillator();
     runningGain = audioCtx.createGain();
 
-    if (activeRoute.kind === "air") {
+    if (isAirRoute()) {
       // 耳に刺さりにくい低めのハム＋やわらかいノイズでジェット感を出す。
       runningOsc.type = "sine";
       runningRailOsc.type = "triangle";
@@ -643,7 +660,7 @@
     }
 
     runningGain.gain.setValueAtTime(0.001, t);
-    runningGain.gain.linearRampToValueAtTime(activeRoute.kind === "air" ? 0.028 : 0.04, t + 0.25);
+    runningGain.gain.linearRampToValueAtTime(isAirRoute() ? 0.028 : isSeaRoute() ? 0.03 : 0.04, t + 0.25);
     runningOsc.connect(runningGain);
     runningRailOsc.connect(runningGain);
     runningGain.connect(audioCtx.destination);
@@ -654,12 +671,20 @@
   function updateRunningSound() {
     if (!audioCtx || !runningOsc || !runningRailOsc || !runningGain) return;
     const t = audioCtx.currentTime;
-    if (activeRoute.kind === "air") {
+    if (isAirRoute()) {
       const soundSpeedKmh = Math.min(displaySpeed(speed), 1400);
       runningOsc.frequency.setTargetAtTime(48 + soundSpeedKmh * 0.018, t, 0.2);
       runningRailOsc.frequency.setTargetAtTime(78 + soundSpeedKmh * 0.09, t, 0.2);
       runningNoiseFilter?.frequency.setTargetAtTime(200 + soundSpeedKmh * 0.22, t, 0.2);
       runningGain.gain.setTargetAtTime(state === "running" ? 0.02 + soundSpeedKmh / 32000 : 0.001, t, 0.14);
+      return;
+    }
+    if (isSeaRoute()) {
+      const soundSpeedKmh = Math.min(displaySpeed(speed), 80);
+      runningOsc.frequency.setTargetAtTime(32 + soundSpeedKmh * 0.2, t, 0.18);
+      runningRailOsc.frequency.setTargetAtTime(55 + soundSpeedKmh * 0.35, t, 0.18);
+      runningNoiseFilter?.frequency.setTargetAtTime(220 + soundSpeedKmh * 2.5, t, 0.18);
+      runningGain.gain.setTargetAtTime(state === "running" ? 0.022 + soundSpeedKmh / 4000 : 0.001, t, 0.14);
       return;
     }
     const soundSpeed = Math.min(speed, 2400);
@@ -870,14 +895,16 @@
     if (state !== "running" || passingStation) return false;
     const distToStation = stationWorldX - distance;
     const physicalBrakingDistance = speed * speed / (2 * 300) + 50;
-    const brakingDistance = activeRoute.kind === "air"
+    const brakingDistance = isAirRoute()
       ? Math.min(physicalBrakingDistance, AIR_MAX_BRAKING_DISTANCE_METERS * PIXELS_PER_METER)
+      : isSeaRoute()
+      ? Math.min(physicalBrakingDistance, SEA_MAX_BRAKING_DISTANCE_METERS * PIXELS_PER_METER)
       : physicalBrakingDistance;
     return distToStation < brakingDistance;
   }
 
   function routeEventForSegment() {
-    if (activeRoute.kind === "air") return "jetstream";
+    if (isAirRoute()) return "jetstream";
     if (selectedRouteKey === "tokaido" && train === TRAINS.nozomi && nextStationName === "しんふじ") return "fuji";
     if (selectedRouteKey === "tokaido" && train === TRAINS.doctoryellow && segmentNumber === 1) return "inspection";
     if (TUNNEL_SEGMENTS[selectedRouteKey]?.has(segmentKey(currentStationName, nextStationName))) return "tunnel";
@@ -932,7 +959,8 @@
   }
 
   function autoTargetKmh() {
-    if (activeRoute.kind === "air") return 900;
+    if (isAirRoute()) return 900;
+    if (isSeaRoute()) return 40;
     return ROUTE_AUTO_SPEED_KMH[selectedRouteKey] || 90;
   }
 
@@ -986,17 +1014,17 @@
     distanceKmValue.textContent = `${(Math.floor(distance / PIXELS_PER_METER) / 1000).toFixed(1)} km`;
     const nextRemaining = nextStationRemainingMeters();
     const terminalRemaining = terminalRemainingMeters();
-    nextStationDistanceLabel.textContent = activeRoute.kind === "air"
+    nextStationDistanceLabel.textContent = isNonRailRoute()
       ? `とうちゃく ${nextStationName || "くうこう"}まで`
       : `つぎの ${nextStationName || "えき"}まで`;
     nextStationDistanceValue.textContent = remainingDistanceMeters(nextRemaining);
     nextStationDistanceKm.textContent = remainingDistanceKm(nextRemaining);
-    terminalDistanceLabel.textContent = activeRoute.kind === "air"
+    terminalDistanceLabel.textContent = isNonRailRoute()
       ? `${terminal.name}まで`
       : `しゅうてん ${terminal.name}まで`;
     terminalDistanceValue.textContent = remainingDistanceMeters(terminalRemaining);
     terminalDistanceKm.textContent = remainingDistanceKm(terminalRemaining);
-    btnExpress.classList.toggle("hidden", activeRoute.kind === "air");
+    btnExpress.classList.toggle("hidden", isNonRailRoute());
     btnExpress.classList.toggle("deadhead", deadheadMode);
     btnExpress.setAttribute("aria-pressed", String(expressMode || deadheadMode));
     if (isDebug) canvas.dataset.serviceMode = deadheadMode ? "deadhead" : expressMode ? "express" : "local";
@@ -1274,9 +1302,8 @@
 
   function randomBoardingCount(maxSeats) {
     if (maxSeats <= 0) return 0;
-    const isAir = activeRoute.kind === "air";
-    const min = isAir ? AIR_BOARDING_MIN : TRAIN_BOARDING_MIN;
-    const max = isAir ? AIR_BOARDING_MAX : TRAIN_BOARDING_MAX;
+    const min = isAirRoute() ? AIR_BOARDING_MIN : isSeaRoute() ? SEA_BOARDING_MIN : TRAIN_BOARDING_MIN;
+    const max = isAirRoute() ? AIR_BOARDING_MAX : isSeaRoute() ? SEA_BOARDING_MAX : TRAIN_BOARDING_MAX;
     const desired = min + Math.floor(Math.random() * (max - min + 1));
     return Math.min(maxSeats, desired);
   }
@@ -1304,10 +1331,16 @@
   }
 
   function announceInitialDeparture() {
-    if (activeRoute.kind === "air") {
+    if (isAirRoute()) {
       const destination = routeTerminalStation().name;
       showPlayBanner(`✈️ ${activeRoute.start}　➡ ${destination}`, 3200);
       say(`このひこうきは、${activeRoute.start}はつ、${destination}ゆきです。まもなく、りりくします`);
+      return;
+    }
+    if (isSeaRoute()) {
+      const destination = routeTerminalStation().name;
+      showPlayBanner(`⛴️ ${activeRoute.start}　➡ ${destination}`, 3200);
+      say(`このふねは、${activeRoute.start}はつ、${destination}ゆきです。まもなく、しゅっこうします`);
       return;
     }
     if (activeRoute.loopKm) {
@@ -1384,7 +1417,8 @@
     segmentStartDistance = 0;
     btnMapMode.classList.remove("hidden");
     setMapMode("scenery");
-    document.body.classList.toggle("air-mode", activeRoute.kind === "air");
+    document.body.classList.toggle("air-mode", isAirRoute());
+    document.body.classList.toggle("sea-mode", isSeaRoute());
     selectScreen.classList.add("hidden");
     runUi.classList.remove("hidden");
     btnHome.classList.remove("hidden");
@@ -1398,19 +1432,21 @@
     btnStationDoors.classList.add("hidden");
     stationPassengers.classList.add("hidden");
     populateQuickAddButtons();
-    runUi.classList.toggle("hidden", activeRoute.kind === "air");
-    btnDriver.querySelector("span:first-child").textContent = activeRoute.kind === "air" ? "👩‍✈️" : "🧑‍✈️";
-    btnDriver.querySelector("span:last-child").textContent = activeRoute.kind === "air" ? "パイロット" : "うんてんし";
-    btnMapRecenter.querySelector("span:first-child").textContent = activeRoute.kind === "air" ? "✈️" : "🚃";
-    btnMapRecenter.querySelector("span:last-child").textContent = activeRoute.kind === "air" ? "ひこうきへ" : "でんしゃへ";
-    btnMapRecenter.setAttribute("aria-label", activeRoute.kind === "air" ? "ひこうきのいちにもどる" : "でんしゃのいちにもどる");
-    document.querySelector("#distance-meter > small").textContent = activeRoute.kind === "air" ? "ひこうきょり" : "そうこうきょり";
+    runUi.classList.toggle("hidden", isNonRailRoute());
+    btnDriver.querySelector("span:first-child").textContent = isAirRoute() ? "👩‍✈️" : isSeaRoute() ? "🧑‍✈️" : "🧑‍✈️";
+    btnDriver.querySelector("span:last-child").textContent = isAirRoute() ? "パイロット" : isSeaRoute() ? "せんちょう" : "うんてんし";
+    btnMapRecenter.querySelector("span:first-child").textContent = isAirRoute() ? "✈️" : isSeaRoute() ? "⛴️" : "🚃";
+    btnMapRecenter.querySelector("span:last-child").textContent = isAirRoute() ? "ひこうきへ" : isSeaRoute() ? "ふねへ" : "でんしゃへ";
+    btnMapRecenter.setAttribute("aria-label", isAirRoute() ? "ひこうきのいちにもどる" : isSeaRoute() ? "ふねのいちにもどる" : "でんしゃのいちにもどる");
+    document.querySelector("#distance-meter > small").textContent = isAirRoute() ? "ひこうきょり" : isSeaRoute() ? "こうかいきょり" : "そうこうきょり";
     clearRouteEvent();
     updateDriveUi();
     arrivalBanner.textContent = "とうちゃく〜！";
     const initialBoarding = boardPassengersAtCurrentStation();
-    if (activeRoute.kind === "air" && initialBoarding.length > 0) {
+    if (isAirRoute() && initialBoarding.length > 0) {
       showPlayBanner(`✈️ ${initialBoarding.length}にん ごじょうしゃ！`, 2200);
+    } else if (isSeaRoute() && initialBoarding.length > 0) {
+      showPlayBanner(`⛴️ ${initialBoarding.length}にん ごじょうしゃ！`, 2200);
     }
     announceInitialDeparture();
   }
@@ -1424,6 +1460,7 @@
     resetMapCamera();
     document.body.classList.remove("map-view-active");
     document.body.classList.remove("air-mode");
+    document.body.classList.remove("sea-mode");
     state = "select";
     speed = 0;
     autoMode = false;
@@ -1476,18 +1513,22 @@
     }
     routeEventBanner.classList.add("hidden");
     btnHeadlight.classList.add("hidden");
-    if (playHorn && activeRoute.kind !== "air") horn();
+    if (playHorn && !isNonRailRoute()) horn();
     if (announceNext) {
-      if (activeRoute.kind === "air") {
+      if (isAirRoute()) {
         say(`${nextStationName}へ、しゅっぱつ。りりくします`);
+      } else if (isSeaRoute()) {
+        say(`${nextStationName}へ、しゅっこうします`);
       } else {
         say(passingStation
           ? `このでんしゃは、${deadheadMode ? "かいそうれっしゃ" : activeRoute.expressModeName}です。${nextStationName}は、とおりすぎます`
           : `つぎは、${nextStationName}`);
       }
     }
-    const departureSpeed = activeRoute.kind === "air"
+    const departureSpeed = isAirRoute()
       ? AIR_DEPARTURE_SPEED_PX_PER_SEC
+      : isSeaRoute()
+      ? SEA_DEPARTURE_SPEED_PX_PER_SEC
       : (autoMode ? 60 : DEPARTURE_SPEED_PX_PER_SEC);
     speed = Math.max(speed, departureSpeed);
     startRunningSound();
@@ -1528,7 +1569,7 @@
     arrivalBanner.classList.remove("hidden");
     chime();
     if (autoMode) autoActionTimer = 1.2;
-    if (activeRoute.kind === "air") {
+    if (isNonRailRoute()) {
       stationDoorsDone = true;
       exchangePassengers();
       if (autoMode) autoActionTimer = 2.8;
@@ -1635,13 +1676,22 @@
 
     arrivalBanner.classList.add("passenger-exchange");
     const moneyText = earnedYen > 0 ? ` 💰${earnedYen.toLocaleString("ja-JP")}えん` : "";
-    if (activeRoute.kind === "air") {
+    if (isAirRoute()) {
       arrivalBanner.textContent = alighting.length > 0
         ? `✈️ ${alighting.length}にん おとどけ！${moneyText} ${boarding.length}にん ごじょうしゃ！`
         : `✈️ ${boarding.length}にん ごじょうしゃ！`;
       say(alighting.length > 0
         ? `${currentStationName}にとうちゃく。${alighting.length}にんおりました。うんちん ${earnedYen}えんです。${boarding.length}にんごじょうしゃです`
         : `${boarding.length}にんごじょうしゃです。つぎのくうこうへいきましょう`);
+      return;
+    }
+    if (isSeaRoute()) {
+      arrivalBanner.textContent = alighting.length > 0
+        ? `⛴️ ${alighting.length}にん おとどけ！${moneyText} ${boarding.length}にん ごじょうしゃ！`
+        : `⛴️ ${boarding.length}にん ごじょうしゃ！`;
+      say(alighting.length > 0
+        ? `${currentStationName}にとうちゃく。${alighting.length}にんおりました。うんちん ${earnedYen}えんです。${boarding.length}にんごじょうしゃです`
+        : `${boarding.length}にんごじょうしゃです。つぎのみなとへいきましょう`);
       return;
     }
     arrivalBanner.textContent = alighting.length > 0
@@ -2066,6 +2116,7 @@
 
   function createVehiclePreview(type) {
     if (type.kind === "airplane") return createAirplanePreview(type);
+    if (type.kind === "ferry") return createFerryPreview(type);
     if (type.kind === "shinkansen") return createShinkansenPreview(type);
     return createCommuterPreview(type);
   }
@@ -2079,6 +2130,7 @@
     "airOsaka", "airHokkaido", "airOkinawa", "airFukuoka", "airKomatsu",
     "airHachijo", "airIshigaki", "airMiyako", "airYakushima", "airAmami",
     "airHonolulu", "airGuam",
+    "ferryMiyajima", "ferrySakurajima", "ferrySeikan",
   ];
 
   function buildExtraSelectionChoices() {
@@ -2139,12 +2191,16 @@
     selectScreen.classList.add("selecting-train");
     const recommendedKey = window.TRAIN_GO_ROUTE_DATA?.metadata.find(({key}) => key === routeKey)?.trainKey
       || ({tokaido:"nozomi",tohoku:"hayabusa"}[routeKey] || routeKey);
-    vehicleSelectTitle.textContent = activeRoute.kind === "air"
+    vehicleSelectTitle.textContent = isAirRoute()
       ? "どの ひこうきに のる？"
+      : isSeaRoute()
+      ? "どの ふねに のる？"
       : "どの でんしゃに のる？";
     document.querySelectorAll(".train-btn").forEach((button) => {
       const airChoice = button.dataset.train === "airplane";
-      button.classList.toggle("hidden", activeRoute.kind === "air" ? !airChoice : airChoice);
+      const seaChoice = button.dataset.train === "ferry";
+      const nonRailChoice = isAirRoute() ? airChoice : isSeaRoute() ? seaChoice : (!airChoice && !seaChoice);
+      button.classList.toggle("hidden", isNonRailRoute() ? !nonRailChoice : (airChoice || seaChoice));
       const recommended = button.dataset.train === recommendedKey;
       const routeOrder = TRAIN_SELECTION_ORDER.indexOf(button.dataset.train);
       button.classList.toggle("recommended", recommended);
@@ -2184,7 +2240,8 @@
   });
 
   function currentTapBoostKmh() {
-    if (activeRoute.kind === "air") return AIR_BASE_TAP_BOOST_KMH;
+    if (isAirRoute()) return AIR_BASE_TAP_BOOST_KMH;
+    if (isSeaRoute()) return SEA_BASE_TAP_BOOST_KMH;
     return BASE_TAP_BOOST_KMH + deliveredPassengers * PASSENGER_TAP_BONUS_KMH;
   }
 
@@ -2436,10 +2493,10 @@
   });
   btnDriver.addEventListener("click", () => {
     ensureAudio();
-    const calls = activeRoute.kind === "air" ? PILOT_CALLS : DRIVER_CALLS;
+    const calls = isAirRoute() ? PILOT_CALLS : isSeaRoute() ? CAPTAIN_CALLS : DRIVER_CALLS;
     const call = calls[driverCallIndex % calls.length];
     driverCallIndex++;
-    showPlayBanner(`${activeRoute.kind === "air" ? "👩‍✈️" : "🧑‍✈️"} ${call}`);
+    showPlayBanner(`${isAirRoute() ? "👩‍✈️" : isSeaRoute() ? "⚓" : "🧑‍✈️"} ${call}`);
     chime();
     say(call);
   });
@@ -2579,7 +2636,7 @@
     if (isDebug) canvas.dataset.viewMode = mapMode;
     if (!announce) return;
     const message = mapMode === "follow"
-      ? (activeRoute.kind === "air" ? "✈️ うえから ひこうきを みてみよう！" : "🚃 うえから へんせいを みてみよう！")
+      ? (isAirRoute() ? "✈️ うえから ひこうきを みてみよう！" : isSeaRoute() ? "⛴️ うえから ふねを みてみよう！" : "🚃 うえから へんせいを みてみよう！")
       : mapMode === "overview" ? "🗺️ ぜんたいちず！" : "🌆 よこから！";
     showPlayBanner(message, 2200);
   }
@@ -3099,7 +3156,7 @@
       ctx.strokeStyle = map.color;
       ctx.globalAlpha = 0.76;
       ctx.lineWidth = routeWidth;
-      ctx.setLineDash(map.kind === "air" ? [routeWidth * 3, routeWidth * 2] : []);
+      ctx.setLineDash(map.kind === "air" || map.kind === "sea" ? [routeWidth * 3, routeWidth * 2] : []);
       drawMapGeoPath(scene, map.coords, offset);
       ctx.stroke();
       ctx.setLineDash([]);
@@ -3119,7 +3176,7 @@
   }
 
   function drawMapAirports(scene, map) {
-    if (activeRoute.kind !== "air" || map.points.length < 2) return;
+    if (!isNonRailRoute() || map.points.length < 2) return;
     const endpointIndexes = [0, map.points.length - 1];
     ctx.save();
     for (const index of endpointIndexes) {
@@ -3172,7 +3229,7 @@
     ctx.stroke();
     ctx.strokeStyle = map.color;
     ctx.lineWidth = routeWidth;
-    ctx.setLineDash(activeRoute.kind === "air" ? [routeWidth * 3, routeWidth * 1.8] : []);
+    ctx.setLineDash(isNonRailRoute() ? [routeWidth * 3, routeWidth * 1.8] : []);
     drawMapGeoPath(scene, map.coords);
     ctx.stroke();
     ctx.setLineDash([]);
@@ -3274,11 +3331,12 @@
 
   function drawYamanoteFollowTrain(scene) {
     const count = scene.carPositions.length;
-    if (train.kind === "airplane") {
+    if (train.kind === "airplane" || train.kind === "ferry") {
       const position = scene.carPositions[0];
       const x = scene.screenCenterX + (position.worldX - scene.centerWorldX) * scene.scale;
       const y = scene.screenCenterY + (position.worldY - scene.centerWorldY) * scene.scale;
-      drawMapAirplaneShape(x, y, position.angle, Math.max(28, Math.min(86, 22 * scene.scale)));
+      if (train.kind === "ferry") drawMapFerryShape(x, y, position.angle, Math.max(28, Math.min(86, 22 * scene.scale)));
+      else drawMapAirplaneShape(x, y, position.angle, Math.max(28, Math.min(86, 22 * scene.scale)));
       return;
     }
     const directionAngle = routeDirection < 0 ? Math.PI : 0;
@@ -3342,6 +3400,10 @@
     const point = mapScenePoint(scene, position.worldX, position.worldY, yamanoteTrainScreenPoint);
     if (train.kind === "airplane") {
       drawMapAirplaneShape(point.x, point.y, position.angle, labelSize * 2.2);
+      return point;
+    }
+    if (train.kind === "ferry") {
+      drawMapFerryShape(point.x, point.y, position.angle, labelSize * 2.2);
       return point;
     }
     ctx.save();
@@ -3463,7 +3525,7 @@
       ? `　${starBoostType.icon} ×${starBoostMultiplier} ${Math.ceil(starBoostTime)}びょう`
       : "";
     const roundedKm = Math.round(position.km * 10) / 10;
-    const vehicleText = activeRoute.kind === "air" ? "✈️ ひこうちゅう" : `🚃 ${totalCarCount()}りょう`;
+    const vehicleText = isAirRoute() ? "✈️ ひこうちゅう" : isSeaRoute() ? "⛴️ こうかいちゅう" : `🚃 ${totalCarCount()}りょう`;
     const badgeText = scene.portrait
       ? `${modeText}　${roundedKm}km　${vehicleText}　🧭↑${boostText}`
       : `${modeText}　${roundedKm} km　${vehicleText}　🧭 きた↑${boostText}`;
@@ -3867,7 +3929,7 @@
   }
 
   function scheduleNextOpposingTrain(initial = false) {
-    if (activeRoute.kind === "air") {
+    if (isNonRailRoute()) {
       nextOpposingTrainIn = Infinity;
       return;
     }
@@ -3900,7 +3962,7 @@
   }
 
   function updateOpposingTrain(dt) {
-    if (state === "select" || mapMode !== "scenery" || activeRoute.kind === "air") return;
+    if (state === "select" || mapMode !== "scenery" || isNonRailRoute()) return;
     if (!opposingTrain) {
       // 速く走るほど短い時間で多くの列車と出会う。上限は描画が混みすぎないためのもの。
       const encounterRate = 1 + Math.min(displaySpeed(speed), 1200) / 400;
@@ -4479,7 +4541,132 @@
     ctx.restore();
   }
 
-  function drawAirports() {
+  
+  function drawMapFerryShape(x, y, angle, size) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle + (routeDirection < 0 ? Math.PI : 0));
+    ctx.shadowColor = "rgba(0,0,0,0.28)";
+    ctx.shadowBlur = Math.max(4, size * 0.1);
+    ctx.fillStyle = train.body;
+    ctx.strokeStyle = train.edge;
+    ctx.lineWidth = Math.max(1.5, size * 0.04);
+    ctx.beginPath();
+    ctx.moveTo(size * 0.55, 0);
+    ctx.lineTo(size * 0.2, -size * 0.22);
+    ctx.lineTo(-size * 0.45, -size * 0.2);
+    ctx.lineTo(-size * 0.55, 0);
+    ctx.lineTo(-size * 0.45, size * 0.2);
+    ctx.lineTo(size * 0.2, size * 0.22);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = train.stripe;
+    ctx.fillRect(-size * 0.25, -size * 0.08, size * 0.45, size * 0.16);
+    ctx.restore();
+  }
+
+  function createFerryPreview(type) {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 200 70");
+    svg.innerHTML = `<path d="M18 42 L48 24 H156 L184 42 L156 54 H48 Z" fill="${type.body}" stroke="${type.edge}" stroke-width="2"/><rect x="70" y="18" width="70" height="18" rx="3" fill="${type.body}" stroke="${type.edge}" stroke-width="2"/><path d="M40 40 H168" stroke="${type.stripe}" stroke-width="6"/><rect x="80" y="22" width="12" height="10" rx="2" fill="#33475a"/><rect x="100" y="22" width="12" height="10" rx="2" fill="#33475a"/><rect x="120" y="22" width="12" height="10" rx="2" fill="#33475a"/>`;
+    return svg;
+  }
+
+  function drawSeaWater() {
+    const y = groundY();
+    const { x0, x1 } = viewRange();
+    const water = ctx.createLinearGradient(0, y - 40, 0, y + 180);
+    water.addColorStop(0, "rgba(120, 190, 230, 0.35)");
+    water.addColorStop(0.35, "#5eb3e0");
+    water.addColorStop(1, "#2f7fb5");
+    ctx.fillStyle = water;
+    ctx.fillRect(x0, y - 18, x1 - x0, 220);
+    ctx.strokeStyle = "rgba(255,255,255,0.35)";
+    ctx.lineWidth = 2;
+    const spacing = 70;
+    const off = visualDistance % spacing;
+    for (let x = x0 - off; x < x1 + spacing; x += spacing) {
+      ctx.beginPath();
+      ctx.moveTo(x, y + 18);
+      ctx.quadraticCurveTo(x + 18, y + 10, x + 36, y + 20);
+      ctx.stroke();
+    }
+  }
+
+  function drawSeaPortAt(worldX, name) {
+    if (worldX === null || worldX === undefined) return;
+    const x = worldScreenOffset(worldX) + W * NOSE_R;
+    const y = groundY();
+    const { x0, x1 } = viewRange();
+    if (x < x0 - 180 || x > x1 + 180) return;
+    ctx.save();
+    ctx.fillStyle = "#8d97a3";
+    ctx.fillRect(x - 70, y - 8, 140, 18);
+    ctx.fillStyle = "#c5ccd4";
+    ctx.fillRect(x - 58, y - 34, 116, 28);
+    ctx.fillStyle = "#5f6b78";
+    ctx.fillRect(x - 8, y - 78, 16, 48);
+    ctx.font = "bold 18px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.fillStyle = "#344054";
+    ctx.fillText(`⚓ ${name}`, x, y - 86);
+    ctx.restore();
+  }
+
+  function drawSeaPorts() {
+    drawSeaPortAt(currentStationX, currentStationName);
+    drawSeaPortAt(stationWorldX, nextStationName);
+  }
+
+  function drawFerry() {
+    const shipW = Math.min(W * 0.3, 280);
+    const shipH = shipW * 0.28;
+    const x = W * NOSE_R;
+    const y = groundY() - shipH * 0.35 - 8;
+    const bob = state === "running" ? Math.sin(distance * 0.03) * 2.2 : 0;
+    ctx.save();
+    ctx.translate(x, y + bob);
+    ctx.fillStyle = "rgba(255,255,255,0.25)";
+    ctx.beginPath();
+    ctx.ellipse(-shipW * 0.1, shipH * 0.55, shipW * 0.45, shipH * 0.18, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = train.body;
+    ctx.strokeStyle = train.edge;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(shipW * 0.48, shipH * 0.08);
+    ctx.lineTo(shipW * 0.18, -shipH * 0.22);
+    ctx.lineTo(-shipW * 0.38, -shipH * 0.2);
+    ctx.lineTo(-shipW * 0.48, shipH * 0.1);
+    ctx.lineTo(-shipW * 0.36, shipH * 0.38);
+    ctx.lineTo(shipW * 0.22, shipH * 0.4);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = train.body;
+    roundRect(-shipW * 0.12, -shipH * 0.55, shipW * 0.34, shipH * 0.36, 6);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = train.stripe;
+    ctx.fillRect(-shipW * 0.34, -shipH * 0.02, shipW * 0.68, shipH * 0.12);
+    ctx.fillStyle = "#33475a";
+    for (let windowX = -shipW * 0.05; windowX < shipW * 0.18; windowX += shipW * 0.08) {
+      ctx.fillRect(windowX, -shipH * 0.46, shipW * 0.045, shipH * 0.12);
+    }
+    if (state === "running") {
+      ctx.strokeStyle = "rgba(255,255,255,0.55)";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(-shipW * 0.48, shipH * 0.2);
+      ctx.lineTo(-shipW * 0.75, shipH * 0.05);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+function drawAirports() {
     drawAirportAt(currentStationX, currentStationName);
     drawAirportAt(stationWorldX, nextStationName);
   }
@@ -4812,7 +4999,7 @@
         } else if (speed > targetSpeed) {
           speed = Math.max(targetSpeed, speed - AUTO_OVERSPEED_DECEL_PX_PER_SEC2 * dt);
         }
-      } else if (activeRoute.kind !== "air") {
+      } else if (!isNonRailRoute()) {
         // 電車は摩擦でゆるやかに減速する。飛行機は巡航速度をそのまま保つ。
         speed = Math.max(speed - FRICTION_PX_PER_SEC2 * dt, 120);
       }
@@ -4910,7 +5097,7 @@
         drawFuji();
         drawMountains();
         drawCityscape();
-        if (activeRoute.kind === "air") {
+        if (isAirRoute()) {
           drawAirports();
           drawJetStream();
           if (trainFacesLeft()) {
@@ -4920,6 +5107,17 @@
             ctx.scale(-1, 1);
           }
           drawAirplane();
+          if (trainFacesLeft()) ctx.restore();
+        } else if (isSeaRoute()) {
+          drawSeaWater();
+          drawSeaPorts();
+          if (trainFacesLeft()) {
+            const mirrorCenterX = ax + (W * 0.5 - ax) / Math.max(viewScale, 0.001);
+            ctx.save();
+            ctx.translate(mirrorCenterX * 2, 0);
+            ctx.scale(-1, 1);
+          }
+          drawFerry();
           if (trainFacesLeft()) ctx.restore();
         } else {
           drawTunnel();
@@ -5306,7 +5504,7 @@
       padding: "8px", fontSize: "14px",
     });
     debugAirBrakingButton.addEventListener("click", () => {
-      if (activeRoute.kind !== "air") return;
+      if (!isAirRoute()) return;
       const previousState = state;
       const previousSpeed = speed;
       const previousDistance = distance;
