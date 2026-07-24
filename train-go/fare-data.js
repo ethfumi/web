@@ -123,10 +123,19 @@
     sanyo: "shinkansen",
     kyushu: "shinkansen",
     nishiKyushu: "shinkansen",
-    // 空路
+    // 空路（未登録キーは kind: "air" または距離表で処理）
     airOsaka: "air",
     airHokkaido: "air",
     airOkinawa: "air",
+    airFukuoka: "air",
+    airKomatsu: "air",
+    airHachijo: "air",
+    airIshigaki: "air",
+    airMiyako: "air",
+    airYakushima: "air",
+    airAmami: "air",
+    airHonolulu: "air",
+    airGuam: "air",
   };
 
   // 実売の目安に近い固定運賃（路線キー → 円）。距離表より優先。
@@ -134,6 +143,15 @@
     airOsaka: 14500,
     airHokkaido: 24800,
     airOkinawa: 29800,
+    airFukuoka: 22800,
+    airKomatsu: 16800,
+    airHachijo: 19800,
+    airIshigaki: 18800,
+    airMiyako: 16800,
+    airYakushima: 12800,
+    airAmami: 17800,
+    airHonolulu: 78000,
+    airGuam: 48000,
   };
 
   function fareClassFor(routeKey, route) {
