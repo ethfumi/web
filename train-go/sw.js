@@ -1,16 +1,16 @@
 // オンラインでは常に最新版を取得し、通信できない時だけ保存済みデータを使う。
-const CACHE = "train-go-v99";
+const CACHE = "train-go-v100";
 const ASSETS = [
   ".",
   "index.html",
-  "style.css?v=99",
-  "train-route-data.js?v=99",
-  "national-rail-route-data.js?v=99",
-  "air-route-data.js?v=99",
-  "sea-route-data.js?v=99",
-  "fare-data.js?v=99",
-  "map-data.js?v=99",
-  "app.js?v=99",
+  "style.css?v=100",
+  "train-route-data.js?v=100",
+  "national-rail-route-data.js?v=100",
+  "air-route-data.js?v=100",
+  "sea-route-data.js?v=100",
+  "fare-data.js?v=100",
+  "map-data.js?v=100",
+  "app.js?v=100",
   "manifest.webmanifest",
   "icons/icon-180.png",
   "icons/icon-512.png",

@@ -453,7 +453,9 @@
   const nextStationDistanceLabel = document.getElementById("next-station-distance-label");
   const nextStationDistanceValue = document.getElementById("next-station-distance-value");
   const nextStationDistanceKm = document.getElementById("next-station-distance-km");
+  const nextStationEta = document.getElementById("next-station-eta");
   const terminalDistanceLabel = document.getElementById("terminal-distance-label");
+  const terminalEta = document.getElementById("terminal-eta");
   const terminalDistanceValue = document.getElementById("terminal-distance-value");
   const terminalDistanceKm = document.getElementById("terminal-distance-km");
   const btnExpress = document.getElementById("btn-express");
@@ -923,6 +925,29 @@
     return `${(Math.max(0, meters) / 1000).toFixed(1)} km`;
   }
 
+  // 知育用: 日や時間があっても、必ず秒まで出して変化が見えるようにする。
+  function formatEtaFromSeconds(totalSeconds) {
+    if (!Number.isFinite(totalSeconds) || totalSeconds < 0) return "—";
+    const sec = Math.floor(totalSeconds);
+    const days = Math.floor(sec / 86400);
+    const hours = Math.floor((sec % 86400) / 3600);
+    const minutes = Math.floor((sec % 3600) / 60);
+    const seconds = sec % 60;
+    const parts = [];
+    if (days > 0) parts.push(`${days}にち`);
+    if (days > 0 || hours > 0) parts.push(`${hours}じかん`);
+    parts.push(`${minutes}ふん`);
+    parts.push(`${seconds}びょう`);
+    return parts.join("");
+  }
+
+  function remainingEtaSeconds(remainingMeters) {
+    const speedKmh = displaySpeed(speed);
+    if (!Number.isFinite(remainingMeters) || remainingMeters <= 0) return 0;
+    if (!Number.isFinite(speedKmh) || speedKmh < 1) return NaN;
+    return remainingMeters / (speedKmh / 3.6);
+  }
+
   function nextStationRemainingMeters() {
     if (stationIdx < 0 || !nextStationName) return 0;
     return Math.max(0, (stationWorldX - distance) / PIXELS_PER_METER);
@@ -1019,11 +1044,17 @@
       : `つぎの ${nextStationName || "えき"}まで`;
     nextStationDistanceValue.textContent = remainingDistanceMeters(nextRemaining);
     nextStationDistanceKm.textContent = remainingDistanceKm(nextRemaining);
+    if (nextStationEta) {
+      nextStationEta.textContent = formatEtaFromSeconds(remainingEtaSeconds(nextRemaining));
+    }
     terminalDistanceLabel.textContent = isNonRailRoute()
       ? `${terminal.name}まで`
       : `しゅうてん ${terminal.name}まで`;
     terminalDistanceValue.textContent = remainingDistanceMeters(terminalRemaining);
     terminalDistanceKm.textContent = remainingDistanceKm(terminalRemaining);
+    if (terminalEta) {
+      terminalEta.textContent = formatEtaFromSeconds(remainingEtaSeconds(terminalRemaining));
+    }
     btnExpress.classList.toggle("hidden", isNonRailRoute());
     btnExpress.classList.toggle("deadhead", deadheadMode);
     btnExpress.setAttribute("aria-pressed", String(expressMode || deadheadMode));
@@ -3022,7 +3053,8 @@
   }
 
   function drawMapPrefectureLabels(scene) {
-    if (scene.mode !== "overview") return;
+    // 全体図で引きすぎたときは県名を消し、文字の重なりを減らす。
+    if (scene.mode !== "overview" || scene.scale < 0.012) return;
     ctx.save();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -3093,7 +3125,8 @@
       }
     }
 
-    if (scene.scale >= 0.0015) {
+    // 広域では湖・川の名前を隠し、線路と駅を優先する。
+    if (scene.scale >= 0.01) {
       ctx.font = "bold " + Math.max(9, Math.min(W, H) * 0.014) + "px sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "bottom";
@@ -3247,7 +3280,9 @@
       if (!mapPointIsVisible(scene, x, y)) continue;
       const important = activeRoute.cityStations.has(station.name)
         || station.name === currentStationName || station.name === nextStationName;
-      const showLabel = scene.mode === "overview" ? important : important || scene.scale >= 0.7;
+      const showLabel = scene.mode === "overview"
+        ? important && scene.scale >= 0.006
+        : important || scene.scale >= 0.7;
       ctx.fillStyle = important ? "#ffffff" : "#dfe8d7";
       ctx.strokeStyle = important ? "#334155" : "#617064";
       ctx.lineWidth = important ? 2.5 : 1.2;
@@ -3264,6 +3299,8 @@
   }
 
   function drawYamanoteLandmarks(scene, labelSize) {
+    // かなり引いた全体図ではランドマーク名も抑える。
+    if (scene.mode === "overview" && scene.scale < 0.008) return;
     ctx.save();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
