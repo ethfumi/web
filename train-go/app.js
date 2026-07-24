@@ -1709,19 +1709,19 @@
     const moneyText = earnedYen > 0 ? ` 💰${earnedYen.toLocaleString("ja-JP")}えん` : "";
     if (isAirRoute()) {
       arrivalBanner.textContent = alighting.length > 0
-        ? `✈️ ${alighting.length}にん おとどけ！${moneyText} ${boarding.length}にん ごじょうしゃ！`
+        ? `✈️ ${alighting.length}にん おとどけ！${moneyText} タップかそく ＋${alighting.length} km/h ${boarding.length}にん ごじょうしゃ！`
         : `✈️ ${boarding.length}にん ごじょうしゃ！`;
       say(alighting.length > 0
-        ? `${currentStationName}にとうちゃく。${alighting.length}にんおりました。うんちん ${earnedYen}えんです。${boarding.length}にんごじょうしゃです`
+        ? `${currentStationName}にとうちゃく。${alighting.length}にんおりました。うんちん ${earnedYen}えん。タップかそくが、${alighting.length}キロアップ！${boarding.length}にんごじょうしゃです`
         : `${boarding.length}にんごじょうしゃです。つぎのくうこうへいきましょう`);
       return;
     }
     if (isSeaRoute()) {
       arrivalBanner.textContent = alighting.length > 0
-        ? `⛴️ ${alighting.length}にん おとどけ！${moneyText} ${boarding.length}にん ごじょうしゃ！`
+        ? `⛴️ ${alighting.length}にん おとどけ！${moneyText} タップかそく ＋${alighting.length} km/h ${boarding.length}にん ごじょうしゃ！`
         : `⛴️ ${boarding.length}にん ごじょうしゃ！`;
       say(alighting.length > 0
-        ? `${currentStationName}にとうちゃく。${alighting.length}にんおりました。うんちん ${earnedYen}えんです。${boarding.length}にんごじょうしゃです`
+        ? `${currentStationName}にとうちゃく。${alighting.length}にんおりました。うんちん ${earnedYen}えん。タップかそくが、${alighting.length}キロアップ！${boarding.length}にんごじょうしゃです`
         : `${boarding.length}にんごじょうしゃです。つぎのみなとへいきましょう`);
       return;
     }
@@ -2305,9 +2305,10 @@
   });
 
   function currentTapBoostKmh() {
-    if (isAirRoute()) return AIR_BASE_TAP_BOOST_KMH;
-    if (isSeaRoute()) return SEA_BASE_TAP_BOOST_KMH;
-    return BASE_TAP_BOOST_KMH + deliveredPassengers * PASSENGER_TAP_BONUS_KMH;
+    const passengerBonus = deliveredPassengers * PASSENGER_TAP_BONUS_KMH;
+    if (isAirRoute()) return AIR_BASE_TAP_BOOST_KMH + passengerBonus;
+    if (isSeaRoute()) return SEA_BASE_TAP_BOOST_KMH + passengerBonus;
+    return BASE_TAP_BOOST_KMH + passengerBonus;
   }
 
   function currentTapBoostPxPerSec() {
