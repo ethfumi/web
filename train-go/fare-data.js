@@ -152,12 +152,16 @@
     airAmami: 17800,
     airHonolulu: 78000,
     airGuam: 48000,
+    ferryMiyajima: 200,
+    ferrySakurajima: 200,
+    ferrySeikan: 2600,
   };
 
   function fareClassFor(routeKey, route) {
     if (FIXED_FARES[routeKey] != null) return "fixed";
     if (ROUTE_FARE_CLASS[routeKey]) return ROUTE_FARE_CLASS[routeKey];
     if (route?.kind === "air") return "air";
+    if (route?.kind === "sea") return "jrMain";
     if (route?.kind === "shinkansen") return "shinkansen";
     return "jrMain";
   }
