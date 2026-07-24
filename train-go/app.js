@@ -2957,6 +2957,26 @@
     return x >= -margin && x <= W + margin && y >= -margin && y <= H + margin;
   }
 
+  function sceneWorldBounds(scene, marginMeters = 80000) {
+    const inv = 1 / Math.max(scene.scale, 1e-9);
+    return {
+      minX: scene.centerWorldX + (0 - scene.screenCenterX) * inv - marginMeters,
+      maxX: scene.centerWorldX + (W - scene.screenCenterX) * inv + marginMeters,
+      minY: scene.centerWorldY + (0 - scene.screenCenterY) * inv - marginMeters,
+      maxY: scene.centerWorldY + (H - scene.screenCenterY) * inv + marginMeters,
+    };
+  }
+
+  function mapIntersectsScene(scene, map) {
+    if (!map) return false;
+    const view = sceneWorldBounds(scene);
+    const minX = mapWorldX(map.minLon);
+    const maxX = mapWorldX(map.maxLon);
+    const minY = mapWorldY(map.maxLat);
+    const maxY = mapWorldY(map.minLat);
+    return maxX >= view.minX && minX <= view.maxX && maxY >= view.minY && minY <= view.maxY;
+  }
+
   const MAP_TOWN_BLOCKS = [];
   let mapTownBlocksReady = false;
 
@@ -2966,7 +2986,9 @@
     let routeNumber = 0;
     for (const mapKey of MAP_ROUTE_DRAW_ORDER) {
       const map = ROUTE_MAPS[mapKey];
-      const stepKm = map.endKm > 100 ? 10 : 1.8;
+      // 空路・海路の沿線に街ブロックを置かない（太平洋全体図で重くなる原因になる）。
+      if (map.kind === "air" || map.kind === "sea") continue;
+      const stepKm = map.endKm > 200 ? Math.max(12, map.endKm / 35) : map.endKm > 100 ? 10 : 1.8;
       const position = {};
       for (let km = 0; km <= map.endKm; km += stepKm) {
         yamanoteMapPositionAt(km, position, map);
@@ -2992,6 +3014,8 @@
   }
 
   function drawMapTownscape(scene) {
+    // 太平洋横断など極端に引いた全体図では街描画を省略して軽くする。
+    if (scene.scale < 0.004) return;
     ensureMapTownBlocks();
     ctx.save();
     for (let index = 0; index < MAP_TOWN_BLOCKS.length; index++) {
@@ -3101,6 +3125,19 @@
     // 追従表示の格子は現在地へ合わせて生成し、東京だけに固定しない。
     drawMapLocalGrid(scene);
 
+    // 局所湾（東京湾・伊勢湾）を陸の上に水として重ね、港が陸に乗らないようにする。
+    if (MAP_GEOGRAPHY.bays?.length) {
+      ctx.fillStyle = timeOfDay === "night" ? "#1a4058" : "#7ec4e4";
+      ctx.strokeStyle = timeOfDay === "night" ? "#3d6f8c" : "#5aafd4";
+      ctx.lineWidth = Math.max(1, Math.min(2.5, scene.scale * 30));
+      for (const bay of MAP_GEOGRAPHY.bays) {
+        drawMapGeoPath(scene, bay.points);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+    }
+
     ctx.fillStyle = timeOfDay === "night" ? "#315f78" : "#80c8e2";
     ctx.strokeStyle = timeOfDay === "night" ? "#4c829c" : "#62b4d6";
     ctx.lineWidth = Math.max(1, Math.min(3.5, scene.scale * 40));
@@ -3172,6 +3209,8 @@
   }
 
   function drawYamanoteRelatedLines(scene, labelSize) {
+    // ホノルルなど極端に引いた全体図では周辺路線を描かず軽くする（点になってノイズになる）。
+    if (scene.scale < 0.003) return;
     const currentKey = activeRouteMapKey();
     const routeWidth = scene.mode === "follow"
       ? Math.max(2, Math.min(4.5, scene.scale * 3.2))
@@ -3182,6 +3221,9 @@
     for (const mapKey of MAP_ROUTE_DRAW_ORDER) {
       if (mapKey === currentKey) continue;
       const map = ROUTE_MAPS[mapKey];
+      if (!mapIntersectsScene(scene, map)) continue;
+      // 広域では他の空路・海路の長距離線を省略（画面を横断する太い破線が重い）。
+      if (scene.scale < 0.01 && (map.kind === "air" || map.kind === "sea")) continue;
       const offset = MAP_ROUTE_LANE_OFFSETS[mapKey] || 0;
       ctx.strokeStyle = "rgba(255,255,255,0.78)";
       ctx.lineWidth = routeWidth + 3.5;
