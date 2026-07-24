@@ -1758,15 +1758,48 @@
   }
 
   function createTrainPreview(key) {
-    return document.querySelector(`.train-btn[data-train="${key}"] svg`).cloneNode(true);
+    const existing = document.querySelector(`.train-btn[data-train="${key}"] svg`);
+    if (existing) return existing.cloneNode(true);
+    return createVehiclePreview(TRAINS[key]);
+  }
+
+  function isShinkansenTrainKey(key) {
+    const type = TRAINS[key];
+    if (!type) return false;
+    if (type.kind === "shinkansen") return true;
+    // 初期の新幹線は kind 未設定のものがある
+    return key === "nozomi" || key === "doctoryellow" || key === "hayabusa" || key === "komachi"
+      || /しんかんせん|けんさしゃ/.test(type.callName || type.name || "");
+  }
+
+  function isCoupleableTrainKey(key) {
+    const type = TRAINS[key];
+    if (!type) return false;
+    if (type.kind === "airplane" || type.kind === "ferry") return false;
+    return true;
+  }
+
+  // 連結候補: 新幹線をすべて先に並べ、そのあと通勤など。枠が足りなくても新幹線は落とさない。
+  function quickAddTrainKeys(currentKey) {
+    const others = Object.keys(TRAINS).filter((key) => key !== currentKey && isCoupleableTrainKey(key));
+    const shinkansen = others.filter(isShinkansenTrainKey);
+    const rest = others.filter((key) => !isShinkansenTrainKey(key));
+    return [...shinkansen, ...rest];
   }
 
   function populateQuickAddButtons() {
-    const otherKeys = Object.keys(TRAINS).filter((key) => key !== trainKey);
+    // 9枠固定。新幹線を先に並べるので、新幹線は常に枠内に収まる。
+    const otherKeys = quickAddTrainKeys(trainKey);
     btnCouple.setAttribute("aria-label", `${TRAINS[trainKey].callName}を連結`);
     btnCouple.querySelector(".quick-train-art").replaceChildren(createTrainPreview(trainKey));
     document.querySelectorAll(".btn-quick-add:not(#btn-couple)").forEach((btn, index) => {
       const key = otherKeys[index];
+      if (!key) {
+        btn.classList.add("hidden");
+        delete btn.dataset.car;
+        return;
+      }
+      btn.classList.remove("hidden");
       btn.dataset.car = key;
       btn.setAttribute("aria-label", `${TRAINS[key].callName}を連結`);
       btn.querySelector(".quick-train-art").replaceChildren(createTrainPreview(key));
