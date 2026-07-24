@@ -721,6 +721,7 @@
   let totalTravelMeters = loadTotalTravelMeters();
   let totalMoneyYen = loadTotalMoneyYen();
   let sessionMoneyYen = 0;
+  let rideMoneyYen = 0;
   let lastTotalDistanceSaveAt = performance.now();
   let wheelAngle = 0;
   let stationWorldX = 0;   // 次の駅の位置(距離座標)
@@ -1054,12 +1055,20 @@
     totalMoneyValue.textContent = formattedYen;
     sessionMoneyValue.textContent = `きょう ＋${sessionYen.toLocaleString("ja-JP")} えん`;
     totalMoneyCard.setAttribute("aria-label", `いままでの運賃、${yen}円、この端末を開いてから${sessionYen}円`);
-    if (runMoneyValue) runMoneyValue.textContent = formattedYen;
-    if (moneyMeter) moneyMeter.setAttribute("aria-label", `いままでの運賃、${yen}円`);
     if (isDebug) {
       totalMoneyCard.dataset.totalYen = String(yen);
       totalMoneyCard.dataset.sessionYen = String(sessionYen);
-      if (moneyMeter) moneyMeter.dataset.totalYen = String(yen);
+    }
+    renderRideMoney();
+  }
+
+  function renderRideMoney() {
+    const rideYen = Math.max(0, Math.floor(rideMoneyYen));
+    const formattedRideYen = rideYen.toLocaleString("ja-JP");
+    if (runMoneyValue) runMoneyValue.textContent = formattedRideYen;
+    if (moneyMeter) {
+      moneyMeter.setAttribute("aria-label", `この電車で稼いだ運賃、${rideYen}円`);
+      if (isDebug) moneyMeter.dataset.rideYen = String(rideYen);
     }
   }
 
@@ -1120,6 +1129,7 @@
     if (earned <= 0) return 0;
     totalMoneyYen += earned;
     sessionMoneyYen += earned;
+    rideMoneyYen += earned;
     saveTotalMoney();
     renderTotalMoney();
     return earned;
@@ -1349,6 +1359,8 @@
     midAnnouncementDone = false;
     onboardPassengers = [];
     deliveredPassengers = 0;
+    rideMoneyYen = 0;
+    renderRideMoney();
     setOnboardPanelExpanded(false);
     stationPassengers.replaceChildren();
     opposingTrain = null;
@@ -4965,7 +4977,7 @@
           autoMode, autoActionTimer, autoTargetKmh: autoTargetKmh(),
           playElapsedSeconds, motionEffect: canvas.dataset.motionEffect,
           onboardPassengers: [...onboardPassengers], deliveredPassengers, tapBoostKmh: currentTapBoostKmh(),
-          totalMoneyYen, sessionMoneyYen,
+          totalMoneyYen, sessionMoneyYen, rideMoneyYen,
           timeOfDay, weather, visitedStations: [...visitedStations],
           fallingStar: fallingStar ? { ...fallingStar } : null,
           starBoostTime, starBoostMultiplier, starBoostType: starBoostType.key,
