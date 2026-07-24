@@ -120,6 +120,8 @@
     "せんだい", "もりおか", "しんあおもり", "きちじょうじ", "みたか",
     "たちかわ", "はちおうじ", "たかお", "なかの", "おおてまち", "にしふなばし",
     "ちょうふ", "ふちゅう", "けいおうはちおうじ", "けいおうたまセンター", "はしもと",
+    "よこはま", "かわさき", "おおふな", "まいはま", "しんきば", "とよす",
+    "おおさき", "かいひんまくはり",
   ]);
   function segmentKey(stationA, stationB) {
     return [stationA, stationB].sort().join("::");
@@ -247,6 +249,14 @@
         announcement: "うみのうえの、みらいみたいなえきだよ！",
         symbols: ["🌊", "✨", "🚇"],
         stamp: "🌌",
+      },
+    },
+    keiyo: {
+      "まいはま": {
+        banner: "🏰 ゆめの えき！",
+        announcement: "しろいおしろと、ゆめがいっぱいのえきだよ！",
+        symbols: ["🏰", "✨", "🎢"],
+        stamp: "🏰",
       },
     },
     yamanote: {
@@ -2038,7 +2048,8 @@
   const ROUTE_SELECTION_ORDER = [
     "tokaido", "sanyo", "kyushu", "nishiKyushu", "tohoku", "hokkaido",
     "akita", "yamagata", "joetsu", "hokuriku",
-    "yamanote", "chuo", "sobu", "tozai", "keio", "inokashira",
+    "yamanote", "keihinTohoku", "chuo", "sobu", "keiyo", "tozai",
+    "keio", "inokashira", "yurikamome", "rinkai", "saikyo",
     "osakaLoop", "osakaChuo", "hankyuTakarazuka",
   ];
 
