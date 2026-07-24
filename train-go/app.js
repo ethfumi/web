@@ -609,24 +609,31 @@
     runningGain = audioCtx.createGain();
 
     if (activeRoute.kind === "air") {
-      runningOsc.type = "sawtooth";
-      runningRailOsc.type = "sine";
-      runningOsc.frequency.value = 48;
-      runningRailOsc.frequency.value = 145;
+      // 耳に刺さりにくい低めのハム＋やわらかいノイズでジェット感を出す。
+      runningOsc.type = "sine";
+      runningRailOsc.type = "triangle";
+      runningOsc.frequency.value = 52;
+      runningRailOsc.frequency.value = 88;
 
       if (!runningNoiseBuffer) {
         runningNoiseBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate, audioCtx.sampleRate);
         const noise = runningNoiseBuffer.getChannelData(0);
-        for (let index = 0; index < noise.length; index++) noise[index] = Math.random() * 2 - 1;
+        let brown = 0;
+        for (let index = 0; index < noise.length; index++) {
+          brown = (brown + (Math.random() * 2 - 1) * 0.02) * 0.98;
+          noise[index] = Math.max(-1, Math.min(1, brown * 3.2));
+        }
       }
       runningNoiseSource = audioCtx.createBufferSource();
       runningNoiseFilter = audioCtx.createBiquadFilter();
+      const noiseGain = audioCtx.createGain();
       runningNoiseSource.buffer = runningNoiseBuffer;
       runningNoiseSource.loop = true;
-      runningNoiseFilter.type = "lowpass";
-      runningNoiseFilter.frequency.value = 650;
-      runningNoiseFilter.Q.value = 0.7;
-      runningNoiseSource.connect(runningNoiseFilter).connect(runningGain);
+      runningNoiseFilter.type = "bandpass";
+      runningNoiseFilter.frequency.value = 240;
+      runningNoiseFilter.Q.value = 0.55;
+      noiseGain.gain.value = 0.55;
+      runningNoiseSource.connect(runningNoiseFilter).connect(noiseGain).connect(runningGain);
       runningNoiseSource.start(t);
     } else {
       runningOsc.type = "triangle";
@@ -636,7 +643,7 @@
     }
 
     runningGain.gain.setValueAtTime(0.001, t);
-    runningGain.gain.linearRampToValueAtTime(activeRoute.kind === "air" ? 0.032 : 0.04, t + 0.25);
+    runningGain.gain.linearRampToValueAtTime(activeRoute.kind === "air" ? 0.028 : 0.04, t + 0.25);
     runningOsc.connect(runningGain);
     runningRailOsc.connect(runningGain);
     runningGain.connect(audioCtx.destination);
@@ -649,10 +656,10 @@
     const t = audioCtx.currentTime;
     if (activeRoute.kind === "air") {
       const soundSpeedKmh = Math.min(displaySpeed(speed), 1400);
-      runningOsc.frequency.setTargetAtTime(42 + soundSpeedKmh * 0.035, t, 0.16);
-      runningRailOsc.frequency.setTargetAtTime(120 + soundSpeedKmh * 0.24, t, 0.16);
-      runningNoiseFilter?.frequency.setTargetAtTime(450 + soundSpeedKmh * 0.55, t, 0.16);
-      runningGain.gain.setTargetAtTime(state === "running" ? 0.026 + soundSpeedKmh / 24000 : 0.001, t, 0.12);
+      runningOsc.frequency.setTargetAtTime(48 + soundSpeedKmh * 0.018, t, 0.2);
+      runningRailOsc.frequency.setTargetAtTime(78 + soundSpeedKmh * 0.09, t, 0.2);
+      runningNoiseFilter?.frequency.setTargetAtTime(200 + soundSpeedKmh * 0.22, t, 0.2);
+      runningGain.gain.setTargetAtTime(state === "running" ? 0.02 + soundSpeedKmh / 32000 : 0.001, t, 0.14);
       return;
     }
     const soundSpeed = Math.min(speed, 2400);
@@ -2069,6 +2076,9 @@
     "yamanote", "keihinTohoku", "chuo", "sobu", "keiyo", "tozai",
     "keio", "inokashira", "yurikamome", "rinkai", "saikyo",
     "osakaLoop", "osakaChuo", "hankyuTakarazuka",
+    "airOsaka", "airHokkaido", "airOkinawa", "airFukuoka", "airKomatsu",
+    "airHachijo", "airIshigaki", "airMiyako", "airYakushima", "airAmami",
+    "airHonolulu", "airGuam",
   ];
 
   function buildExtraSelectionChoices() {
