@@ -620,6 +620,14 @@ html, body {
   opacity: 0.75;
 }
 
+.remaining-eta {
+  color: #d7f0ff;
+  opacity: 0.95 !important;
+  font-size: 1.55vmin !important;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
 #drive-panel button {
   color: #344054;
   display: flex;
