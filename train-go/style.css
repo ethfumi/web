@@ -548,33 +548,23 @@ html, body {
 }
 
 #money-meter {
-  display: flex;
   width: 100%;
-  margin-top: 0.8vmin;
-  padding-top: 0.8vmin;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35vmin;
-  border-top: 0.25vmin solid rgba(255, 255, 255, 0.55);
-  line-height: 1;
-  color: #ffe7a8;
-}
-
-#money-meter > small {
-  font-size: 1.7vmin;
-  opacity: 0.92;
+  margin-top: 0.7vmin;
+  padding-top: 0.55vmin;
+  border-top: 0.2vmin solid rgba(255, 255, 255, 0.28);
+  color: rgba(255, 236, 190, 0.82);
+  font-size: 1.55vmin;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  letter-spacing: 0.02em;
 }
 
 #run-money-value {
-  font-size: 3.6vmin;
+  font-size: 1.65vmin;
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
-  color: #ffd56a;
-}
-
-#money-meter .distance-main small {
-  font-size: 1.7vmin;
-  color: #ffe7a8;
+  color: rgba(255, 220, 130, 0.95);
 }
 
 #remaining-meter {
