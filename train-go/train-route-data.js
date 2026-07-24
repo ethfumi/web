@@ -488,3 +488,53 @@
     });
   }
 })();
+
+// 東京湾フェリー接続の在来線（久里浜側・金谷側）
+(() => {
+  "use strict";
+  const data = window.TRAIN_GO_ROUTE_DATA;
+  Object.assign(data.trains, {
+    yokosuka: {
+      name: "みずいろのでんしゃ", kind: "commuter", body: "#e8ecef", stripe: "#0072bc",
+      face: "#0072bc", edge: "#aeb8be", callName: "みずいろのでんしゃ",
+    },
+    uchibo: {
+      name: "あおのでんしゃ", kind: "commuter", body: "#e8ecef", stripe: "#00a7e3",
+      face: "#00a7e3", edge: "#aeb8be", callName: "あおのでんしゃ",
+    },
+  });
+  const sources = [
+    {
+      key: "yokosuka", name: "よこすかせん", color: "#0072bc", trainKey: "yokosuka",
+      speed: 95, cars: 11, crossing: true, icon: "⚓",
+      p: [
+        ["とうきょう", 0, 139.7671, 35.6812], ["しんばし", 1.9, 139.7586, 35.6663],
+        ["しながわ", 6.8, 139.7388, 35.6285], ["おおふな", 31.7, 139.5311, 35.3535],
+        ["よこすか", 68.0, 139.6550, 35.2830], ["くりはま", 73.2, 139.7065, 35.2310],
+      ],
+    },
+    {
+      key: "uchibo", name: "うちぼうせん", color: "#00a7e3", trainKey: "uchibo",
+      speed: 90, cars: 10, crossing: true, icon: "🐚",
+      p: [
+        ["ちば", 0, 140.1133, 35.6134], ["そが", 3.8, 140.1307, 35.5815],
+        ["きさらづ", 31.3, 139.9240, 35.3750], ["きमितつ", 42.6, 139.9020, 35.3300],
+        ["はまかなや", 70.0, 139.8250, 35.1700],
+      ],
+    },
+  ];
+  for (const item of sources) {
+    const stations = item.p.slice(1).map(([name, km]) => ({ name, km }));
+    stations.push({ name: item.p[0][0], km: 0 });
+    data.routes[item.key] = {
+      name: item.name, start: item.p[0][0], startKm: 0, supportsExpress: false,
+      allowCrossings: Boolean(item.crossing), stations,
+      expressStops: new Set(), cityStations: new Set(item.p.map(([name]) => name)),
+    };
+    data.maps[item.key] = { name: item.name, color: item.color, points: item.p };
+    data.metadata.push({
+      key: item.key, name: item.name, color: item.color, trainKey: item.trainKey,
+      kind: "rail", icon: item.icon, cars: item.cars, speedKmh: item.speed,
+    });
+  }
+})();

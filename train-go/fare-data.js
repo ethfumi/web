@@ -87,6 +87,8 @@
     keihinTohoku: "jrTokyo",
     keiyo: "jrTokyo",
     rinkai: "jrTokyo",
+    yokosuka: "jrTokyo",
+    uchibo: "jrMain",
     osakaLoop: "jrTokyo",
     // 地下鉄
     ginza: "metro",
@@ -155,6 +157,10 @@
     ferryMiyajima: 200,
     ferrySakurajima: 200,
     ferrySeikan: 2600,
+    ferryTokyoBay: 750,
+    ferryOgasawara: 30000,
+    ferryTaiheiyo: 22000,
+    ferryShinnihonkai: 18000,
   };
 
   function fareClassFor(routeKey, route) {
