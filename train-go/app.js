@@ -38,6 +38,11 @@
   const AIR_JETSTREAM_BOOST_KMH = 180;
   const AIR_MAX_BRAKING_DISTANCE_METERS = 20000;
   const PASSENGER_TAP_BONUS_KMH = 1;
+  const MAX_ONBOARD_PASSENGERS = 16;
+  const TRAIN_BOARDING_MIN = 2;
+  const TRAIN_BOARDING_MAX = 6;
+  const AIR_BOARDING_MIN = 6;
+  const AIR_BOARDING_MAX = 12;
   const DEPARTURE_SPEED_PX_PER_SEC = DEPARTURE_SPEED_KMH / SPEED_DISPLAY_SCALE;
   const AIR_DEPARTURE_SPEED_PX_PER_SEC = AIR_DEPARTURE_SPEED_KMH / SPEED_DISPLAY_SCALE;
   const STAR_SPAWN_MIN_SECONDS = 9;
@@ -115,6 +120,8 @@
     "せんだい", "もりおか", "しんあおもり", "きちじょうじ", "みたか",
     "たちかわ", "はちおうじ", "たかお", "なかの", "おおてまち", "にしふなばし",
     "ちょうふ", "ふちゅう", "けいおうはちおうじ", "けいおうたまセンター", "はしもと",
+    "よこはま", "かわさき", "おおふな", "まいはま", "しんきば", "とよす",
+    "おおさき", "かいひんまくはり",
   ]);
   function segmentKey(stationA, stationB) {
     return [stationA, stationB].sort().join("::");
@@ -244,6 +251,14 @@
         stamp: "🌌",
       },
     },
+    keiyo: {
+      "まいはま": {
+        banner: "🏰 ゆめの えき！",
+        announcement: "しろいおしろと、ゆめがいっぱいのえきだよ！",
+        symbols: ["🏰", "✨", "🎢"],
+        stamp: "🏰",
+      },
+    },
     yamanote: {
       "うえの": {
         banner: "🐼 どうぶつの まち！",
@@ -276,8 +291,9 @@
     Object.values(ROUTES).flatMap((route) => stationNamesForRoute(route)),
   )];
   const PASSENGER_POOL = [
-    "🧒", "👧", "👦", "👩", "👨", "👵", "👴",
-    "🐰", "🐻", "🐧", "🐶", "🐱", "🦊", "🐼",
+    "🧒", "👧", "👦", "👩", "👨", "👵", "👴", "👶", "🧑", "🧔",
+    "🐰", "🐻", "🐧", "🐶", "🐱", "🦊", "🐼", "🐨", "🐯", "🐸",
+    "🐵", "🐥", "🦄", "🐷",
   ];
 
   const OPPOSING_TRAIN_TYPES = {
@@ -385,6 +401,7 @@
   const WEATHERS = ["sunny", "rain", "snow"];
   const STAMP_STORAGE_KEY = "train-go-station-stamps-v1";
   const TOTAL_DISTANCE_STORAGE_KEY = "train-go-total-distance-meters-v1";
+  const TOTAL_MONEY_STORAGE_KEY = "train-go-total-fare-yen-v1";
   const METERS_PER_MILE = 1609.344;
 
   // ---- 要素 ----
@@ -411,6 +428,11 @@
   const totalDistanceCard = document.getElementById("total-distance-card");
   const totalMilesValue = document.getElementById("total-miles-value");
   const totalKmValue = document.getElementById("total-km-value");
+  const totalMoneyCard = document.getElementById("total-money-card");
+  const totalMoneyValue = document.getElementById("total-money-value");
+  const sessionMoneyValue = document.getElementById("session-money-value");
+  const moneyMeter = document.getElementById("money-meter");
+  const runMoneyValue = document.getElementById("run-money-value");
   const nextStationDistanceLabel = document.getElementById("next-station-distance-label");
   const nextStationDistanceValue = document.getElementById("next-station-distance-value");
   const nextStationDistanceKm = document.getElementById("next-station-distance-km");
@@ -697,6 +719,9 @@
   let distance = 0;
   let visualDistance = 0;    // 折り返し後は減らし、背景や駅を反対方向へ流す
   let totalTravelMeters = loadTotalTravelMeters();
+  let totalMoneyYen = loadTotalMoneyYen();
+  let sessionMoneyYen = 0;
+  let rideMoneyYen = 0;
   let lastTotalDistanceSaveAt = performance.now();
   let wheelAngle = 0;
   let stationWorldX = 0;   // 次の駅の位置(距離座標)
@@ -1000,6 +1025,15 @@
     }
   }
 
+  function loadTotalMoneyYen() {
+    try {
+      const saved = Number(localStorage.getItem(TOTAL_MONEY_STORAGE_KEY) || 0);
+      return Number.isFinite(saved) && saved >= 0 ? Math.min(Math.floor(saved), Number.MAX_SAFE_INTEGER) : 0;
+    } catch {
+      return 0;
+    }
+  }
+
   function renderTotalTravelDistance() {
     const meters = Math.max(0, Math.floor(totalTravelMeters));
     const miles = meters / METERS_PER_MILE;
@@ -1014,6 +1048,30 @@
     if (isDebug) totalDistanceCard.dataset.totalMeters = String(meters);
   }
 
+  function renderTotalMoney() {
+    const yen = Math.max(0, Math.floor(totalMoneyYen));
+    const sessionYen = Math.max(0, Math.floor(sessionMoneyYen));
+    const formattedYen = yen.toLocaleString("ja-JP");
+    totalMoneyValue.textContent = formattedYen;
+    sessionMoneyValue.textContent = `きょう ＋${sessionYen.toLocaleString("ja-JP")} えん`;
+    totalMoneyCard.setAttribute("aria-label", `いままでの運賃、${yen}円、この端末を開いてから${sessionYen}円`);
+    if (isDebug) {
+      totalMoneyCard.dataset.totalYen = String(yen);
+      totalMoneyCard.dataset.sessionYen = String(sessionYen);
+    }
+    renderRideMoney();
+  }
+
+  function renderRideMoney() {
+    const rideYen = Math.max(0, Math.floor(rideMoneyYen));
+    const formattedRideYen = rideYen.toLocaleString("ja-JP");
+    if (runMoneyValue) runMoneyValue.textContent = formattedRideYen;
+    if (moneyMeter) {
+      moneyMeter.setAttribute("aria-label", `この電車で稼いだ運賃、${rideYen}円`);
+      if (isDebug) moneyMeter.dataset.rideYen = String(rideYen);
+    }
+  }
+
   function saveTotalTravelDistance() {
     try {
       localStorage.setItem(TOTAL_DISTANCE_STORAGE_KEY, String(Math.floor(totalTravelMeters)));
@@ -1023,6 +1081,60 @@
     lastTotalDistanceSaveAt = performance.now();
   }
 
+  function saveTotalMoney() {
+    try {
+      localStorage.setItem(TOTAL_MONEY_STORAGE_KEY, String(Math.floor(totalMoneyYen)));
+    } catch {
+      // 保存できない環境でも、その回の運賃は数え続ける。
+    }
+  }
+
+  function stationKmOnActiveRoute(stationName) {
+    if (!activeRoute || !stationName) return null;
+    if (stationName === activeRoute.start) return activeRoute.startKm;
+    for (const station of activeRoute.stations) {
+      if (station.name === stationName) return station.km;
+    }
+    return null;
+  }
+
+  function travelDistanceKmOnActiveRoute(fromName, toName) {
+    const fromKm = stationKmOnActiveRoute(fromName);
+    const toKm = stationKmOnActiveRoute(toName);
+    if (fromKm == null || toKm == null) return 0;
+    const raw = Math.abs(toKm - fromKm);
+    if (activeRoute.loopKm) {
+      return Math.min(raw, Math.max(0, activeRoute.loopKm - raw));
+    }
+    return raw;
+  }
+
+  function fareYenForPassenger(passenger) {
+    const origin = passenger.origin || currentStationName;
+    const destination = passenger.destination || currentStationName;
+    const distanceKm = travelDistanceKmOnActiveRoute(origin, destination);
+    const fareApi = window.TRAIN_GO_FARE;
+    if (!fareApi?.fareYen) {
+      return Math.max(140, Math.round(distanceKm * 20));
+    }
+    return fareApi.fareYen(selectedRouteKey, distanceKm, activeRoute);
+  }
+
+  function earnFareFromPassengers(alighting) {
+    if (!alighting.length) return 0;
+    let earned = 0;
+    for (const passenger of alighting) {
+      earned += fareYenForPassenger(passenger);
+    }
+    if (earned <= 0) return 0;
+    totalMoneyYen += earned;
+    sessionMoneyYen += earned;
+    rideMoneyYen += earned;
+    saveTotalMoney();
+    renderTotalMoney();
+    return earned;
+  }
+
   function recordTotalTravel(travelPixels, now) {
     if (!Number.isFinite(travelPixels) || travelPixels <= 0) return;
     totalTravelMeters += travelPixels / PIXELS_PER_METER;
@@ -1030,6 +1142,7 @@
   }
 
   renderTotalTravelDistance();
+  renderTotalMoney();
 
   function loadVisitedStations() {
     try {
@@ -1147,8 +1260,28 @@
     const destinations = futureDestinationNames();
     return pickPassengers(count).map((icon) => ({
       icon,
+      origin: currentStationName,
       destination: destinations[Math.floor(Math.random() * destinations.length)],
     }));
+  }
+
+  function randomBoardingCount(maxSeats) {
+    if (maxSeats <= 0) return 0;
+    const isAir = activeRoute.kind === "air";
+    const min = isAir ? AIR_BOARDING_MIN : TRAIN_BOARDING_MIN;
+    const max = isAir ? AIR_BOARDING_MAX : TRAIN_BOARDING_MAX;
+    const desired = min + Math.floor(Math.random() * (max - min + 1));
+    return Math.min(maxSeats, desired);
+  }
+
+  function boardPassengersAtCurrentStation(count = randomBoardingCount(MAX_ONBOARD_PASSENGERS - onboardPassengers.length)) {
+    const availableSeats = Math.max(0, MAX_ONBOARD_PASSENGERS - onboardPassengers.length);
+    const boardingCount = Math.min(availableSeats, count);
+    if (boardingCount <= 0) return [];
+    const boarding = makeBoardingPassengers(boardingCount);
+    onboardPassengers.push(...boarding);
+    updateOnboardPanel();
+    return boarding;
   }
 
   function cycleWeatherAndTime() {
@@ -1226,6 +1359,8 @@
     midAnnouncementDone = false;
     onboardPassengers = [];
     deliveredPassengers = 0;
+    rideMoneyYen = 0;
+    renderRideMoney();
     setOnboardPanelExpanded(false);
     stationPassengers.replaceChildren();
     opposingTrain = null;
@@ -1236,7 +1371,6 @@
     driverCallIndex = 0;
     autoMode = false;
     autoActionTimer = 0;
-    updateOnboardPanel();
     addStationStamp(activeRoute.start, false);
     renderStampBook();
     segmentNumber = 0;
@@ -1258,7 +1392,6 @@
     stationPassengers.classList.add("hidden");
     populateQuickAddButtons();
     runUi.classList.toggle("hidden", activeRoute.kind === "air");
-    onboardPanel.classList.toggle("hidden", activeRoute.kind === "air");
     btnDriver.querySelector("span:first-child").textContent = activeRoute.kind === "air" ? "👩‍✈️" : "🧑‍✈️";
     btnDriver.querySelector("span:last-child").textContent = activeRoute.kind === "air" ? "パイロット" : "うんてんし";
     btnMapRecenter.querySelector("span:first-child").textContent = activeRoute.kind === "air" ? "✈️" : "🚃";
@@ -1268,12 +1401,18 @@
     clearRouteEvent();
     updateDriveUi();
     arrivalBanner.textContent = "とうちゃく〜！";
+    const initialBoarding = boardPassengersAtCurrentStation();
+    if (activeRoute.kind === "air" && initialBoarding.length > 0) {
+      showPlayBanner(`✈️ ${initialBoarding.length}にん ごじょうしゃ！`, 2200);
+    }
     announceInitialDeparture();
   }
 
   function goHome() {
     saveTotalTravelDistance();
+    saveTotalMoney();
     renderTotalTravelDistance();
+    renderTotalMoney();
     mapMode = "scenery";
     resetMapCamera();
     document.body.classList.remove("map-view-active");
@@ -1384,9 +1523,8 @@
     if (autoMode) autoActionTimer = 1.2;
     if (activeRoute.kind === "air") {
       stationDoorsDone = true;
-      arrivalBanner.textContent = isTurnaround ? "✈️ おりかえし〜！" : "✈️ ちゃくりく〜！";
-      say(`${currentStationName}に、ちゃくりく！${isTurnaround ? `おりかえして、${routeTerminalStation().name}へいくよ。` : ""}がめんをタップすると、またとべるよ`);
-      if (autoMode) autoActionTimer = 2.4;
+      exchangePassengers();
+      if (autoMode) autoActionTimer = 2.8;
     } else if (isKomachiStop) {
       komachiReady = true;
       arrivalBanner.textContent = "れんけつするでんしゃがいた！";
@@ -1464,17 +1602,7 @@
     });
   }
 
-  function exchangePassengers() {
-    const alighting = onboardPassengers.filter((passenger) => passenger.destination === currentStationName);
-    onboardPassengers = onboardPassengers.filter((passenger) => passenger.destination !== currentStationName);
-    deliveredPassengers += alighting.length;
-
-    const availableSeats = Math.max(0, 7 - onboardPassengers.length);
-    const boardingCount = Math.min(availableSeats, 1 + Math.floor(Math.random() * 3));
-    const boarding = makeBoardingPassengers(boardingCount);
-    onboardPassengers.push(...boarding);
-    updateOnboardPanel();
-
+  function renderPassengerExchange(alighting, boarding) {
     stationPassengers.replaceChildren();
     [...alighting.map((passenger) => ({ ...passenger, direction: "alight" })),
       ...boarding.map((passenger) => ({ ...passenger, direction: "board" }))]
@@ -1483,18 +1611,38 @@
         span.textContent = passenger.icon;
         span.className = `passenger-${passenger.direction}`;
         span.title = `${passenger.destination}へいくよ`;
-        span.style.setProperty("--passenger-delay", `${index * 0.18}s`);
+        span.style.setProperty("--passenger-delay", `${index * 0.12}s`);
         stationPassengers.appendChild(span);
       });
+    stationPassengers.classList.toggle("hidden", alighting.length + boarding.length === 0);
+  }
 
-    stationPassengers.classList.remove("hidden");
+  function exchangePassengers() {
+    const alighting = onboardPassengers.filter((passenger) => passenger.destination === currentStationName);
+    onboardPassengers = onboardPassengers.filter((passenger) => passenger.destination !== currentStationName);
+    deliveredPassengers += alighting.length;
+    const earnedYen = earnFareFromPassengers(alighting);
+
+    const boarding = boardPassengersAtCurrentStation();
+    renderPassengerExchange(alighting, boarding);
+
     arrivalBanner.classList.add("passenger-exchange");
+    const moneyText = earnedYen > 0 ? ` 💰${earnedYen.toLocaleString("ja-JP")}えん` : "";
+    if (activeRoute.kind === "air") {
+      arrivalBanner.textContent = alighting.length > 0
+        ? `✈️ ${alighting.length}にん おとどけ！${moneyText} ${boarding.length}にん ごじょうしゃ！`
+        : `✈️ ${boarding.length}にん ごじょうしゃ！`;
+      say(alighting.length > 0
+        ? `${currentStationName}にとうちゃく。${alighting.length}にんおりました。うんちん ${earnedYen}えんです。${boarding.length}にんごじょうしゃです`
+        : `${boarding.length}にんごじょうしゃです。つぎのくうこうへいきましょう`);
+      return;
+    }
     arrivalBanner.textContent = alighting.length > 0
-      ? `${alighting.length}にん おとどけ！ タップかそく ＋${alighting.length} km/h`
+      ? `${alighting.length}にん おとどけ！${moneyText} タップかそく ＋${alighting.length} km/h`
       : `${boarding.length}にん ごじょうしゃ！`;
     const destination = boarding[0]?.destination;
     say(alighting.length > 0
-      ? `ドアがひらきます。${alighting.length}にんとうちゃく！タップかそくが、${alighting.length}キロアップ！${boarding.length}にんごじょうしゃ！`
+      ? `ドアがひらきます。${alighting.length}にんとうちゃく！うんちん ${earnedYen}えん！タップかそくが、${alighting.length}キロアップ！${boarding.length}にんごじょうしゃ！`
       : `ドアがひらきます。${boarding.length}にん、${destination ? `${destination}まで` : ""}ごじょうしゃくださーい！`);
   }
 
@@ -1918,7 +2066,8 @@
   const ROUTE_SELECTION_ORDER = [
     "tokaido", "sanyo", "kyushu", "nishiKyushu", "tohoku", "hokkaido",
     "akita", "yamagata", "joetsu", "hokuriku",
-    "yamanote", "chuo", "sobu", "tozai", "keio", "inokashira",
+    "yamanote", "keihinTohoku", "chuo", "sobu", "keiyo", "tozai",
+    "keio", "inokashira", "yurikamome", "rinkai", "saikyo",
     "osakaLoop", "osakaChuo", "hankyuTakarazuka",
   ];
 
@@ -1967,6 +2116,7 @@
 
   function showRouteSelection() {
     renderTotalTravelDistance();
+    renderTotalMoney();
     routeSelectPage.classList.remove("hidden");
     trainSelectPage.classList.add("hidden");
     selectScreen.classList.remove("selecting-train");
@@ -4827,6 +4977,7 @@
           autoMode, autoActionTimer, autoTargetKmh: autoTargetKmh(),
           playElapsedSeconds, motionEffect: canvas.dataset.motionEffect,
           onboardPassengers: [...onboardPassengers], deliveredPassengers, tapBoostKmh: currentTapBoostKmh(),
+          totalMoneyYen, sessionMoneyYen, rideMoneyYen,
           timeOfDay, weather, visitedStations: [...visitedStations],
           fallingStar: fallingStar ? { ...fallingStar } : null,
           starBoostTime, starBoostMultiplier, starBoostType: starBoostType.key,
