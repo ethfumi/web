@@ -86,9 +86,18 @@ html, body {
   text-shadow: 0 2px 0 #fff;
 }
 
-#total-distance-card {
+.total-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.6vmin;
+  width: 100%;
+}
+
+#total-distance-card,
+#total-money-card {
   display: grid;
-  min-width: min(46vw, 280px);
+  min-width: min(40vw, 240px);
   justify-items: center;
   padding: 0.7vmin 3vmin 0.9vmin;
   border: 0.35vmin solid rgba(42, 92, 170, 0.16);
@@ -99,34 +108,52 @@ html, body {
   line-height: 1;
 }
 
+#total-money-card {
+  border-color: rgba(201, 148, 36, 0.28);
+  background: rgba(255, 250, 235, 0.9);
+  box-shadow: 0 0.65vmin 0 rgba(176, 132, 40, 0.18);
+}
+
 .total-distance-label {
   color: #658098;
   font-size: clamp(10px, 1.7vmin, 15px);
   font-weight: 700;
 }
 
-#total-distance-card > div {
+#total-distance-card > div,
+#total-money-card > div {
   display: flex;
   align-items: baseline;
   gap: 0.6vmin;
 }
 
-#total-miles-value {
+#total-miles-value,
+#total-money-value {
   color: #2a5caa;
   font-size: clamp(28px, 5.2vmin, 48px);
   font-variant-numeric: tabular-nums;
 }
 
-#total-distance-card > div span {
+#total-money-value {
+  color: #c07a10;
+}
+
+#total-distance-card > div span,
+#total-money-card > div span {
   font-size: clamp(14px, 2.5vmin, 23px);
   font-weight: 800;
 }
 
-#total-km-value {
+#total-km-value,
+#session-money-value {
   margin-top: 0.35vmin;
   color: rgba(69, 99, 123, 0.62);
   font-size: clamp(10px, 1.65vmin, 15px);
   font-variant-numeric: tabular-nums;
+}
+
+#session-money-value {
+  color: rgba(160, 110, 20, 0.75);
 }
 
 .train-select-title {
