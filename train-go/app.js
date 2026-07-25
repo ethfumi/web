@@ -949,7 +949,9 @@
   }
 
   function nextStationRemainingMeters() {
-    if (stationIdx < 0 || !nextStationName) return 0;
+    // stationIdx < 0 は「始発へ戻る最終区間」を表す（飛行機・船は帰り道全体）。
+    // 次駅名がある限り stationWorldX 基準で残りを出す。
+    if (!nextStationName) return 0;
     return Math.max(0, (stationWorldX - distance) / PIXELS_PER_METER);
   }
 
