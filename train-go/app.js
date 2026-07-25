@@ -6,6 +6,24 @@
 
   const isDebug = new URLSearchParams(location.search).has("debug");
 
+  // ?debug のときだけ描画段階ごとの所要時間を集計する。__tg.profile() で読み出す。
+  const profileTotals = isDebug ? new Map() : null;
+  function profileRecord(name, ms) {
+    const entry = profileTotals.get(name);
+    if (entry) {
+      entry.ms += ms;
+      entry.calls += 1;
+    } else {
+      profileTotals.set(name, { ms, calls: 1 });
+    }
+  }
+  function profiled(name, draw) {
+    if (!profileTotals) return draw();
+    const started = performance.now();
+    draw();
+    profileRecord(name, performance.now() - started);
+  }
+
   const {trains: TRAINS, routes: ROUTES} = window.TRAIN_GO_ROUTE_DATA;
 
   function isAirRoute(route = activeRoute) {
@@ -2993,6 +3011,49 @@
     return x >= -margin && x <= W + margin && y >= -margin && y <= H + margin;
   }
 
+  function mapSegmentIsVisible(x0, y0, x1, y1, margin) {
+    if (x0 < -margin && x1 < -margin) return false;
+    if (x0 > W + margin && x1 > W + margin) return false;
+    if (y0 < -margin && y1 < -margin) return false;
+    if (y0 > H + margin && y1 > H + margin) return false;
+    return true;
+  }
+
+  // 折れ線用。画面外の連続区間は moveTo で飛ばし、長い路線でもパスを短く保つ。
+  // 面を塗る地形 (海岸線・湖) には使わない。切れたパスは closePath できない。
+  function drawMapGeoPathCulled(scene, points, pixelOffset = 0) {
+    const margin = 80 + Math.abs(pixelOffset);
+    ctx.beginPath();
+    let prevX = 0;
+    let prevY = 0;
+    let hasPrev = false;
+    let penDown = false;
+    for (let index = 0; index < points.length; index++) {
+      const point = points[index];
+      let x = scene.screenCenterX + (mapWorldX(point[0]) - scene.centerWorldX) * scene.scale;
+      let y = scene.screenCenterY + (mapWorldY(point[1]) - scene.centerWorldY) * scene.scale;
+      if (pixelOffset) {
+        const previous = points[Math.max(0, index - 1)];
+        const next = points[Math.min(points.length - 1, index + 1)];
+        const dx = (mapWorldX(next[0]) - mapWorldX(previous[0])) * scene.scale;
+        const dy = (mapWorldY(next[1]) - mapWorldY(previous[1])) * scene.scale;
+        const length = Math.max(Math.hypot(dx, dy), 0.001);
+        x += -dy / length * pixelOffset;
+        y += dx / length * pixelOffset;
+      }
+      if (hasPrev && mapSegmentIsVisible(prevX, prevY, x, y, margin)) {
+        if (!penDown) ctx.moveTo(prevX, prevY);
+        ctx.lineTo(x, y);
+        penDown = true;
+      } else {
+        penDown = false;
+      }
+      prevX = x;
+      prevY = y;
+      hasPrev = true;
+    }
+  }
+
   function sceneWorldBounds(scene, marginMeters = 80000) {
     const inv = 1 / Math.max(scene.scale, 1e-9);
     return {
@@ -3003,14 +3064,27 @@
     };
   }
 
-  function mapIntersectsScene(scene, map) {
+  function mapIntersectsScene(scene, map, marginMeters) {
     if (!map) return false;
-    const view = sceneWorldBounds(scene);
+    const view = sceneWorldBounds(scene, marginMeters);
     const minX = mapWorldX(map.minLon);
     const maxX = mapWorldX(map.maxLon);
     const minY = mapWorldY(map.maxLat);
     const maxY = mapWorldY(map.minLat);
     return maxX >= view.minX && minX <= view.maxX && maxY >= view.minY && minY <= view.maxY;
+  }
+
+  // 画面と路線の外接矩形の隙間 (重なっていれば 0)。中点距離と違い、
+  // 画面を横切る長い路線を「遠い」と誤判定しない。
+  function mapViewGapDistance(scene, map) {
+    const view = sceneWorldBounds(scene, 0);
+    const minX = mapWorldX(map.minLon);
+    const maxX = mapWorldX(map.maxLon);
+    const minY = mapWorldY(map.maxLat);
+    const maxY = mapWorldY(map.minLat);
+    const gapX = Math.max(view.minX - maxX, minX - view.maxX, 0);
+    const gapY = Math.max(view.minY - maxY, minY - view.maxY, 0);
+    return Math.hypot(gapX, gapY);
   }
 
   const MAP_TOWN_BLOCKS = [];
@@ -3332,43 +3406,50 @@
 
   function drawYamanoteRelatedLines(scene, labelSize) {
     // 極端に引いた全体図、または空路・海路では周辺路線を描かない。
-    if (scene.scale < 0.003 || isNonRailRoute()) return;
+    if (scene.scale < 0.003 || isNonRailRoute()) {
+      if (isDebug) canvas.dataset.mapRelatedLines = "";
+      return;
+    }
     const currentKey = activeRouteMapKey();
     const routeWidth = scene.mode === "follow"
       ? Math.max(2, Math.min(4.5, scene.scale * 3.2))
       : Math.max(2, Math.min(6, scene.scale * 6));
     // うえからは見える近傍だけ。首都圏で全地下鉄を毎フレーム描くと重い。
-    const viewRadius = (Math.min(W, H) / Math.max(scene.scale, 1e-6)) * (scene.mode === "follow" ? 0.55 : 0.9);
+    // 判定は画面サイズに応じた余白つきの矩形交差で行う。中点までの距離で
+    // 足切りすると、画面を横切っている長い路線が丸ごと消えてしまう。
+    const viewMargin = Math.max(400, (W / Math.max(scene.scale, 1e-6)) * 0.2);
     const candidates = [];
     for (const mapKey of MAP_ROUTE_DRAW_ORDER) {
       if (mapKey === currentKey) continue;
       const map = ROUTE_MAPS[mapKey];
-      if (!map || !mapIntersectsScene(scene, map)) continue;
+      if (!map || !mapIntersectsScene(scene, map, viewMargin)) continue;
       if (scene.scale < 0.01 && (map.kind === "air" || map.kind === "sea")) continue;
-      const mid = map.points[Math.floor(map.points.length / 2)];
-      const midX = mapWorldX(mid.lon);
-      const midY = mapWorldY(mid.lat);
-      const dist = Math.hypot(midX - scene.centerWorldX, midY - scene.centerWorldY);
-      if (dist > viewRadius) continue;
-      candidates.push({ mapKey, map, dist });
+      candidates.push({ mapKey, map, dist: mapViewGapDistance(scene, map) });
     }
+    // 画面に重なる路線 (gap 0) が先に来る。上限で落ちるのは画面外のものだけ。
     candidates.sort((a, b) => a.dist - b.dist);
-    const maxRelated = scene.mode === "follow" ? 8 : 14;
+    const maxRelated = scene.mode === "follow" ? 16 : 20;
     ctx.save();
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
-    for (let index = 0; index < Math.min(candidates.length, maxRelated); index++) {
+    const drawnCount = Math.min(candidates.length, maxRelated);
+    if (isDebug) {
+      canvas.dataset.mapScale = String(scene.scale);
+      canvas.dataset.mapRelatedLines = candidates.slice(0, drawnCount).map((c) => c.mapKey).join(",");
+      canvas.dataset.mapRelatedDropped = String(candidates.length - drawnCount);
+    }
+    for (let index = 0; index < drawnCount; index++) {
       const { mapKey, map } = candidates[index];
       const offset = MAP_ROUTE_LANE_OFFSETS[mapKey] || 0;
       ctx.strokeStyle = "rgba(255,255,255,0.78)";
       ctx.lineWidth = routeWidth + 3.5;
-      drawMapGeoPath(scene, map.coords, offset);
+      drawMapGeoPathCulled(scene, map.coords, offset);
       ctx.stroke();
       ctx.strokeStyle = map.color;
       ctx.globalAlpha = 0.76;
       ctx.lineWidth = routeWidth;
       ctx.setLineDash(map.kind === "air" || map.kind === "sea" ? [routeWidth * 3, routeWidth * 2] : []);
-      drawMapGeoPath(scene, map.coords, offset);
+      drawMapGeoPathCulled(scene, map.coords, offset);
       ctx.stroke();
       ctx.setLineDash([]);
       ctx.globalAlpha = 1;
@@ -3436,12 +3517,12 @@
       : Math.max(5, Math.min(13, scene.scale * 10));
     ctx.strokeStyle = "rgba(255,255,255,0.95)";
     ctx.lineWidth = routeWidth + 7;
-    drawMapGeoPath(scene, map.coords);
+    drawMapGeoPathCulled(scene, map.coords);
     ctx.stroke();
     ctx.strokeStyle = map.color;
     ctx.lineWidth = routeWidth;
     ctx.setLineDash(isNonRailRoute() ? [routeWidth * 3, routeWidth * 1.8] : []);
-    drawMapGeoPath(scene, map.coords);
+    drawMapGeoPathCulled(scene, map.coords);
     ctx.stroke();
     ctx.setLineDash([]);
 
@@ -3716,17 +3797,13 @@
     const automaticScene = mapMode === "follow" ? yamanoteFollowScene() : yamanoteOverviewScene();
     const scene = applyManualMapCamera(automaticScene);
     const labelSize = Math.max(10, Math.min(W, H) * (scene.portrait ? 0.024 : 0.021));
-    // 地図描画を画面内にクリップし、はみ出し計算・塗りを抑える。
     ctx.save();
-    ctx.beginPath();
-    ctx.rect(0, 0, W, H);
-    ctx.clip();
-    drawYamanoteMapBackground(scene);
-    drawMapTownscape(scene);
-    drawYamanoteRelatedLines(scene, labelSize);
-    drawYamanoteRoute(scene, labelSize);
+    profiled("map:background", () => drawYamanoteMapBackground(scene));
+    profiled("map:townscape", () => drawMapTownscape(scene));
+    profiled("map:relatedLines", () => drawYamanoteRelatedLines(scene, labelSize));
+    profiled("map:route", () => drawYamanoteRoute(scene, labelSize));
     if (!(isNonRailRoute() && scene.mode === "follow")) {
-      drawYamanoteLandmarks(scene, labelSize);
+      profiled("map:landmarks", () => drawYamanoteLandmarks(scene, labelSize));
     }
 
     const position = yamanoteMapPosition();
@@ -5302,6 +5379,7 @@ function drawAirports() {
       canvas.dataset.starMissBlue = String(missedRareStars.blue);
       canvas.dataset.starMissRainbow = String(missedRareStars.rainbow);
     }
+    const drawStarted = profileTotals ? performance.now() : 0;
     const routeMapActive = mapMode !== "scenery" && activeRouteMap() && state !== "select";
     if (routeMapActive) {
       drawYamanoteMap();
@@ -5319,7 +5397,7 @@ function drawAirports() {
         ctx.translate(-ax, -ay);
         drawFuji();
         drawMountains();
-        drawCityscape();
+        profiled("scenery:cityscape", drawCityscape);
         if (isAirRoute()) {
           drawAirports();
           drawJetStream();
@@ -5344,12 +5422,12 @@ function drawAirports() {
           if (trainFacesLeft()) ctx.restore();
         } else {
           drawTunnel();
-          drawTrack();
+          profiled("scenery:track", drawTrack);
           drawCrossing();
-          drawOpposingTrain();
-          drawDistanceMarkers();
+          profiled("scenery:opposing", drawOpposingTrain);
+          profiled("scenery:markers", drawDistanceMarkers);
           drawInspectionEffect();
-          drawStations();
+          profiled("scenery:stations", drawStations);
           if (trainFacesLeft()) {
             // 外側のカメラ拡縮後も画面中央を軸に見えるよう、座標系側の反転軸を補正する。
             const mirrorCenterX = ax + (W * 0.5 - ax) / Math.max(viewScale, 0.001);
@@ -5359,7 +5437,7 @@ function drawAirports() {
           }
           drawHeadlight();
           drawTrainMotionEffects();
-          drawTrain();
+          profiled("scenery:train", drawTrain);
           drawKomachi();
           if (trainFacesLeft()) ctx.restore();
         }
@@ -5370,6 +5448,7 @@ function drawAirports() {
     drawStarPowerBadge();
     drawConfetti(dt);
     drawSpeedBoosts(dt);
+    if (profileTotals) profileRecord("*draw:total", performance.now() - drawStarted);
 
     scheduleFrame();
   }
@@ -5388,6 +5467,14 @@ function drawAirports() {
   if (isDebug) {
     window.__tg = {
       skipToStation() { distance = stationWorldX - 600; },
+      // 描画段階ごとの平均所要時間 (ms/フレーム)。呼ぶたびに集計をリセットする。
+      profile() {
+        const rows = [...profileTotals.entries()]
+          .map(([name, { ms, calls }]) => ({ name, calls, avgMs: Math.round((ms / calls) * 1000) / 1000 }))
+          .sort((a, b) => b.avgMs - a.avgMs);
+        profileTotals.clear();
+        return rows;
+      },
       status() {
         return {
           state, selectedRouteKey, routeName: activeRoute.name, routeVariant: activeRoute.variant || "main", currentLineKm, routeDirection,
