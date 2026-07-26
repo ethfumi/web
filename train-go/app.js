@@ -3011,6 +3011,30 @@
     return x >= -margin && x <= W + margin && y >= -margin && y <= H + margin;
   }
 
+  // 地図の文字が重ならないよう、1フレーム内で確定したラベルの矩形を持つ。
+  // 置けた時だけ true を返し、呼び出し側はその時だけ描く。矩形は使い回す。
+  const mapLabelBoxes = [];
+  let mapLabelBoxCount = 0;
+  function resetMapLabelBoxes() {
+    mapLabelBoxCount = 0;
+  }
+  function claimMapLabelBox(centerX, bottomY, width, height) {
+    const left = centerX - width / 2;
+    const right = centerX + width / 2;
+    const top = bottomY - height;
+    for (let index = 0; index < mapLabelBoxCount; index++) {
+      const box = mapLabelBoxes[index];
+      if (left < box.right && right > box.left && top < box.bottom && bottomY > box.top) return false;
+    }
+    const box = mapLabelBoxes[mapLabelBoxCount] || (mapLabelBoxes[mapLabelBoxCount] = {});
+    box.left = left;
+    box.right = right;
+    box.top = top;
+    box.bottom = bottomY;
+    mapLabelBoxCount++;
+    return true;
+  }
+
   function mapSegmentIsVisible(x0, y0, x1, y1, margin) {
     if (x0 < -margin && x1 < -margin) return false;
     if (x0 > W + margin && x1 > W + margin) return false;
@@ -3405,6 +3429,7 @@
   }
 
   function drawYamanoteRelatedLines(scene, labelSize) {
+    relatedLineLabelCount = 0;
     // 極端に引いた全体図、または空路・海路では周辺路線を描かない。
     if (scene.scale < 0.003 || isNonRailRoute()) {
       if (isDebug) canvas.dataset.mapRelatedLines = "";
@@ -3458,13 +3483,37 @@
       const labelX = scene.screenCenterX + (mapWorldX(labelPoint.lon) - scene.centerWorldX) * scene.scale;
       const labelY = scene.screenCenterY + (mapWorldY(labelPoint.lat) - scene.centerWorldY) * scene.scale;
       if (!mapPointIsVisible(scene, labelX, labelY) || scene.scale < 0.02 || (scene.mode === "follow" && scene.scale < 0.12)) continue;
-      ctx.font = "bold " + Math.max(9, labelSize * 0.56) + "px sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "bottom";
-      ctx.fillStyle = timeOfDay === "night" ? "rgba(244,247,251,0.82)" : "rgba(48,62,80,0.78)";
-      ctx.fillText(map.name, labelX, labelY - 5);
+      // 名前はここでは描かず、駅名を置いたあとに回す (drawMapRelatedLineLabels)。
+      const pending = relatedLineLabels[relatedLineLabelCount]
+        || (relatedLineLabels[relatedLineLabelCount] = {});
+      pending.name = map.name;
+      pending.x = labelX;
+      pending.y = labelY;
+      relatedLineLabelCount++;
     }
     ctx.restore();
+  }
+
+  // 周辺路線の名前。駅名より弱く、ぶつかる時は名前のほうを消す。
+  const relatedLineLabels = [];
+  let relatedLineLabelCount = 0;
+  function drawMapRelatedLineLabels(scene, labelSize) {
+    if (!relatedLineLabelCount) return;
+    const fontSize = Math.max(9, labelSize * 0.56);
+    ctx.save();
+    ctx.font = "bold " + fontSize + "px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.fillStyle = timeOfDay === "night" ? "rgba(244,247,251,0.82)" : "rgba(48,62,80,0.78)";
+    for (let index = 0; index < relatedLineLabelCount; index++) {
+      const label = relatedLineLabels[index];
+      const y = label.y - 5;
+      const width = ctx.measureText(label.name).width + fontSize * 0.4;
+      if (!claimMapLabelBox(label.x, y, width, fontSize)) continue;
+      ctx.fillText(label.name, label.x, y);
+    }
+    ctx.restore();
+    relatedLineLabelCount = 0;
   }
 
   function drawMapAirports(scene, map) {
@@ -3533,25 +3582,41 @@
     for (let index = 0; index < stationList.length; index++) {
       const station = stationList[index];
       const position = yamanoteMapPositionAt(station.km, routeStationMapPositions[index], map);
-      const x = scene.screenCenterX + (position.worldX - scene.centerWorldX) * scene.scale;
-      const y = scene.screenCenterY + (position.worldY - scene.centerWorldY) * scene.scale;
-      if (!mapPointIsVisible(scene, x, y)) continue;
+      position.screenX = scene.screenCenterX + (position.worldX - scene.centerWorldX) * scene.scale;
+      position.screenY = scene.screenCenterY + (position.worldY - scene.centerWorldY) * scene.scale;
+      if (!mapPointIsVisible(scene, position.screenX, position.screenY)) continue;
       const important = activeRoute.cityStations.has(station.name)
         || station.name === currentStationName || station.name === nextStationName;
-      const showLabel = scene.mode === "overview"
-        ? important && scene.scale >= 0.006
-        : important || scene.scale >= 0.7;
       ctx.fillStyle = important ? "#ffffff" : "#dfe8d7";
       ctx.strokeStyle = important ? "#334155" : "#617064";
       ctx.lineWidth = important ? 2.5 : 1.2;
       ctx.beginPath();
-      ctx.arc(x, y, important ? 5.5 : 3, 0, Math.PI * 2);
+      ctx.arc(position.screenX, position.screenY, important ? 5.5 : 3, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
-      if (!showLabel) continue;
-      ctx.fillStyle = timeOfDay === "night" ? "#f4f7fb" : "#344054";
-      ctx.textAlign = "center";
-      ctx.fillText(station.name, x, y - labelSize * 0.55);
+    }
+
+    // 名前は点をすべて描いてから、いま走っている駅を先に置く。
+    // 混んだ区間で「つぎの駅」の名前が先着のラベルに負けて消えるのを防ぐ。
+    ctx.fillStyle = timeOfDay === "night" ? "#f4f7fb" : "#344054";
+    ctx.textAlign = "center";
+    for (let pass = 0; pass < 2; pass++) {
+      for (let index = 0; index < stationList.length; index++) {
+        const station = stationList[index];
+        const position = routeStationMapPositions[index];
+        if (!mapPointIsVisible(scene, position.screenX, position.screenY)) continue;
+        const running = station.name === currentStationName || station.name === nextStationName;
+        if ((pass === 0) !== running) continue;
+        const important = activeRoute.cityStations.has(station.name) || running;
+        const showLabel = scene.mode === "overview"
+          ? important && scene.scale >= 0.006
+          : important || scene.scale >= 0.7;
+        if (!showLabel) continue;
+        const labelY = position.screenY - labelSize * 0.55;
+        const labelWidth = ctx.measureText(station.name).width;
+        if (!claimMapLabelBox(position.screenX, labelY, labelWidth + labelSize * 0.4, labelSize)) continue;
+        ctx.fillText(station.name, position.screenX, labelY);
+      }
     }
     ctx.restore();
   }
@@ -3568,9 +3633,13 @@
       if (!mapPointIsVisible(scene, x, y, 50)) continue;
       ctx.font = (labelSize * 1.25) + "px sans-serif";
       ctx.fillText(landmark.icon, x, y - labelSize * 0.3);
-      ctx.font = "bold " + Math.max(8, labelSize * 0.68) + "px sans-serif";
+      // 名前が駅名とぶつかる時はアイコンだけ残す。駅名は先に場所を取っている。
+      const nameSize = Math.max(8, labelSize * 0.68);
+      const nameY = y + labelSize * 0.95;
+      ctx.font = "bold " + nameSize + "px sans-serif";
+      if (!claimMapLabelBox(x, nameY + nameSize / 2, ctx.measureText(landmark.name).width + nameSize * 0.4, nameSize)) continue;
       ctx.fillStyle = timeOfDay === "night" ? "#e9eef6" : "#51606f";
-      ctx.fillText(landmark.name, x, y + labelSize * 0.95);
+      ctx.fillText(landmark.name, x, nameY);
     }
     for (const landmark of MAP_GEOGRAPHY.landmarks) {
       const x = scene.screenCenterX + (mapWorldX(landmark.lon) - scene.centerWorldX) * scene.scale;
@@ -3578,9 +3647,12 @@
       if (!mapPointIsVisible(scene, x, y, 60)) continue;
       ctx.font = Math.max(18, labelSize * 1.7) + "px sans-serif";
       ctx.fillText(landmark.icon, x, y - labelSize * 0.3);
-      ctx.font = "bold " + Math.max(9, labelSize * 0.72) + "px sans-serif";
+      const nameSize = Math.max(9, labelSize * 0.72);
+      const nameY = y + labelSize * 1.15;
+      ctx.font = "bold " + nameSize + "px sans-serif";
+      if (!claimMapLabelBox(x, nameY + nameSize / 2, ctx.measureText(landmark.name).width + nameSize * 0.4, nameSize)) continue;
       ctx.fillStyle = timeOfDay === "night" ? "#eef5ff" : "#526578";
-      ctx.fillText(landmark.name, x, y + labelSize * 1.15);
+      ctx.fillText(landmark.name, x, nameY);
     }
     ctx.restore();
   }
@@ -3797,11 +3869,13 @@
     const automaticScene = mapMode === "follow" ? yamanoteFollowScene() : yamanoteOverviewScene();
     const scene = applyManualMapCamera(automaticScene);
     const labelSize = Math.max(10, Math.min(W, H) * (scene.portrait ? 0.024 : 0.021));
+    resetMapLabelBoxes();
     ctx.save();
     profiled("map:background", () => drawYamanoteMapBackground(scene));
     profiled("map:townscape", () => drawMapTownscape(scene));
     profiled("map:relatedLines", () => drawYamanoteRelatedLines(scene, labelSize));
     profiled("map:route", () => drawYamanoteRoute(scene, labelSize));
+    profiled("map:relatedLabels", () => drawMapRelatedLineLabels(scene, labelSize));
     if (!(isNonRailRoute() && scene.mode === "follow")) {
       profiled("map:landmarks", () => drawYamanoteLandmarks(scene, labelSize));
     }
