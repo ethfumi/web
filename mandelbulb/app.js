@@ -496,6 +496,37 @@ vec3 renderHarmonicField(vec2 coordinate) {
   return quiet + calmGeometryColor((contourA + contourB) * 0.58 + nodes * 0.12);
 }
 
+vec3 renderApollonian(vec2 coordinate) {
+  vec2 period = vec2(1.0, uShapeParams.y);
+  vec2 z = coordinate;
+  float scale = 1.0;
+  float nearestRadius = 1e9;
+  float shell = 1e9;
+  float cellIndex = 0.0;
+  int depth = clamp(uIterations, 4, 14);
+  for (int i = 0; i < 14; i++) {
+    if (i >= depth) break;
+    vec2 cell = floor(z / (2.0 * period) + 0.5);
+    cellIndex += dot(cell, vec2(0.37, 0.61)) * (float(i) + 1.0);
+    z -= 2.0 * period * cell;
+    float radius = length(z);
+    // 反転の直前に最小円までの距離を拾う。1/scale で元の座標系へ戻す
+    shell = min(shell, abs(radius - uShapeParams.z) / scale);
+    float inversion = uShapeParams.x / max(dot(z, z), 0.00002);
+    z *= inversion;
+    scale *= inversion;
+    nearestRadius = min(nearestRadius, radius);
+  }
+  float gasket = abs(z.y) / scale;
+  float edge = exp(-95.0 * gasket);
+  float hairline = exp(-260.0 * gasket) * 0.5;
+  float ring = exp(-140.0 * shell);
+  float fill = smoothstep(0.85, 0.0, nearestRadius);
+  float tone = 0.5 + 0.5 * sin(cellIndex * 1.7 + nearestRadius * 3.1);
+  vec3 body = calmGeometryColor(0.014 + fill * 0.03 + tone * 0.016);
+  return body + calmGeometryColor(edge * 0.72 + hairline + ring * 0.34);
+}
+
 vec3 renderPlane(vec2 screenPoint) {
   float planeScale = 1.72;
   if (uMode == 6) planeScale = 1.42;
@@ -504,6 +535,7 @@ vec3 renderPlane(vec2 screenPoint) {
   else if (uMode == 9) planeScale = 1.55;
   else if (uMode == 10) planeScale = 1.35;
   else if (uMode == 11) planeScale = 1.65;
+  else if (uMode == 16) planeScale = 1.05;
   else if (uMode >= 13) planeScale = 1.75;
   vec2 coordinate = uPan + screenPoint * (planeScale / uZoom);
   vec3 color;
@@ -516,6 +548,7 @@ vec3 renderPlane(vec2 screenPoint) {
   else if (uMode == 13) color = renderInfiniteKaleidoscope(coordinate);
   else if (uMode == 14) color = renderInfinitePrism(coordinate);
   else if (uMode == 15) color = renderInfiniteSpiral(coordinate);
+  else if (uMode == 16) color = renderApollonian(coordinate);
   else color = renderEscapeSet(coordinate);
   float gridGlow = (uMode <= 6 || uMode == 12) ? exp(-70.0 * min(abs(coordinate.x), abs(coordinate.y))) / max(1.0, uZoom * 0.04) : 0.0;
   return color + vec3(0.08, 0.22, 0.27) * gridGlow;
@@ -696,6 +729,11 @@ void main() {
       { key: "arms", label: "ARMS", description: "螺旋の本数", min: 3, max: 24, step: 1, value: 10, digits: 0 },
       { key: "zoomPeriod", label: "ZOOM PERIOD", description: "模様が戻る倍率", min: 1.35, max: 5, step: 0.05, value: 2, digits: 2, suffix: "×" },
       { key: "spiral", label: "SPIRAL", description: "巻きの強さ", min: 0.25, max: 3, step: 0.05, value: 1.15, digits: 2 }
+    ] },
+    { title: "APOLLONIAN GASKET", subtitle: "/ TOUCHING CIRCLES", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "格子へ折り返してから円で反転する操作を反復し、互いに接する円で平面を埋め尽くします。隙間には必ずより小さい円が入るため、ズームしても充填が終わりません。", note: "CURVATUREで円の大きさの配分、ASPECTで格子の縦横比が変わります。比率を変えると接する円の並びが組み替わります。", parameters: [
+      { key: "curvature", label: "CURVATURE", description: "円反転の強さ", min: 0.7, max: 1.6, step: 0.005, value: 1.09, digits: 3 },
+      { key: "aspect", label: "ASPECT", description: "格子の縦横比", min: 0.45, max: 2.2, step: 0.01, value: 1, digits: 2 },
+      { key: "shell", label: "SHELL", description: "強調する円の半径", min: 0.2, max: 1.4, step: 0.01, value: 0.72, digits: 2 }
     ] }
   ];
 
@@ -777,6 +815,7 @@ void main() {
       case 13: return (values.centers > 0 ? "sⱼₖ = " + values.spread.toFixed(2) + " · " + values.zoomPeriod.toFixed(2) + "ᵏ · exp(2πij/" + values.centers.toFixed(0) + ")\nw = z − nearest({0, sⱼₖ})" : "w = z  // central singularity only") + "\nρ = log|w| / log(" + values.zoomPeriod.toFixed(2) + "),  φ = fract(ρ)";
       case 14: return "ρ = log(r) / log(" + values.zoomPeriod.toFixed(2) + ")\nα = fold(θ + " + values.shear.toFixed(2) + "ρ, 2π / " + values.sides.toFixed(0) + ")\nL = lines(ρ + 2α, ρ − 2α)";
       case 15: return "ρ = log(r) / log(" + values.zoomPeriod.toFixed(2) + ")\nS± = " + values.arms.toFixed(0) + "θ ± " + values.spiral.toFixed(2) + "ρ\nK(r, θ) = lines(S+, S−)";
+      case 16: return "zₙ₊₁ = " + values.curvature.toFixed(3) + " · zₙ′ / |zₙ′|²,  zₙ′ = fold(zₙ, 1 : " + values.aspect.toFixed(2) + ")\nd = |Im z| / ∏ kᵢ";
       default: return "";
     }
   }
