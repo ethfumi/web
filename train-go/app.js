@@ -214,6 +214,10 @@
   const UNDERGROUND_STATIONS = {
     inokashira: new Set(["しんせん"]),
     keio: new Set(["しんじゅく"]),
+    tsukubaExpress: new Set([
+      "あきはばら", "しんおかちまち", "あさくさ", "みなみせんじゅ",
+      "きたせんじゅ", "あおい", "ろくちょう", "つくば",
+    ]),
     osakaChuo: new Set([
       "ながた", "たかいだ", "ふかえばし", "みどりばし", "もりのみや",
       "たにまちよんちょうめ", "さかいすじほんまち", "ほんまち", "あわざ",
@@ -2208,7 +2212,8 @@
   const ROUTE_SELECTION_ORDER = [
     "tokaido", "sanyo", "kyushu", "nishiKyushu", "tohoku", "hokkaido",
     "akita", "yamagata", "joetsu", "hokuriku",
-    "yamanote", "keihinTohoku", "chuo", "sobu", "keiyo", "tozai",
+    "yamanote", "keihinTohoku", "chuo", "sobu", "tsukubaExpress",
+    "joban", "tobuSkytree", "keiyo", "tozai",
     "keio", "inokashira", "yurikamome", "rinkai", "saikyo", "yokosuka", "uchibo",
     "osakaLoop", "osakaChuo", "hankyuTakarazuka",
     "airOsaka", "airHokkaido", "airOkinawa", "airFukuoka", "airKomatsu",
