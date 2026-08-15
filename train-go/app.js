@@ -2187,36 +2187,41 @@
   // 車体の大きさ・前面フォルム・扉数・屋根上機器・足まわりを変えて描き分ける。
   // lengthRatio は 20m級の通勤電車を 1 とした車体の長さ。実車の比をゆるめて使う。
   // 車両の占める幅そのものなので、編成の長さもこの値で決まる。
+  // bobAmp は走行中の上下の揺れ幅(px)。線路と足まわりの違いで、揺れ方も変える。
   const CAR_PROFILES = {
     // 25m級。長い車体があってこそ、ロングノーズが窮屈にならない。
+    // スラブ軌道とロングレールを高い精度で保線しているので、上下にはほとんど揺れない。
     shinkansen: {lengthRatio:1.28, heightRatio:1, cabRatio:0.42, doors:0, windowCount:6,
       face:"nose", cab:"nose", band:"swoosh", roof:"smooth", pantographEvery:3,
-      wheels:"rail", windowTop:0.22, windowHeight:0.17},
-    // JR の通勤電車。角ばった切妻の前面。
+      wheels:"rail", windowTop:0.22, windowHeight:0.17, bobAmp:0.2},
+    // JR の通勤電車。角ばった切妻の前面。バラスト軌道と継ぎ目でいちばんよく揺れる。
     commuter: {lengthRatio:1, heightRatio:1, cabRatio:0.19, doors:2,
       face:"flat", cab:"box", band:"waist", roof:"cooler", pantographEvery:2,
-      wheels:"rail", windowTop:0.19, windowHeight:0.23},
+      wheels:"rail", windowTop:0.19, windowHeight:0.23, bobAmp:0.9},
     // 私鉄。前面上部を斜めに落とした顔つきで、JR と見分ける。
     private: {lengthRatio:1, heightRatio:0.96, cabRatio:0.22, doors:2,
       face:"slant", cab:"box", band:"waist", roof:"cooler", pantographEvery:2,
-      wheels:"rail", windowTop:0.2, windowHeight:0.22},
+      wheels:"rail", windowTop:0.2, windowHeight:0.22, bobAmp:0.85},
     // 地下鉄。丸みのある前面で、ひと回り小さい車体。
+    // ロングレール中心で継ぎ目が少なく、地上の通勤電車よりは静か。
     subway: {lengthRatio:0.98, heightRatio:0.92, cabRatio:0.2, doors:2,
       face:"round", cab:"box", band:"waist", roof:"cooler", pantographEvery:2,
-      wheels:"rail", windowTop:0.2, windowHeight:0.22},
+      wheels:"rail", windowTop:0.2, windowHeight:0.22, bobAmp:0.6},
     // 銀座線・丸ノ内線・大江戸線のような16m級の小型車体。
     subwaySmall: {lengthRatio:0.84, heightRatio:0.82, cabRatio:0.22, doors:2,
       face:"round", cab:"box", band:"waist", roof:"cooler", pantographEvery:2,
-      wheels:"rail", windowTop:0.2, windowHeight:0.22},
-    // 在来線サイズの車体で走るミニ新幹線(E3系つばさ・E6系こまち)。
-    // フル規格と連結したときに、短くて背が低いことが分かるようにする。
-    miniShinkansen: {lengthRatio:1, heightRatio:0.85, cabRatio:0.4, doors:0, windowCount:4,
+      wheels:"rail", windowTop:0.2, windowHeight:0.22, bobAmp:0.6},
+    // 在来線サイズの長さで走るミニ新幹線(E3系つばさ・E6系こまち)。
+    // 実車で狭いのは車体の幅で、高さはフル規格とほぼ変わらない。
+    // 横から見た絵では幅が出ないので、短さだけで違いを見せる。
+    miniShinkansen: {lengthRatio:1, heightRatio:1, cabRatio:0.4, doors:0, windowCount:4,
       face:"nose", cab:"nose", band:"swoosh", roof:"smooth", pantographEvery:3,
-      wheels:"rail", windowTop:0.22, windowHeight:0.18},
+      wheels:"rail", windowTop:0.22, windowHeight:0.18, bobAmp:0.3},
     // 新交通システムとモノレール。短く低い車体、ゴムタイヤ、パンタグラフなし。
+    // ゴムタイヤなので上下の細かい振動は出にくい。
     newtransit: {lengthRatio:0.62, heightRatio:0.72, cabRatio:0.26, doors:1,
       face:"round", cab:"compact", band:"low", roof:"flat", pantographEvery:0,
-      wheels:"tire", windowTop:0.18, windowHeight:0.26},
+      wheels:"tire", windowTop:0.18, windowHeight:0.26, bobAmp:0.45},
   };
 
   // 新幹線の先頭形状。車種ごとに実車の顔つきへ寄せる。
@@ -5309,11 +5314,19 @@ function drawAirports() {
     ctx.restore();
   }
 
+  // 走行中の上下の揺れ。速さに応じて大きくなり、停まる寸前は自然に収まる。
+  // 実際の揺れ幅は車種ごとの bobAmp を掛けて決める。
+  function trainBobPhase(phaseOffset = 0) {
+    if (state !== "running") return 0;
+    const speedFactor = Math.min(1, displaySpeed(speed) / 90);
+    return Math.sin(distance * 0.05 + phaseOffset) * speedFactor;
+  }
+
   function drawTrain() {
     const y = groundY();
     const { carW, carH, gap } = carMetrics();
     const noseX = W * NOSE_R + trainStationOffset();
-    const bob = state === "running" ? Math.sin(distance * 0.05) * 1.5 : 0;
+    const bob = trainBobPhase();
 
     // 車体は右端(連結面)を基準に、先頭から順に後ろへ積み上げていく。
     // 車種ごとに長さが違うので、等間隔ではなく1両ずつ位置を進める。
@@ -5324,7 +5337,7 @@ function drawAirports() {
       const bodyW = carSlotWidth(carTypes[i]);
       const bodyH = carH * profile.heightRatio;
       const left = right - bodyW;
-      const top = y - bodyH - 10 + bob * (i % 2 === 0 ? 1 : -1);
+      const top = y - bodyH - 10 + bob * profile.bobAmp * (i % 2 === 0 ? 1 : -1);
 
       // 連結器の高さは地面基準にして、背の高さが違う車両同士でも一直線につなぐ。
       if (i > 0) {
@@ -5690,9 +5703,9 @@ function drawAirports() {
     const connectionX = komachiCoupled
       ? noseX + komachiGap
       : worldScreenOffset(komachiStationX) + noseX + komachiGap;
-    const bob = state === "running" ? Math.sin(distance * 0.05 + 1) * 1.5 : 0;
-    // こまちはミニ新幹線なので、はやぶさより短くて背が低い。床の高さはそろえる。
+    // こまちはミニ新幹線なので、はやぶさより車体が短い。床の高さはそろえる。
     const profile = carProfile(TRAINS.komachi);
+    const bob = trainBobPhase(1) * profile.bobAmp;
     const bodyW = carSlotWidth("komachi");
     const bodyH = carH * profile.heightRatio;
     const top = y - bodyH - 10 + bob;
