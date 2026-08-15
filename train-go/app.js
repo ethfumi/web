@@ -1931,7 +1931,8 @@
       say(`${carWord(totalCarCount())}！ながーい！これでまんたんだよ！`);
       return;
     }
-    carTypes.push(typeKey);
+    // 編成ごとに色が違う形式は、つなぐたびに別の色が来る。
+    carTypes.push(pickTrainVariant(baseTrainKey(typeKey)));
     cars = carTypes.length;
     say(`れんけつ！ぜんぶで、${carWord(totalCarCount())}！`);
     spawnConfetti(12);
@@ -2184,33 +2185,36 @@
 
   // 種別ごとの車体プロファイル。路線が増えても見分けられるよう、
   // 車体の大きさ・前面フォルム・扉数・屋根上機器・足まわりを変えて描き分ける。
+  // lengthRatio は 20m級の通勤電車を 1 とした車体の長さ。実車の比をゆるめて使う。
+  // 車両の占める幅そのものなので、編成の長さもこの値で決まる。
   const CAR_PROFILES = {
-    shinkansen: {widthRatio:1, heightRatio:1, cabRatio:0.42, doors:0, windowCount:5,
+    // 25m級。長い車体があってこそ、ロングノーズが窮屈にならない。
+    shinkansen: {lengthRatio:1.28, heightRatio:1, cabRatio:0.42, doors:0, windowCount:6,
       face:"nose", cab:"nose", band:"swoosh", roof:"smooth", pantographEvery:3,
       wheels:"rail", windowTop:0.22, windowHeight:0.17},
     // JR の通勤電車。角ばった切妻の前面。
-    commuter: {widthRatio:1, heightRatio:1, cabRatio:0.19, doors:2,
+    commuter: {lengthRatio:1, heightRatio:1, cabRatio:0.19, doors:2,
       face:"flat", cab:"box", band:"waist", roof:"cooler", pantographEvery:2,
       wheels:"rail", windowTop:0.19, windowHeight:0.23},
     // 私鉄。前面上部を斜めに落とした顔つきで、JR と見分ける。
-    private: {widthRatio:1, heightRatio:0.96, cabRatio:0.22, doors:2,
+    private: {lengthRatio:1, heightRatio:0.96, cabRatio:0.22, doors:2,
       face:"slant", cab:"box", band:"waist", roof:"cooler", pantographEvery:2,
       wheels:"rail", windowTop:0.2, windowHeight:0.22},
     // 地下鉄。丸みのある前面で、ひと回り小さい車体。
-    subway: {widthRatio:0.99, heightRatio:0.92, cabRatio:0.2, doors:2,
+    subway: {lengthRatio:0.98, heightRatio:0.92, cabRatio:0.2, doors:2,
       face:"round", cab:"box", band:"waist", roof:"cooler", pantographEvery:2,
       wheels:"rail", windowTop:0.2, windowHeight:0.22},
-    // 銀座線・丸ノ内線・大江戸線のような小型車体の地下鉄。
-    subwaySmall: {widthRatio:0.94, heightRatio:0.82, cabRatio:0.22, doors:2,
+    // 銀座線・丸ノ内線・大江戸線のような16m級の小型車体。
+    subwaySmall: {lengthRatio:0.84, heightRatio:0.82, cabRatio:0.22, doors:2,
       face:"round", cab:"box", band:"waist", roof:"cooler", pantographEvery:2,
       wheels:"rail", windowTop:0.2, windowHeight:0.22},
     // 在来線サイズの車体で走るミニ新幹線(E3系つばさ・E6系こまち)。
-    // フル規格と連結したときに、ひと回り小さいことが分かるようにする。
-    miniShinkansen: {widthRatio:1, heightRatio:0.85, cabRatio:0.4, doors:0, windowCount:4,
+    // フル規格と連結したときに、短くて背が低いことが分かるようにする。
+    miniShinkansen: {lengthRatio:1, heightRatio:0.85, cabRatio:0.4, doors:0, windowCount:4,
       face:"nose", cab:"nose", band:"swoosh", roof:"smooth", pantographEvery:3,
       wheels:"rail", windowTop:0.22, windowHeight:0.18},
-    // 新交通システムとモノレール。小さく低い車体、ゴムタイヤ、パンタグラフなし。
-    newtransit: {widthRatio:0.9, heightRatio:0.72, cabRatio:0.26, doors:1,
+    // 新交通システムとモノレール。短く低い車体、ゴムタイヤ、パンタグラフなし。
+    newtransit: {lengthRatio:0.62, heightRatio:0.72, cabRatio:0.26, doors:1,
       face:"round", cab:"compact", band:"low", roof:"flat", pantographEvery:0,
       wheels:"tire", windowTop:0.18, windowHeight:0.26},
   };
@@ -2262,6 +2266,27 @@
       || CAR_PROFILES.shinkansen;
   }
 
+  // 車両1両が占める幅。車種ごとに長さが違うので、編成の位置は先頭から順に積み上げる。
+  function carSlotWidth(typeKey) {
+    const type = TRAINS[typeKey];
+    const ratio = type ? carProfile(type).lengthRatio : 1;
+    return carMetrics().carW * ratio;
+  }
+
+  // 編成全体の長さ。停車位置・カメラの引き・加速の演出がこの値を使う。
+  function trainTotalWidth(typeKeys = carTypes) {
+    const { gap } = carMetrics();
+    let total = 0;
+    for (const key of typeKeys) total += carSlotWidth(key) + gap;
+    return Math.max(0, total - gap);
+  }
+
+  // こまち編成(2両)が占める幅。連結時の停止位置とヘッドライトの基準に使う。
+  function komachiTrainWidth() {
+    const { gap } = carMetrics();
+    return carSlotWidth("komachi") * 2 + gap;
+  }
+
   // 編成ごとに色が違う形式は、色ちがいを "キー#色名" として TRAINS へ展開してある。
   // 選択画面には基本の色だけを並べ、実際に走らせるときにどの編成が来るかを決める。
   // weight は実車の編成数に合わせた出やすさ。特別塗装が1〜2編成しかない路線では、
@@ -2276,6 +2301,11 @@
       entries.push({key: variantKey, weight: variant.weight ?? 1});
     }
     TRAIN_VARIANTS.set(key, entries);
+  }
+
+  // 色ちがいのキーから、もとの形式のキーへ戻す。
+  function baseTrainKey(key) {
+    return TRAINS[key]?.variantOf || key;
   }
 
   function pickTrainVariant(key) {
@@ -2303,7 +2333,8 @@
     const g = el.getContext("2d");
     g.scale(dpr, dpr);
     const profile = carProfile(type);
-    const bodyW = 176 * profile.widthRatio;
+    // 長い新幹線でも枠に収まる基準幅にして、車種ごとの長さの違いをそのまま出す。
+    const bodyW = 138 * profile.lengthRatio;
     const bodyH = 36 * profile.heightRatio;
     const left = (PREVIEW_W - bodyW) / 2;
     // 床の高さをそろえて、背の低い車両は低く見えるようにする。
@@ -4755,8 +4786,8 @@
   function drawHeadlight() {
     const tunnelActive = routeEvent === "tunnel" && routeEventAnnounced;
     if (!headlightsAreOn() || (!tunnelActive && timeOfDay !== "night")) return;
-    const { carW, gap } = carMetrics();
-    const frontX = W * NOSE_R + trainStationOffset() + (komachiCoupled ? komachiGap + carW * 2 + gap : 0);
+    const { carW } = carMetrics();
+    const frontX = W * NOSE_R + trainStationOffset() + (komachiCoupled ? komachiGap + komachiTrainWidth() : 0);
     const centerY = groundY() - carW * 0.16;
     const beam = ctx.createLinearGradient(frontX, 0, frontX + W * 0.4, 0);
     beam.addColorStop(0, "rgba(255,244,160,0.75)");
@@ -4826,15 +4857,16 @@
       keio: 10,
       inokashira: 5,
     }[selectedRouteKey] || 5;
-    const { carW, gap } = carMetrics();
-    return Math.max(baseWidth, capacity * carW + Math.max(capacity - 1, 0) * gap + carW * 0.5);
+    // ホームの長さは、その路線を走る車両の長さで決まる。新幹線のホームは在来線より長い。
+    const { gap } = carMetrics();
+    const slotW = carSlotWidth(routeTrainKey(selectedRouteKey));
+    return Math.max(baseWidth, capacity * slotW + Math.max(capacity - 1, 0) * gap + slotW * 0.5);
   }
 
   function trainStationOffset() {
     if (!komachiCoupled) return 0;
-    const { carW, gap } = carMetrics();
     // 連結時も、編成の本当の先頭がホーム先端の停止位置へ来るよう固定する。
-    return -(komachiGap + carW * 2 + gap);
+    return -(komachiGap + komachiTrainWidth());
   }
 
   function stationScreenX(worldX, name) {
@@ -4986,9 +5018,9 @@
 
   function drawTrainMotionEffects() {
     const y = groundY();
-    const { carW, carH, gap } = carMetrics();
+    const { carW, carH } = carMetrics();
     const noseX = W * NOSE_R + trainStationOffset();
-    const tailX = noseX - cars * (carW + gap);
+    const tailX = noseX - trainTotalWidth();
 
     if (accelerationEffect > 0.02) {
       ctx.save();
@@ -5283,24 +5315,22 @@ function drawAirports() {
     const noseX = W * NOSE_R + trainStationOffset();
     const bob = state === "running" ? Math.sin(distance * 0.05) * 1.5 : 0;
 
+    // 車体は右端(連結面)を基準に、先頭から順に後ろへ積み上げていく。
+    // 車種ごとに長さが違うので、等間隔ではなく1両ずつ位置を進める。
+    let right = noseX;
     for (let i = 0; i < cars; i++) {
       const carTrain = TRAINS[carTypes[i]];
       const profile = carProfile(carTrain);
-      // 車体は右端(連結面)を基準に描き、種別ごとに長さ・高さを変える。
-      // スロット幅 carW は変えないので、編成長・停車位置・カメラのズームは従来どおり。
-      const bodyW = carW * profile.widthRatio;
+      const bodyW = carSlotWidth(carTypes[i]);
       const bodyH = carH * profile.heightRatio;
-      const right = noseX - i * (carW + gap);
       const left = right - bodyW;
       const top = y - bodyH - 10 + bob * (i % 2 === 0 ? 1 : -1);
 
-      // 連結器は前の車両の左端まで届かせる。車体の短い種別が混ざっても隙間ができない。
-      // 高さは地面基準にして、背の高さが違う車両同士でも一直線につながって見せる。
+      // 連結器の高さは地面基準にして、背の高さが違う車両同士でも一直線につなぐ。
       if (i > 0) {
-        const prevW = carW * carProfile(TRAINS[carTypes[i - 1]]).widthRatio;
         const linkH = Math.max(5, carH * 0.11);
         ctx.fillStyle = "#5a636b";
-        ctx.fillRect(right, y - 10 - carH * 0.3 - linkH / 2, carW + gap - prevW, linkH);
+        ctx.fillRect(right, y - 10 - carH * 0.3 - linkH / 2, gap, linkH);
       }
 
       drawRailCarOn(ctx, carTrain, profile, left, top, bodyW, bodyH, {
@@ -5314,6 +5344,7 @@ function drawAirports() {
 
       const carNumber = komachiCoupled ? i + 3 : i + 1;
       drawCarNumber(left + bodyW * 0.52, top + bodyH * 0.72, carNumber, bodyH);
+      right = left - gap;
     }
   }
 
@@ -5660,19 +5691,19 @@ function drawAirports() {
       ? noseX + komachiGap
       : worldScreenOffset(komachiStationX) + noseX + komachiGap;
     const bob = state === "running" ? Math.sin(distance * 0.05 + 1) * 1.5 : 0;
-    // こまちはミニ新幹線なので、はやぶさより車体が小さい。床の高さはそろえる。
+    // こまちはミニ新幹線なので、はやぶさより短くて背が低い。床の高さはそろえる。
     const profile = carProfile(TRAINS.komachi);
-    const bodyW = carW * profile.widthRatio;
+    const bodyW = carSlotWidth("komachi");
     const bodyH = carH * profile.heightRatio;
     const top = y - bodyH - 10 + bob;
 
     for (let i = 0; i < 2; i++) {
-      const left = connectionX + i * (carW + gap);
+      const left = connectionX + i * (bodyW + gap);
       // i=0 は緑の新幹線側を向く連結用の先頭車、i=1 は編成の外側を向く先頭車。
       // 本体と同じ関数で描き、ノーズの形と屋根上をそろえる。
       if (i === 0) {
         ctx.fillStyle = "#666";
-        ctx.fillRect(left + bodyW, y - 10 - carH * 0.3 - 3, carW + gap - bodyW, 6);
+        ctx.fillRect(left + bodyW, y - 10 - carH * 0.3 - 3, gap, 6);
       }
       drawRailCarOn(ctx, TRAINS.komachi, profile, left, top, bodyW, bodyH, {
         isHead: i === 1,
@@ -5839,13 +5870,11 @@ function drawAirports() {
     // 編成全体が画面に入るようにカメラをなめらかに引く (W=0 の非表示中は更新しない)。
     // 100両でも全編成が画面に入るまで縮小する。
     if (W > 0) {
-      const { carW, gap } = carMetrics();
-      const leftScale = (W * (NOSE_R - 0.03)) / (cars * (carW + gap));
+      const leftScale = (W * (NOSE_R - 0.03)) / Math.max(trainTotalWidth(), 1);
       const komachiIsNear = komachiStationX !== null
         && komachiStationX - distance < W * 1.2;
-      const rightCars = komachiCoupled || komachiIsNear ? 2 : 0;
-      const rightScale = rightCars > 0
-        ? (W * (1 - NOSE_R - 0.03)) / (rightCars * (carW + gap) + komachiGap)
+      const rightScale = komachiCoupled || komachiIsNear
+        ? (W * (1 - NOSE_R - 0.03)) / (komachiTrainWidth() + komachiGap)
         : 1;
       const targetScale = Math.max(Math.min(1, leftScale, rightScale), 0.018);
       viewScale += (targetScale - viewScale) * Math.min(dt * 3, 1);
