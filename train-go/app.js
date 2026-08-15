@@ -2183,7 +2183,28 @@
   function createCommuterPreview(type) {
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("viewBox", "0 0 200 70");
-    svg.innerHTML = `<rect x="10" y="16" width="180" height="44" rx="8" fill="${type.body}" stroke="${type.edge}" stroke-width="2"/><rect x="168" y="18" width="20" height="40" rx="5" fill="${type.face}"/><rect x="12" y="45" width="176" height="8" fill="${type.stripe}"/><rect x="25" y="25" width="28" height="14" rx="3" fill="#333"/><rect x="65" y="25" width="28" height="14" rx="3" fill="#333"/><rect x="105" y="25" width="28" height="14" rx="3" fill="#333"/><circle cx="55" cy="60" r="7" fill="#555"/><circle cx="145" cy="60" r="7" fill="#555"/>`;
+    // 通勤電車: 切妻の箱型・4扉・屋根上のクーラーとパンタグラフ。
+    const stripe2 = type.stripe2
+      ? `<rect x="12" y="52" width="176" height="5" fill="${type.stripe2}"/>` : "";
+    const doors = [28, 62, 97, 132]
+      .map((x) => `<rect x="${x}" y="20" width="17" height="36" rx="2" fill="rgba(22,36,48,0.1)" stroke="rgba(22,36,48,0.28)" stroke-width="1"/><path d="M${x + 8.5} 22 V54" stroke="rgba(22,36,48,0.28)" stroke-width="1"/>`).join("");
+    const windows = [[20, 7], [46, 15], [81, 15], [115, 15], [150, 7], [31, 11], [65, 11], [100, 11], [135, 11]]
+      .map(([x, w]) => `<rect x="${x}" y="24" width="${w}" height="14" rx="3" fill="#333"/>`).join("");
+    svg.innerHTML = `<rect x="42" y="9" width="26" height="7" rx="2" fill="#c3ccd2" stroke="#7d8b95" stroke-width="1"/><rect x="82" y="9" width="26" height="7" rx="2" fill="#c3ccd2" stroke="#7d8b95" stroke-width="1"/><path d="M118 16 L130 8 L146 3 M138 3 H158" stroke="#5b6a74" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect x="10" y="16" width="180" height="44" rx="6" fill="${type.body}" stroke="${type.edge}" stroke-width="2"/><rect x="12" y="43" width="176" height="8" fill="${type.stripe}"/>${stripe2}<rect x="168" y="18" width="20" height="40" rx="4" fill="${type.face}"/><rect x="170" y="22" width="16" height="12" rx="3" fill="#20303d"/><rect x="174" y="38" width="8" height="18" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/><circle cx="171" cy="42" r="2.6" fill="#ffeeb0"/><circle cx="185" cy="42" r="2.6" fill="#ffeeb0"/>${doors}${windows}<circle cx="55" cy="60" r="7" fill="#555"/><circle cx="145" cy="60" r="7" fill="#555"/>`;
+    return svg;
+  }
+
+  function createNewTransitPreview(type) {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 200 70");
+    // 新交通システム: 小さく低い車体・ゴムタイヤ・パンタグラフなしの平らな屋根。
+    const stripe2 = type.stripe2
+      ? `<rect x="33" y="47" width="134" height="4" fill="${type.stripe2}"/>` : "";
+    const doors = [55, 105]
+      .map((x) => `<rect x="${x}" y="26" width="13" height="26" rx="2" fill="rgba(22,36,48,0.1)" stroke="rgba(22,36,48,0.28)" stroke-width="1"/><path d="M${x + 6.5} 28 V50" stroke="rgba(22,36,48,0.28)" stroke-width="1"/>`).join("");
+    const windows = [[39, 14], [71, 14], [88, 14], [120, 14], [58, 8], [108, 8]]
+      .map(([x, w]) => `<rect x="${x}" y="29" width="${w}" height="12" rx="3" fill="#333"/>`).join("");
+    svg.innerHTML = `<rect x="78" y="17" width="44" height="6" rx="2" fill="#d3dade"/><rect x="30" y="23" width="140" height="32" rx="12" fill="${type.body}" stroke="${type.edge}" stroke-width="2"/><rect x="33" y="39" width="134" height="7" fill="${type.stripe}"/>${stripe2}<rect x="139" y="27" width="26" height="11" rx="4" fill="#20303d"/><circle cx="163" cy="47" r="2.6" fill="#ffeeb0"/>${doors}${windows}<circle cx="58" cy="57" r="7" fill="#2b2b2b"/><circle cx="58" cy="57" r="3" fill="#c9d1d6"/><circle cx="142" cy="57" r="7" fill="#2b2b2b"/><circle cx="142" cy="57" r="3" fill="#c9d1d6"/>`;
     return svg;
   }
 
@@ -2198,13 +2219,15 @@
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("viewBox", "0 0 200 70");
     const upper = type.upper || type.body;
-    svg.innerHTML = `<path d="M8 47 Q17 24 60 18 H181 Q192 18 194 31 V54 H20 Q8 54 8 47Z" fill="${type.body}" stroke="${type.edge}" stroke-width="2"/><path d="M12 43 Q28 25 63 21 H184 V31 H57 Q28 31 12 43Z" fill="${upper}"/><path d="M14 46 H190" stroke="${type.stripe}" stroke-width="5"/><rect x="83" y="27" width="22" height="10" rx="3" fill="#333"/><rect x="113" y="27" width="22" height="10" rx="3" fill="#333"/><rect x="143" y="27" width="22" height="10" rx="3" fill="#333"/><circle cx="55" cy="55" r="6" fill="#555"/><circle cx="155" cy="55" r="6" fill="#555"/>`;
+    // 新幹線: 流線形のロングノーズ・低くたたんだパンタグラフ・小さめの窓。
+    svg.innerHTML = `<path d="M96 18 L105 13 L116 9 M110 9 H128" stroke="#5b6a74" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 47 Q17 24 60 18 H181 Q192 18 194 31 V54 H20 Q8 54 8 47Z" fill="${type.body}" stroke="${type.edge}" stroke-width="2"/><path d="M12 43 Q28 25 63 21 H184 V31 H57 Q28 31 12 43Z" fill="${upper}"/><path d="M14 46 H190" stroke="${type.stripe}" stroke-width="5"/><rect x="74" y="26" width="16" height="9" rx="2" fill="#333"/><rect x="94" y="26" width="16" height="9" rx="2" fill="#333"/><rect x="114" y="26" width="16" height="9" rx="2" fill="#333"/><rect x="134" y="26" width="16" height="9" rx="2" fill="#333"/><rect x="160" y="22" width="10" height="26" rx="2" fill="rgba(22,36,48,0.16)" stroke="rgba(22,36,48,0.34)" stroke-width="1"/><rect x="32" y="24" width="19" height="8" rx="3" fill="#293947"/><circle cx="14" cy="46" r="2.6" fill="#ffeeb0"/><circle cx="55" cy="55" r="6" fill="#555"/><circle cx="155" cy="55" r="6" fill="#555"/>`;
     return svg;
   }
 
   function createVehiclePreview(type) {
     if (type.kind === "airplane") return createAirplanePreview(type);
     if (type.kind === "ferry") return createFerryPreview(type);
+    if (type.kind === "newtransit") return createNewTransitPreview(type);
     if (type.kind === "shinkansen") return createShinkansenPreview(type);
     return createCommuterPreview(type);
   }
@@ -2213,7 +2236,7 @@
     "tokaido", "sanyo", "kyushu", "nishiKyushu", "tohoku", "hokkaido",
     "akita", "yamagata", "joetsu", "hokuriku",
     "yamanote", "keihinTohoku", "chuo", "sobu", "tsukubaExpress",
-    "joban", "tobuSkytree", "keiyo", "tozai",
+    "joban", "tobuSkytree", "takasaki", "newShuttle", "keiyo", "tozai",
     "keio", "inokashira", "yurikamome", "rinkai", "saikyo", "yokosuka", "uchibo",
     "osakaLoop", "osakaChuo", "hankyuTakarazuka",
     "airOsaka", "airHokkaido", "airOkinawa", "airFukuoka", "airKomatsu",
@@ -2253,6 +2276,18 @@
       trainButton.appendChild(createVehiclePreview(TRAINS[trainKey]));
       group.appendChild(trainButton);
       trainButtons.appendChild(group);
+    }
+  }
+
+  // index.html に直接書いてある通勤電車の絵は、ドア数や屋根上機器が走行中の描画と揃わない。
+  // 種別ごとの描き分けを1か所に集めるため、通勤・新交通の絵はここで作り直す。
+  // 新幹線は車種ごとに手描きの絵があるので置き換えない。
+  function refreshGeneratedPreviews() {
+    for (const button of document.querySelectorAll(".train-btn")) {
+      const type = TRAINS[button.dataset.train];
+      if (!type || (type.kind !== "commuter" && type.kind !== "newtransit")) continue;
+      button.querySelector("svg")?.remove();
+      button.appendChild(createVehiclePreview(type));
     }
   }
 
@@ -2300,6 +2335,7 @@
   }
 
   buildExtraSelectionChoices();
+  refreshGeneratedPreviews();
   document.querySelectorAll(".route-btn").forEach((button, fallbackIndex) => {
     const routeOrder = ROUTE_SELECTION_ORDER.indexOf(button.dataset.route);
     button.style.order = String(routeOrder >= 0 ? routeOrder : 100 + fallbackIndex);
@@ -5118,96 +5154,297 @@ function drawAirports() {
 
     for (let i = 0; i < cars; i++) {
       const carTrain = TRAINS[carTypes[i]];
-      const commuter = carTrain.kind === "commuter";
+      const kind = carKind(carTrain);
+      const profile = CAR_PROFILES[kind];
+      // 車体は右端(連結面)を基準に描き、種別ごとに長さ・高さを変える。
+      // スロット幅 carW は変えないので、編成長・停車位置・カメラのズームは従来どおり。
+      const bodyW = carW * profile.widthRatio;
+      const bodyH = carH * profile.heightRatio;
       const right = noseX - i * (carW + gap);
-      const left = right - carW;
-      const top = y - carH - 10 + bob * (i % 2 === 0 ? 1 : -1);
+      const left = right - bodyW;
+      const top = y - bodyH - 10 + bob * (i % 2 === 0 ? 1 : -1);
 
       ctx.fillStyle = carTrain.body;
       ctx.strokeStyle = carTrain.edge;
       ctx.lineWidth = 2;
       ctx.beginPath();
       const isTail = cars > 1 && i === cars - 1;
-      if (commuter) {
-        // 通勤電車は先頭・中間・後尾とも箱型の車体。
-        roundRect(left, top, carW, carH, Math.max(5, carH * 0.12));
-      } else if (i === 0) {
-        // 先頭車: ロングノーズ
-        ctx.moveTo(left, top + 6);
-        ctx.quadraticCurveTo(left, top, left + 10, top);
-        ctx.lineTo(right - carW * 0.45, top);
-        ctx.quadraticCurveTo(right - carW * 0.1, top + 2, right, top + carH - 8);
-        ctx.quadraticCurveTo(right, top + carH, right - 8, top + carH);
-        ctx.lineTo(left + 6, top + carH);
-        ctx.quadraticCurveTo(left, top + carH, left, top + carH - 6);
-        ctx.closePath();
-      } else if (isTail) {
-        // 最後の車両: 後ろ向きの運転席がある後尾車。
-        ctx.moveTo(left, top + carH - 8);
-        ctx.quadraticCurveTo(left + carW * 0.1, top + 2, left + carW * 0.45, top);
-        ctx.lineTo(right - 10, top);
-        ctx.quadraticCurveTo(right, top, right, top + 6);
-        ctx.lineTo(right, top + carH - 6);
-        ctx.quadraticCurveTo(right, top + carH, right - 6, top + carH);
-        ctx.lineTo(left + 8, top + carH);
-        ctx.quadraticCurveTo(left, top + carH, left, top + carH - 8);
-        ctx.closePath();
+      const isHead = i === 0;
+      if (kind === "shinkansen") {
+        if (isHead) {
+          // 先頭車: ロングノーズ
+          ctx.moveTo(left, top + 6);
+          ctx.quadraticCurveTo(left, top, left + 10, top);
+          ctx.lineTo(right - bodyW * 0.45, top);
+          ctx.quadraticCurveTo(right - bodyW * 0.1, top + 2, right, top + bodyH - 8);
+          ctx.quadraticCurveTo(right, top + bodyH, right - 8, top + bodyH);
+          ctx.lineTo(left + 6, top + bodyH);
+          ctx.quadraticCurveTo(left, top + bodyH, left, top + bodyH - 6);
+          ctx.closePath();
+        } else if (isTail) {
+          // 最後の車両: 後ろ向きの運転席がある後尾車。
+          ctx.moveTo(left, top + bodyH - 8);
+          ctx.quadraticCurveTo(left + bodyW * 0.1, top + 2, left + bodyW * 0.45, top);
+          ctx.lineTo(right - 10, top);
+          ctx.quadraticCurveTo(right, top, right, top + 6);
+          ctx.lineTo(right, top + bodyH - 6);
+          ctx.quadraticCurveTo(right, top + bodyH, right - 6, top + bodyH);
+          ctx.lineTo(left + 8, top + bodyH);
+          ctx.quadraticCurveTo(left, top + bodyH, left, top + bodyH - 8);
+          ctx.closePath();
+        } else {
+          roundRect(left, top, bodyW, bodyH, 8);
+        }
+      } else if (kind === "newtransit") {
+        // 新交通システムは小さくて丸い車体。編成端の角を大きく落とす。
+        roundRect(left, top, bodyW, bodyH, bodyH * (isHead || isTail ? 0.34 : 0.2));
       } else {
-        roundRect(left, top, carW, carH, 8);
+        // 通勤電車は先頭・中間・後尾とも切妻の箱型。
+        roundRect(left, top, bodyW, bodyH, Math.max(5, bodyH * 0.12));
       }
       ctx.fill();
       if (carTrain.upper) {
         ctx.save();
         ctx.clip();
         ctx.fillStyle = carTrain.upper;
-        ctx.fillRect(left, top, carW, carH * 0.47);
+        ctx.fillRect(left, top, bodyW, bodyH * 0.47);
         ctx.restore();
       }
       ctx.stroke();
-      if (commuter && (i === 0 || isTail)) {
-        ctx.fillStyle = carTrain.face;
-        const cabWidth = carW * 0.18;
-        ctx.fillRect(i === 0 ? right - cabWidth : left, top + 2, cabWidth, carH - 4);
-      }
 
-      // 帯
+      // 帯: 通勤は腰帯、新幹線は窓下の細帯と前面のスウォッシュ、新交通は窓下＋足元。
       ctx.fillStyle = carTrain.stripe;
-      if (commuter) {
-        ctx.fillRect(left + 2, top + carH * 0.58, carW - 4, carH * 0.14);
+      if (kind === "commuter") {
+        ctx.fillRect(left + 2, top + bodyH * 0.58, bodyW - 4, bodyH * 0.14);
         if (carTrain.stripe2) {
           ctx.fillStyle = carTrain.stripe2;
-          ctx.fillRect(left + 2, top + carH * 0.73, carW - 4, carH * 0.08);
+          ctx.fillRect(left + 2, top + bodyH * 0.73, bodyW - 4, bodyH * 0.08);
         }
-      } else if (i === 0) {
+      } else if (kind === "newtransit") {
+        ctx.fillRect(left + 3, top + bodyH * 0.52, bodyW - 6, bodyH * 0.13);
+        if (carTrain.stripe2) {
+          ctx.fillStyle = carTrain.stripe2;
+          ctx.fillRect(left + 3, top + bodyH * 0.82, bodyW - 6, bodyH * 0.08);
+        }
+      } else if (isHead) {
         ctx.beginPath();
-        ctx.moveTo(left + 2, top + carH * 0.45);
-        ctx.lineTo(right - carW * 0.32, top + carH * 0.42);
-        ctx.lineTo(right - carW * 0.05, top + carH * 0.75);
-        ctx.lineTo(right - carW * 0.05, top + carH * 0.88);
-        ctx.lineTo(left + 2, top + carH * 0.62);
+        ctx.moveTo(left + 2, top + bodyH * 0.45);
+        ctx.lineTo(right - bodyW * 0.32, top + bodyH * 0.42);
+        ctx.lineTo(right - bodyW * 0.05, top + bodyH * 0.75);
+        ctx.lineTo(right - bodyW * 0.05, top + bodyH * 0.88);
+        ctx.lineTo(left + 2, top + bodyH * 0.62);
         ctx.closePath();
         ctx.fill();
       } else {
-        ctx.fillRect(left + 2, top + carH * 0.48, carW - 4, carH * 0.16);
+        ctx.fillRect(left + 2, top + bodyH * 0.48, bodyW - 4, bodyH * 0.16);
       }
 
-      // 窓
-      const winCount = i === 0 || isTail ? 2 : 3;
-      const winStart = isTail ? left + carW * 0.38 : left + carW * 0.12;
-      drawTrainWindows(winStart, top, carW, carH, winCount);
+      // 運転台まわりと、ドア・窓の割り付け
+      const cabW = isHead || isTail ? bodyW * profile.cabRatio : 0;
+      drawCabFace(carTrain, kind, profile, left, right, top, bodyW, bodyH, isHead, isTail);
+      drawCarSideLayout(left, top, bodyW, bodyH, profile,
+        isTail ? cabW : bodyW * 0.05, isHead ? cabW : bodyW * 0.05);
 
-      // 連結器
+      // 屋根上機器（クーラー・パンタグラフ）
+      drawCarRoof(left, top, bodyW, bodyH, profile, i);
+
+      // 連結器（車体を短く描く種別ほど、あいだの棒が長く見える）
       if (i > 0) {
-        ctx.fillStyle = "#666";
-        ctx.fillRect(right, top + carH * 0.6, gap, 6);
+        ctx.fillStyle = "#5a636b";
+        ctx.fillRect(right, top + bodyH * 0.62, carW + gap - bodyW, Math.max(5, bodyH * 0.12));
       }
 
       const carNumber = komachiCoupled ? i + 3 : i + 1;
-      drawCarNumber(left + carW * 0.52, top + carH * 0.72, carNumber, carH);
+      drawCarNumber(left + bodyW * 0.52, top + bodyH * 0.72, carNumber, bodyH);
 
-      drawWheel(left + carW * 0.22, y - 8, 9);
-      drawWheel(left + carW * 0.78, y - 8, 9);
+      // 足まわり: 鉄道は鉄輪、新交通システムはゴムタイヤ。
+      if (profile.wheels === "tire") {
+        drawRubberTire(left + bodyW * 0.24, y - 6, 6);
+        drawRubberTire(left + bodyW * 0.76, y - 6, 6);
+      } else {
+        drawWheel(left + bodyW * 0.22, y - 8, 9);
+        drawWheel(left + bodyW * 0.78, y - 8, 9);
+      }
     }
+  }
+
+  // 種別ごとの車体プロファイル。色だけだと並べても見分けにくいので、
+  // 大きさ・前面形状・ドア数・屋根上機器・足まわりを変えて描き分ける。
+  const CAR_PROFILES = {
+    shinkansen: {widthRatio:1, heightRatio:1, doors:1, cabRatio:0.42,
+      windowTop:0.2, windowHeight:0.18, roof:"smooth", pantographEvery:4, wheels:"rail"},
+    commuter: {widthRatio:1, heightRatio:1, doors:4, cabRatio:0.18,
+      windowTop:0.17, windowHeight:0.24, roof:"cooler", pantographEvery:2, wheels:"rail"},
+    newtransit: {widthRatio:0.66, heightRatio:0.76, doors:2, cabRatio:0.24,
+      windowTop:0.16, windowHeight:0.26, roof:"flat", pantographEvery:0, wheels:"tire"},
+  };
+
+  function carKind(carTrain) {
+    // 初期の新幹線は kind 未設定なので、未知の種別は新幹線として扱う。
+    return CAR_PROFILES[carTrain.kind] ? carTrain.kind : "shinkansen";
+  }
+
+  // ドアと、ドアのあいだに入る窓をまとめて割り付ける。
+  // ドア数が変わると窓割りも自動で変わるので、種別の差がいちばん出る部分。
+  function drawCarSideLayout(left, top, bodyW, bodyH, profile, insetLeft, insetRight) {
+    const start = left + insetLeft;
+    const usable = bodyW - insetLeft - insetRight;
+    if (usable <= bodyW * 0.1) return;
+    const doorW = Math.max(3, bodyW * 0.095);
+    const doorTop = top + bodyH * 0.1;
+    const doorH = bodyH * 0.78;
+    const winTop = top + bodyH * profile.windowTop;
+    const winH = bodyH * profile.windowHeight;
+    const bounds = [start];
+    const doorCenters = [];
+
+    ctx.save();
+    ctx.fillStyle = "rgba(22, 36, 48, 0.1)";
+    ctx.strokeStyle = "rgba(22, 36, 48, 0.28)";
+    ctx.lineWidth = 1;
+    for (let d = 0; d < profile.doors; d++) {
+      const centerX = start + usable * ((d + 0.5) / profile.doors);
+      const doorX = centerX - doorW / 2;
+      roundRect(doorX, doorTop, doorW, doorH, 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(centerX, doorTop + 2);
+      ctx.lineTo(centerX, doorTop + doorH - 2);
+      ctx.stroke();
+      bounds.push(doorX, doorX + doorW);
+      doorCenters.push(centerX);
+    }
+    ctx.restore();
+    bounds.push(start + usable);
+
+    ctx.save();
+    ctx.fillStyle = timeOfDay === "night" ? "#ffe58a" : "#333";
+    if (timeOfDay === "night") {
+      ctx.shadowColor = "rgba(255, 221, 112, 0.9)";
+      ctx.shadowBlur = 8;
+    }
+    // ドアのあいだの側窓
+    for (let b = 0; b < bounds.length - 1; b += 2) {
+      const segStart = bounds[b] + bodyW * 0.012;
+      const segEnd = bounds[b + 1] - bodyW * 0.012;
+      const segW = segEnd - segStart;
+      if (segW < bodyW * 0.04) continue;
+      const panes = segW > bodyW * 0.2 ? 2 : 1;
+      const paneW = segW / panes;
+      for (let p = 0; p < panes; p++) {
+        roundRect(segStart + p * paneW + paneW * 0.08, winTop, paneW * 0.84, winH, 3);
+        ctx.fill();
+      }
+    }
+    // ドアにも窓がある
+    for (const centerX of doorCenters) {
+      roundRect(centerX - doorW * 0.34, winTop, doorW * 0.68, winH * 0.9, 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // 編成端の運転台。切妻(通勤)・流線形(新幹線)・丸い小型(新交通)で顔つきを変える。
+  function drawCabFace(carTrain, kind, profile, left, right, top, bodyW, bodyH, isHead, isTail) {
+    if (!isHead && !isTail) return;
+    const cabW = bodyW * profile.cabRatio;
+    const cabX = isHead ? right - cabW : left;
+    const lightR = Math.max(1.5, bodyH * 0.06);
+    ctx.save();
+    if (kind === "commuter") {
+      ctx.fillStyle = carTrain.face || carTrain.stripe;
+      ctx.fillRect(cabX, top + 2, cabW, bodyH - 4);
+      ctx.fillStyle = "#20303d";
+      roundRect(cabX + cabW * 0.12, top + bodyH * 0.16, cabW * 0.76, bodyH * 0.3, 3);
+      ctx.fill();
+      // 貫通扉
+      ctx.strokeStyle = "rgba(255,255,255,0.55)";
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(cabX + cabW * 0.3, top + bodyH * 0.5, cabW * 0.4, bodyH * 0.44);
+      ctx.fillStyle = "#ffeeb0";
+      ctx.beginPath();
+      ctx.arc(cabX + cabW * 0.14, top + bodyH * 0.62, lightR, 0, Math.PI * 2);
+      ctx.arc(cabX + cabW * 0.86, top + bodyH * 0.62, lightR, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (kind === "newtransit") {
+      // 貫通扉のない、1枚窓の丸い前面。
+      ctx.fillStyle = "#20303d";
+      roundRect(cabX + cabW * 0.1, top + bodyH * 0.14, cabW * 0.8, bodyH * 0.34, 5);
+      ctx.fill();
+      ctx.fillStyle = "#ffeeb0";
+      ctx.beginPath();
+      ctx.arc(isHead ? right - cabW * 0.22 : left + cabW * 0.22, top + bodyH * 0.74, lightR, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      // 新幹線はノーズ上の細長い運転台窓と、鼻先のライト。
+      ctx.fillStyle = "#293947";
+      const windshieldX = isHead ? right - cabW * 0.92 : left + cabW * 0.42;
+      roundRect(windshieldX, top + bodyH * 0.2, cabW * 0.5, bodyH * 0.2, 4);
+      ctx.fill();
+      ctx.fillStyle = "#ffeeb0";
+      ctx.beginPath();
+      ctx.arc(isHead ? right - bodyW * 0.04 : left + bodyW * 0.04, top + bodyH * 0.74, lightR * 0.9, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawCarRoof(left, top, bodyW, bodyH, profile, index) {
+    ctx.save();
+    if (profile.roof === "cooler") {
+      // 通勤電車は屋根上にクーラーが並ぶ。
+      ctx.fillStyle = "#c3ccd2";
+      ctx.strokeStyle = "rgba(70,86,96,0.55)";
+      ctx.lineWidth = 1;
+      const boxH = Math.max(3, bodyH * 0.1);
+      for (let c = 0; c < 3; c++) {
+        roundRect(left + bodyW * (0.16 + c * 0.27), top - boxH, bodyW * 0.16, boxH, 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+    } else if (profile.roof === "flat") {
+      // 新交通システムはパンタグラフがなく、平らな屋根に小さな機器箱だけ。
+      ctx.fillStyle = "#d3dade";
+      const boxH = Math.max(2, bodyH * 0.09);
+      roundRect(left + bodyW * 0.3, top - boxH, bodyW * 0.4, boxH, 2);
+      ctx.fill();
+    }
+    if (profile.pantographEvery > 0 && index % profile.pantographEvery === 1) {
+      drawPantograph(left + bodyW * 0.7, top, bodyH, profile.roof === "smooth");
+    }
+    ctx.restore();
+  }
+
+  // シングルアームのパンタグラフ。新幹線は低くたたんだ形にする。
+  function drawPantograph(x, roofY, bodyH, lowProfile) {
+    const armH = bodyH * (lowProfile ? 0.3 : 0.46);
+    ctx.save();
+    ctx.strokeStyle = "#5b6a74";
+    ctx.lineWidth = Math.max(1.5, bodyH * 0.045);
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.beginPath();
+    ctx.moveTo(x - bodyH * 0.24, roofY);
+    ctx.lineTo(x, roofY - armH * 0.6);
+    ctx.lineTo(x + bodyH * 0.26, roofY - armH);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x + bodyH * 0.06, roofY - armH);
+    ctx.lineTo(x + bodyH * 0.46, roofY - armH);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawRubberTire(x, y, r) {
+    ctx.fillStyle = "#2b2b2b";
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#c9d1d6";
+    ctx.beginPath();
+    ctx.arc(x, y, r * 0.45, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   function drawKomachi() {
