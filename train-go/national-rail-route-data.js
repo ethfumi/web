@@ -8,14 +8,17 @@
     redShinkansen: {name:"あかいしんかんせん",kind:"shinkansen",body:"#f7f8f8",stripe:"#d83434",face:"#d83434",edge:"#aeb8be",callName:"あかいしんかんせん"},
     orangeShinkansen: {name:"オレンジのしんかんせん",kind:"shinkansen",body:"#f7f8f8",stripe:"#ef6b32",face:"#ef6b32",edge:"#aeb8be",callName:"オレンジのしんかんせん"},
     purpleShinkansen: {name:"むらさきのしんかんせん",kind:"shinkansen",body:"#f7f8f8",upper:"#7650a5",stripe:"#f0c33c",face:"#7650a5",edge:"#aeb8be",callName:"むらさきのしんかんせん"},
-    hankyuMaroon: {name:"あずきいろのでんしゃ",kind:"commuter",body:"#6b1f2b",stripe:"#d9c8a4",face:"#6b1f2b",edge:"#4a111a",callName:"あずきいろのでんしゃ"},
-    osakaChuo: {name:"みどりのでんしゃ",kind:"commuter",body:"#edf1f2",stripe:"#019a66",stripe2:"#7fcdb2",face:"#019a66",edge:"#aeb8be",callName:"みどりのでんしゃ"},
+    hankyuMaroon: {name:"あずきいろのでんしゃ",kind:"commuter",profile:"private",body:"#6b1f2b",stripe:"#d9c8a4",face:"#6b1f2b",edge:"#4a111a",callName:"あずきいろのでんしゃ"},
+    // 大阪メトロ中央線は第三軌条集電なので、屋根にパンタグラフが載らない。
+    osakaChuo: {name:"みどりのでんしゃ",kind:"commuter",profile:"subway",noPantograph:true,body:"#edf1f2",stripe:"#019a66",stripe2:"#7fcdb2",face:"#019a66",edge:"#aeb8be",callName:"みどりのでんしゃ"},
     tsukubaExpress: {name:"あかとこんいろのでんしゃ",kind:"commuter",body:"#edf1f2",stripe:"#d7193f",stripe2:"#243b75",face:"#243b75",edge:"#aeb8be",callName:"あかとこんいろのでんしゃ"},
     joban: {name:"あおとみどりのでんしゃ",kind:"commuter",body:"#edf1f2",stripe:"#00a7e3",stripe2:"#63b32e",face:"#00a7e3",edge:"#aeb8be",callName:"あおとみどりのでんしゃ"},
-    tobuSkytree: {name:"あおとオレンジのでんしゃ",kind:"commuter",body:"#edf1f2",stripe:"#0067c0",stripe2:"#f58220",face:"#0067c0",edge:"#aeb8be",callName:"あおとオレンジのでんしゃ"},
+    tobuSkytree: {name:"あおとオレンジのでんしゃ",kind:"commuter",profile:"private",body:"#edf1f2",stripe:"#0067c0",stripe2:"#f58220",face:"#0067c0",edge:"#aeb8be",callName:"あおとオレンジのでんしゃ"},
     takasaki: {name:"オレンジとみどりのでんしゃ",kind:"commuter",body:"#e8ecef",stripe:"#f28c28",stripe2:"#43a36b",face:"#f28c28",edge:"#aeb8be",callName:"オレンジとみどりのでんしゃ"},
     // ニューシャトルは鉄輪ではなくゴムタイヤの新交通システム。kind を分けて車体も小さく描く。
     newShuttle: {name:"ニューシャトル",kind:"newtransit",body:"#f2f6f7",stripe:"#00b0c7",stripe2:"#1d3f8c",face:"#00b0c7",edge:"#a8b4ba",callName:"ニューシャトル"},
+    // ゆいレール（沖縄都市モノレール）もゴムタイヤ走行のモノレール。newtransit として小さく描く。
+    yuiRail: {name:"ゆいレール",kind:"newtransit",body:"#f4f6f7",stripe:"#e0619b",stripe2:"#c8ced2",face:"#e0619b",edge:"#a8b4ba",callName:"ゆいレール"},
   });
 
   const sources = [
@@ -65,6 +68,10 @@
     // ニューシャトル（埼玉新都市交通伊奈線）。大宮〜内宿の13駅、12.7km。
     {key:"newShuttle",name:"ニューシャトル",color:"#00b0c7",trainKey:"newShuttle",speed:60,cars:6,express:false,icon:"🚝",
       p:[["おおみや",0,139.6239,35.9063],["てつどうはくぶつかん",1.5,139.6177,35.9205],["かものみや",3.2,139.6168,35.9357],["ひがしみやはら",4.0,139.6182,35.9426],["こんば",4.8,139.6196,35.9501],["よしのはら",5.6,139.6210,35.9572],["はらいち",6.4,139.6223,35.9639],["しょうなん",7.2,139.6237,35.9711],["まるやま",8.2,139.6247,35.9799],["しく",9.4,139.6222,35.9912],["いなちゅうおう",10.5,139.6173,35.9993],["はぬき",11.6,139.6084,36.0075],["うちじゅく",12.7,139.6001,36.0140]],
+      stops:[]},
+    // ゆいレール（沖縄都市モノレール線）。那覇空港〜てだこ浦西の19駅、17.0km。沖縄県で唯一の鉄道。
+    {key:"yuiRail",name:"ゆいレール",color:"#e0619b",trainKey:"yuiRail",speed:55,cars:3,express:false,icon:"🌺",
+      p:[["なはくうこう",0,127.6521,26.2062],["あかみね",2,127.6626,26.1934],["おろく",2.8,127.6678,26.1965],["おうのやまこうえん",3.8,127.6737,26.2030],["つぼがわ",4.6,127.6767,26.2081],["あさひばし",5.4,127.6773,26.2136],["けんちょうまえ",6.1,127.6825,26.2130],["みえばし",6.8,127.6863,26.2177],["まきし",7.8,127.6922,26.2167],["あさと",8.4,127.6964,26.2183],["おもろまち",9.1,127.6988,26.2225],["ふるじま",10.1,127.7016,26.2283],["しりつびょういんまえ",11.2,127.7084,26.2295],["ぎぼ",12.1,127.7156,26.2266],["しゅり",12.9,127.7196,26.2222],["いしみね",13.9,127.7255,26.2296],["きょうづか",14.7,127.7290,26.2360],["うらそえまえだ",15.6,127.7295,26.2432],["てだこうらにし",17,127.7360,26.2492]],
       stops:[]},
   ];
 

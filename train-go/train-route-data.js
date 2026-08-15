@@ -8,9 +8,22 @@
   const routes = {};
   const maps = {};
   const metadata = [];
+  // 車体の描き分け。地下鉄は丸い前面、私鉄は斜めに落ちた前面にして、JR の切妻と見分ける。
+  // 銀座線・丸ノ内線・大江戸線は小型車体。第三軌条から集電する路線はパンタグラフを持たない。
+  const SMALL_SUBWAY_KEYS = new Set(["ginza", "marunouchi", "oedo"]);
+  const SUBWAY_KEYS = new Set(["hibiya", "chiyoda", "yurakucho", "hanzomon",
+    "namboku", "fukutoshin", "asakusa", "mita", "shinjukuSubway"]);
+  const PRIVATE_RAIL_KEYS = new Set(["odakyu", "toyoko", "keikyu"]);
+  const THIRD_RAIL_KEYS = new Set(["ginza", "marunouchi"]);
+  const carProfileFor = (key) => SMALL_SUBWAY_KEYS.has(key) ? "subwaySmall"
+    : SUBWAY_KEYS.has(key) ? "subway"
+    : PRIVATE_RAIL_KEYS.has(key) ? "private"
+    : "commuter";
   for (const item of source) {
     trains[item.key] = {
-      name:item.trainName, kind:"commuter", body:"#edf1f2", stripe:item.color,
+      name:item.trainName, kind:"commuter", profile:carProfileFor(item.key),
+      noPantograph:THIRD_RAIL_KEYS.has(item.key),
+      body:"#edf1f2", stripe:item.color,
       face:item.color, edge:"#aeb8be", callName:item.trainName,
     };
     const stations = item.points.slice(1).map(([name,km]) => ({name,km}));
@@ -68,11 +81,13 @@
       face: "#9acd32", edge: "#aeb8be", callName: "みどりのでんしゃ",
     },
     inokashira: {
-      name: "むらさきのでんしゃ", kind: "commuter", body: "#eef1f2", stripe: "#6f4aa8",
+      name: "むらさきのでんしゃ", kind: "commuter", profile: "private",
+      body: "#eef1f2", stripe: "#6f4aa8",
       face: "#6f4aa8", edge: "#aeb8be", callName: "むらさきのでんしゃ",
     },
     tozai: {
-      name: "みずいろのでんしゃ", kind: "commuter", body: "#e8ecef", stripe: "#32a5d2", stripe2: "#2362a8",
+      name: "みずいろのでんしゃ", kind: "commuter", profile: "subway",
+      body: "#e8ecef", stripe: "#32a5d2", stripe2: "#2362a8",
       face: "#3085cc", edge: "#aeb8be", callName: "みずいろのでんしゃ",
     },
     sobu: {
@@ -84,7 +99,8 @@
       face: "#f28c28", edge: "#aeb8be", callName: "オレンジのでんしゃ",
     },
     keio: {
-      name: "あかとあおのでんしゃ", kind: "commuter", body: "#e8ecef", stripe: "#d31359", stripe2: "#174f9a",
+      name: "あかとあおのでんしゃ", kind: "commuter", profile: "private",
+      body: "#e8ecef", stripe: "#d31359", stripe2: "#174f9a",
       face: "#d31359", edge: "#aeb8be", callName: "あかとあおのでんしゃ",
     },
   });
@@ -380,8 +396,9 @@
       name: "あかのでんしゃ", kind: "commuter", body: "#e8ecef", stripe: "#c9242f",
       face: "#c9242f", edge: "#aeb8be", callName: "あかのでんしゃ",
     },
+    // ゆりかもめは鉄輪ではなくゴムタイヤの新交通システム。車体も小さく描く。
     yurikamome: {
-      name: "しろいゆりかもめ", kind: "commuter", body: "#f4f8fb", stripe: "#6ec1e4",
+      name: "しろいゆりかもめ", kind: "newtransit", body: "#f4f8fb", stripe: "#6ec1e4",
       face: "#6ec1e4", edge: "#aeb8be", callName: "しろいゆりかもめ",
     },
     rinkai: {
