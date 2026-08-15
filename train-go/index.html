@@ -25,7 +25,7 @@
 <title>つなげて！でんしゃ！</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="stylesheet" href="style.css?v=108">
+<link rel="stylesheet" href="style.css?v=110">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -61,88 +61,22 @@
   <button id="btn-back-to-routes" type="button" aria-label="ろせんえらびにもどる">← もどる</button>
   <div id="vehicle-select-title" class="train-select-title">どの でんしゃに のる？</div>
   <div class="train-buttons">
-    <div class="train-choice-group">
-      <button class="train-btn" data-train="chuo" aria-label="オレンジのでんしゃ">
-        <svg viewBox="0 0 200 70"><rect x="10" y="16" width="180" height="44" rx="8" fill="#e8ecef" stroke="#aeb8be" stroke-width="2"/><rect x="168" y="18" width="20" height="40" rx="5" fill="#f28c28"/><rect x="12" y="45" width="176" height="8" fill="#f28c28"/><rect x="25" y="25" width="28" height="14" rx="3" fill="#333"/><rect x="65" y="25" width="28" height="14" rx="3" fill="#333"/><rect x="105" y="25" width="28" height="14" rx="3" fill="#333"/><circle cx="55" cy="60" r="7" fill="#555"/><circle cx="145" cy="60" r="7" fill="#555"/></svg>
-      </button>
-    </div>
-    <div class="train-choice-group multiple">
-      <button class="train-btn" data-train="nozomi" aria-label="しろいしんかんせん">
-        <svg viewBox="0 0 200 70">
-          <path d="M96 22 L105 17 L116 13 M110 13 H128" stroke="#5b6a74" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M10 55 Q10 25 55 22 L185 22 Q195 22 195 35 L195 55 Q195 60 190 60 L15 60 Q10 60 10 55 Z" fill="#f8f8f8" stroke="#ccc" stroke-width="2"/>
-          <path d="M12 40 Q20 30 60 28 L195 28 L195 36 L12 44 Z" fill="#1c48a6"/>
-          <rect x="70" y="30" width="22" height="12" rx="3" fill="#333"/>
-          <rect x="105" y="30" width="22" height="12" rx="3" fill="#333"/>
-          <rect x="140" y="30" width="22" height="12" rx="3" fill="#333"/>
-          <circle cx="55" cy="60" r="7" fill="#555"/><circle cx="95" cy="60" r="7" fill="#555"/><circle cx="150" cy="60" r="7" fill="#555"/>
-        </svg>
-      </button>
-      <button class="train-btn" data-train="doctoryellow" aria-label="きいろいけんさしゃ">
-        <svg viewBox="0 0 200 70">
-          <path d="M96 22 L105 17 L116 13 M110 13 H128" stroke="#5b6a74" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M10 55 Q10 25 55 22 L185 22 Q195 22 195 35 L195 55 Q195 60 190 60 L15 60 Q10 60 10 55 Z" fill="#ffd900" stroke="#d4b400" stroke-width="2"/>
-          <path d="M12 40 Q20 30 60 28 L195 28 L195 36 L12 44 Z" fill="#1c48a6"/>
-          <rect x="70" y="30" width="22" height="12" rx="3" fill="#333"/>
-          <rect x="105" y="30" width="22" height="12" rx="3" fill="#333"/>
-          <rect x="140" y="30" width="22" height="12" rx="3" fill="#333"/>
-          <circle cx="55" cy="60" r="7" fill="#555"/><circle cx="95" cy="60" r="7" fill="#555"/><circle cx="150" cy="60" r="7" fill="#555"/>
-        </svg>
-      </button>
-    </div>
-    <div class="train-choice-group multiple">
-      <button class="train-btn" data-train="hayabusa" aria-label="みどりのしんかんせん">
-        <svg viewBox="0 0 200 70">
-          <path d="M96 22 L105 17 L116 13 M110 13 H128" stroke="#5b6a74" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M10 55 Q10 25 55 22 L185 22 Q195 22 195 35 L195 55 Q195 60 190 60 L15 60 Q10 60 10 55 Z" fill="#f7f5ed" stroke="#218b7a" stroke-width="2"/>
-          <path d="M10 42 Q17 25 55 22 L185 22 Q195 22 195 35 L195 39 L60 36 Q25 36 10 48 Z" fill="#36a995"/>
-          <path d="M12 43 Q25 37 60 36 L195 39 L195 44 L12 49 Z" fill="#e73d8f"/>
-          <rect x="70" y="30" width="22" height="12" rx="3" fill="#333"/>
-          <rect x="105" y="30" width="22" height="12" rx="3" fill="#333"/>
-          <rect x="140" y="30" width="22" height="12" rx="3" fill="#333"/>
-          <circle cx="55" cy="60" r="7" fill="#555"/><circle cx="95" cy="60" r="7" fill="#555"/><circle cx="150" cy="60" r="7" fill="#555"/>
-        </svg>
-      </button>
-      <button class="train-btn" data-train="komachi" aria-label="あかいしんかんせん">
-        <svg viewBox="0 0 200 70"><path d="M96 22 L105 17 L116 13 M110 13 H128" stroke="#5b6a74" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 55 Q10 25 55 22 L185 22 Q195 22 195 35 L195 55 Q195 60 190 60 L15 60 Q10 60 10 55 Z" fill="#ef3340" stroke="#b51f2a" stroke-width="2"/><path d="M12 43 Q25 37 60 36 L195 39 L195 45 L12 50 Z" fill="#b7b7b7"/><rect x="70" y="30" width="22" height="12" rx="3" fill="#333"/><rect x="105" y="30" width="22" height="12" rx="3" fill="#333"/><rect x="140" y="30" width="22" height="12" rx="3" fill="#333"/><circle cx="55" cy="60" r="7" fill="#555"/><circle cx="95" cy="60" r="7" fill="#555"/><circle cx="150" cy="60" r="7" fill="#555"/></svg>
-      </button>
-    </div>
-    <div class="train-choice-group">
-      <button class="train-btn" data-train="sobu" aria-label="きいろのでんしゃ">
-        <svg viewBox="0 0 200 70"><rect x="10" y="16" width="180" height="44" rx="8" fill="#e8ecef" stroke="#aeb8be" stroke-width="2"/><rect x="168" y="18" width="20" height="40" rx="5" fill="#f0c928"/><rect x="12" y="45" width="176" height="8" fill="#f0c928"/><rect x="25" y="25" width="28" height="14" rx="3" fill="#333"/><rect x="65" y="25" width="28" height="14" rx="3" fill="#333"/><rect x="105" y="25" width="28" height="14" rx="3" fill="#333"/><circle cx="55" cy="60" r="7" fill="#555"/><circle cx="145" cy="60" r="7" fill="#555"/></svg>
-      </button>
-    </div>
-    <div class="train-choice-group">
-      <button class="train-btn" data-train="tozai" aria-label="みずいろのでんしゃ">
-        <svg viewBox="0 0 200 70"><rect x="10" y="16" width="180" height="44" rx="8" fill="#e8ecef" stroke="#aeb8be" stroke-width="2"/><rect x="168" y="18" width="20" height="40" rx="5" fill="#3085cc"/><rect x="12" y="43" width="176" height="5" fill="#32a5d2"/><rect x="12" y="49" width="176" height="5" fill="#2362a8"/><rect x="25" y="25" width="28" height="14" rx="3" fill="#333"/><rect x="65" y="25" width="28" height="14" rx="3" fill="#333"/><rect x="105" y="25" width="28" height="14" rx="3" fill="#333"/><circle cx="55" cy="60" r="7" fill="#555"/><circle cx="145" cy="60" r="7" fill="#555"/></svg>
-      </button>
-    </div>
-    <div class="train-choice-group">
-      <button class="train-btn" data-train="inokashira" aria-label="むらさきのでんしゃ">
-        <svg viewBox="0 0 200 70"><rect x="10" y="16" width="180" height="44" rx="8" fill="#eef1f2" stroke="#aeb8be" stroke-width="2"/><rect x="168" y="18" width="20" height="40" rx="5" fill="#6f4aa8"/><rect x="12" y="45" width="176" height="8" fill="#6f4aa8"/><rect x="25" y="25" width="28" height="14" rx="3" fill="#333"/><rect x="65" y="25" width="28" height="14" rx="3" fill="#333"/><rect x="105" y="25" width="28" height="14" rx="3" fill="#333"/><circle cx="55" cy="60" r="7" fill="#555"/><circle cx="145" cy="60" r="7" fill="#555"/></svg>
-      </button>
-    </div>
-    <div class="train-choice-group">
-      <button class="train-btn" data-train="keio" aria-label="あかとあおのでんしゃ">
-        <svg viewBox="0 0 200 70"><rect x="10" y="16" width="180" height="44" rx="8" fill="#e8ecef" stroke="#aeb8be" stroke-width="2"/><rect x="168" y="18" width="20" height="40" rx="5" fill="#d31359"/><rect x="12" y="42" width="176" height="5" fill="#d31359"/><rect x="12" y="49" width="176" height="5" fill="#174f9a"/><rect x="25" y="25" width="28" height="14" rx="3" fill="#333"/><rect x="65" y="25" width="28" height="14" rx="3" fill="#333"/><rect x="105" y="25" width="28" height="14" rx="3" fill="#333"/><circle cx="55" cy="60" r="7" fill="#555"/><circle cx="145" cy="60" r="7" fill="#555"/></svg>
-      </button>
-    </div>
-    <div class="train-choice-group">
-      <button class="train-btn" data-train="yamanote" aria-label="みどりのでんしゃ">
-        <svg viewBox="0 0 200 70"><rect x="10" y="16" width="180" height="44" rx="8" fill="#e8ecef" stroke="#aeb8be" stroke-width="2"/><rect x="168" y="18" width="20" height="40" rx="5" fill="#9acd32"/><rect x="12" y="45" width="176" height="8" fill="#9acd32"/><rect x="25" y="25" width="28" height="14" rx="3" fill="#333"/><rect x="65" y="25" width="28" height="14" rx="3" fill="#333"/><rect x="105" y="25" width="28" height="14" rx="3" fill="#333"/><circle cx="55" cy="60" r="7" fill="#555"/><circle cx="145" cy="60" r="7" fill="#555"/></svg>
-      </button>
-    </div>
   </div>
   </section>
   <div id="release-info">
     <!-- 更新時は sw.js の CACHE バージョンと揃える -->
-    <div id="app-version" aria-label="つなげて！でんしゃ！、バージョン109、2026年8月15日更新">
+    <div id="app-version" aria-label="つなげて！でんしゃ！、バージョン110、2026年8月15日更新">
       <span class="version-title">つなげて！でんしゃ！</span>
-      <strong>v109</strong><span>2026.08.15 更新</span>
+      <strong>v110</strong><span>2026.08.15 更新</span>
     </div>
     <details id="update-history">
       <summary>🆕 こうしん</summary>
       <div class="update-history-list" aria-label="こうしんりれき">
+        <span><time datetime="2026-08-15">8/15</time> ゆいレール（おきなわ）をついか</span>
+        <span><time datetime="2026-08-15">8/15</time> ちかてつ・してつ・しんこうつうを かたちで かきわけ</span>
+        <span><time datetime="2026-08-15">8/15</time> えらぶえと はしるすがたを おなじに</span>
+        <span><time datetime="2026-08-15">8/15</time> ろせんと でんしゃの ならびじゅんを せいり</span>
+        <span><time datetime="2026-08-15">8/15</time> ちいさいでんしゃの れんけつの すきまを なおす</span>
         <span><time datetime="2026-08-15">8/15</time> でんしゃの かたちを しゅるいごとに かきわけ</span>
         <span><time datetime="2026-08-15">8/15</time> たかさきせんと ニューシャトルをついか</span>
         <span><time datetime="2026-08-11">8/11</time> つくばエクスプレスと ちかくのろせんをついか</span>
@@ -306,13 +240,13 @@
   <span>🔦</span><span id="headlight-label">ライトをつける</span>
 </button>
 
-<script src="train-route-data.js?v=108"></script>
-<script src="national-rail-route-data.js?v=108"></script>
-<script src="air-route-data.js?v=108"></script>
-<script src="sea-route-data.js?v=108"></script>
-<script src="fare-data.js?v=108"></script>
-<script src="map-data.js?v=108"></script>
-<script src="app.js?v=108"></script>
+<script src="train-route-data.js?v=110"></script>
+<script src="national-rail-route-data.js?v=110"></script>
+<script src="air-route-data.js?v=110"></script>
+<script src="sea-route-data.js?v=110"></script>
+<script src="fare-data.js?v=110"></script>
+<script src="map-data.js?v=110"></script>
+<script src="app.js?v=110"></script>
 <!-- Cloudflare Web Analytics: Cookieを使用せず、個人を識別しないアクセス集計 -->
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"ca5e1fbb318447b3ac9409f3da1cad2a"}'></script>
 </body>

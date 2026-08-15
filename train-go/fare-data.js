@@ -116,6 +116,7 @@
     hankyuTakarazuka: "private",
     yurikamome: "private",
     newShuttle: "private",
+    yuiRail: "private",
     // 新幹線
     tokaido: "shinkansen",
     tohoku: "shinkansen",
