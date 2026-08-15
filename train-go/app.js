@@ -6,7 +6,35 @@
 
   const isDebug = new URLSearchParams(location.search).has("debug");
 
+  // ?debug のときだけ描画段階ごとの所要時間を集計する。__tg.profile() で読み出す。
+  const profileTotals = isDebug ? new Map() : null;
+  function profileRecord(name, ms) {
+    const entry = profileTotals.get(name);
+    if (entry) {
+      entry.ms += ms;
+      entry.calls += 1;
+    } else {
+      profileTotals.set(name, { ms, calls: 1 });
+    }
+  }
+  function profiled(name, draw) {
+    if (!profileTotals) return draw();
+    const started = performance.now();
+    draw();
+    profileRecord(name, performance.now() - started);
+  }
+
   const {trains: TRAINS, routes: ROUTES} = window.TRAIN_GO_ROUTE_DATA;
+
+  function isAirRoute(route = activeRoute) {
+    return route?.kind === "air";
+  }
+  function isSeaRoute(route = activeRoute) {
+    return route?.kind === "sea";
+  }
+  function isNonRailRoute(route = activeRoute) {
+    return isAirRoute(route) || isSeaRoute(route);
+  }
 
   const CAR_COUNT_WORDS = [
     "いちりょう", "にりょう", "さんりょう", "よんりょう", "ごりょう",
@@ -38,8 +66,19 @@
   const AIR_JETSTREAM_BOOST_KMH = 180;
   const AIR_MAX_BRAKING_DISTANCE_METERS = 20000;
   const PASSENGER_TAP_BONUS_KMH = 1;
+  const MAX_ONBOARD_PASSENGERS = 16;
+  const TRAIN_BOARDING_MIN = 2;
+  const TRAIN_BOARDING_MAX = 6;
+  const AIR_BOARDING_MIN = 6;
+  const AIR_BOARDING_MAX = 12;
   const DEPARTURE_SPEED_PX_PER_SEC = DEPARTURE_SPEED_KMH / SPEED_DISPLAY_SCALE;
   const AIR_DEPARTURE_SPEED_PX_PER_SEC = AIR_DEPARTURE_SPEED_KMH / SPEED_DISPLAY_SCALE;
+  const SEA_DEPARTURE_SPEED_KMH = 28;
+  const SEA_BASE_TAP_BOOST_KMH = 8;
+  const SEA_MAX_BRAKING_DISTANCE_METERS = 8000;
+  const SEA_BOARDING_MIN = 4;
+  const SEA_BOARDING_MAX = 10;
+  const SEA_DEPARTURE_SPEED_PX_PER_SEC = SEA_DEPARTURE_SPEED_KMH / SPEED_DISPLAY_SCALE;
   const STAR_SPAWN_MIN_SECONDS = 9;
   const FALLING_STAR_TYPES = [
     {
@@ -115,6 +154,8 @@
     "せんだい", "もりおか", "しんあおもり", "きちじょうじ", "みたか",
     "たちかわ", "はちおうじ", "たかお", "なかの", "おおてまち", "にしふなばし",
     "ちょうふ", "ふちゅう", "けいおうはちおうじ", "けいおうたまセンター", "はしもと",
+    "よこはま", "かわさき", "おおふな", "まいはま", "しんきば", "とよす",
+    "おおさき", "かいひんまくはり",
   ]);
   function segmentKey(stationA, stationB) {
     return [stationA, stationB].sort().join("::");
@@ -173,6 +214,10 @@
   const UNDERGROUND_STATIONS = {
     inokashira: new Set(["しんせん"]),
     keio: new Set(["しんじゅく"]),
+    tsukubaExpress: new Set([
+      "あきはばら", "しんおかちまち", "あさくさ", "みなみせんじゅ",
+      "きたせんじゅ", "あおい", "ろくちょう", "つくば",
+    ]),
     osakaChuo: new Set([
       "ながた", "たかいだ", "ふかえばし", "みどりばし", "もりのみや",
       "たにまちよんちょうめ", "さかいすじほんまち", "ほんまち", "あわざ",
@@ -244,6 +289,14 @@
         stamp: "🌌",
       },
     },
+    keiyo: {
+      "まいはま": {
+        banner: "🏰 ゆめの えき！",
+        announcement: "しろいおしろと、ゆめがいっぱいのえきだよ！",
+        symbols: ["🏰", "✨", "🎢"],
+        stamp: "🏰",
+      },
+    },
     yamanote: {
       "うえの": {
         banner: "🐼 どうぶつの まち！",
@@ -276,8 +329,9 @@
     Object.values(ROUTES).flatMap((route) => stationNamesForRoute(route)),
   )];
   const PASSENGER_POOL = [
-    "🧒", "👧", "👦", "👩", "👨", "👵", "👴",
-    "🐰", "🐻", "🐧", "🐶", "🐱", "🦊", "🐼",
+    "🧒", "👧", "👦", "👩", "👨", "👵", "👴", "👶", "🧑", "🧔",
+    "🐰", "🐻", "🐧", "🐶", "🐱", "🦊", "🐼", "🐨", "🐯", "🐸",
+    "🐵", "🐥", "🦄", "🐷",
   ];
 
   const OPPOSING_TRAIN_TYPES = {
@@ -307,13 +361,15 @@
     freight: { name: "かもつれっしゃ", kind: "freight", cars: 26, speedKmh: 100, body: "#40505d", stripe: "#e49a31" },
   };
   for (const {key,trainKey,kind,cars,speedKmh} of window.TRAIN_GO_ROUTE_DATA?.metadata || []) {
-    if (kind === "air") continue;
+    if (kind === "air" || kind === "sea") continue;
     const type = TRAINS[trainKey || key];
     OPPOSING_TRAIN_TYPES[key] = {
       name:type.name, kind:kind === "shinkansen" ? "shinkansen" : "local",
       cars:cars || (key === "osakaLoop" ? 8 : 10),
       speedKmh:speedKmh || (key === "odakyu" || key === "toyoko" || key === "keikyu" ? 110 : 90),
       body:type.body, stripe:type.stripe, stripe2:type.stripe2,
+      // 色ちがいのある形式は、すれ違う編成の色も1本ごとに変える。
+      sourceKey:trainKey || key,
     };
   }
 
@@ -381,10 +437,12 @@
 
   const DRIVER_CALLS = ["しんごうよし！", "ドアよし！", "しゅっぱつしんこう！", "じこくよし！"];
   const PILOT_CALLS = ["りりくします！", "じゅんこうこうどです！", "ちゃくりくたいせい！", "しんろよし！"];
+  const CAPTAIN_CALLS = ["いかりよし！", "ほういよし！", "エンジンよし！", "きゃくしつよし！", "てんこうよし！"];
   const TIMES_OF_DAY = ["day", "sunset", "night"];
   const WEATHERS = ["sunny", "rain", "snow"];
   const STAMP_STORAGE_KEY = "train-go-station-stamps-v1";
   const TOTAL_DISTANCE_STORAGE_KEY = "train-go-total-distance-meters-v1";
+  const TOTAL_MONEY_STORAGE_KEY = "train-go-total-fare-yen-v1";
   const METERS_PER_MILE = 1609.344;
 
   // ---- 要素 ----
@@ -411,10 +469,17 @@
   const totalDistanceCard = document.getElementById("total-distance-card");
   const totalMilesValue = document.getElementById("total-miles-value");
   const totalKmValue = document.getElementById("total-km-value");
+  const totalMoneyCard = document.getElementById("total-money-card");
+  const totalMoneyValue = document.getElementById("total-money-value");
+  const sessionMoneyValue = document.getElementById("session-money-value");
+  const moneyMeter = document.getElementById("money-meter");
+  const runMoneyValue = document.getElementById("run-money-value");
   const nextStationDistanceLabel = document.getElementById("next-station-distance-label");
   const nextStationDistanceValue = document.getElementById("next-station-distance-value");
   const nextStationDistanceKm = document.getElementById("next-station-distance-km");
+  const nextStationEta = document.getElementById("next-station-eta");
   const terminalDistanceLabel = document.getElementById("terminal-distance-label");
+  const terminalEta = document.getElementById("terminal-eta");
   const terminalDistanceValue = document.getElementById("terminal-distance-value");
   const terminalDistanceKm = document.getElementById("terminal-distance-km");
   const btnExpress = document.getElementById("btn-express");
@@ -586,25 +651,32 @@
     runningRailOsc = audioCtx.createOscillator();
     runningGain = audioCtx.createGain();
 
-    if (activeRoute.kind === "air") {
-      runningOsc.type = "sawtooth";
-      runningRailOsc.type = "sine";
-      runningOsc.frequency.value = 48;
-      runningRailOsc.frequency.value = 145;
+    if (isAirRoute()) {
+      // 耳に刺さりにくい低めのハム＋やわらかいノイズでジェット感を出す。
+      runningOsc.type = "sine";
+      runningRailOsc.type = "triangle";
+      runningOsc.frequency.value = 52;
+      runningRailOsc.frequency.value = 88;
 
       if (!runningNoiseBuffer) {
         runningNoiseBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate, audioCtx.sampleRate);
         const noise = runningNoiseBuffer.getChannelData(0);
-        for (let index = 0; index < noise.length; index++) noise[index] = Math.random() * 2 - 1;
+        let brown = 0;
+        for (let index = 0; index < noise.length; index++) {
+          brown = (brown + (Math.random() * 2 - 1) * 0.02) * 0.98;
+          noise[index] = Math.max(-1, Math.min(1, brown * 3.2));
+        }
       }
       runningNoiseSource = audioCtx.createBufferSource();
       runningNoiseFilter = audioCtx.createBiquadFilter();
+      const noiseGain = audioCtx.createGain();
       runningNoiseSource.buffer = runningNoiseBuffer;
       runningNoiseSource.loop = true;
-      runningNoiseFilter.type = "lowpass";
-      runningNoiseFilter.frequency.value = 650;
-      runningNoiseFilter.Q.value = 0.7;
-      runningNoiseSource.connect(runningNoiseFilter).connect(runningGain);
+      runningNoiseFilter.type = "bandpass";
+      runningNoiseFilter.frequency.value = 240;
+      runningNoiseFilter.Q.value = 0.55;
+      noiseGain.gain.value = 0.55;
+      runningNoiseSource.connect(runningNoiseFilter).connect(noiseGain).connect(runningGain);
       runningNoiseSource.start(t);
     } else {
       runningOsc.type = "triangle";
@@ -614,7 +686,7 @@
     }
 
     runningGain.gain.setValueAtTime(0.001, t);
-    runningGain.gain.linearRampToValueAtTime(activeRoute.kind === "air" ? 0.032 : 0.04, t + 0.25);
+    runningGain.gain.linearRampToValueAtTime(isAirRoute() ? 0.028 : isSeaRoute() ? 0.03 : 0.04, t + 0.25);
     runningOsc.connect(runningGain);
     runningRailOsc.connect(runningGain);
     runningGain.connect(audioCtx.destination);
@@ -625,12 +697,20 @@
   function updateRunningSound() {
     if (!audioCtx || !runningOsc || !runningRailOsc || !runningGain) return;
     const t = audioCtx.currentTime;
-    if (activeRoute.kind === "air") {
+    if (isAirRoute()) {
       const soundSpeedKmh = Math.min(displaySpeed(speed), 1400);
-      runningOsc.frequency.setTargetAtTime(42 + soundSpeedKmh * 0.035, t, 0.16);
-      runningRailOsc.frequency.setTargetAtTime(120 + soundSpeedKmh * 0.24, t, 0.16);
-      runningNoiseFilter?.frequency.setTargetAtTime(450 + soundSpeedKmh * 0.55, t, 0.16);
-      runningGain.gain.setTargetAtTime(state === "running" ? 0.026 + soundSpeedKmh / 24000 : 0.001, t, 0.12);
+      runningOsc.frequency.setTargetAtTime(48 + soundSpeedKmh * 0.018, t, 0.2);
+      runningRailOsc.frequency.setTargetAtTime(78 + soundSpeedKmh * 0.09, t, 0.2);
+      runningNoiseFilter?.frequency.setTargetAtTime(200 + soundSpeedKmh * 0.22, t, 0.2);
+      runningGain.gain.setTargetAtTime(state === "running" ? 0.02 + soundSpeedKmh / 32000 : 0.001, t, 0.14);
+      return;
+    }
+    if (isSeaRoute()) {
+      const soundSpeedKmh = Math.min(displaySpeed(speed), 80);
+      runningOsc.frequency.setTargetAtTime(32 + soundSpeedKmh * 0.2, t, 0.18);
+      runningRailOsc.frequency.setTargetAtTime(55 + soundSpeedKmh * 0.35, t, 0.18);
+      runningNoiseFilter?.frequency.setTargetAtTime(220 + soundSpeedKmh * 2.5, t, 0.18);
+      runningGain.gain.setTargetAtTime(state === "running" ? 0.022 + soundSpeedKmh / 4000 : 0.001, t, 0.14);
       return;
     }
     const soundSpeed = Math.min(speed, 2400);
@@ -697,6 +777,9 @@
   let distance = 0;
   let visualDistance = 0;    // 折り返し後は減らし、背景や駅を反対方向へ流す
   let totalTravelMeters = loadTotalTravelMeters();
+  let totalMoneyYen = loadTotalMoneyYen();
+  let sessionMoneyYen = 0;
+  let rideMoneyYen = 0;
   let lastTotalDistanceSaveAt = performance.now();
   let wheelAngle = 0;
   let stationWorldX = 0;   // 次の駅の位置(距離座標)
@@ -838,14 +921,16 @@
     if (state !== "running" || passingStation) return false;
     const distToStation = stationWorldX - distance;
     const physicalBrakingDistance = speed * speed / (2 * 300) + 50;
-    const brakingDistance = activeRoute.kind === "air"
+    const brakingDistance = isAirRoute()
       ? Math.min(physicalBrakingDistance, AIR_MAX_BRAKING_DISTANCE_METERS * PIXELS_PER_METER)
+      : isSeaRoute()
+      ? Math.min(physicalBrakingDistance, SEA_MAX_BRAKING_DISTANCE_METERS * PIXELS_PER_METER)
       : physicalBrakingDistance;
     return distToStation < brakingDistance;
   }
 
   function routeEventForSegment() {
-    if (activeRoute.kind === "air") return "jetstream";
+    if (isAirRoute()) return "jetstream";
     if (selectedRouteKey === "tokaido" && train === TRAINS.nozomi && nextStationName === "しんふじ") return "fuji";
     if (selectedRouteKey === "tokaido" && train === TRAINS.doctoryellow && segmentNumber === 1) return "inspection";
     if (TUNNEL_SEGMENTS[selectedRouteKey]?.has(segmentKey(currentStationName, nextStationName))) return "tunnel";
@@ -864,8 +949,33 @@
     return `${(Math.max(0, meters) / 1000).toFixed(1)} km`;
   }
 
+  // 知育用: 日や時間があっても、必ず秒まで出して変化が見えるようにする。
+  function formatEtaFromSeconds(totalSeconds) {
+    if (!Number.isFinite(totalSeconds) || totalSeconds < 0) return "—";
+    const sec = Math.floor(totalSeconds);
+    const days = Math.floor(sec / 86400);
+    const hours = Math.floor((sec % 86400) / 3600);
+    const minutes = Math.floor((sec % 3600) / 60);
+    const seconds = sec % 60;
+    const parts = [];
+    if (days > 0) parts.push(`${days}にち`);
+    if (days > 0 || hours > 0) parts.push(`${hours}じかん`);
+    parts.push(`${minutes}ふん`);
+    parts.push(`${seconds}びょう`);
+    return parts.join("");
+  }
+
+  function remainingEtaSeconds(remainingMeters) {
+    const speedKmh = displaySpeed(speed);
+    if (!Number.isFinite(remainingMeters) || remainingMeters <= 0) return 0;
+    if (!Number.isFinite(speedKmh) || speedKmh < 1) return NaN;
+    return remainingMeters / (speedKmh / 3.6);
+  }
+
   function nextStationRemainingMeters() {
-    if (stationIdx < 0 || !nextStationName) return 0;
+    // stationIdx < 0 は「始発へ戻る最終区間」を表す（飛行機・船は帰り道全体）。
+    // 次駅名がある限り stationWorldX 基準で残りを出す。
+    if (!nextStationName) return 0;
     return Math.max(0, (stationWorldX - distance) / PIXELS_PER_METER);
   }
 
@@ -900,7 +1010,8 @@
   }
 
   function autoTargetKmh() {
-    if (activeRoute.kind === "air") return 900;
+    if (isAirRoute()) return 900;
+    if (isSeaRoute()) return 40;
     return ROUTE_AUTO_SPEED_KMH[selectedRouteKey] || 90;
   }
 
@@ -954,17 +1065,23 @@
     distanceKmValue.textContent = `${(Math.floor(distance / PIXELS_PER_METER) / 1000).toFixed(1)} km`;
     const nextRemaining = nextStationRemainingMeters();
     const terminalRemaining = terminalRemainingMeters();
-    nextStationDistanceLabel.textContent = activeRoute.kind === "air"
+    nextStationDistanceLabel.textContent = isNonRailRoute()
       ? `とうちゃく ${nextStationName || "くうこう"}まで`
       : `つぎの ${nextStationName || "えき"}まで`;
     nextStationDistanceValue.textContent = remainingDistanceMeters(nextRemaining);
     nextStationDistanceKm.textContent = remainingDistanceKm(nextRemaining);
-    terminalDistanceLabel.textContent = activeRoute.kind === "air"
+    if (nextStationEta) {
+      nextStationEta.textContent = formatEtaFromSeconds(remainingEtaSeconds(nextRemaining));
+    }
+    terminalDistanceLabel.textContent = isNonRailRoute()
       ? `${terminal.name}まで`
       : `しゅうてん ${terminal.name}まで`;
     terminalDistanceValue.textContent = remainingDistanceMeters(terminalRemaining);
     terminalDistanceKm.textContent = remainingDistanceKm(terminalRemaining);
-    btnExpress.classList.toggle("hidden", activeRoute.kind === "air");
+    if (terminalEta) {
+      terminalEta.textContent = formatEtaFromSeconds(remainingEtaSeconds(terminalRemaining));
+    }
+    btnExpress.classList.toggle("hidden", isNonRailRoute());
     btnExpress.classList.toggle("deadhead", deadheadMode);
     btnExpress.setAttribute("aria-pressed", String(expressMode || deadheadMode));
     if (isDebug) canvas.dataset.serviceMode = deadheadMode ? "deadhead" : expressMode ? "express" : "local";
@@ -1000,6 +1117,15 @@
     }
   }
 
+  function loadTotalMoneyYen() {
+    try {
+      const saved = Number(localStorage.getItem(TOTAL_MONEY_STORAGE_KEY) || 0);
+      return Number.isFinite(saved) && saved >= 0 ? Math.min(Math.floor(saved), Number.MAX_SAFE_INTEGER) : 0;
+    } catch {
+      return 0;
+    }
+  }
+
   function renderTotalTravelDistance() {
     const meters = Math.max(0, Math.floor(totalTravelMeters));
     const miles = meters / METERS_PER_MILE;
@@ -1014,6 +1140,30 @@
     if (isDebug) totalDistanceCard.dataset.totalMeters = String(meters);
   }
 
+  function renderTotalMoney() {
+    const yen = Math.max(0, Math.floor(totalMoneyYen));
+    const sessionYen = Math.max(0, Math.floor(sessionMoneyYen));
+    const formattedYen = yen.toLocaleString("ja-JP");
+    totalMoneyValue.textContent = formattedYen;
+    sessionMoneyValue.textContent = `きょう ＋${sessionYen.toLocaleString("ja-JP")} えん`;
+    totalMoneyCard.setAttribute("aria-label", `いままでの運賃、${yen}円、この端末を開いてから${sessionYen}円`);
+    if (isDebug) {
+      totalMoneyCard.dataset.totalYen = String(yen);
+      totalMoneyCard.dataset.sessionYen = String(sessionYen);
+    }
+    renderRideMoney();
+  }
+
+  function renderRideMoney() {
+    const rideYen = Math.max(0, Math.floor(rideMoneyYen));
+    const formattedRideYen = rideYen.toLocaleString("ja-JP");
+    if (runMoneyValue) runMoneyValue.textContent = formattedRideYen;
+    if (moneyMeter) {
+      moneyMeter.setAttribute("aria-label", `この電車で稼いだ運賃、${rideYen}円`);
+      if (isDebug) moneyMeter.dataset.rideYen = String(rideYen);
+    }
+  }
+
   function saveTotalTravelDistance() {
     try {
       localStorage.setItem(TOTAL_DISTANCE_STORAGE_KEY, String(Math.floor(totalTravelMeters)));
@@ -1023,6 +1173,60 @@
     lastTotalDistanceSaveAt = performance.now();
   }
 
+  function saveTotalMoney() {
+    try {
+      localStorage.setItem(TOTAL_MONEY_STORAGE_KEY, String(Math.floor(totalMoneyYen)));
+    } catch {
+      // 保存できない環境でも、その回の運賃は数え続ける。
+    }
+  }
+
+  function stationKmOnActiveRoute(stationName) {
+    if (!activeRoute || !stationName) return null;
+    if (stationName === activeRoute.start) return activeRoute.startKm;
+    for (const station of activeRoute.stations) {
+      if (station.name === stationName) return station.km;
+    }
+    return null;
+  }
+
+  function travelDistanceKmOnActiveRoute(fromName, toName) {
+    const fromKm = stationKmOnActiveRoute(fromName);
+    const toKm = stationKmOnActiveRoute(toName);
+    if (fromKm == null || toKm == null) return 0;
+    const raw = Math.abs(toKm - fromKm);
+    if (activeRoute.loopKm) {
+      return Math.min(raw, Math.max(0, activeRoute.loopKm - raw));
+    }
+    return raw;
+  }
+
+  function fareYenForPassenger(passenger) {
+    const origin = passenger.origin || currentStationName;
+    const destination = passenger.destination || currentStationName;
+    const distanceKm = travelDistanceKmOnActiveRoute(origin, destination);
+    const fareApi = window.TRAIN_GO_FARE;
+    if (!fareApi?.fareYen) {
+      return Math.max(140, Math.round(distanceKm * 20));
+    }
+    return fareApi.fareYen(selectedRouteKey, distanceKm, activeRoute);
+  }
+
+  function earnFareFromPassengers(alighting) {
+    if (!alighting.length) return 0;
+    let earned = 0;
+    for (const passenger of alighting) {
+      earned += fareYenForPassenger(passenger);
+    }
+    if (earned <= 0) return 0;
+    totalMoneyYen += earned;
+    sessionMoneyYen += earned;
+    rideMoneyYen += earned;
+    saveTotalMoney();
+    renderTotalMoney();
+    return earned;
+  }
+
   function recordTotalTravel(travelPixels, now) {
     if (!Number.isFinite(travelPixels) || travelPixels <= 0) return;
     totalTravelMeters += travelPixels / PIXELS_PER_METER;
@@ -1030,6 +1234,7 @@
   }
 
   renderTotalTravelDistance();
+  renderTotalMoney();
 
   function loadVisitedStations() {
     try {
@@ -1147,8 +1352,27 @@
     const destinations = futureDestinationNames();
     return pickPassengers(count).map((icon) => ({
       icon,
+      origin: currentStationName,
       destination: destinations[Math.floor(Math.random() * destinations.length)],
     }));
+  }
+
+  function randomBoardingCount(maxSeats) {
+    if (maxSeats <= 0) return 0;
+    const min = isAirRoute() ? AIR_BOARDING_MIN : isSeaRoute() ? SEA_BOARDING_MIN : TRAIN_BOARDING_MIN;
+    const max = isAirRoute() ? AIR_BOARDING_MAX : isSeaRoute() ? SEA_BOARDING_MAX : TRAIN_BOARDING_MAX;
+    const desired = min + Math.floor(Math.random() * (max - min + 1));
+    return Math.min(maxSeats, desired);
+  }
+
+  function boardPassengersAtCurrentStation(count = randomBoardingCount(MAX_ONBOARD_PASSENGERS - onboardPassengers.length)) {
+    const availableSeats = Math.max(0, MAX_ONBOARD_PASSENGERS - onboardPassengers.length);
+    const boardingCount = Math.min(availableSeats, count);
+    if (boardingCount <= 0) return [];
+    const boarding = makeBoardingPassengers(boardingCount);
+    onboardPassengers.push(...boarding);
+    updateOnboardPanel();
+    return boarding;
   }
 
   function cycleWeatherAndTime() {
@@ -1164,10 +1388,16 @@
   }
 
   function announceInitialDeparture() {
-    if (activeRoute.kind === "air") {
+    if (isAirRoute()) {
       const destination = routeTerminalStation().name;
       showPlayBanner(`✈️ ${activeRoute.start}　➡ ${destination}`, 3200);
       say(`このひこうきは、${activeRoute.start}はつ、${destination}ゆきです。まもなく、りりくします`);
+      return;
+    }
+    if (isSeaRoute()) {
+      const destination = routeTerminalStation().name;
+      showPlayBanner(`⛴️ ${activeRoute.start}　➡ ${destination}`, 3200);
+      say(`このふねは、${activeRoute.start}はつ、${destination}ゆきです。まもなく、しゅっこうします`);
       return;
     }
     if (activeRoute.loopKm) {
@@ -1184,9 +1414,10 @@
     mapMode = "scenery";
     resetMapCamera();
     activeRoute = routeForGameStart();
-    trainKey = key;
-    train = TRAINS[key];
-    carTypes = [key];
+    // 編成ごとに色が違う形式は、走らせるたびにどの編成が来るかが変わる。
+    trainKey = pickTrainVariant(key);
+    train = TRAINS[trainKey];
+    carTypes = [trainKey];
     cars = 1;
     speed = 0;
     distance = 0;
@@ -1226,6 +1457,8 @@
     midAnnouncementDone = false;
     onboardPassengers = [];
     deliveredPassengers = 0;
+    rideMoneyYen = 0;
+    renderRideMoney();
     setOnboardPanelExpanded(false);
     stationPassengers.replaceChildren();
     opposingTrain = null;
@@ -1236,14 +1469,14 @@
     driverCallIndex = 0;
     autoMode = false;
     autoActionTimer = 0;
-    updateOnboardPanel();
     addStationStamp(activeRoute.start, false);
     renderStampBook();
     segmentNumber = 0;
     segmentStartDistance = 0;
     btnMapMode.classList.remove("hidden");
     setMapMode("scenery");
-    document.body.classList.toggle("air-mode", activeRoute.kind === "air");
+    document.body.classList.toggle("air-mode", isAirRoute());
+    document.body.classList.toggle("sea-mode", isSeaRoute());
     selectScreen.classList.add("hidden");
     runUi.classList.remove("hidden");
     btnHome.classList.remove("hidden");
@@ -1257,27 +1490,35 @@
     btnStationDoors.classList.add("hidden");
     stationPassengers.classList.add("hidden");
     populateQuickAddButtons();
-    runUi.classList.toggle("hidden", activeRoute.kind === "air");
-    onboardPanel.classList.toggle("hidden", activeRoute.kind === "air");
-    btnDriver.querySelector("span:first-child").textContent = activeRoute.kind === "air" ? "👩‍✈️" : "🧑‍✈️";
-    btnDriver.querySelector("span:last-child").textContent = activeRoute.kind === "air" ? "パイロット" : "うんてんし";
-    btnMapRecenter.querySelector("span:first-child").textContent = activeRoute.kind === "air" ? "✈️" : "🚃";
-    btnMapRecenter.querySelector("span:last-child").textContent = activeRoute.kind === "air" ? "ひこうきへ" : "でんしゃへ";
-    btnMapRecenter.setAttribute("aria-label", activeRoute.kind === "air" ? "ひこうきのいちにもどる" : "でんしゃのいちにもどる");
-    document.querySelector("#distance-meter > small").textContent = activeRoute.kind === "air" ? "ひこうきょり" : "そうこうきょり";
+    runUi.classList.toggle("hidden", isNonRailRoute());
+    btnDriver.querySelector("span:first-child").textContent = isAirRoute() ? "👩‍✈️" : isSeaRoute() ? "🧑‍✈️" : "🧑‍✈️";
+    btnDriver.querySelector("span:last-child").textContent = isAirRoute() ? "パイロット" : isSeaRoute() ? "せんちょう" : "うんてんし";
+    btnMapRecenter.querySelector("span:first-child").textContent = isAirRoute() ? "✈️" : isSeaRoute() ? "⛴️" : "🚃";
+    btnMapRecenter.querySelector("span:last-child").textContent = isAirRoute() ? "ひこうきへ" : isSeaRoute() ? "ふねへ" : "でんしゃへ";
+    btnMapRecenter.setAttribute("aria-label", isAirRoute() ? "ひこうきのいちにもどる" : isSeaRoute() ? "ふねのいちにもどる" : "でんしゃのいちにもどる");
+    document.querySelector("#distance-meter > small").textContent = isAirRoute() ? "ひこうきょり" : isSeaRoute() ? "こうかいきょり" : "そうこうきょり";
     clearRouteEvent();
     updateDriveUi();
     arrivalBanner.textContent = "とうちゃく〜！";
+    const initialBoarding = boardPassengersAtCurrentStation();
+    if (isAirRoute() && initialBoarding.length > 0) {
+      showPlayBanner(`✈️ ${initialBoarding.length}にん ごじょうしゃ！`, 2200);
+    } else if (isSeaRoute() && initialBoarding.length > 0) {
+      showPlayBanner(`⛴️ ${initialBoarding.length}にん ごじょうしゃ！`, 2200);
+    }
     announceInitialDeparture();
   }
 
   function goHome() {
     saveTotalTravelDistance();
+    saveTotalMoney();
     renderTotalTravelDistance();
+    renderTotalMoney();
     mapMode = "scenery";
     resetMapCamera();
     document.body.classList.remove("map-view-active");
     document.body.classList.remove("air-mode");
+    document.body.classList.remove("sea-mode");
     state = "select";
     speed = 0;
     autoMode = false;
@@ -1330,18 +1571,22 @@
     }
     routeEventBanner.classList.add("hidden");
     btnHeadlight.classList.add("hidden");
-    if (playHorn && activeRoute.kind !== "air") horn();
+    if (playHorn && !isNonRailRoute()) horn();
     if (announceNext) {
-      if (activeRoute.kind === "air") {
+      if (isAirRoute()) {
         say(`${nextStationName}へ、しゅっぱつ。りりくします`);
+      } else if (isSeaRoute()) {
+        say(`${nextStationName}へ、しゅっこうします`);
       } else {
         say(passingStation
           ? `このでんしゃは、${deadheadMode ? "かいそうれっしゃ" : activeRoute.expressModeName}です。${nextStationName}は、とおりすぎます`
           : `つぎは、${nextStationName}`);
       }
     }
-    const departureSpeed = activeRoute.kind === "air"
+    const departureSpeed = isAirRoute()
       ? AIR_DEPARTURE_SPEED_PX_PER_SEC
+      : isSeaRoute()
+      ? SEA_DEPARTURE_SPEED_PX_PER_SEC
       : (autoMode ? 60 : DEPARTURE_SPEED_PX_PER_SEC);
     speed = Math.max(speed, departureSpeed);
     startRunningSound();
@@ -1382,11 +1627,10 @@
     arrivalBanner.classList.remove("hidden");
     chime();
     if (autoMode) autoActionTimer = 1.2;
-    if (activeRoute.kind === "air") {
+    if (isNonRailRoute()) {
       stationDoorsDone = true;
-      arrivalBanner.textContent = isTurnaround ? "✈️ おりかえし〜！" : "✈️ ちゃくりく〜！";
-      say(`${currentStationName}に、ちゃくりく！${isTurnaround ? `おりかえして、${routeTerminalStation().name}へいくよ。` : ""}がめんをタップすると、またとべるよ`);
-      if (autoMode) autoActionTimer = 2.4;
+      exchangePassengers();
+      if (autoMode) autoActionTimer = 2.8;
     } else if (isKomachiStop) {
       komachiReady = true;
       arrivalBanner.textContent = "れんけつするでんしゃがいた！";
@@ -1464,17 +1708,7 @@
     });
   }
 
-  function exchangePassengers() {
-    const alighting = onboardPassengers.filter((passenger) => passenger.destination === currentStationName);
-    onboardPassengers = onboardPassengers.filter((passenger) => passenger.destination !== currentStationName);
-    deliveredPassengers += alighting.length;
-
-    const availableSeats = Math.max(0, 7 - onboardPassengers.length);
-    const boardingCount = Math.min(availableSeats, 1 + Math.floor(Math.random() * 3));
-    const boarding = makeBoardingPassengers(boardingCount);
-    onboardPassengers.push(...boarding);
-    updateOnboardPanel();
-
+  function renderPassengerExchange(alighting, boarding) {
     stationPassengers.replaceChildren();
     [...alighting.map((passenger) => ({ ...passenger, direction: "alight" })),
       ...boarding.map((passenger) => ({ ...passenger, direction: "board" }))]
@@ -1483,18 +1717,47 @@
         span.textContent = passenger.icon;
         span.className = `passenger-${passenger.direction}`;
         span.title = `${passenger.destination}へいくよ`;
-        span.style.setProperty("--passenger-delay", `${index * 0.18}s`);
+        span.style.setProperty("--passenger-delay", `${index * 0.12}s`);
         stationPassengers.appendChild(span);
       });
+    stationPassengers.classList.toggle("hidden", alighting.length + boarding.length === 0);
+  }
 
-    stationPassengers.classList.remove("hidden");
+  function exchangePassengers() {
+    const alighting = onboardPassengers.filter((passenger) => passenger.destination === currentStationName);
+    onboardPassengers = onboardPassengers.filter((passenger) => passenger.destination !== currentStationName);
+    deliveredPassengers += alighting.length;
+    const earnedYen = earnFareFromPassengers(alighting);
+
+    const boarding = boardPassengersAtCurrentStation();
+    renderPassengerExchange(alighting, boarding);
+
     arrivalBanner.classList.add("passenger-exchange");
+    const moneyText = earnedYen > 0 ? ` 💰${earnedYen.toLocaleString("ja-JP")}えん` : "";
+    if (isAirRoute()) {
+      arrivalBanner.textContent = alighting.length > 0
+        ? `✈️ ${alighting.length}にん おとどけ！${moneyText} タップかそく ＋${alighting.length} km/h ${boarding.length}にん ごじょうしゃ！`
+        : `✈️ ${boarding.length}にん ごじょうしゃ！`;
+      say(alighting.length > 0
+        ? `${currentStationName}にとうちゃく。${alighting.length}にんおりました。うんちん ${earnedYen}えん。タップかそくが、${alighting.length}キロアップ！${boarding.length}にんごじょうしゃです`
+        : `${boarding.length}にんごじょうしゃです。つぎのくうこうへいきましょう`);
+      return;
+    }
+    if (isSeaRoute()) {
+      arrivalBanner.textContent = alighting.length > 0
+        ? `⛴️ ${alighting.length}にん おとどけ！${moneyText} タップかそく ＋${alighting.length} km/h ${boarding.length}にん ごじょうしゃ！`
+        : `⛴️ ${boarding.length}にん ごじょうしゃ！`;
+      say(alighting.length > 0
+        ? `${currentStationName}にとうちゃく。${alighting.length}にんおりました。うんちん ${earnedYen}えん。タップかそくが、${alighting.length}キロアップ！${boarding.length}にんごじょうしゃです`
+        : `${boarding.length}にんごじょうしゃです。つぎのみなとへいきましょう`);
+      return;
+    }
     arrivalBanner.textContent = alighting.length > 0
-      ? `${alighting.length}にん おとどけ！ タップかそく ＋${alighting.length} km/h`
+      ? `${alighting.length}にん おとどけ！${moneyText} タップかそく ＋${alighting.length} km/h`
       : `${boarding.length}にん ごじょうしゃ！`;
     const destination = boarding[0]?.destination;
     say(alighting.length > 0
-      ? `ドアがひらきます。${alighting.length}にんとうちゃく！タップかそくが、${alighting.length}キロアップ！${boarding.length}にんごじょうしゃ！`
+      ? `ドアがひらきます。${alighting.length}にんとうちゃく！うんちん ${earnedYen}えん！タップかそくが、${alighting.length}キロアップ！${boarding.length}にんごじょうしゃ！`
       : `ドアがひらきます。${boarding.length}にん、${destination ? `${destination}まで` : ""}ごじょうしゃくださーい！`);
   }
 
@@ -1522,15 +1785,47 @@
   }
 
   function createTrainPreview(key) {
-    return document.querySelector(`.train-btn[data-train="${key}"] svg`).cloneNode(true);
+    // canvas の絵は cloneNode では中身が写らないので、そのつど描き直す。
+    return createVehiclePreview(TRAINS[key]);
+  }
+
+  function isShinkansenTrainKey(key) {
+    const type = TRAINS[key];
+    if (!type) return false;
+    if (type.kind === "shinkansen") return true;
+    // 初期の新幹線は kind 未設定のものがある
+    return key === "nozomi" || key === "doctoryellow" || key === "hayabusa" || key === "komachi"
+      || /しんかんせん|けんさしゃ/.test(type.callName || type.name || "");
+  }
+
+  function isCoupleableTrainKey(key) {
+    const type = TRAINS[key];
+    if (!type) return false;
+    if (type.kind === "airplane" || type.kind === "ferry") return false;
+    return true;
+  }
+
+  // 連結候補: 新幹線をすべて先に並べ、そのあと通勤など。枠が足りなくても新幹線は落とさない。
+  function quickAddTrainKeys(currentKey) {
+    const others = Object.keys(TRAINS).filter((key) => key !== currentKey && isCoupleableTrainKey(key));
+    const shinkansen = others.filter(isShinkansenTrainKey);
+    const rest = others.filter((key) => !isShinkansenTrainKey(key));
+    return [...shinkansen, ...rest];
   }
 
   function populateQuickAddButtons() {
-    const otherKeys = Object.keys(TRAINS).filter((key) => key !== trainKey);
+    // 9枠固定。新幹線を先に並べるので、新幹線は常に枠内に収まる。
+    const otherKeys = quickAddTrainKeys(trainKey);
     btnCouple.setAttribute("aria-label", `${TRAINS[trainKey].callName}を連結`);
     btnCouple.querySelector(".quick-train-art").replaceChildren(createTrainPreview(trainKey));
     document.querySelectorAll(".btn-quick-add:not(#btn-couple)").forEach((btn, index) => {
       const key = otherKeys[index];
+      if (!key) {
+        btn.classList.add("hidden");
+        delete btn.dataset.car;
+        return;
+      }
+      btn.classList.remove("hidden");
       btn.dataset.car = key;
       btn.setAttribute("aria-label", `${TRAINS[key].callName}を連結`);
       btn.querySelector(".quick-train-art").replaceChildren(createTrainPreview(key));
@@ -1636,7 +1931,8 @@
       say(`${carWord(totalCarCount())}！ながーい！これでまんたんだよ！`);
       return;
     }
-    carTypes.push(typeKey);
+    // 編成ごとに色が違う形式は、つなぐたびに別の色が来る。
+    carTypes.push(pickTrainVariant(baseTrainKey(typeKey)));
     cars = carTypes.length;
     say(`れんけつ！ぜんぶで、${carWord(totalCarCount())}！`);
     spawnConfetti(12);
@@ -1887,11 +2183,171 @@
     return true;
   }
 
-  function createCommuterPreview(type) {
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("viewBox", "0 0 200 70");
-    svg.innerHTML = `<rect x="10" y="16" width="180" height="44" rx="8" fill="${type.body}" stroke="${type.edge}" stroke-width="2"/><rect x="168" y="18" width="20" height="40" rx="5" fill="${type.face}"/><rect x="12" y="45" width="176" height="8" fill="${type.stripe}"/><rect x="25" y="25" width="28" height="14" rx="3" fill="#333"/><rect x="65" y="25" width="28" height="14" rx="3" fill="#333"/><rect x="105" y="25" width="28" height="14" rx="3" fill="#333"/><circle cx="55" cy="60" r="7" fill="#555"/><circle cx="145" cy="60" r="7" fill="#555"/>`;
-    return svg;
+  // 種別ごとの車体プロファイル。路線が増えても見分けられるよう、
+  // 車体の大きさ・前面フォルム・扉数・屋根上機器・足まわりを変えて描き分ける。
+  // lengthRatio は 20m級の通勤電車を 1 とした車体の長さ。実車の比をゆるめて使う。
+  // 車両の占める幅そのものなので、編成の長さもこの値で決まる。
+  // bobAmp は走行中の上下の揺れ幅(px)。線路と足まわりの違いで、揺れ方も変える。
+  const CAR_PROFILES = {
+    // 25m級。長い車体があってこそ、ロングノーズが窮屈にならない。
+    // スラブ軌道とロングレールを高い精度で保線しているので、上下にはほとんど揺れない。
+    shinkansen: {lengthRatio:1.28, heightRatio:1, cabRatio:0.42, doors:0, windowCount:6,
+      face:"nose", cab:"nose", band:"swoosh", roof:"smooth", pantographEvery:3,
+      wheels:"rail", windowTop:0.22, windowHeight:0.17, bobAmp:0.2},
+    // JR の通勤電車。角ばった切妻の前面。バラスト軌道と継ぎ目でいちばんよく揺れる。
+    commuter: {lengthRatio:1, heightRatio:1, cabRatio:0.19, doors:2,
+      face:"flat", cab:"box", band:"waist", roof:"cooler", pantographEvery:2,
+      wheels:"rail", windowTop:0.19, windowHeight:0.23, bobAmp:0.9},
+    // 私鉄。前面上部を斜めに落とした顔つきで、JR と見分ける。
+    private: {lengthRatio:1, heightRatio:0.96, cabRatio:0.22, doors:2,
+      face:"slant", cab:"box", band:"waist", roof:"cooler", pantographEvery:2,
+      wheels:"rail", windowTop:0.2, windowHeight:0.22, bobAmp:0.85},
+    // 地下鉄。丸みのある前面で、ひと回り小さい車体。
+    // ロングレール中心で継ぎ目が少なく、地上の通勤電車よりは静か。
+    subway: {lengthRatio:0.98, heightRatio:0.92, cabRatio:0.2, doors:2,
+      face:"round", cab:"box", band:"waist", roof:"cooler", pantographEvery:2,
+      wheels:"rail", windowTop:0.2, windowHeight:0.22, bobAmp:0.6},
+    // 銀座線・丸ノ内線・大江戸線のような16m級の小型車体。
+    subwaySmall: {lengthRatio:0.84, heightRatio:0.82, cabRatio:0.22, doors:2,
+      face:"round", cab:"box", band:"waist", roof:"cooler", pantographEvery:2,
+      wheels:"rail", windowTop:0.2, windowHeight:0.22, bobAmp:0.6},
+    // 在来線サイズの長さで走るミニ新幹線(E3系つばさ・E6系こまち)。
+    // 実車で狭いのは車体の幅で、高さはフル規格とほぼ変わらない。
+    // 横から見た絵では幅が出ないので、短さだけで違いを見せる。
+    miniShinkansen: {lengthRatio:1, heightRatio:1, cabRatio:0.4, doors:0, windowCount:4,
+      face:"nose", cab:"nose", band:"swoosh", roof:"smooth", pantographEvery:3,
+      wheels:"rail", windowTop:0.22, windowHeight:0.18, bobAmp:0.3},
+    // 新交通システムとモノレール。短く低い車体、ゴムタイヤ、パンタグラフなし。
+    // ゴムタイヤなので上下の細かい振動は出にくい。
+    newtransit: {lengthRatio:0.62, heightRatio:0.72, cabRatio:0.26, doors:1,
+      face:"round", cab:"compact", band:"low", roof:"flat", pantographEvery:0,
+      wheels:"tire", windowTop:0.18, windowHeight:0.26, bobAmp:0.45},
+  };
+
+  // 新幹線の先頭形状。車種ごとに実車の顔つきへ寄せる。
+  //   len      ノーズの長さ（車体幅に対する比）
+  //   tipY     鼻先が来る高さ（車体高に対する比。小さいほど高い位置で尖る）
+  //   shoulder 屋根が水平に伸びる長さ。大きいほど平らに伸びてから下がる
+  //   bulge    先端のふくらみ。大きいほどカモノハシのように丸く前へ張り出す
+  const DEFAULT_NOSE = {len:0.5, tipY:0.78, shoulder:0.32, bulge:0.28};
+  const NOSE_SHAPES = {
+    // N700系。低い位置まで下りてから前へ張り出すエアロ形状。
+    nozomi: {len:0.46, tipY:0.86, shoulder:0.22, bulge:0.46},
+    hikari: {len:0.46, tipY:0.86, shoulder:0.22, bulge:0.46},
+    kodama: {len:0.46, tipY:0.86, shoulder:0.22, bulge:0.46},
+    // 923形ドクターイエロー。700系ゆずりのカモノハシ。
+    doctoryellow: {len:0.46, tipY:0.88, shoulder:0.14, bulge:0.56},
+    // E5系。15m級の超ロングノーズで、水平に伸びてから細く尖る。
+    hayabusa: {len:0.7, tipY:0.7, shoulder:0.58, bulge:0.08},
+    yamabiko: {len:0.7, tipY:0.7, shoulder:0.58, bulge:0.08},
+    // E6系。E5系よりわずかに短い。
+    komachi: {len:0.62, tipY:0.72, shoulder:0.5, bulge:0.12},
+    // E7/W7系。中くらいの長さで先端は丸め。
+    blueGoldShinkansen: {len:0.5, tipY:0.76, shoulder:0.36, bulge:0.22},
+    // 800系。短くころんとした九州の顔。
+    redShinkansen: {len:0.3, tipY:0.72, shoulder:0.1, bulge:0.5},
+    // N700S。N700系に近いが先端はやや絞られている。
+    orangeShinkansen: {len:0.5, tipY:0.84, shoulder:0.26, bulge:0.38},
+    // E3系つばさ。ミニ新幹線らしい短いノーズ。
+    purpleShinkansen: {len:0.38, tipY:0.76, shoulder:0.26, bulge:0.24},
+  };
+  for (const [key, nose] of Object.entries(NOSE_SHAPES)) {
+    if (TRAINS[key]) TRAINS[key].nose = nose;
+  }
+  // ミニ新幹線は在来線サイズの車体で走る。
+  for (const key of ["komachi", "purpleShinkansen"]) {
+    if (TRAINS[key]) TRAINS[key].profile = "miniShinkansen";
+  }
+
+  function carNose(carTrain) {
+    return carTrain.nose || DEFAULT_NOSE;
+  }
+
+  function carProfile(carTrain) {
+    // 車両データが profile を持っていればそれを使う。
+    // 初期の新幹線は kind も未設定なので、未知の種別は新幹線として扱う。
+    return CAR_PROFILES[carTrain.profile]
+      || CAR_PROFILES[carTrain.kind]
+      || CAR_PROFILES.shinkansen;
+  }
+
+  // 車両1両が占める幅。車種ごとに長さが違うので、編成の位置は先頭から順に積み上げる。
+  function carSlotWidth(typeKey) {
+    const type = TRAINS[typeKey];
+    const ratio = type ? carProfile(type).lengthRatio : 1;
+    return carMetrics().carW * ratio;
+  }
+
+  // 編成全体の長さ。停車位置・カメラの引き・加速の演出がこの値を使う。
+  function trainTotalWidth(typeKeys = carTypes) {
+    const { gap } = carMetrics();
+    let total = 0;
+    for (const key of typeKeys) total += carSlotWidth(key) + gap;
+    return Math.max(0, total - gap);
+  }
+
+  // こまち編成(2両)が占める幅。連結時の停止位置とヘッドライトの基準に使う。
+  function komachiTrainWidth() {
+    const { gap } = carMetrics();
+    return carSlotWidth("komachi") * 2 + gap;
+  }
+
+  // 編成ごとに色が違う形式は、色ちがいを "キー#色名" として TRAINS へ展開してある。
+  // 選択画面には基本の色だけを並べ、実際に走らせるときにどの編成が来るかを決める。
+  // weight は実車の編成数に合わせた出やすさ。特別塗装が1〜2編成しかない路線では、
+  // その色がめったに来ないようにする。
+  const TRAIN_VARIANTS = new Map();
+  for (const [key, type] of Object.entries(TRAINS)) {
+    if (!type.variants) continue;
+    const entries = [{key, weight: type.variantWeight ?? 1}];
+    for (const variant of type.variants) {
+      const variantKey = `${key}#${variant.name}`;
+      TRAINS[variantKey] = {...type, ...variant, variants: undefined, variantOf: key};
+      entries.push({key: variantKey, weight: variant.weight ?? 1});
+    }
+    TRAIN_VARIANTS.set(key, entries);
+  }
+
+  // 色ちがいのキーから、もとの形式のキーへ戻す。
+  function baseTrainKey(key) {
+    return TRAINS[key]?.variantOf || key;
+  }
+
+  function pickTrainVariant(key) {
+    const entries = TRAIN_VARIANTS.get(key);
+    if (!entries) return key;
+    const total = entries.reduce((sum, entry) => sum + entry.weight, 0);
+    let roll = Math.random() * total;
+    for (const entry of entries) {
+      roll -= entry.weight;
+      if (roll < 0) return entry.key;
+    }
+    return key;
+  }
+
+  // 「どの でんしゃに のる？」の絵は、走行画面と同じ drawRailCarOn で描く。
+  // 選ぶときの絵と、実際に走る車両の姿がずれないようにするため。
+  const PREVIEW_W = 200;
+  const PREVIEW_H = 70;
+  function createRailPreview(type) {
+    const el = document.createElement("canvas");
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    el.width = PREVIEW_W * dpr;
+    el.height = PREVIEW_H * dpr;
+    el.style.aspectRatio = `${PREVIEW_W} / ${PREVIEW_H}`;
+    const g = el.getContext("2d");
+    g.scale(dpr, dpr);
+    const profile = carProfile(type);
+    // 長い新幹線でも枠に収まる基準幅にして、車種ごとの長さの違いをそのまま出す。
+    const bodyW = 138 * profile.lengthRatio;
+    const bodyH = 36 * profile.heightRatio;
+    const left = (PREVIEW_W - bodyW) / 2;
+    // 床の高さをそろえて、背の低い車両は低く見えるようにする。
+    const top = 56 - bodyH;
+    // index を 1 にして、パンタグラフを持つ形式かどうかも絵に出す。
+    drawRailCarOn(g, type, profile, left, top, bodyW, bodyH,
+      {isHead: true, index: 1, wheelY: top + bodyH + 10, wheelSpin: 0, night: false});
+    return el;
   }
 
   function createAirplanePreview(type) {
@@ -1901,55 +2357,94 @@
     return svg;
   }
 
-  function createShinkansenPreview(type) {
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("viewBox", "0 0 200 70");
-    const upper = type.upper || type.body;
-    svg.innerHTML = `<path d="M8 47 Q17 24 60 18 H181 Q192 18 194 31 V54 H20 Q8 54 8 47Z" fill="${type.body}" stroke="${type.edge}" stroke-width="2"/><path d="M12 43 Q28 25 63 21 H184 V31 H57 Q28 31 12 43Z" fill="${upper}"/><path d="M14 46 H190" stroke="${type.stripe}" stroke-width="5"/><rect x="83" y="27" width="22" height="10" rx="3" fill="#333"/><rect x="113" y="27" width="22" height="10" rx="3" fill="#333"/><rect x="143" y="27" width="22" height="10" rx="3" fill="#333"/><circle cx="55" cy="55" r="6" fill="#555"/><circle cx="155" cy="55" r="6" fill="#555"/>`;
-    return svg;
-  }
-
   function createVehiclePreview(type) {
     if (type.kind === "airplane") return createAirplanePreview(type);
-    if (type.kind === "shinkansen") return createShinkansenPreview(type);
-    return createCommuterPreview(type);
+    if (type.kind === "ferry") return createFerryPreview(type);
+    return createRailPreview(type);
   }
 
+  // 並び: しんかんせん → でんしゃ → ひこうき → ふね。
+  // でんしゃ内は 関東(JR → ちかてつ → 私鉄 → 新交通・臨海) → 関西 → 沖縄 の順で、近い路線を隣に置く。
   const ROUTE_SELECTION_ORDER = [
     "tokaido", "sanyo", "kyushu", "nishiKyushu", "tohoku", "hokkaido",
     "akita", "yamagata", "joetsu", "hokuriku",
-    "yamanote", "chuo", "sobu", "tozai", "keio", "inokashira",
+    "yamanote", "keihinTohoku", "chuo", "sobu", "tsukubaExpress",
+    "saikyo", "shonanShinjuku", "uenoTokyo", "takasaki",
+    "joban", "keiyo", "yokosuka", "uchibo",
+    "ginza", "marunouchi", "hibiya", "tozai", "chiyoda",
+    "yurakucho", "hanzomon", "namboku", "fukutoshin",
+    "asakusa", "mita", "shinjukuSubway", "oedo",
+    "keio", "inokashira", "odakyu", "toyoko", "keikyu", "tobuSkytree",
+    "yurikamome", "rinkai", "newShuttle",
     "osakaLoop", "osakaChuo", "hankyuTakarazuka",
+    "yuiRail",
+    "airOsaka", "airHokkaido", "airOkinawa", "airFukuoka", "airKomatsu",
+    "airHachijo", "airIshigaki", "airMiyako", "airYakushima", "airAmami",
+    "airHonolulu", "airGuam",
+    "ferryMiyajima", "ferrySakurajima", "ferrySeikan", "ferryTokyoBay",
+    "ferryOgasawara", "ferryTaiheiyo", "ferryShinnihonkai",
   ];
 
   function buildExtraSelectionChoices() {
     const routeButtons = document.querySelector(".route-buttons");
-    const trainButtons = document.querySelector(".train-buttons");
-    for (const {key,name,color,trainKey} of window.TRAIN_GO_ROUTE_DATA?.metadata || []) {
+    for (const {key,name,color,icon} of window.TRAIN_GO_ROUTE_DATA?.metadata || []) {
       const routeButton = document.createElement("button");
       routeButton.className = "route-btn";
       routeButton.dataset.route = key;
       routeButton.setAttribute("aria-pressed", "false");
       const marker = document.createElement("span");
-      if (window.TRAIN_GO_ROUTE_DATA.metadata.find((item) => item.key === key)?.icon) {
-        marker.textContent = window.TRAIN_GO_ROUTE_DATA.metadata.find((item) => item.key === key).icon;
+      if (icon) {
+        marker.textContent = icon;
       } else {
         marker.className = "route-color-marker";
         marker.style.background = color;
       }
       routeButton.append(marker, name);
-      const routeOrder = ROUTE_SELECTION_ORDER.indexOf(key);
-      routeButton.style.order = String(routeOrder >= 0 ? routeOrder : 100 + (window.TRAIN_GO_ROUTE_DATA?.metadata || []).findIndex((item) => item.key === key));
       routeButtons.appendChild(routeButton);
+    }
+  }
 
-      if (trainButtons.querySelector(`.train-btn[data-train="${trainKey}"]`)) continue;
+  // その路線で最初にすすめる車両。路線キーと車両キーが同じものが多く、
+  // 新幹線だけ路線名と車両名が違うので個別に対応づける。
+  function routeTrainKey(routeKey) {
+    return window.TRAIN_GO_ROUTE_DATA?.metadata.find(({key}) => key === routeKey)?.trainKey
+      || ({tokaido:"nozomi", tohoku:"hayabusa"}[routeKey] || routeKey);
+  }
+
+  // 路線に対応づかない車両は、ゆかりのある路線のうしろへ続けて並べる。
+  const EXTRA_TRAINS_AFTER_ROUTE = {
+    tokaido: ["doctoryellow"],
+    tohoku: ["komachi"],
+  };
+
+  // 車両の並びは路線の並びと同じにする。同じ車両を使う路線は最初の1回だけ数える。
+  const TRAIN_SELECTION_ORDER = (() => {
+    const order = [];
+    const seen = new Set();
+    const add = (key) => {
+      if (!key || seen.has(key) || !TRAINS[key]) return;
+      seen.add(key);
+      order.push(key);
+    };
+    for (const routeKey of ROUTE_SELECTION_ORDER) {
+      add(routeTrainKey(routeKey));
+      for (const extra of EXTRA_TRAINS_AFTER_ROUTE[routeKey] || []) add(extra);
+    }
+    return order;
+  })();
+
+  // 車両ボタンも並び順どおりに作る。絵は走行画面と同じ描画関数から生成する。
+  function buildTrainChoices() {
+    const trainButtons = document.querySelector(".train-buttons");
+    for (const key of TRAIN_SELECTION_ORDER) {
+      const type = TRAINS[key];
       const group = document.createElement("div");
       group.className = "train-choice-group";
       const trainButton = document.createElement("button");
       trainButton.className = "train-btn";
-      trainButton.dataset.train = trainKey;
-      trainButton.setAttribute("aria-label", TRAINS[trainKey].callName);
-      trainButton.appendChild(createVehiclePreview(TRAINS[trainKey]));
+      trainButton.dataset.train = key;
+      trainButton.setAttribute("aria-label", type.callName || type.name);
+      trainButton.appendChild(createVehiclePreview(type));
       group.appendChild(trainButton);
       trainButtons.appendChild(group);
     }
@@ -1959,14 +2454,10 @@
   const trainSelectPage = document.getElementById("train-select-page");
   const vehicleSelectTitle = document.getElementById("vehicle-select-title");
   const btnBackToRoutes = document.getElementById("btn-back-to-routes");
-  const TRAIN_SELECTION_ORDER = [
-    "nozomi", "doctoryellow", "hayabusa", "komachi",
-    "yamanote", "chuo", "sobu", "tozai", "keio", "inokashira",
-    ...(window.TRAIN_GO_ROUTE_DATA?.metadata || []).map(({trainKey}) => trainKey),
-  ].filter((key, index, keys) => keys.indexOf(key) === index);
 
   function showRouteSelection() {
     renderTotalTravelDistance();
+    renderTotalMoney();
     routeSelectPage.classList.remove("hidden");
     trainSelectPage.classList.add("hidden");
     selectScreen.classList.remove("selecting-train");
@@ -1977,14 +2468,17 @@
     routeSelectPage.classList.add("hidden");
     trainSelectPage.classList.remove("hidden");
     selectScreen.classList.add("selecting-train");
-    const recommendedKey = window.TRAIN_GO_ROUTE_DATA?.metadata.find(({key}) => key === routeKey)?.trainKey
-      || ({tokaido:"nozomi",tohoku:"hayabusa"}[routeKey] || routeKey);
-    vehicleSelectTitle.textContent = activeRoute.kind === "air"
+    const recommendedKey = routeTrainKey(routeKey);
+    vehicleSelectTitle.textContent = isAirRoute()
       ? "どの ひこうきに のる？"
+      : isSeaRoute()
+      ? "どの ふねに のる？"
       : "どの でんしゃに のる？";
     document.querySelectorAll(".train-btn").forEach((button) => {
       const airChoice = button.dataset.train === "airplane";
-      button.classList.toggle("hidden", activeRoute.kind === "air" ? !airChoice : airChoice);
+      const seaChoice = button.dataset.train === "ferry";
+      const nonRailChoice = isAirRoute() ? airChoice : isSeaRoute() ? seaChoice : (!airChoice && !seaChoice);
+      button.classList.toggle("hidden", isNonRailRoute() ? !nonRailChoice : (airChoice || seaChoice));
       const recommended = button.dataset.train === recommendedKey;
       const routeOrder = TRAIN_SELECTION_ORDER.indexOf(button.dataset.train);
       button.classList.toggle("recommended", recommended);
@@ -1994,6 +2488,7 @@
   }
 
   buildExtraSelectionChoices();
+  buildTrainChoices();
   document.querySelectorAll(".route-btn").forEach((button, fallbackIndex) => {
     const routeOrder = ROUTE_SELECTION_ORDER.indexOf(button.dataset.route);
     button.style.order = String(routeOrder >= 0 ? routeOrder : 100 + fallbackIndex);
@@ -2024,8 +2519,10 @@
   });
 
   function currentTapBoostKmh() {
-    if (activeRoute.kind === "air") return AIR_BASE_TAP_BOOST_KMH;
-    return BASE_TAP_BOOST_KMH + deliveredPassengers * PASSENGER_TAP_BONUS_KMH;
+    const passengerBonus = deliveredPassengers * PASSENGER_TAP_BONUS_KMH;
+    if (isAirRoute()) return AIR_BASE_TAP_BOOST_KMH + passengerBonus;
+    if (isSeaRoute()) return SEA_BASE_TAP_BOOST_KMH + passengerBonus;
+    return BASE_TAP_BOOST_KMH + passengerBonus;
   }
 
   function currentTapBoostPxPerSec() {
@@ -2276,10 +2773,10 @@
   });
   btnDriver.addEventListener("click", () => {
     ensureAudio();
-    const calls = activeRoute.kind === "air" ? PILOT_CALLS : DRIVER_CALLS;
+    const calls = isAirRoute() ? PILOT_CALLS : isSeaRoute() ? CAPTAIN_CALLS : DRIVER_CALLS;
     const call = calls[driverCallIndex % calls.length];
     driverCallIndex++;
-    showPlayBanner(`${activeRoute.kind === "air" ? "👩‍✈️" : "🧑‍✈️"} ${call}`);
+    showPlayBanner(`${isAirRoute() ? "👩‍✈️" : isSeaRoute() ? "⚓" : "🧑‍✈️"} ${call}`);
     chime();
     say(call);
   });
@@ -2419,7 +2916,7 @@
     if (isDebug) canvas.dataset.viewMode = mapMode;
     if (!announce) return;
     const message = mapMode === "follow"
-      ? (activeRoute.kind === "air" ? "✈️ うえから ひこうきを みてみよう！" : "🚃 うえから へんせいを みてみよう！")
+      ? (isAirRoute() ? "✈️ うえから ひこうきを みてみよう！" : isSeaRoute() ? "⛴️ うえから ふねを みてみよう！" : "🚃 うえから へんせいを みてみよう！")
       : mapMode === "overview" ? "🗺️ ぜんたいちず！" : "🌆 よこから！";
     showPlayBanner(message, 2200);
   }
@@ -2708,6 +3205,106 @@
     return x >= -margin && x <= W + margin && y >= -margin && y <= H + margin;
   }
 
+  // 地図の文字が重ならないよう、1フレーム内で確定したラベルの矩形を持つ。
+  // 置けた時だけ true を返し、呼び出し側はその時だけ描く。矩形は使い回す。
+  const mapLabelBoxes = [];
+  let mapLabelBoxCount = 0;
+  function resetMapLabelBoxes() {
+    mapLabelBoxCount = 0;
+  }
+  function claimMapLabelBox(centerX, bottomY, width, height) {
+    const left = centerX - width / 2;
+    const right = centerX + width / 2;
+    const top = bottomY - height;
+    for (let index = 0; index < mapLabelBoxCount; index++) {
+      const box = mapLabelBoxes[index];
+      if (left < box.right && right > box.left && top < box.bottom && bottomY > box.top) return false;
+    }
+    const box = mapLabelBoxes[mapLabelBoxCount] || (mapLabelBoxes[mapLabelBoxCount] = {});
+    box.left = left;
+    box.right = right;
+    box.top = top;
+    box.bottom = bottomY;
+    mapLabelBoxCount++;
+    return true;
+  }
+
+  function mapSegmentIsVisible(x0, y0, x1, y1, margin) {
+    if (x0 < -margin && x1 < -margin) return false;
+    if (x0 > W + margin && x1 > W + margin) return false;
+    if (y0 < -margin && y1 < -margin) return false;
+    if (y0 > H + margin && y1 > H + margin) return false;
+    return true;
+  }
+
+  // 折れ線用。画面外の連続区間は moveTo で飛ばし、長い路線でもパスを短く保つ。
+  // 面を塗る地形 (海岸線・湖) には使わない。切れたパスは closePath できない。
+  function drawMapGeoPathCulled(scene, points, pixelOffset = 0) {
+    const margin = 80 + Math.abs(pixelOffset);
+    ctx.beginPath();
+    let prevX = 0;
+    let prevY = 0;
+    let hasPrev = false;
+    let penDown = false;
+    for (let index = 0; index < points.length; index++) {
+      const point = points[index];
+      let x = scene.screenCenterX + (mapWorldX(point[0]) - scene.centerWorldX) * scene.scale;
+      let y = scene.screenCenterY + (mapWorldY(point[1]) - scene.centerWorldY) * scene.scale;
+      if (pixelOffset) {
+        const previous = points[Math.max(0, index - 1)];
+        const next = points[Math.min(points.length - 1, index + 1)];
+        const dx = (mapWorldX(next[0]) - mapWorldX(previous[0])) * scene.scale;
+        const dy = (mapWorldY(next[1]) - mapWorldY(previous[1])) * scene.scale;
+        const length = Math.max(Math.hypot(dx, dy), 0.001);
+        x += -dy / length * pixelOffset;
+        y += dx / length * pixelOffset;
+      }
+      if (hasPrev && mapSegmentIsVisible(prevX, prevY, x, y, margin)) {
+        if (!penDown) ctx.moveTo(prevX, prevY);
+        ctx.lineTo(x, y);
+        penDown = true;
+      } else {
+        penDown = false;
+      }
+      prevX = x;
+      prevY = y;
+      hasPrev = true;
+    }
+  }
+
+  function sceneWorldBounds(scene, marginMeters = 80000) {
+    const inv = 1 / Math.max(scene.scale, 1e-9);
+    return {
+      minX: scene.centerWorldX + (0 - scene.screenCenterX) * inv - marginMeters,
+      maxX: scene.centerWorldX + (W - scene.screenCenterX) * inv + marginMeters,
+      minY: scene.centerWorldY + (0 - scene.screenCenterY) * inv - marginMeters,
+      maxY: scene.centerWorldY + (H - scene.screenCenterY) * inv + marginMeters,
+    };
+  }
+
+  function mapIntersectsScene(scene, map, marginMeters) {
+    if (!map) return false;
+    const view = sceneWorldBounds(scene, marginMeters);
+    const minX = mapWorldX(map.minLon);
+    const maxX = mapWorldX(map.maxLon);
+    const minY = mapWorldY(map.maxLat);
+    const maxY = mapWorldY(map.minLat);
+    return maxX >= view.minX && minX <= view.maxX && maxY >= view.minY && minY <= view.maxY;
+  }
+
+  // 画面と路線の外接矩形の隙間 (重なっていれば 0)。中点距離と違い、
+  // 画面を横切る長い路線を「遠い」と誤判定しない。
+  function mapViewGapDistance(scene, map) {
+    const view = sceneWorldBounds(scene, 0);
+    const minX = mapWorldX(map.minLon);
+    const maxX = mapWorldX(map.maxLon);
+    const minY = mapWorldY(map.maxLat);
+    const maxY = mapWorldY(map.minLat);
+    const gapX = Math.max(view.minX - maxX, minX - view.maxX, 0);
+    const gapY = Math.max(view.minY - maxY, minY - view.maxY, 0);
+    return Math.hypot(gapX, gapY);
+  }
+
   const MAP_TOWN_BLOCKS = [];
   let mapTownBlocksReady = false;
 
@@ -2717,7 +3314,9 @@
     let routeNumber = 0;
     for (const mapKey of MAP_ROUTE_DRAW_ORDER) {
       const map = ROUTE_MAPS[mapKey];
-      const stepKm = map.endKm > 100 ? 10 : 1.8;
+      // 空路・海路の沿線に街ブロックを置かない（太平洋全体図で重くなる原因になる）。
+      if (map.kind === "air" || map.kind === "sea") continue;
+      const stepKm = map.endKm > 200 ? Math.max(12, map.endKm / 35) : map.endKm > 100 ? 10 : 1.8;
       const position = {};
       for (let km = 0; km <= map.endKm; km += stepKm) {
         yamanoteMapPositionAt(km, position, map);
@@ -2743,10 +3342,19 @@
   }
 
   function drawMapTownscape(scene) {
+    // 極端に引いた全体図、または空路・海路では街を描かない。
+    if (scene.scale < 0.004 || isNonRailRoute()) return;
     ensureMapTownBlocks();
+    const view = sceneWorldBounds(scene, 120);
+    // うえから（追従）は見える範囲が狭いのに全件変換していたのが重い。
+    const maxBlocks = scene.mode === "follow" ? 280 : 700;
+    let drawn = 0;
     ctx.save();
     for (let index = 0; index < MAP_TOWN_BLOCKS.length; index++) {
       const block = MAP_TOWN_BLOCKS[index];
+      if (block.worldX < view.minX || block.worldX > view.maxX
+        || block.worldY < view.minY || block.worldY > view.maxY) continue;
+      if (scene.scale < 0.01 && index % 3) continue;
       const x = scene.screenCenterX + (block.worldX - scene.centerWorldX) * scene.scale;
       const y = scene.screenCenterY + (block.worldY - scene.centerWorldY) * scene.scale;
       if (!mapPointIsVisible(scene, x, y, 35)) continue;
@@ -2756,6 +3364,7 @@
         ctx.beginPath();
         ctx.arc(x, y, 2.3, 0, Math.PI * 2);
         ctx.fill();
+        if (++drawn >= maxBlocks) break;
         continue;
       }
       const width = Math.max(4, Math.min(30, block.width * scene.scale));
@@ -2770,41 +3379,90 @@
           ? ["#46505a", "#3f4d59", "#554b50", "#445148"][block.colorIndex]
           : BUILDING_COLORS[block.colorIndex];
         ctx.fillRect(x - width / 2, y - height / 2, width, height);
-        ctx.strokeStyle = timeOfDay === "night" ? "rgba(255,222,130,0.40)" : "rgba(95,105,110,0.20)";
-        ctx.lineWidth = 1;
-        ctx.strokeRect(x - width / 2, y - height / 2, width, height);
+        if (scene.scale >= 0.02) {
+          ctx.strokeStyle = timeOfDay === "night" ? "rgba(255,222,130,0.40)" : "rgba(95,105,110,0.20)";
+          ctx.lineWidth = 1;
+          ctx.strokeRect(x - width / 2, y - height / 2, width, height);
+        }
       }
+      if (++drawn >= maxBlocks) break;
     }
     ctx.restore();
   }
 
   function drawMapLocalGrid(scene) {
     if (scene.mode !== "follow" || scene.scale <= 0) return;
+    // 空路・海路のうえからでは格子を薄く・疎に（見た目より軽さ優先）。
+    if (isNonRailRoute() && scene.scale < 0.015) return;
     const minWorldX = scene.centerWorldX + (scene.left - scene.screenCenterX) / scene.scale;
     const maxWorldX = scene.centerWorldX + (scene.right - scene.screenCenterX) / scene.scale;
     const minWorldY = scene.centerWorldY + (scene.top - scene.screenCenterY) / scene.scale;
     const maxWorldY = scene.centerWorldY + (scene.bottom - scene.screenCenterY) / scene.scale;
-    const targetStep = 115 / scene.scale;
-    const steps = [100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000];
+    const targetStep = (isNonRailRoute() ? 180 : 115) / scene.scale;
+    const steps = [100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000];
     const step = steps.find((candidate) => candidate >= targetStep) || steps[steps.length - 1];
-    ctx.beginPath();
-    for (let worldX = Math.floor(minWorldX / step) * step; worldX <= maxWorldX; worldX += step) {
-      const x = scene.screenCenterX + (worldX - scene.centerWorldX) * scene.scale;
-      ctx.moveTo(x, scene.top);
-      ctx.lineTo(x, scene.bottom);
-    }
-    for (let worldY = Math.floor(minWorldY / step) * step; worldY <= maxWorldY; worldY += step) {
-      const y = scene.screenCenterY + (worldY - scene.centerWorldY) * scene.scale;
-      ctx.moveTo(scene.left, y);
-      ctx.lineTo(scene.right, y);
+    // 線が多すぎると重いので本数を上限。
+    const maxLines = 24;
+    const xCount = Math.ceil((maxWorldX - minWorldX) / step);
+    const yCount = Math.ceil((maxWorldY - minWorldY) / step);
+    if (xCount + yCount > maxLines * 2) {
+      // step をさらに粗くする
+      const coarsen = Math.ceil(Math.max(xCount, yCount) / maxLines);
+      const coarseStep = step * coarsen;
+      ctx.beginPath();
+      for (let worldX = Math.floor(minWorldX / coarseStep) * coarseStep; worldX <= maxWorldX; worldX += coarseStep) {
+        const x = scene.screenCenterX + (worldX - scene.centerWorldX) * scene.scale;
+        ctx.moveTo(x, scene.top);
+        ctx.lineTo(x, scene.bottom);
+      }
+      for (let worldY = Math.floor(minWorldY / coarseStep) * coarseStep; worldY <= maxWorldY; worldY += coarseStep) {
+        const y = scene.screenCenterY + (worldY - scene.centerWorldY) * scene.scale;
+        ctx.moveTo(scene.left, y);
+        ctx.lineTo(scene.right, y);
+      }
+    } else {
+      ctx.beginPath();
+      for (let worldX = Math.floor(minWorldX / step) * step; worldX <= maxWorldX; worldX += step) {
+        const x = scene.screenCenterX + (worldX - scene.centerWorldX) * scene.scale;
+        ctx.moveTo(x, scene.top);
+        ctx.lineTo(x, scene.bottom);
+      }
+      for (let worldY = Math.floor(minWorldY / step) * step; worldY <= maxWorldY; worldY += step) {
+        const y = scene.screenCenterY + (worldY - scene.centerWorldY) * scene.scale;
+        ctx.moveTo(scene.left, y);
+        ctx.lineTo(scene.right, y);
+      }
     }
     ctx.strokeStyle = timeOfDay === "night" ? "rgba(194,210,224,0.09)" : "rgba(255,255,255,0.48)";
     ctx.lineWidth = Math.max(1, Math.min(W, H) * 0.002);
     ctx.stroke();
   }
 
+  function geoLonLatPathIntersectsScene(scene, points) {
+    if (!points?.length) return false;
+    let minLon = Infinity;
+    let maxLon = -Infinity;
+    let minLat = Infinity;
+    let maxLat = -Infinity;
+    for (const point of points) {
+      const lon = point[0];
+      const lat = point[1];
+      if (lon < minLon) minLon = lon;
+      if (lon > maxLon) maxLon = lon;
+      if (lat < minLat) minLat = lat;
+      if (lat > maxLat) maxLat = lat;
+    }
+    const view = sceneWorldBounds(scene, 50000);
+    const minX = mapWorldX(minLon);
+    const maxX = mapWorldX(maxLon);
+    const minY = mapWorldY(maxLat);
+    const maxY = mapWorldY(minLat);
+    return maxX >= view.minX && minX <= view.maxX && maxY >= view.minY && minY <= view.maxY;
+  }
+
   function drawMapPrefectureLabels(scene) {
-    if (scene.mode !== "overview") return;
+    // 全体図で引きすぎたときは県名を消し、文字の重なりを減らす。
+    if (scene.mode !== "overview" || scene.scale < 0.012) return;
     ctx.save();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -2825,23 +3483,46 @@
     ctx.fillStyle = mapGradient;
     ctx.fillRect(0, 0, W, H);
 
-    ctx.fillStyle = timeOfDay === "night" ? "#263f47" : "#e4f0cf";
-    ctx.strokeStyle = timeOfDay === "night" ? "rgba(139,180,185,0.72)" : "rgba(81,130,139,0.66)";
-    ctx.lineWidth = Math.max(1.2, Math.min(W, H) * 0.0023);
-    for (const coastline of MAP_GEOGRAPHY.coastlines) {
-      drawMapGeoPath(scene, coastline);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
+    // うえからでは巨大な国土ポリゴンの fill が毎フレーム重たいので、塗りつぶしを避ける。
+    const isFollow = scene.mode === "follow";
+    const drawBorders = !isFollow && (scene.mode === "overview" || scene.scale < 0.08)
+      || (isFollow && scene.scale < 0.05 && !isNonRailRoute());
+    const drawWaterNames = scene.scale >= 0.01 && !isNonRailRoute() && !isFollow;
+
+    if (isFollow) {
+      // ベース色だけ敷いて、海岸は線のみ（画面内に交差するものだけ）。
+      ctx.fillStyle = isNonRailRoute()
+        ? (timeOfDay === "night" ? "rgba(20,50,70,0.55)" : "rgba(150,210,230,0.45)")
+        : (timeOfDay === "night" ? "rgba(38,63,71,0.92)" : "rgba(228,240,207,0.96)");
+      ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = timeOfDay === "night" ? "rgba(139,180,185,0.72)" : "rgba(81,130,139,0.66)";
+      ctx.lineWidth = Math.max(1.2, Math.min(W, H) * 0.0023);
+      for (const coastline of MAP_GEOGRAPHY.coastlines) {
+        if (!geoLonLatPathIntersectsScene(scene, coastline)) continue;
+        drawMapGeoPath(scene, coastline);
+        ctx.stroke();
+      }
+    } else {
+      ctx.fillStyle = timeOfDay === "night" ? "#263f47" : "#e4f0cf";
+      ctx.strokeStyle = timeOfDay === "night" ? "rgba(139,180,185,0.72)" : "rgba(81,130,139,0.66)";
+      ctx.lineWidth = Math.max(1.2, Math.min(W, H) * 0.0023);
+      for (const coastline of MAP_GEOGRAPHY.coastlines) {
+        if (!geoLonLatPathIntersectsScene(scene, coastline)) continue;
+        drawMapGeoPath(scene, coastline);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
     }
 
     // 県境は全体図と広域の追従表示だけに出し、近距離では線路を邪魔しない。
-    if (scene.mode === "overview" || scene.scale < 0.08) {
+    if (drawBorders) {
       ctx.save();
       ctx.setLineDash([5, 5]);
       ctx.strokeStyle = timeOfDay === "night" ? "rgba(195,214,207,0.32)" : "rgba(91,124,105,0.46)";
       ctx.lineWidth = Math.max(1, Math.min(2, Math.min(W, H) * 0.0018));
       for (const border of MAP_GEOGRAPHY.borders) {
+        if (!geoLonLatPathIntersectsScene(scene, border)) continue;
         drawMapGeoPath(scene, border);
         ctx.stroke();
       }
@@ -2851,31 +3532,52 @@
     // 追従表示の格子は現在地へ合わせて生成し、東京だけに固定しない。
     drawMapLocalGrid(scene);
 
-    ctx.fillStyle = timeOfDay === "night" ? "#315f78" : "#80c8e2";
-    ctx.strokeStyle = timeOfDay === "night" ? "#4c829c" : "#62b4d6";
-    ctx.lineWidth = Math.max(1, Math.min(3.5, scene.scale * 40));
-    for (const lake of MAP_GEOGRAPHY.lakes) {
-      drawMapGeoPath(scene, lake.points);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-    }
-    ctx.strokeStyle = timeOfDay === "night" ? "#4c829c" : "#72bfdc";
-    ctx.lineWidth = Math.max(1.2, Math.min(4, scene.scale * 28));
-    for (const river of MAP_GEOGRAPHY.rivers) {
-      drawMapGeoPath(scene, river.points);
-      ctx.stroke();
-    }
-    if (((scene.mode === "overview" && scene.scale >= 0.025) || (scene.mode === "follow" && scene.scale >= 0.08))) {
-      ctx.strokeStyle = timeOfDay === "night" ? "#69a5c4" : "#4ca4cb";
-      ctx.lineWidth = Math.max(2, Math.min(5, scene.scale * 34));
-      for (const moat of MAP_GEOGRAPHY.moats) {
-        drawMapGeoPath(scene, moat.points);
+    // 局所湾（東京湾・伊勢湾）を陸の上に水として重ね、港が陸に乗らないようにする。
+    if (MAP_GEOGRAPHY.bays?.length && (!isNonRailRoute() || isFollow)) {
+      ctx.fillStyle = timeOfDay === "night" ? "#1a4058" : "#7ec4e4";
+      ctx.strokeStyle = timeOfDay === "night" ? "#3d6f8c" : "#5aafd4";
+      ctx.lineWidth = Math.max(1, Math.min(2.5, scene.scale * 30));
+      for (const bay of MAP_GEOGRAPHY.bays) {
+        if (!geoLonLatPathIntersectsScene(scene, bay.points)) continue;
+        drawMapGeoPath(scene, bay.points);
+        ctx.closePath();
+        ctx.fill();
         ctx.stroke();
       }
     }
 
-    if (scene.scale >= 0.0015) {
+    // 湖・川・堀は画面内だけ。うえからでは湖の fill を省略して線だけにする場合あり。
+    if (!isNonRailRoute() || !isFollow) {
+      ctx.fillStyle = timeOfDay === "night" ? "#315f78" : "#80c8e2";
+      ctx.strokeStyle = timeOfDay === "night" ? "#4c829c" : "#62b4d6";
+      ctx.lineWidth = Math.max(1, Math.min(3.5, scene.scale * 40));
+      for (const lake of MAP_GEOGRAPHY.lakes) {
+        if (!geoLonLatPathIntersectsScene(scene, lake.points)) continue;
+        drawMapGeoPath(scene, lake.points);
+        ctx.closePath();
+        if (!isFollow) ctx.fill();
+        ctx.stroke();
+      }
+      ctx.strokeStyle = timeOfDay === "night" ? "#4c829c" : "#72bfdc";
+      ctx.lineWidth = Math.max(1.2, Math.min(4, scene.scale * 28));
+      for (const river of MAP_GEOGRAPHY.rivers) {
+        if (!geoLonLatPathIntersectsScene(scene, river.points)) continue;
+        drawMapGeoPath(scene, river.points);
+        ctx.stroke();
+      }
+      if (((scene.mode === "overview" && scene.scale >= 0.025) || (isFollow && scene.scale >= 0.08))) {
+        ctx.strokeStyle = timeOfDay === "night" ? "#69a5c4" : "#4ca4cb";
+        ctx.lineWidth = Math.max(2, Math.min(5, scene.scale * 34));
+        for (const moat of MAP_GEOGRAPHY.moats) {
+          if (!geoLonLatPathIntersectsScene(scene, moat.points)) continue;
+          drawMapGeoPath(scene, moat.points);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // 広域では湖・川の名前を隠し、線路と駅を優先する。
+    if (drawWaterNames) {
       ctx.font = "bold " + Math.max(9, Math.min(W, H) * 0.014) + "px sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "bottom";
@@ -2921,26 +3623,52 @@
   }
 
   function drawYamanoteRelatedLines(scene, labelSize) {
+    relatedLineLabelCount = 0;
+    // 極端に引いた全体図、または空路・海路では周辺路線を描かない。
+    if (scene.scale < 0.003 || isNonRailRoute()) {
+      if (isDebug) canvas.dataset.mapRelatedLines = "";
+      return;
+    }
     const currentKey = activeRouteMapKey();
     const routeWidth = scene.mode === "follow"
       ? Math.max(2, Math.min(4.5, scene.scale * 3.2))
       : Math.max(2, Math.min(6, scene.scale * 6));
-    ctx.save();
-    ctx.lineJoin = "round";
-    ctx.lineCap = "round";
+    // うえからは見える近傍だけ。首都圏で全地下鉄を毎フレーム描くと重い。
+    // 判定は画面サイズに応じた余白つきの矩形交差で行う。中点までの距離で
+    // 足切りすると、画面を横切っている長い路線が丸ごと消えてしまう。
+    const viewMargin = Math.max(400, (W / Math.max(scene.scale, 1e-6)) * 0.2);
+    const candidates = [];
     for (const mapKey of MAP_ROUTE_DRAW_ORDER) {
       if (mapKey === currentKey) continue;
       const map = ROUTE_MAPS[mapKey];
+      if (!map || !mapIntersectsScene(scene, map, viewMargin)) continue;
+      if (scene.scale < 0.01 && (map.kind === "air" || map.kind === "sea")) continue;
+      candidates.push({ mapKey, map, dist: mapViewGapDistance(scene, map) });
+    }
+    // 画面に重なる路線 (gap 0) が先に来る。上限で落ちるのは画面外のものだけ。
+    candidates.sort((a, b) => a.dist - b.dist);
+    const maxRelated = scene.mode === "follow" ? 16 : 20;
+    ctx.save();
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    const drawnCount = Math.min(candidates.length, maxRelated);
+    if (isDebug) {
+      canvas.dataset.mapScale = String(scene.scale);
+      canvas.dataset.mapRelatedLines = candidates.slice(0, drawnCount).map((c) => c.mapKey).join(",");
+      canvas.dataset.mapRelatedDropped = String(candidates.length - drawnCount);
+    }
+    for (let index = 0; index < drawnCount; index++) {
+      const { mapKey, map } = candidates[index];
       const offset = MAP_ROUTE_LANE_OFFSETS[mapKey] || 0;
       ctx.strokeStyle = "rgba(255,255,255,0.78)";
       ctx.lineWidth = routeWidth + 3.5;
-      drawMapGeoPath(scene, map.coords, offset);
+      drawMapGeoPathCulled(scene, map.coords, offset);
       ctx.stroke();
       ctx.strokeStyle = map.color;
       ctx.globalAlpha = 0.76;
       ctx.lineWidth = routeWidth;
-      ctx.setLineDash(map.kind === "air" ? [routeWidth * 3, routeWidth * 2] : []);
-      drawMapGeoPath(scene, map.coords, offset);
+      ctx.setLineDash(map.kind === "air" || map.kind === "sea" ? [routeWidth * 3, routeWidth * 2] : []);
+      drawMapGeoPathCulled(scene, map.coords, offset);
       ctx.stroke();
       ctx.setLineDash([]);
       ctx.globalAlpha = 1;
@@ -2949,17 +3677,41 @@
       const labelX = scene.screenCenterX + (mapWorldX(labelPoint.lon) - scene.centerWorldX) * scene.scale;
       const labelY = scene.screenCenterY + (mapWorldY(labelPoint.lat) - scene.centerWorldY) * scene.scale;
       if (!mapPointIsVisible(scene, labelX, labelY) || scene.scale < 0.02 || (scene.mode === "follow" && scene.scale < 0.12)) continue;
-      ctx.font = "bold " + Math.max(9, labelSize * 0.56) + "px sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "bottom";
-      ctx.fillStyle = timeOfDay === "night" ? "rgba(244,247,251,0.82)" : "rgba(48,62,80,0.78)";
-      ctx.fillText(map.name, labelX, labelY - 5);
+      // 名前はここでは描かず、駅名を置いたあとに回す (drawMapRelatedLineLabels)。
+      const pending = relatedLineLabels[relatedLineLabelCount]
+        || (relatedLineLabels[relatedLineLabelCount] = {});
+      pending.name = map.name;
+      pending.x = labelX;
+      pending.y = labelY;
+      relatedLineLabelCount++;
     }
     ctx.restore();
   }
 
+  // 周辺路線の名前。駅名より弱く、ぶつかる時は名前のほうを消す。
+  const relatedLineLabels = [];
+  let relatedLineLabelCount = 0;
+  function drawMapRelatedLineLabels(scene, labelSize) {
+    if (!relatedLineLabelCount) return;
+    const fontSize = Math.max(9, labelSize * 0.56);
+    ctx.save();
+    ctx.font = "bold " + fontSize + "px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.fillStyle = timeOfDay === "night" ? "rgba(244,247,251,0.82)" : "rgba(48,62,80,0.78)";
+    for (let index = 0; index < relatedLineLabelCount; index++) {
+      const label = relatedLineLabels[index];
+      const y = label.y - 5;
+      const width = ctx.measureText(label.name).width + fontSize * 0.4;
+      if (!claimMapLabelBox(label.x, y, width, fontSize)) continue;
+      ctx.fillText(label.name, label.x, y);
+    }
+    ctx.restore();
+    relatedLineLabelCount = 0;
+  }
+
   function drawMapAirports(scene, map) {
-    if (activeRoute.kind !== "air" || map.points.length < 2) return;
+    if (!isNonRailRoute() || map.points.length < 2) return;
     const endpointIndexes = [0, map.points.length - 1];
     ctx.save();
     for (const index of endpointIndexes) {
@@ -3008,12 +3760,12 @@
       : Math.max(5, Math.min(13, scene.scale * 10));
     ctx.strokeStyle = "rgba(255,255,255,0.95)";
     ctx.lineWidth = routeWidth + 7;
-    drawMapGeoPath(scene, map.coords);
+    drawMapGeoPathCulled(scene, map.coords);
     ctx.stroke();
     ctx.strokeStyle = map.color;
     ctx.lineWidth = routeWidth;
-    ctx.setLineDash(activeRoute.kind === "air" ? [routeWidth * 3, routeWidth * 1.8] : []);
-    drawMapGeoPath(scene, map.coords);
+    ctx.setLineDash(isNonRailRoute() ? [routeWidth * 3, routeWidth * 1.8] : []);
+    drawMapGeoPathCulled(scene, map.coords);
     ctx.stroke();
     ctx.setLineDash([]);
 
@@ -3024,28 +3776,48 @@
     for (let index = 0; index < stationList.length; index++) {
       const station = stationList[index];
       const position = yamanoteMapPositionAt(station.km, routeStationMapPositions[index], map);
-      const x = scene.screenCenterX + (position.worldX - scene.centerWorldX) * scene.scale;
-      const y = scene.screenCenterY + (position.worldY - scene.centerWorldY) * scene.scale;
-      if (!mapPointIsVisible(scene, x, y)) continue;
+      position.screenX = scene.screenCenterX + (position.worldX - scene.centerWorldX) * scene.scale;
+      position.screenY = scene.screenCenterY + (position.worldY - scene.centerWorldY) * scene.scale;
+      if (!mapPointIsVisible(scene, position.screenX, position.screenY)) continue;
       const important = activeRoute.cityStations.has(station.name)
         || station.name === currentStationName || station.name === nextStationName;
-      const showLabel = scene.mode === "overview" ? important : important || scene.scale >= 0.7;
       ctx.fillStyle = important ? "#ffffff" : "#dfe8d7";
       ctx.strokeStyle = important ? "#334155" : "#617064";
       ctx.lineWidth = important ? 2.5 : 1.2;
       ctx.beginPath();
-      ctx.arc(x, y, important ? 5.5 : 3, 0, Math.PI * 2);
+      ctx.arc(position.screenX, position.screenY, important ? 5.5 : 3, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
-      if (!showLabel) continue;
-      ctx.fillStyle = timeOfDay === "night" ? "#f4f7fb" : "#344054";
-      ctx.textAlign = "center";
-      ctx.fillText(station.name, x, y - labelSize * 0.55);
+    }
+
+    // 名前は点をすべて描いてから、いま走っている駅を先に置く。
+    // 混んだ区間で「つぎの駅」の名前が先着のラベルに負けて消えるのを防ぐ。
+    ctx.fillStyle = timeOfDay === "night" ? "#f4f7fb" : "#344054";
+    ctx.textAlign = "center";
+    for (let pass = 0; pass < 2; pass++) {
+      for (let index = 0; index < stationList.length; index++) {
+        const station = stationList[index];
+        const position = routeStationMapPositions[index];
+        if (!mapPointIsVisible(scene, position.screenX, position.screenY)) continue;
+        const running = station.name === currentStationName || station.name === nextStationName;
+        if ((pass === 0) !== running) continue;
+        const important = activeRoute.cityStations.has(station.name) || running;
+        const showLabel = scene.mode === "overview"
+          ? important && scene.scale >= 0.006
+          : important || scene.scale >= 0.7;
+        if (!showLabel) continue;
+        const labelY = position.screenY - labelSize * 0.55;
+        const labelWidth = ctx.measureText(station.name).width;
+        if (!claimMapLabelBox(position.screenX, labelY, labelWidth + labelSize * 0.4, labelSize)) continue;
+        ctx.fillText(station.name, position.screenX, labelY);
+      }
     }
     ctx.restore();
   }
 
   function drawYamanoteLandmarks(scene, labelSize) {
+    // かなり引いた全体図ではランドマーク名も抑える。
+    if (scene.mode === "overview" && scene.scale < 0.008) return;
     ctx.save();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -3055,9 +3827,13 @@
       if (!mapPointIsVisible(scene, x, y, 50)) continue;
       ctx.font = (labelSize * 1.25) + "px sans-serif";
       ctx.fillText(landmark.icon, x, y - labelSize * 0.3);
-      ctx.font = "bold " + Math.max(8, labelSize * 0.68) + "px sans-serif";
+      // 名前が駅名とぶつかる時はアイコンだけ残す。駅名は先に場所を取っている。
+      const nameSize = Math.max(8, labelSize * 0.68);
+      const nameY = y + labelSize * 0.95;
+      ctx.font = "bold " + nameSize + "px sans-serif";
+      if (!claimMapLabelBox(x, nameY + nameSize / 2, ctx.measureText(landmark.name).width + nameSize * 0.4, nameSize)) continue;
       ctx.fillStyle = timeOfDay === "night" ? "#e9eef6" : "#51606f";
-      ctx.fillText(landmark.name, x, y + labelSize * 0.95);
+      ctx.fillText(landmark.name, x, nameY);
     }
     for (const landmark of MAP_GEOGRAPHY.landmarks) {
       const x = scene.screenCenterX + (mapWorldX(landmark.lon) - scene.centerWorldX) * scene.scale;
@@ -3065,9 +3841,12 @@
       if (!mapPointIsVisible(scene, x, y, 60)) continue;
       ctx.font = Math.max(18, labelSize * 1.7) + "px sans-serif";
       ctx.fillText(landmark.icon, x, y - labelSize * 0.3);
-      ctx.font = "bold " + Math.max(9, labelSize * 0.72) + "px sans-serif";
+      const nameSize = Math.max(9, labelSize * 0.72);
+      const nameY = y + labelSize * 1.15;
+      ctx.font = "bold " + nameSize + "px sans-serif";
+      if (!claimMapLabelBox(x, nameY + nameSize / 2, ctx.measureText(landmark.name).width + nameSize * 0.4, nameSize)) continue;
       ctx.fillStyle = timeOfDay === "night" ? "#eef5ff" : "#526578";
-      ctx.fillText(landmark.name, x, y + labelSize * 1.15);
+      ctx.fillText(landmark.name, x, nameY);
     }
     ctx.restore();
   }
@@ -3114,11 +3893,12 @@
 
   function drawYamanoteFollowTrain(scene) {
     const count = scene.carPositions.length;
-    if (train.kind === "airplane") {
+    if (train.kind === "airplane" || train.kind === "ferry") {
       const position = scene.carPositions[0];
       const x = scene.screenCenterX + (position.worldX - scene.centerWorldX) * scene.scale;
       const y = scene.screenCenterY + (position.worldY - scene.centerWorldY) * scene.scale;
-      drawMapAirplaneShape(x, y, position.angle, Math.max(28, Math.min(86, 22 * scene.scale)));
+      if (train.kind === "ferry") drawMapFerryShape(x, y, position.angle, Math.max(28, Math.min(86, 22 * scene.scale)));
+      else drawMapAirplaneShape(x, y, position.angle, Math.max(28, Math.min(86, 22 * scene.scale)));
       return;
     }
     const directionAngle = routeDirection < 0 ? Math.PI : 0;
@@ -3182,6 +3962,10 @@
     const point = mapScenePoint(scene, position.worldX, position.worldY, yamanoteTrainScreenPoint);
     if (train.kind === "airplane") {
       drawMapAirplaneShape(point.x, point.y, position.angle, labelSize * 2.2);
+      return point;
+    }
+    if (train.kind === "ferry") {
+      drawMapFerryShape(point.x, point.y, position.angle, labelSize * 2.2);
       return point;
     }
     ctx.save();
@@ -3279,11 +4063,16 @@
     const automaticScene = mapMode === "follow" ? yamanoteFollowScene() : yamanoteOverviewScene();
     const scene = applyManualMapCamera(automaticScene);
     const labelSize = Math.max(10, Math.min(W, H) * (scene.portrait ? 0.024 : 0.021));
-    drawYamanoteMapBackground(scene);
-    drawMapTownscape(scene);
-    drawYamanoteRelatedLines(scene, labelSize);
-    drawYamanoteRoute(scene, labelSize);
-    drawYamanoteLandmarks(scene, labelSize);
+    resetMapLabelBoxes();
+    ctx.save();
+    profiled("map:background", () => drawYamanoteMapBackground(scene));
+    profiled("map:townscape", () => drawMapTownscape(scene));
+    profiled("map:relatedLines", () => drawYamanoteRelatedLines(scene, labelSize));
+    profiled("map:route", () => drawYamanoteRoute(scene, labelSize));
+    profiled("map:relatedLabels", () => drawMapRelatedLineLabels(scene, labelSize));
+    if (!(isNonRailRoute() && scene.mode === "follow")) {
+      profiled("map:landmarks", () => drawYamanoteLandmarks(scene, labelSize));
+    }
 
     const position = yamanoteMapPosition();
     let trainPoint;
@@ -3294,6 +4083,7 @@
       trainPoint = drawYamanoteOverviewMarker(scene, labelSize, position);
     }
     drawMapPowerStar(scene, position, labelSize);
+    ctx.restore();
 
     ctx.font = "bold " + (labelSize * 0.86) + "px sans-serif";
     ctx.textAlign = "center";
@@ -3303,7 +4093,7 @@
       ? `　${starBoostType.icon} ×${starBoostMultiplier} ${Math.ceil(starBoostTime)}びょう`
       : "";
     const roundedKm = Math.round(position.km * 10) / 10;
-    const vehicleText = activeRoute.kind === "air" ? "✈️ ひこうちゅう" : `🚃 ${totalCarCount()}りょう`;
+    const vehicleText = isAirRoute() ? "✈️ ひこうちゅう" : isSeaRoute() ? "⛴️ こうかいちゅう" : `🚃 ${totalCarCount()}りょう`;
     const badgeText = scene.portrait
       ? `${modeText}　${roundedKm}km　${vehicleText}　🧭↑${boostText}`
       : `${modeText}　${roundedKm} km　${vehicleText}　🧭 きた↑${boostText}`;
@@ -3707,7 +4497,7 @@
   }
 
   function scheduleNextOpposingTrain(initial = false) {
-    if (activeRoute.kind === "air") {
+    if (isNonRailRoute()) {
       nextOpposingTrainIn = Infinity;
       return;
     }
@@ -3717,12 +4507,22 @@
     nextOpposingTrainIn = (minimum + Math.random() * variation) * (initial ? 0.7 : 1);
   }
 
+  // すれ違う列車も、色ちがいのある形式なら1本ごとに違う編成が来る。
+  function opposingTypeWithVariant(type) {
+    if (!type.sourceKey) return type;
+    const variantKey = pickTrainVariant(type.sourceKey);
+    const variant = TRAINS[variantKey];
+    if (!variant || variantKey === type.sourceKey) return type;
+    return {...type, name:variant.callName || variant.name,
+      body:variant.body, stripe:variant.stripe, stripe2:variant.stripe2};
+  }
+
   function spawnOpposingTrain(typeIndex = null) {
     const pool = opposingTrainPoolForSegment();
     const index = typeIndex === null
       ? Math.floor(Math.random() * pool.length)
       : typeIndex % pool.length;
-    const type = pool[index];
+    const type = opposingTypeWithVariant(pool[index]);
     const { x0, x1 } = viewRange();
     const cars = Array.isArray(type.cars)
       ? type.cars[Math.floor(Math.random() * type.cars.length)]
@@ -3740,7 +4540,7 @@
   }
 
   function updateOpposingTrain(dt) {
-    if (state === "select" || mapMode !== "scenery" || activeRoute.kind === "air") return;
+    if (state === "select" || mapMode !== "scenery" || isNonRailRoute()) return;
     if (!opposingTrain) {
       // 速く走るほど短い時間で多くの列車と出会う。上限は描画が混みすぎないためのもの。
       const encounterRate = 1 + Math.min(displaySpeed(speed), 1200) / 400;
@@ -3991,8 +4791,8 @@
   function drawHeadlight() {
     const tunnelActive = routeEvent === "tunnel" && routeEventAnnounced;
     if (!headlightsAreOn() || (!tunnelActive && timeOfDay !== "night")) return;
-    const { carW, gap } = carMetrics();
-    const frontX = W * NOSE_R + trainStationOffset() + (komachiCoupled ? komachiGap + carW * 2 + gap : 0);
+    const { carW } = carMetrics();
+    const frontX = W * NOSE_R + trainStationOffset() + (komachiCoupled ? komachiGap + komachiTrainWidth() : 0);
     const centerY = groundY() - carW * 0.16;
     const beam = ctx.createLinearGradient(frontX, 0, frontX + W * 0.4, 0);
     beam.addColorStop(0, "rgba(255,244,160,0.75)");
@@ -4062,15 +4862,16 @@
       keio: 10,
       inokashira: 5,
     }[selectedRouteKey] || 5;
-    const { carW, gap } = carMetrics();
-    return Math.max(baseWidth, capacity * carW + Math.max(capacity - 1, 0) * gap + carW * 0.5);
+    // ホームの長さは、その路線を走る車両の長さで決まる。新幹線のホームは在来線より長い。
+    const { gap } = carMetrics();
+    const slotW = carSlotWidth(routeTrainKey(selectedRouteKey));
+    return Math.max(baseWidth, capacity * slotW + Math.max(capacity - 1, 0) * gap + slotW * 0.5);
   }
 
   function trainStationOffset() {
     if (!komachiCoupled) return 0;
-    const { carW, gap } = carMetrics();
     // 連結時も、編成の本当の先頭がホーム先端の停止位置へ来るよう固定する。
-    return -(komachiGap + carW * 2 + gap);
+    return -(komachiGap + komachiTrainWidth());
   }
 
   function stationScreenX(worldX, name) {
@@ -4165,16 +4966,20 @@
   }
 
   function drawWheel(x, y, r) {
-    ctx.fillStyle = "#3a3a3a";
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, 7);
-    ctx.fill();
-    ctx.strokeStyle = "#999";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(x - r * 0.7 * Math.cos(wheelAngle), y - r * 0.7 * Math.sin(wheelAngle));
-    ctx.lineTo(x + r * 0.7 * Math.cos(wheelAngle), y + r * 0.7 * Math.sin(wheelAngle));
-    ctx.stroke();
+    drawWheelOn(ctx, x, y, r, wheelAngle);
+  }
+
+  function drawWheelOn(g, x, y, r, angle) {
+    g.fillStyle = "#3a3a3a";
+    g.beginPath();
+    g.arc(x, y, r, 0, 7);
+    g.fill();
+    g.strokeStyle = "#999";
+    g.lineWidth = 2;
+    g.beginPath();
+    g.moveTo(x - r * 0.7 * Math.cos(angle), y - r * 0.7 * Math.sin(angle));
+    g.lineTo(x + r * 0.7 * Math.cos(angle), y + r * 0.7 * Math.sin(angle));
+    g.stroke();
   }
 
   function drawCarNumber(x, y, number, carH) {
@@ -4218,9 +5023,9 @@
 
   function drawTrainMotionEffects() {
     const y = groundY();
-    const { carW, carH, gap } = carMetrics();
+    const { carW, carH } = carMetrics();
     const noseX = W * NOSE_R + trainStationOffset();
-    const tailX = noseX - cars * (carW + gap);
+    const tailX = noseX - trainTotalWidth();
 
     if (accelerationEffect > 0.02) {
       ctx.save();
@@ -4319,7 +5124,132 @@
     ctx.restore();
   }
 
-  function drawAirports() {
+  
+  function drawMapFerryShape(x, y, angle, size) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle + (routeDirection < 0 ? Math.PI : 0));
+    ctx.shadowColor = "rgba(0,0,0,0.28)";
+    ctx.shadowBlur = Math.max(4, size * 0.1);
+    ctx.fillStyle = train.body;
+    ctx.strokeStyle = train.edge;
+    ctx.lineWidth = Math.max(1.5, size * 0.04);
+    ctx.beginPath();
+    ctx.moveTo(size * 0.55, 0);
+    ctx.lineTo(size * 0.2, -size * 0.22);
+    ctx.lineTo(-size * 0.45, -size * 0.2);
+    ctx.lineTo(-size * 0.55, 0);
+    ctx.lineTo(-size * 0.45, size * 0.2);
+    ctx.lineTo(size * 0.2, size * 0.22);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = train.stripe;
+    ctx.fillRect(-size * 0.25, -size * 0.08, size * 0.45, size * 0.16);
+    ctx.restore();
+  }
+
+  function createFerryPreview(type) {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 200 70");
+    svg.innerHTML = `<path d="M18 42 L48 24 H156 L184 42 L156 54 H48 Z" fill="${type.body}" stroke="${type.edge}" stroke-width="2"/><rect x="70" y="18" width="70" height="18" rx="3" fill="${type.body}" stroke="${type.edge}" stroke-width="2"/><path d="M40 40 H168" stroke="${type.stripe}" stroke-width="6"/><rect x="80" y="22" width="12" height="10" rx="2" fill="#33475a"/><rect x="100" y="22" width="12" height="10" rx="2" fill="#33475a"/><rect x="120" y="22" width="12" height="10" rx="2" fill="#33475a"/>`;
+    return svg;
+  }
+
+  function drawSeaWater() {
+    const y = groundY();
+    const { x0, x1 } = viewRange();
+    const water = ctx.createLinearGradient(0, y - 40, 0, y + 180);
+    water.addColorStop(0, "rgba(120, 190, 230, 0.35)");
+    water.addColorStop(0.35, "#5eb3e0");
+    water.addColorStop(1, "#2f7fb5");
+    ctx.fillStyle = water;
+    ctx.fillRect(x0, y - 18, x1 - x0, 220);
+    ctx.strokeStyle = "rgba(255,255,255,0.35)";
+    ctx.lineWidth = 2;
+    const spacing = 70;
+    const off = visualDistance % spacing;
+    for (let x = x0 - off; x < x1 + spacing; x += spacing) {
+      ctx.beginPath();
+      ctx.moveTo(x, y + 18);
+      ctx.quadraticCurveTo(x + 18, y + 10, x + 36, y + 20);
+      ctx.stroke();
+    }
+  }
+
+  function drawSeaPortAt(worldX, name) {
+    if (worldX === null || worldX === undefined) return;
+    const x = worldScreenOffset(worldX) + W * NOSE_R;
+    const y = groundY();
+    const { x0, x1 } = viewRange();
+    if (x < x0 - 180 || x > x1 + 180) return;
+    ctx.save();
+    ctx.fillStyle = "#8d97a3";
+    ctx.fillRect(x - 70, y - 8, 140, 18);
+    ctx.fillStyle = "#c5ccd4";
+    ctx.fillRect(x - 58, y - 34, 116, 28);
+    ctx.fillStyle = "#5f6b78";
+    ctx.fillRect(x - 8, y - 78, 16, 48);
+    ctx.font = "bold 18px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.fillStyle = "#344054";
+    ctx.fillText(`⚓ ${name}`, x, y - 86);
+    ctx.restore();
+  }
+
+  function drawSeaPorts() {
+    drawSeaPortAt(currentStationX, currentStationName);
+    drawSeaPortAt(stationWorldX, nextStationName);
+  }
+
+  function drawFerry() {
+    const shipW = Math.min(W * 0.3, 280);
+    const shipH = shipW * 0.28;
+    const x = W * NOSE_R;
+    const y = groundY() - shipH * 0.35 - 8;
+    const bob = state === "running" ? Math.sin(distance * 0.03) * 2.2 : 0;
+    ctx.save();
+    ctx.translate(x, y + bob);
+    ctx.fillStyle = "rgba(255,255,255,0.25)";
+    ctx.beginPath();
+    ctx.ellipse(-shipW * 0.1, shipH * 0.55, shipW * 0.45, shipH * 0.18, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = train.body;
+    ctx.strokeStyle = train.edge;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(shipW * 0.48, shipH * 0.08);
+    ctx.lineTo(shipW * 0.18, -shipH * 0.22);
+    ctx.lineTo(-shipW * 0.38, -shipH * 0.2);
+    ctx.lineTo(-shipW * 0.48, shipH * 0.1);
+    ctx.lineTo(-shipW * 0.36, shipH * 0.38);
+    ctx.lineTo(shipW * 0.22, shipH * 0.4);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = train.body;
+    roundRect(-shipW * 0.12, -shipH * 0.55, shipW * 0.34, shipH * 0.36, 6);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = train.stripe;
+    ctx.fillRect(-shipW * 0.34, -shipH * 0.02, shipW * 0.68, shipH * 0.12);
+    ctx.fillStyle = "#33475a";
+    for (let windowX = -shipW * 0.05; windowX < shipW * 0.18; windowX += shipW * 0.08) {
+      ctx.fillRect(windowX, -shipH * 0.46, shipW * 0.045, shipH * 0.12);
+    }
+    if (state === "running") {
+      ctx.strokeStyle = "rgba(255,255,255,0.55)";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(-shipW * 0.48, shipH * 0.2);
+      ctx.lineTo(-shipW * 0.75, shipH * 0.05);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+function drawAirports() {
     drawAirportAt(currentStationX, currentStationName);
     drawAirportAt(stationWorldX, nextStationName);
   }
@@ -4384,104 +5314,384 @@
     ctx.restore();
   }
 
+  // 走行中の上下の揺れ。速さに応じて大きくなり、停まる寸前は自然に収まる。
+  // 実際の揺れ幅は車種ごとの bobAmp を掛けて決める。
+  function trainBobPhase(phaseOffset = 0) {
+    if (state !== "running") return 0;
+    const speedFactor = Math.min(1, displaySpeed(speed) / 90);
+    return Math.sin(distance * 0.05 + phaseOffset) * speedFactor;
+  }
+
   function drawTrain() {
     const y = groundY();
     const { carW, carH, gap } = carMetrics();
     const noseX = W * NOSE_R + trainStationOffset();
-    const bob = state === "running" ? Math.sin(distance * 0.05) * 1.5 : 0;
+    const bob = trainBobPhase();
 
+    // 車体は右端(連結面)を基準に、先頭から順に後ろへ積み上げていく。
+    // 車種ごとに長さが違うので、等間隔ではなく1両ずつ位置を進める。
+    let right = noseX;
     for (let i = 0; i < cars; i++) {
       const carTrain = TRAINS[carTypes[i]];
-      const commuter = carTrain.kind === "commuter";
-      const right = noseX - i * (carW + gap);
-      const left = right - carW;
-      const top = y - carH - 10 + bob * (i % 2 === 0 ? 1 : -1);
+      const profile = carProfile(carTrain);
+      const bodyW = carSlotWidth(carTypes[i]);
+      const bodyH = carH * profile.heightRatio;
+      const left = right - bodyW;
+      const top = y - bodyH - 10 + bob * profile.bobAmp * (i % 2 === 0 ? 1 : -1);
 
-      ctx.fillStyle = carTrain.body;
-      ctx.strokeStyle = carTrain.edge;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      const isTail = cars > 1 && i === cars - 1;
-      if (commuter) {
-        // 通勤電車は先頭・中間・後尾とも箱型の車体。
-        roundRect(left, top, carW, carH, Math.max(5, carH * 0.12));
-      } else if (i === 0) {
-        // 先頭車: ロングノーズ
-        ctx.moveTo(left, top + 6);
-        ctx.quadraticCurveTo(left, top, left + 10, top);
-        ctx.lineTo(right - carW * 0.45, top);
-        ctx.quadraticCurveTo(right - carW * 0.1, top + 2, right, top + carH - 8);
-        ctx.quadraticCurveTo(right, top + carH, right - 8, top + carH);
-        ctx.lineTo(left + 6, top + carH);
-        ctx.quadraticCurveTo(left, top + carH, left, top + carH - 6);
-        ctx.closePath();
-      } else if (isTail) {
-        // 最後の車両: 後ろ向きの運転席がある後尾車。
-        ctx.moveTo(left, top + carH - 8);
-        ctx.quadraticCurveTo(left + carW * 0.1, top + 2, left + carW * 0.45, top);
-        ctx.lineTo(right - 10, top);
-        ctx.quadraticCurveTo(right, top, right, top + 6);
-        ctx.lineTo(right, top + carH - 6);
-        ctx.quadraticCurveTo(right, top + carH, right - 6, top + carH);
-        ctx.lineTo(left + 8, top + carH);
-        ctx.quadraticCurveTo(left, top + carH, left, top + carH - 8);
-        ctx.closePath();
-      } else {
-        roundRect(left, top, carW, carH, 8);
-      }
-      ctx.fill();
-      if (carTrain.upper) {
-        ctx.save();
-        ctx.clip();
-        ctx.fillStyle = carTrain.upper;
-        ctx.fillRect(left, top, carW, carH * 0.47);
-        ctx.restore();
-      }
-      ctx.stroke();
-      if (commuter && (i === 0 || isTail)) {
-        ctx.fillStyle = carTrain.face;
-        const cabWidth = carW * 0.18;
-        ctx.fillRect(i === 0 ? right - cabWidth : left, top + 2, cabWidth, carH - 4);
-      }
-
-      // 帯
-      ctx.fillStyle = carTrain.stripe;
-      if (commuter) {
-        ctx.fillRect(left + 2, top + carH * 0.58, carW - 4, carH * 0.14);
-        if (carTrain.stripe2) {
-          ctx.fillStyle = carTrain.stripe2;
-          ctx.fillRect(left + 2, top + carH * 0.73, carW - 4, carH * 0.08);
-        }
-      } else if (i === 0) {
-        ctx.beginPath();
-        ctx.moveTo(left + 2, top + carH * 0.45);
-        ctx.lineTo(right - carW * 0.32, top + carH * 0.42);
-        ctx.lineTo(right - carW * 0.05, top + carH * 0.75);
-        ctx.lineTo(right - carW * 0.05, top + carH * 0.88);
-        ctx.lineTo(left + 2, top + carH * 0.62);
-        ctx.closePath();
-        ctx.fill();
-      } else {
-        ctx.fillRect(left + 2, top + carH * 0.48, carW - 4, carH * 0.16);
-      }
-
-      // 窓
-      const winCount = i === 0 || isTail ? 2 : 3;
-      const winStart = isTail ? left + carW * 0.38 : left + carW * 0.12;
-      drawTrainWindows(winStart, top, carW, carH, winCount);
-
-      // 連結器
+      // 連結器の高さは地面基準にして、背の高さが違う車両同士でも一直線につなぐ。
       if (i > 0) {
-        ctx.fillStyle = "#666";
-        ctx.fillRect(right, top + carH * 0.6, gap, 6);
+        const linkH = Math.max(5, carH * 0.11);
+        ctx.fillStyle = "#5a636b";
+        ctx.fillRect(right, y - 10 - carH * 0.3 - linkH / 2, gap, linkH);
       }
+
+      drawRailCarOn(ctx, carTrain, profile, left, top, bodyW, bodyH, {
+        isHead: i === 0,
+        isTail: cars > 1 && i === cars - 1,
+        index: i,
+        wheelY: y,
+        wheelSpin: wheelAngle,
+        night: timeOfDay === "night",
+      });
 
       const carNumber = komachiCoupled ? i + 3 : i + 1;
-      drawCarNumber(left + carW * 0.52, top + carH * 0.72, carNumber, carH);
-
-      drawWheel(left + carW * 0.22, y - 8, 9);
-      drawWheel(left + carW * 0.78, y - 8, 9);
+      drawCarNumber(left + bodyW * 0.52, top + bodyH * 0.72, carNumber, bodyH);
+      right = left - gap;
     }
+  }
+
+  // 1両分の車体。走行画面と「どの でんしゃに のる？」のプレビューが同じ絵になるよう、
+  // 描画先の context を引数で受け取り、両方からこの関数を呼ぶ。
+  function drawRailCarOn(g, carTrain, profile, left, top, bodyW, bodyH, opts) {
+    const {isHead = false, isTail = false, index = 0,
+      wheelY = null, wheelSpin = 0, night = false} = opts || {};
+    const nose = carNose(carTrain);
+
+    // 屋根上機器を先に描き、車体で足元が隠れるようにする。
+    drawCarRoofOn(g, carTrain, profile, left, top, bodyW, bodyH, index);
+
+    g.save();
+    traceCarBodyOn(g, left, top, bodyW, bodyH, profile, isHead, isTail, nose);
+    g.fillStyle = carTrain.body;
+    g.fill();
+    // 前面や帯が車体からはみ出さないよう、内側は車体の形で切り抜いて描く。
+    g.save();
+    g.clip();
+    if (carTrain.upper) {
+      g.fillStyle = carTrain.upper;
+      g.fillRect(left, top, bodyW, bodyH * 0.47);
+    }
+    drawCarBandOn(g, carTrain, profile, left, top, bodyW, bodyH, isHead, isTail, nose);
+    drawCabFaceOn(g, carTrain, profile, left, top, bodyW, bodyH, isHead, isTail);
+    const cabW = bodyW * profile.cabRatio;
+    drawCarSideOn(g, profile, left, top, bodyW, bodyH,
+      isTail ? cabW : bodyW * 0.06, isHead ? cabW : bodyW * 0.06, night);
+    g.restore();
+    traceCarBodyOn(g, left, top, bodyW, bodyH, profile, isHead, isTail, nose);
+    g.strokeStyle = carTrain.edge || "#aeb8be";
+    g.lineWidth = 2;
+    g.stroke();
+    g.restore();
+
+    // 足まわり: 鉄道は鉄輪、新交通システムとモノレールはゴムタイヤ。
+    if (wheelY === null) return;
+    if (profile.wheels === "tire") {
+      const r = Math.max(5, bodyH * 0.2);
+      drawRubberTireOn(g, left + bodyW * 0.24, wheelY - 6, r);
+      drawRubberTireOn(g, left + bodyW * 0.76, wheelY - 6, r);
+    } else {
+      drawWheelOn(g, left + bodyW * 0.22, wheelY - 8, 9, wheelSpin);
+      drawWheelOn(g, left + bodyW * 0.78, wheelY - 8, 9, wheelSpin);
+    }
+  }
+
+  // 車体の輪郭。前面の形（切妻・傾斜・丸型・ロングノーズ）がいちばんの識別点になる。
+  function traceCarBodyOn(g, left, top, w, h, profile, isHead, isTail, nose) {
+    const right = left + w;
+    const bottom = top + h;
+    const rB = Math.max(3, h * 0.12);
+    if (profile.face === "nose" && (isHead || isTail)) {
+      // 先頭は右向き、後尾は左向き。dir で左右を反転させ、同じ式で両方描く。
+      const dir = isHead ? 1 : -1;
+      const frontX = isHead ? right : left;
+      const backX = isHead ? left : right;
+      const len = w * nose.len;
+      const tip = top + h * nose.tipY;
+      g.beginPath();
+      g.moveTo(backX, top + rB);
+      g.quadraticCurveTo(backX, top, backX + dir * rB, top);
+      g.lineTo(frontX - dir * len, top);
+      g.bezierCurveTo(
+        frontX - dir * len * (1 - nose.shoulder), top + h * 0.02,
+        frontX - dir * len * nose.bulge, top + h * nose.tipY * 0.55,
+        frontX, tip);
+      g.quadraticCurveTo(frontX, top + h * (nose.tipY + (1 - nose.tipY) * 0.55), frontX, bottom - 4);
+      g.quadraticCurveTo(frontX, bottom, frontX - dir * 8, bottom);
+      g.lineTo(backX + dir * rB, bottom);
+      g.quadraticCurveTo(backX, bottom, backX, bottom - rB);
+      g.closePath();
+      return;
+    }
+    if ((profile.face === "round" || profile.face === "slant") && (isHead || isTail)) {
+      // 前面側だけ形を変える。isHead は右が前、isTail は左が前(後ろ向き)。
+      const dir = isHead ? 1 : -1;
+      const frontX = isHead ? right : left;
+      const backX = isHead ? left : right;
+      g.beginPath();
+      g.moveTo(backX + dir * rB, top);
+      if (profile.face === "slant") {
+        // 私鉄: 屋根を手前で切り上げ、前面をまっすぐ斜めに落とす。
+        const slant = Math.min(w * 0.16, h * 0.75);
+        g.lineTo(frontX - dir * slant, top);
+        g.lineTo(frontX, top + h * 0.46);
+        g.lineTo(frontX, bottom - rB);
+        g.quadraticCurveTo(frontX, bottom, frontX - dir * rB, bottom);
+      } else {
+        // 地下鉄: 前面を半円に近い大きな丸みにする。
+        const rF = Math.min(w * 0.34, h * 0.5);
+        g.lineTo(frontX - dir * rF, top);
+        g.quadraticCurveTo(frontX, top, frontX, top + rF);
+        g.lineTo(frontX, bottom - rF);
+        g.quadraticCurveTo(frontX, bottom, frontX - dir * rF, bottom);
+      }
+      g.lineTo(backX + dir * rB, bottom);
+      g.quadraticCurveTo(backX, bottom, backX, bottom - rB);
+      g.lineTo(backX, top + rB);
+      g.quadraticCurveTo(backX, top, backX + dir * rB, top);
+      g.closePath();
+      return;
+    }
+    // 切妻(JR通勤)の先頭車と、すべての中間車。
+    roundRectOn(g, left, top, w, h, profile.face === "flat" ? Math.max(2, h * 0.07) : rB);
+  }
+
+  // 帯の位置。通勤・地下鉄・私鉄は腰帯、新幹線は前面へ回り込むスウォッシュ、新交通は窓下と足元。
+  function drawCarBandOn(g, carTrain, profile, left, top, bodyW, bodyH, isHead, isTail, nose) {
+    const right = left + bodyW;
+    g.fillStyle = carTrain.stripe;
+    if (profile.band === "waist") {
+      g.fillRect(left, top + bodyH * 0.58, bodyW, bodyH * 0.14);
+      if (carTrain.stripe2) {
+        g.fillStyle = carTrain.stripe2;
+        g.fillRect(left, top + bodyH * 0.73, bodyW, bodyH * 0.08);
+      }
+      return;
+    }
+    if (profile.band === "low") {
+      g.fillRect(left, top + bodyH * 0.52, bodyW, bodyH * 0.13);
+      if (carTrain.stripe2) {
+        g.fillStyle = carTrain.stripe2;
+        g.fillRect(left, top + bodyH * 0.82, bodyW, bodyH * 0.08);
+      }
+      return;
+    }
+    if (isHead || isTail) {
+      // ノーズの傾斜に沿って前へ回り込む帯。長い鼻ほど帯も長く伸びる。
+      const dir = isHead ? 1 : -1;
+      const frontX = isHead ? right : left;
+      const len = bodyW * nose.len;
+      g.beginPath();
+      g.moveTo(frontX - dir * bodyW, top + bodyH * 0.45);
+      g.lineTo(frontX - dir * len * 0.85, top + bodyH * 0.42);
+      g.lineTo(frontX - dir * len * 0.06, top + bodyH * (nose.tipY + 0.04));
+      g.lineTo(frontX - dir * len * 0.06, top + bodyH * (nose.tipY + 0.18));
+      g.lineTo(frontX - dir * bodyW, top + bodyH * 0.62);
+      g.closePath();
+      g.fill();
+      return;
+    }
+    g.fillRect(left, top + bodyH * 0.48, bodyW, bodyH * 0.16);
+  }
+
+  // 側面のドアと窓。ドアはデフォルメした車体に合う数だけ置く（実車の扉数は入れない）。
+  function drawCarSideOn(g, profile, left, top, bodyW, bodyH, insetLeft, insetRight, night) {
+    const start = left + insetLeft;
+    const usable = bodyW - insetLeft - insetRight;
+    if (usable <= bodyW * 0.1) return;
+    const winTop = top + bodyH * profile.windowTop;
+    const winH = bodyH * profile.windowHeight;
+    const doorW = Math.max(4, bodyW * 0.1);
+    const bounds = [start];
+    const doorCenters = [];
+
+    // 新幹線は客用ドアを描かないかわりに、小さな窓を等間隔に並べる。
+    if (profile.doors === 0) {
+      g.save();
+      g.fillStyle = night ? "#ffe58a" : "#333";
+      if (night) {
+        g.shadowColor = "rgba(255, 221, 112, 0.9)";
+        g.shadowBlur = 8;
+      }
+      const count = profile.windowCount || 5;
+      const pitch = usable / count;
+      for (let i = 0; i < count; i++) {
+        roundRectOn(g, start + pitch * (i + 0.18), winTop, pitch * 0.64, winH, 2);
+        g.fill();
+      }
+      g.restore();
+      return;
+    }
+
+    if (profile.doors > 0) {
+      g.save();
+      g.fillStyle = "rgba(22, 36, 48, 0.1)";
+      g.strokeStyle = "rgba(22, 36, 48, 0.3)";
+      g.lineWidth = 1;
+      const doorTop = top + bodyH * 0.12;
+      const doorH = bodyH * 0.76;
+      for (let d = 0; d < profile.doors; d++) {
+        const centerX = start + usable * ((d + 0.5) / profile.doors);
+        const doorX = centerX - doorW / 2;
+        roundRectOn(g, doorX, doorTop, doorW, doorH, 2);
+        g.fill();
+        g.stroke();
+        g.beginPath();
+        g.moveTo(centerX, doorTop + 2);
+        g.lineTo(centerX, doorTop + doorH - 2);
+        g.stroke();
+        bounds.push(doorX, doorX + doorW);
+        doorCenters.push(centerX);
+      }
+      g.restore();
+    }
+    bounds.push(start + usable);
+
+    g.save();
+    g.fillStyle = night ? "#ffe58a" : "#333";
+    if (night) {
+      g.shadowColor = "rgba(255, 221, 112, 0.9)";
+      g.shadowBlur = 8;
+    }
+    for (let b = 0; b < bounds.length - 1; b += 2) {
+      const segStart = bounds[b] + bodyW * 0.015;
+      const segEnd = bounds[b + 1] - bodyW * 0.015;
+      const segW = segEnd - segStart;
+      if (segW < bodyW * 0.05) continue;
+      // デフォルメなので、ドアのあいだは大きな1枚窓にする。
+      roundRectOn(g, segStart + segW * 0.08, winTop, segW * 0.84, winH, 3);
+      g.fill();
+    }
+    for (const centerX of doorCenters) {
+      roundRectOn(g, centerX - doorW * 0.32, winTop, doorW * 0.64, winH * 0.9, 2);
+      g.fill();
+    }
+    g.restore();
+  }
+
+
+  // 編成端の運転台。箱型(通勤・私鉄・地下鉄)・流線形(新幹線)・小型1枚窓(新交通)で顔つきを変える。
+  function drawCabFaceOn(g, carTrain, profile, left, top, bodyW, bodyH, isHead, isTail) {
+    if (!isHead && !isTail) return;
+    const right = left + bodyW;
+    const cabW = bodyW * profile.cabRatio;
+    const cabX = isHead ? right - cabW : left;
+    const lightR = Math.max(1.5, bodyH * 0.06);
+    g.save();
+    if (profile.cab === "box") {
+      // 前面は路線カラーで塗り、大きな窓・貫通扉・両側のライトを置く。
+      g.fillStyle = carTrain.face || carTrain.stripe;
+      g.fillRect(cabX, top, cabW, bodyH);
+      g.fillStyle = "#20303d";
+      roundRectOn(g, cabX + cabW * 0.12, top + bodyH * 0.16, cabW * 0.76, bodyH * 0.3, 3);
+      g.fill();
+      g.strokeStyle = "rgba(255,255,255,0.5)";
+      g.lineWidth = 1.5;
+      g.strokeRect(cabX + cabW * 0.3, top + bodyH * 0.52, cabW * 0.4, bodyH * 0.44);
+      g.fillStyle = "#ffeeb0";
+      g.beginPath();
+      g.arc(cabX + cabW * 0.15, top + bodyH * 0.64, lightR, 0, Math.PI * 2);
+      g.arc(cabX + cabW * 0.85, top + bodyH * 0.64, lightR, 0, Math.PI * 2);
+      g.fill();
+    } else if (profile.cab === "compact") {
+      // 貫通扉のない、1枚窓の丸い前面。
+      g.fillStyle = "#20303d";
+      roundRectOn(g, cabX + cabW * 0.1, top + bodyH * 0.14, cabW * 0.8, bodyH * 0.34, 5);
+      g.fill();
+      g.fillStyle = "#ffeeb0";
+      g.beginPath();
+      g.arc(isHead ? right - cabW * 0.22 : left + cabW * 0.22, top + bodyH * 0.74, lightR, 0, Math.PI * 2);
+      g.fill();
+    } else {
+      // 新幹線はノーズの傾斜に沿った運転台窓と、鼻先のライト。
+      const nose = carNose(carTrain);
+      const len = bodyW * nose.len;
+      const dir = isHead ? 1 : -1;
+      const frontX = isHead ? right : left;
+      const baseX = frontX - dir * len * 0.62;
+      g.fillStyle = "#293947";
+      g.beginPath();
+      g.moveTo(baseX, top + bodyH * 0.14);
+      g.lineTo(baseX + dir * len * 0.28, top + bodyH * 0.34);
+      g.lineTo(baseX + dir * len * 0.22, top + bodyH * 0.5);
+      g.lineTo(baseX - dir * len * 0.06, top + bodyH * 0.3);
+      g.closePath();
+      g.fill();
+      g.fillStyle = "#ffeeb0";
+      g.beginPath();
+      g.arc(frontX - dir * bodyW * 0.03, top + bodyH * (nose.tipY + 0.1), lightR * 0.9, 0, Math.PI * 2);
+      g.fill();
+    }
+    g.restore();
+  }
+
+  // 屋根の上。クーラーの並びとパンタグラフの有無・形が、種別を見分ける手がかりになる。
+  function drawCarRoofOn(g, carTrain, profile, left, top, bodyW, bodyH, index) {
+    g.save();
+    if (profile.roof === "cooler") {
+      g.fillStyle = "#c3ccd2";
+      g.strokeStyle = "rgba(70,86,96,0.55)";
+      g.lineWidth = 1;
+      const boxH = Math.max(3, bodyH * 0.1);
+      for (let c = 0; c < 3; c++) {
+        roundRectOn(g, left + bodyW * (0.16 + c * 0.27), top - boxH, bodyW * 0.16, boxH, 2);
+        g.fill();
+        g.stroke();
+      }
+    } else if (profile.roof === "flat") {
+      // 新交通システムは平らな屋根に小さな機器箱だけ。
+      g.fillStyle = "#d3dade";
+      const boxH = Math.max(2, bodyH * 0.09);
+      roundRectOn(g, left + bodyW * 0.3, top - boxH, bodyW * 0.4, boxH, 2);
+      g.fill();
+    }
+    // 第三軌条から電気を取る地下鉄は noPantograph を立ててあり、屋根の上に何も載らない。
+    if (profile.pantographEvery > 0 && !carTrain.noPantograph
+      && index % profile.pantographEvery === 1) {
+      drawPantographOn(g, left + bodyW * 0.7, top, bodyH, profile.roof === "smooth");
+    }
+    g.restore();
+  }
+
+  // シングルアームのパンタグラフ。新幹線は低くたたんだ形にする。
+  function drawPantographOn(g, x, roofY, bodyH, lowProfile) {
+    const armH = bodyH * (lowProfile ? 0.3 : 0.46);
+    g.save();
+    g.strokeStyle = "#5b6a74";
+    g.lineWidth = Math.max(1.5, bodyH * 0.045);
+    g.lineCap = "round";
+    g.lineJoin = "round";
+    g.beginPath();
+    g.moveTo(x - bodyH * 0.24, roofY);
+    g.lineTo(x, roofY - armH * 0.6);
+    g.lineTo(x + bodyH * 0.26, roofY - armH);
+    g.stroke();
+    g.beginPath();
+    g.moveTo(x + bodyH * 0.06, roofY - armH);
+    g.lineTo(x + bodyH * 0.46, roofY - armH);
+    g.stroke();
+    g.restore();
+  }
+
+  function drawRubberTireOn(g, x, y, r) {
+    g.fillStyle = "#2b2b2b";
+    g.beginPath();
+    g.arc(x, y, r, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = "#c9d1d6";
+    g.beginPath();
+    g.arc(x, y, r * 0.45, 0, Math.PI * 2);
+    g.fill();
   }
 
   function drawKomachi() {
@@ -4493,64 +5703,45 @@
     const connectionX = komachiCoupled
       ? noseX + komachiGap
       : worldScreenOffset(komachiStationX) + noseX + komachiGap;
-    const bob = state === "running" ? Math.sin(distance * 0.05 + 1) * 1.5 : 0;
-    const top = y - carH - 10 + bob;
+    // こまちはミニ新幹線なので、はやぶさより車体が短い。床の高さはそろえる。
+    const profile = carProfile(TRAINS.komachi);
+    const bob = trainBobPhase(1) * profile.bobAmp;
+    const bodyW = carSlotWidth("komachi");
+    const bodyH = carH * profile.heightRatio;
+    const top = y - bodyH - 10 + bob;
 
     for (let i = 0; i < 2; i++) {
-      const left = connectionX + i * (carW + gap);
-      const right = left + carW;
-      ctx.fillStyle = TRAINS.komachi.body;
-      ctx.strokeStyle = TRAINS.komachi.edge;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      if (i === 0) {
-        // 緑の新幹線側を向く、連結用の先頭車。
-        ctx.moveTo(left, top + carH - 8);
-        ctx.quadraticCurveTo(left + carW * 0.1, top + 2, left + carW * 0.45, top);
-        ctx.lineTo(right - 10, top);
-        ctx.quadraticCurveTo(right, top, right, top + 6);
-        ctx.lineTo(right, top + carH - 6);
-        ctx.quadraticCurveTo(right, top + carH, right - 6, top + carH);
-        ctx.lineTo(left + 8, top + carH);
-        ctx.quadraticCurveTo(left, top + carH, left, top + carH - 8);
-      } else {
-        // 編成の外側は右向きのロングノーズ。
-        ctx.moveTo(left, top + 6);
-        ctx.quadraticCurveTo(left, top, left + 10, top);
-        ctx.lineTo(right - carW * 0.45, top);
-        ctx.quadraticCurveTo(right - carW * 0.1, top + 2, right, top + carH - 8);
-        ctx.quadraticCurveTo(right, top + carH, right - 8, top + carH);
-        ctx.lineTo(left + 6, top + carH);
-        ctx.quadraticCurveTo(left, top + carH, left, top + carH - 6);
-      }
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = TRAINS.komachi.stripe;
-      ctx.fillRect(left + carW * 0.08, top + carH * 0.52, carW * 0.84, carH * 0.14);
-
-      const windowStart = left + carW * 0.2;
-      drawTrainWindows(windowStart, top, carW, carH, 2, carW * 0.3);
-
+      const left = connectionX + i * (bodyW + gap);
+      // i=0 は緑の新幹線側を向く連結用の先頭車、i=1 は編成の外側を向く先頭車。
+      // 本体と同じ関数で描き、ノーズの形と屋根上をそろえる。
       if (i === 0) {
         ctx.fillStyle = "#666";
-        ctx.fillRect(right, top + carH * 0.6, gap, 6);
+        ctx.fillRect(left + bodyW, y - 10 - carH * 0.3 - 3, gap, 6);
       }
-      drawCarNumber(left + carW * 0.52, top + carH * 0.72, 2 - i, carH);
-      drawWheel(left + carW * 0.22, y - 8, 9);
-      drawWheel(left + carW * 0.78, y - 8, 9);
+      drawRailCarOn(ctx, TRAINS.komachi, profile, left, top, bodyW, bodyH, {
+        isHead: i === 1,
+        isTail: i === 0,
+        index: i,
+        wheelY: y,
+        wheelSpin: wheelAngle,
+        night: timeOfDay === "night",
+      });
+      drawCarNumber(left + bodyW * 0.52, top + bodyH * 0.72, 2 - i, bodyH);
     }
   }
 
   function roundRect(x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + w, y, x + w, y + h, r);
-    ctx.arcTo(x + w, y + h, x, y + h, r);
-    ctx.arcTo(x, y + h, x, y, r);
-    ctx.arcTo(x, y, x + w, y, r);
-    ctx.closePath();
+    roundRectOn(ctx, x, y, w, h, r);
+  }
+
+  function roundRectOn(g, x, y, w, h, r) {
+    g.beginPath();
+    g.moveTo(x + r, y);
+    g.arcTo(x + w, y, x + w, y + h, r);
+    g.arcTo(x + w, y + h, x, y + h, r);
+    g.arcTo(x, y + h, x, y, r);
+    g.arcTo(x, y, x + w, y, r);
+    g.closePath();
   }
 
   function drawConfetti(dt) {
@@ -4652,7 +5843,7 @@
         } else if (speed > targetSpeed) {
           speed = Math.max(targetSpeed, speed - AUTO_OVERSPEED_DECEL_PX_PER_SEC2 * dt);
         }
-      } else if (activeRoute.kind !== "air") {
+      } else if (!isNonRailRoute()) {
         // 電車は摩擦でゆるやかに減速する。飛行機は巡航速度をそのまま保つ。
         speed = Math.max(speed - FRICTION_PX_PER_SEC2 * dt, 120);
       }
@@ -4692,13 +5883,11 @@
     // 編成全体が画面に入るようにカメラをなめらかに引く (W=0 の非表示中は更新しない)。
     // 100両でも全編成が画面に入るまで縮小する。
     if (W > 0) {
-      const { carW, gap } = carMetrics();
-      const leftScale = (W * (NOSE_R - 0.03)) / (cars * (carW + gap));
+      const leftScale = (W * (NOSE_R - 0.03)) / Math.max(trainTotalWidth(), 1);
       const komachiIsNear = komachiStationX !== null
         && komachiStationX - distance < W * 1.2;
-      const rightCars = komachiCoupled || komachiIsNear ? 2 : 0;
-      const rightScale = rightCars > 0
-        ? (W * (1 - NOSE_R - 0.03)) / (rightCars * (carW + gap) + komachiGap)
+      const rightScale = komachiCoupled || komachiIsNear
+        ? (W * (1 - NOSE_R - 0.03)) / (komachiTrainWidth() + komachiGap)
         : 1;
       const targetScale = Math.max(Math.min(1, leftScale, rightScale), 0.018);
       viewScale += (targetScale - viewScale) * Math.min(dt * 3, 1);
@@ -4732,6 +5921,7 @@
       canvas.dataset.starMissBlue = String(missedRareStars.blue);
       canvas.dataset.starMissRainbow = String(missedRareStars.rainbow);
     }
+    const drawStarted = profileTotals ? performance.now() : 0;
     const routeMapActive = mapMode !== "scenery" && activeRouteMap() && state !== "select";
     if (routeMapActive) {
       drawYamanoteMap();
@@ -4749,8 +5939,8 @@
         ctx.translate(-ax, -ay);
         drawFuji();
         drawMountains();
-        drawCityscape();
-        if (activeRoute.kind === "air") {
+        profiled("scenery:cityscape", drawCityscape);
+        if (isAirRoute()) {
           drawAirports();
           drawJetStream();
           if (trainFacesLeft()) {
@@ -4761,14 +5951,25 @@
           }
           drawAirplane();
           if (trainFacesLeft()) ctx.restore();
+        } else if (isSeaRoute()) {
+          drawSeaWater();
+          drawSeaPorts();
+          if (trainFacesLeft()) {
+            const mirrorCenterX = ax + (W * 0.5 - ax) / Math.max(viewScale, 0.001);
+            ctx.save();
+            ctx.translate(mirrorCenterX * 2, 0);
+            ctx.scale(-1, 1);
+          }
+          drawFerry();
+          if (trainFacesLeft()) ctx.restore();
         } else {
           drawTunnel();
-          drawTrack();
+          profiled("scenery:track", drawTrack);
           drawCrossing();
-          drawOpposingTrain();
-          drawDistanceMarkers();
+          profiled("scenery:opposing", drawOpposingTrain);
+          profiled("scenery:markers", drawDistanceMarkers);
           drawInspectionEffect();
-          drawStations();
+          profiled("scenery:stations", drawStations);
           if (trainFacesLeft()) {
             // 外側のカメラ拡縮後も画面中央を軸に見えるよう、座標系側の反転軸を補正する。
             const mirrorCenterX = ax + (W * 0.5 - ax) / Math.max(viewScale, 0.001);
@@ -4778,7 +5979,7 @@
           }
           drawHeadlight();
           drawTrainMotionEffects();
-          drawTrain();
+          profiled("scenery:train", drawTrain);
           drawKomachi();
           if (trainFacesLeft()) ctx.restore();
         }
@@ -4789,6 +5990,7 @@
     drawStarPowerBadge();
     drawConfetti(dt);
     drawSpeedBoosts(dt);
+    if (profileTotals) profileRecord("*draw:total", performance.now() - drawStarted);
 
     scheduleFrame();
   }
@@ -4807,6 +6009,14 @@
   if (isDebug) {
     window.__tg = {
       skipToStation() { distance = stationWorldX - 600; },
+      // 描画段階ごとの平均所要時間 (ms/フレーム)。呼ぶたびに集計をリセットする。
+      profile() {
+        const rows = [...profileTotals.entries()]
+          .map(([name, { ms, calls }]) => ({ name, calls, avgMs: Math.round((ms / calls) * 1000) / 1000 }))
+          .sort((a, b) => b.avgMs - a.avgMs);
+        profileTotals.clear();
+        return rows;
+      },
       status() {
         return {
           state, selectedRouteKey, routeName: activeRoute.name, routeVariant: activeRoute.variant || "main", currentLineKm, routeDirection,
@@ -4827,6 +6037,7 @@
           autoMode, autoActionTimer, autoTargetKmh: autoTargetKmh(),
           playElapsedSeconds, motionEffect: canvas.dataset.motionEffect,
           onboardPassengers: [...onboardPassengers], deliveredPassengers, tapBoostKmh: currentTapBoostKmh(),
+          totalMoneyYen, sessionMoneyYen, rideMoneyYen,
           timeOfDay, weather, visitedStations: [...visitedStations],
           fallingStar: fallingStar ? { ...fallingStar } : null,
           starBoostTime, starBoostMultiplier, starBoostType: starBoostType.key,
@@ -5145,7 +6356,7 @@
       padding: "8px", fontSize: "14px",
     });
     debugAirBrakingButton.addEventListener("click", () => {
-      if (activeRoute.kind !== "air") return;
+      if (!isAirRoute()) return;
       const previousState = state;
       const previousSpeed = speed;
       const previousDistance = distance;

@@ -6,7 +6,7 @@ WebGL2 の fragment shader でリアルタイム描画する、スマホ優先�
 
 - 3D: Mandelbulb / Mandelbox / Menger Sponge
 - 2D: Mandelbrot / Julia / Burning Ship / Burning Julia / Newton / Sierpinski Carpet / Kaleidoscope
-- Generative: Phyllotaxis / Truchet Tiles / Harmonic Field
+- Generative: Phyllotaxis / Truchet Tiles / Harmonic Field / Apollonian Gasket
 
 各モードには、形状や構造を実際に変える専用パラメータを表示する。式と上部の値表示も操作に追従する。
 

@@ -8,9 +8,22 @@
   const routes = {};
   const maps = {};
   const metadata = [];
+  // 車体の描き分け。地下鉄は丸い前面、私鉄は斜めに落ちた前面にして、JR の切妻と見分ける。
+  // 銀座線・丸ノ内線・大江戸線は小型車体。第三軌条から集電する路線はパンタグラフを持たない。
+  const SMALL_SUBWAY_KEYS = new Set(["ginza", "marunouchi", "oedo"]);
+  const SUBWAY_KEYS = new Set(["hibiya", "chiyoda", "yurakucho", "hanzomon",
+    "namboku", "fukutoshin", "asakusa", "mita", "shinjukuSubway"]);
+  const PRIVATE_RAIL_KEYS = new Set(["odakyu", "toyoko", "keikyu"]);
+  const THIRD_RAIL_KEYS = new Set(["ginza", "marunouchi"]);
+  const carProfileFor = (key) => SMALL_SUBWAY_KEYS.has(key) ? "subwaySmall"
+    : SUBWAY_KEYS.has(key) ? "subway"
+    : PRIVATE_RAIL_KEYS.has(key) ? "private"
+    : "commuter";
   for (const item of source) {
     trains[item.key] = {
-      name:item.trainName, kind:"commuter", body:"#edf1f2", stripe:item.color,
+      name:item.trainName, kind:"commuter", profile:carProfileFor(item.key),
+      noPantograph:THIRD_RAIL_KEYS.has(item.key),
+      body:"#edf1f2", stripe:item.color,
       face:item.color, edge:"#aeb8be", callName:item.trainName,
     };
     const stations = item.points.slice(1).map(([name,km]) => ({name,km}));
@@ -26,6 +39,29 @@
     maps[item.key] = {name:item.name,color:item.color,points:item.points};
     metadata.push({key:item.key,name:item.name,color:item.color,trainKey:item.key});
   }
+
+  // 常設の特別塗装がある路線だけ、色ちがいの編成を用意する。
+  // weight は実車の編成数に合わせた出やすさで、1〜2編成しかない特別塗装はめったに来ない。
+  // 色は公式に数値が公開されていないため、実車の見た目に寄せたゲーム用の近似色。
+  Object.assign(trains.keikyu, {
+    callName:"あかいけいきゅう", variantWeight:70,
+    variants:[
+      // KEIKYU BLUE SKY TRAIN。600形・2100形の2編成。
+      {name:"あお", weight:2, body:"#1b6fc4", stripe:"#ffffff", face:"#1b6fc4",
+        callName:"あおいけいきゅう"},
+      // KEIKYU YELLOW HAPPY TRAIN。新1000形の1編成。
+      {name:"きいろ", weight:1, body:"#f5c518", stripe:"#ffffff", face:"#f5c518",
+        callName:"きいろいけいきゅう"},
+    ],
+  });
+  Object.assign(trains.ginza, {
+    variantWeight:38,
+    variants:[
+      // 1000系特別仕様編成。40編成のうち2編成だけの復刻デザイン。
+      {name:"レトロ", weight:2, body:"#e8a020", stripe:"#8c5a12", stripe2:"#c8901c",
+        face:"#e8a020", edge:"#a06c14", callName:"レトロなぎんざせん"},
+    ],
+  });
   window.TRAIN_GO_ROUTE_DATA = {trains,routes,maps,metadata};
 })();
 
@@ -68,11 +104,13 @@
       face: "#9acd32", edge: "#aeb8be", callName: "みどりのでんしゃ",
     },
     inokashira: {
-      name: "むらさきのでんしゃ", kind: "commuter", body: "#eef1f2", stripe: "#6f4aa8",
+      name: "むらさきのでんしゃ", kind: "commuter", profile: "private",
+      body: "#eef1f2", stripe: "#6f4aa8",
       face: "#6f4aa8", edge: "#aeb8be", callName: "むらさきのでんしゃ",
     },
     tozai: {
-      name: "みずいろのでんしゃ", kind: "commuter", body: "#e8ecef", stripe: "#32a5d2", stripe2: "#2362a8",
+      name: "みずいろのでんしゃ", kind: "commuter", profile: "subway",
+      body: "#e8ecef", stripe: "#32a5d2", stripe2: "#2362a8",
       face: "#3085cc", edge: "#aeb8be", callName: "みずいろのでんしゃ",
     },
     sobu: {
@@ -84,8 +122,15 @@
       face: "#f28c28", edge: "#aeb8be", callName: "オレンジのでんしゃ",
     },
     keio: {
-      name: "あかとあおのでんしゃ", kind: "commuter", body: "#e8ecef", stripe: "#d31359", stripe2: "#174f9a",
+      name: "あかとあおのでんしゃ", kind: "commuter", profile: "private",
+      body: "#e8ecef", stripe: "#d31359", stripe2: "#174f9a",
       face: "#d31359", edge: "#aeb8be", callName: "あかとあおのでんしゃ",
+      // 高尾山トレインは 8000系の1編成だけの特別塗装。めったに来ない。
+      variantWeight: 40,
+      variants: [
+        { name: "たかおさん", weight: 1, body: "#dfe7d8", stripe: "#8cc63f", stripe2: "#4f8f2a",
+          face: "#8cc63f", callName: "たかおさんトレイン" },
+      ],
     },
   });
   Object.assign(data.routes, {
@@ -366,4 +411,176 @@
       ]),
     },
   });
+})();
+// 首都圏の追加路線（京浜東北・京葉・ゆりかもめ・りんかい）
+(() => {
+  "use strict";
+  const data = window.TRAIN_GO_ROUTE_DATA;
+  Object.assign(data.trains, {
+    keihinTohoku: {
+      name: "みずいろのでんしゃ", kind: "commuter", body: "#e8ecef", stripe: "#00b2e5",
+      face: "#00b2e5", edge: "#aeb8be", callName: "みずいろのでんしゃ",
+    },
+    keiyo: {
+      name: "あかのでんしゃ", kind: "commuter", body: "#e8ecef", stripe: "#c9242f",
+      face: "#c9242f", edge: "#aeb8be", callName: "あかのでんしゃ",
+    },
+    // ゆりかもめは鉄輪ではなくゴムタイヤの新交通システム。車体も小さく描く。
+    yurikamome: {
+      name: "しろいゆりかもめ", kind: "newtransit", body: "#f4f8fb", stripe: "#6ec1e4",
+      face: "#6ec1e4", edge: "#aeb8be", callName: "しろいゆりかもめ",
+    },
+    rinkai: {
+      name: "あおのりんかいせん", kind: "commuter", body: "#edf1f2", stripe: "#00418e",
+      face: "#00418e", edge: "#aeb8be", callName: "あおのりんかいせん",
+    },
+  });
+
+  const sources = [
+    {
+      key: "keihinTohoku", name: "けいひんとうほくせん", color: "#00b2e5", trainKey: "keihinTohoku",
+      speed: 90, cars: 10, crossing: true, icon: "🩵",
+      p: [
+        ["おおみや", 0, 139.6239, 35.9063], ["さいたましんとしん", 1.6, 139.6336, 35.8938],
+        ["よの", 3.4, 139.6389, 35.8844], ["きたうらわ", 4.8, 139.6458, 35.8720],
+        ["うらわ", 6.1, 139.6573, 35.8586], ["みなみうらわ", 8.9, 139.6690, 35.8476],
+        ["わらび", 11.3, 139.6797, 35.8297], ["にしかわぐち", 12.8, 139.7044, 35.8153],
+        ["かわぐち", 14.2, 139.7178, 35.8019], ["あかばね", 17.1, 139.7209, 35.7777],
+        ["ひがしじゅうじょう", 19.0, 139.7275, 35.7635], ["おうじ", 20.4, 139.7373, 35.7526],
+        ["かみなかざと", 21.9, 139.7469, 35.7466], ["たばた", 23.2, 139.7608, 35.7381],
+        ["にしにっぽり", 24.5, 139.7668, 35.7321], ["にっぽり", 25.0, 139.7706, 35.7280],
+        ["うぐいすだに", 26.1, 139.7788, 35.7215], ["うえの", 27.3, 139.7774, 35.7142],
+        ["おかちまち", 27.9, 139.7747, 35.7074], ["あきはばら", 28.9, 139.7731, 35.6984],
+        ["かんだ", 29.6, 139.7709, 35.6917], ["とうきょう", 30.8, 139.7671, 35.6812],
+        ["ゆうらくちょう", 31.6, 139.7638, 35.6751], ["しんばし", 32.7, 139.7586, 35.6663],
+        ["はままつちょう", 33.9, 139.7570, 35.6556], ["たまち", 35.4, 139.7476, 35.6457],
+        ["たかなわゲートウェイ", 36.7, 139.7407, 35.6355], ["しながわ", 37.6, 139.7388, 35.6285],
+        ["おおいまち", 40.0, 139.7347, 35.6065], ["おおもり", 43.1, 139.7281, 35.5886],
+        ["かまた", 46.5, 139.7157, 35.5623], ["かわさき", 51.6, 139.6975, 35.5314],
+        ["つるみ", 58.6, 139.6763, 35.5084], ["しんこやす", 62.2, 139.6548, 35.4872],
+        ["ひがしかながわ", 65.2, 139.6333, 35.4775], ["よこはま", 68.6, 139.6220, 35.4662],
+        ["さくらぎちょう", 70.5, 139.6309, 35.4510], ["かんない", 71.4, 139.6368, 35.4447],
+        ["いしかわちょう", 72.3, 139.6429, 35.4385], ["やまて", 73.7, 139.6466, 35.4271],
+        ["ねぎし", 75.0, 139.6362, 35.4160], ["いそご", 77.1, 139.6180, 35.3993],
+        ["しんすぎた", 79.2, 139.6189, 35.3864], ["ようこうだい", 81.5, 139.5958, 35.3786],
+        ["こうなんだい", 83.3, 139.5766, 35.3752], ["ほんごうだい", 85.9, 139.5503, 35.3677],
+        ["おおふな", 89.2, 139.5311, 35.3535],
+      ],
+    },
+    {
+      key: "keiyo", name: "けいようせん", color: "#c9242f", trainKey: "keiyo",
+      speed: 100, cars: 10, crossing: false, icon: "🏰",
+      p: [
+        ["とうきょう", 0, 139.7671, 35.6812], ["はっちょうぼり", 1.2, 139.7776, 35.6746],
+        ["えっちゅうじま", 2.8, 139.7928, 35.6680], ["しおみ", 5.4, 139.8173, 35.6587],
+        ["しんきば", 7.4, 139.8269, 35.6456], ["かさいりんかいこうえん", 10.6, 139.8608, 35.6440],
+        ["まいはま", 12.7, 139.8849, 35.6359], ["しんうらやす", 16.1, 139.9126, 35.6497],
+        ["いちかわしおはま", 18.2, 139.9240, 35.6650], ["ふたまたしんまち", 22.6, 139.9595, 35.6900],
+        ["みなみふなばし", 26.0, 139.9970, 35.6814], ["しんならしの", 28.7, 140.0267, 35.6583],
+        ["かいひんまくはり", 31.7, 140.0587, 35.6486], ["けみがわはま", 33.5, 140.0735, 35.6372],
+        ["いなげかいがん", 35.3, 140.0905, 35.6280], ["ちばみなと", 38.5, 140.1095, 35.6067],
+        ["そが", 43.0, 140.1307, 35.5815],
+      ],
+    },
+    {
+      key: "yurikamome", name: "ゆりかもめ", color: "#6ec1e4", trainKey: "yurikamome",
+      speed: 60, cars: 6, crossing: false, icon: "🌉",
+      p: [
+        ["しんばし", 0, 139.7586, 35.6663], ["しおどめ", 0.4, 139.7609, 35.6644],
+        ["たけしば", 1.3, 139.7615, 35.6540], ["ひので", 1.8, 139.7565, 35.6495],
+        ["しばうらふとう", 2.5, 139.7530, 35.6420], ["おだいばかいひんこうえん", 4.0, 139.7780, 35.6295],
+        ["だいば", 4.5, 139.7715, 35.6255], ["ふねのかがくかん", 5.2, 139.7730, 35.6195],
+        ["テレコムセンター", 6.0, 139.7795, 35.6270], ["あおみ", 6.8, 139.7790, 35.6355],
+        ["こくさいてんじじょうせいもん", 7.6, 139.7915, 35.6300], ["ありあけ", 8.2, 139.7930, 35.6355],
+        ["ありあけテニスのもり", 8.9, 139.7900, 35.6410], ["いちばまえ", 9.7, 139.7850, 35.6455],
+        ["しんとよす", 10.4, 139.7905, 35.6485], ["とよす", 11.1, 139.7958, 35.6553],
+      ],
+    },
+    {
+      key: "rinkai", name: "りんかいせん", color: "#00418e", trainKey: "rinkai",
+      speed: 90, cars: 10, crossing: false, icon: "🌊",
+      p: [
+        ["おおさき", 0, 139.7284, 35.6197], ["おおいまち", 1.6, 139.7347, 35.6065],
+        ["しながわシーサイド", 2.7, 139.7495, 35.6095], ["てんのうずアイル", 3.5, 139.7508, 35.6228],
+        ["とうきょうテレポート", 5.2, 139.7788, 35.6275], ["こくさいてんじじょう", 7.8, 139.7918, 35.6300],
+        ["しののめ", 9.4, 139.8025, 35.6410], ["しんきば", 12.2, 139.8269, 35.6456],
+      ],
+    },
+  ];
+
+  for (const item of sources) {
+    const stations = item.p.slice(1).map(([name, km]) => ({ name, km }));
+    stations.push({ name: item.p[0][0], km: 0 });
+    data.routes[item.key] = {
+      name: item.name,
+      start: item.p[0][0],
+      startKm: 0,
+      supportsExpress: false,
+      allowCrossings: Boolean(item.crossing),
+      stations,
+      expressStops: new Set(),
+      cityStations: new Set(item.p.map(([name]) => name)),
+    };
+    data.maps[item.key] = { name: item.name, color: item.color, points: item.p };
+    data.metadata.push({
+      key: item.key,
+      name: item.name,
+      color: item.color,
+      trainKey: item.trainKey,
+      kind: "rail",
+      icon: item.icon,
+      cars: item.cars,
+      speedKmh: item.speed,
+    });
+  }
+})();
+
+// 東京湾フェリー接続の在来線（久里浜側・金谷側）
+(() => {
+  "use strict";
+  const data = window.TRAIN_GO_ROUTE_DATA;
+  Object.assign(data.trains, {
+    yokosuka: {
+      name: "みずいろのでんしゃ", kind: "commuter", body: "#e8ecef", stripe: "#0072bc",
+      face: "#0072bc", edge: "#aeb8be", callName: "みずいろのでんしゃ",
+    },
+    uchibo: {
+      name: "あおのでんしゃ", kind: "commuter", body: "#e8ecef", stripe: "#00a7e3",
+      face: "#00a7e3", edge: "#aeb8be", callName: "あおのでんしゃ",
+    },
+  });
+  const sources = [
+    {
+      key: "yokosuka", name: "よこすかせん", color: "#0072bc", trainKey: "yokosuka",
+      speed: 95, cars: 11, crossing: true, icon: "⚓",
+      p: [
+        ["とうきょう", 0, 139.7671, 35.6812], ["しんばし", 1.9, 139.7586, 35.6663],
+        ["しながわ", 6.8, 139.7388, 35.6285], ["おおふな", 31.7, 139.5311, 35.3535],
+        ["よこすか", 68.0, 139.6550, 35.2830], ["くりはま", 73.2, 139.7065, 35.2310],
+      ],
+    },
+    {
+      key: "uchibo", name: "うちぼうせん", color: "#00a7e3", trainKey: "uchibo",
+      speed: 90, cars: 10, crossing: true, icon: "🐚",
+      p: [
+        ["ちば", 0, 140.1133, 35.6134], ["そが", 3.8, 140.1307, 35.5815],
+        ["きさらづ", 31.3, 139.9240, 35.3750], ["きमितつ", 42.6, 139.9020, 35.3300],
+        ["はまかなや", 70.0, 139.8250, 35.1700],
+      ],
+    },
+  ];
+  for (const item of sources) {
+    const stations = item.p.slice(1).map(([name, km]) => ({ name, km }));
+    stations.push({ name: item.p[0][0], km: 0 });
+    data.routes[item.key] = {
+      name: item.name, start: item.p[0][0], startKm: 0, supportsExpress: false,
+      allowCrossings: Boolean(item.crossing), stations,
+      expressStops: new Set(), cityStations: new Set(item.p.map(([name]) => name)),
+    };
+    data.maps[item.key] = { name: item.name, color: item.color, points: item.p };
+    data.metadata.push({
+      key: item.key, name: item.name, color: item.color, trainKey: item.trainKey,
+      kind: "rail", icon: item.icon, cars: item.cars, speedKmh: item.speed,
+    });
+  }
 })();

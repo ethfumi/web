@@ -86,9 +86,18 @@ html, body {
   text-shadow: 0 2px 0 #fff;
 }
 
-#total-distance-card {
+.total-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.6vmin;
+  width: 100%;
+}
+
+#total-distance-card,
+#total-money-card {
   display: grid;
-  min-width: min(46vw, 280px);
+  min-width: min(40vw, 240px);
   justify-items: center;
   padding: 0.7vmin 3vmin 0.9vmin;
   border: 0.35vmin solid rgba(42, 92, 170, 0.16);
@@ -99,34 +108,52 @@ html, body {
   line-height: 1;
 }
 
+#total-money-card {
+  border-color: rgba(201, 148, 36, 0.28);
+  background: rgba(255, 250, 235, 0.9);
+  box-shadow: 0 0.65vmin 0 rgba(176, 132, 40, 0.18);
+}
+
 .total-distance-label {
   color: #658098;
   font-size: clamp(10px, 1.7vmin, 15px);
   font-weight: 700;
 }
 
-#total-distance-card > div {
+#total-distance-card > div,
+#total-money-card > div {
   display: flex;
   align-items: baseline;
   gap: 0.6vmin;
 }
 
-#total-miles-value {
+#total-miles-value,
+#total-money-value {
   color: #2a5caa;
   font-size: clamp(28px, 5.2vmin, 48px);
   font-variant-numeric: tabular-nums;
 }
 
-#total-distance-card > div span {
+#total-money-value {
+  color: #c07a10;
+}
+
+#total-distance-card > div span,
+#total-money-card > div span {
   font-size: clamp(14px, 2.5vmin, 23px);
   font-weight: 800;
 }
 
-#total-km-value {
+#total-km-value,
+#session-money-value {
   margin-top: 0.35vmin;
   color: rgba(69, 99, 123, 0.62);
   font-size: clamp(10px, 1.65vmin, 15px);
   font-variant-numeric: tabular-nums;
+}
+
+#session-money-value {
+  color: rgba(160, 110, 20, 0.75);
 }
 
 .train-select-title {
@@ -209,7 +236,8 @@ html, body {
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
 }
 
-.train-btn svg {
+.train-btn svg,
+.train-btn canvas {
   width: 68%;
   height: auto;
   flex-shrink: 0;
@@ -331,7 +359,8 @@ html, body {
   #select-screen { gap: 1.3vmin; padding-top: max(1.5vmin, env(safe-area-inset-top)); }
 
   .train-btn { padding: 0.8vmin 2vmin; }
-  .train-btn svg { width: 78%; }
+  .train-btn svg,
+  .train-btn canvas { width: 78%; }
 }
 
 @media (max-width: 560px) {
@@ -412,7 +441,8 @@ html, body {
   justify-content: center;
 }
 
-.quick-train-art svg {
+.quick-train-art svg,
+.quick-train-art canvas {
   width: 100%;
   height: auto;
 }
@@ -520,6 +550,26 @@ html, body {
   opacity: 0.78;
 }
 
+#money-meter {
+  width: 100%;
+  margin-top: 0.7vmin;
+  padding-top: 0.55vmin;
+  border-top: 0.2vmin solid rgba(255, 255, 255, 0.28);
+  color: rgba(255, 236, 190, 0.82);
+  font-size: 1.55vmin;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+#run-money-value {
+  font-size: 1.65vmin;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 220, 130, 0.95);
+}
+
 #remaining-meter {
   display: grid;
   width: 100%;
@@ -571,6 +621,14 @@ html, body {
 
 .remaining-values > small {
   opacity: 0.75;
+}
+
+.remaining-eta {
+  color: #d7f0ff;
+  opacity: 0.95 !important;
+  font-size: 1.55vmin !important;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
 }
 
 #drive-panel button {
@@ -917,15 +975,23 @@ html, body {
   padding: 0;
   font-size: clamp(20px, 3.5vmin, 34px);
 }
-/* 空路では鉄道専用の連結・ドア・ライト操作を隠す。 */
+/* 空路・海路では鉄道専用の連結・ドア・ライト操作を隠す（乗客パネルは表示）。 */
 body.air-mode #run-ui,
 body.air-mode #btn-station-doors,
 body.air-mode #btn-headlight,
-body.air-mode #onboard-panel {
+body.sea-mode #run-ui,
+body.sea-mode #btn-station-doors,
+body.sea-mode #btn-headlight {
   display: none !important;
 }
 
-body.air-mode .train-btn[data-train="airplane"] svg {
+body.air-mode #station-passengers,
+body.sea-mode #station-passengers {
+  display: flex !important;
+}
+
+body.air-mode .train-btn[data-train="airplane"] svg,
+body.sea-mode .train-btn[data-train="ferry"] svg {
   width: min(48vmin, 300px);
 }
 
