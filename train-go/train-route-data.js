@@ -39,6 +39,29 @@
     maps[item.key] = {name:item.name,color:item.color,points:item.points};
     metadata.push({key:item.key,name:item.name,color:item.color,trainKey:item.key});
   }
+
+  // 常設の特別塗装がある路線だけ、色ちがいの編成を用意する。
+  // weight は実車の編成数に合わせた出やすさで、1〜2編成しかない特別塗装はめったに来ない。
+  // 色は公式に数値が公開されていないため、実車の見た目に寄せたゲーム用の近似色。
+  Object.assign(trains.keikyu, {
+    callName:"あかいけいきゅう", variantWeight:70,
+    variants:[
+      // KEIKYU BLUE SKY TRAIN。600形・2100形の2編成。
+      {name:"あお", weight:2, body:"#1b6fc4", stripe:"#ffffff", face:"#1b6fc4",
+        callName:"あおいけいきゅう"},
+      // KEIKYU YELLOW HAPPY TRAIN。新1000形の1編成。
+      {name:"きいろ", weight:1, body:"#f5c518", stripe:"#ffffff", face:"#f5c518",
+        callName:"きいろいけいきゅう"},
+    ],
+  });
+  Object.assign(trains.ginza, {
+    variantWeight:38,
+    variants:[
+      // 1000系特別仕様編成。40編成のうち2編成だけの復刻デザイン。
+      {name:"レトロ", weight:2, body:"#e8a020", stripe:"#8c5a12", stripe2:"#c8901c",
+        face:"#e8a020", edge:"#a06c14", callName:"レトロなぎんざせん"},
+    ],
+  });
   window.TRAIN_GO_ROUTE_DATA = {trains,routes,maps,metadata};
 })();
 
@@ -102,6 +125,12 @@
       name: "あかとあおのでんしゃ", kind: "commuter", profile: "private",
       body: "#e8ecef", stripe: "#d31359", stripe2: "#174f9a",
       face: "#d31359", edge: "#aeb8be", callName: "あかとあおのでんしゃ",
+      // 高尾山トレインは 8000系の1編成だけの特別塗装。めったに来ない。
+      variantWeight: 40,
+      variants: [
+        { name: "たかおさん", weight: 1, body: "#dfe7d8", stripe: "#8cc63f", stripe2: "#4f8f2a",
+          face: "#8cc63f", callName: "たかおさんトレイン" },
+      ],
     },
   });
   Object.assign(data.routes, {

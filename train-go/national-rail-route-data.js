@@ -16,7 +16,17 @@
     tobuSkytree: {name:"あおとオレンジのでんしゃ",kind:"commuter",profile:"private",body:"#edf1f2",stripe:"#0067c0",stripe2:"#f58220",face:"#0067c0",edge:"#aeb8be",callName:"あおとオレンジのでんしゃ"},
     takasaki: {name:"オレンジとみどりのでんしゃ",kind:"commuter",body:"#e8ecef",stripe:"#f28c28",stripe2:"#43a36b",face:"#f28c28",edge:"#aeb8be",callName:"オレンジとみどりのでんしゃ"},
     // ニューシャトルは鉄輪ではなくゴムタイヤの新交通システム。kind を分けて車体も小さく描く。
-    newShuttle: {name:"ニューシャトル",kind:"newtransit",body:"#f2f6f7",stripe:"#00b0c7",stripe2:"#1d3f8c",face:"#00b0c7",edge:"#a8b4ba",callName:"ニューシャトル"},
+    // 2020系は6編成すべて色が違う（宝石にちなんだ愛称が付く）ため、走らせるたびに
+    // どの色が来るか変わるようにしてある。色は愛称に合わせたゲーム用の近似色。
+    newShuttle: {name:"ニューシャトル",kind:"newtransit",body:"#f2f6f7",stripe:"#00b0c7",stripe2:"#1d3f8c",face:"#00b0c7",edge:"#a8b4ba",callName:"みずいろのニューシャトル",
+      variants:[
+        {name:"みどり",stripe:"#2eb872",stripe2:"#1b7d4b",face:"#2eb872",callName:"みどりのニューシャトル"},
+        {name:"だいだい",stripe:"#f0902b",stripe2:"#c26a12",face:"#f0902b",callName:"オレンジのニューシャトル"},
+        {name:"あか",stripe:"#d62b45",stripe2:"#9c1a2e",face:"#d62b45",callName:"あかいニューシャトル"},
+        {name:"きいろ",stripe:"#f2c53d",stripe2:"#c99a19",face:"#f2c53d",callName:"きいろのニューシャトル"},
+        {name:"むらさき",stripe:"#8a5fb0",stripe2:"#5d3b7d",face:"#8a5fb0",callName:"むらさきのニューシャトル"},
+        {name:"にじいろ",stripe:"#2f6fc4",stripe2:"#e0573e",face:"#2f6fc4",callName:"にじいろのニューシャトル"},
+      ]},
     // ゆいレール（沖縄都市モノレール）もゴムタイヤ走行のモノレール。newtransit として小さく描く。
     yuiRail: {name:"ゆいレール",kind:"newtransit",body:"#f4f6f7",stripe:"#e0619b",stripe2:"#c8ced2",face:"#e0619b",edge:"#a8b4ba",callName:"ゆいレール"},
   });

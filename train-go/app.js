@@ -368,6 +368,8 @@
       cars:cars || (key === "osakaLoop" ? 8 : 10),
       speedKmh:speedKmh || (key === "odakyu" || key === "toyoko" || key === "keikyu" ? 110 : 90),
       body:type.body, stripe:type.stripe, stripe2:type.stripe2,
+      // 色ちがいのある形式は、すれ違う編成の色も1本ごとに変える。
+      sourceKey:trainKey || key,
     };
   }
 
@@ -1412,9 +1414,10 @@
     mapMode = "scenery";
     resetMapCamera();
     activeRoute = routeForGameStart();
-    trainKey = key;
-    train = TRAINS[key];
-    carTypes = [key];
+    // 編成ごとに色が違う形式は、走らせるたびにどの編成が来るかが変わる。
+    trainKey = pickTrainVariant(key);
+    train = TRAINS[trainKey];
+    carTypes = [trainKey];
     cars = 1;
     speed = 0;
     distance = 0;
@@ -2182,7 +2185,7 @@
   // 種別ごとの車体プロファイル。路線が増えても見分けられるよう、
   // 車体の大きさ・前面フォルム・扉数・屋根上機器・足まわりを変えて描き分ける。
   const CAR_PROFILES = {
-    shinkansen: {widthRatio:1, heightRatio:1, cabRatio:0.42, doors:0,
+    shinkansen: {widthRatio:1, heightRatio:1, cabRatio:0.42, doors:0, windowCount:5,
       face:"nose", cab:"nose", band:"swoosh", roof:"smooth", pantographEvery:3,
       wheels:"rail", windowTop:0.22, windowHeight:0.17},
     // JR の通勤電車。角ばった切妻の前面。
@@ -2201,20 +2204,54 @@
     subwaySmall: {widthRatio:0.94, heightRatio:0.82, cabRatio:0.22, doors:2,
       face:"round", cab:"box", band:"waist", roof:"cooler", pantographEvery:2,
       wheels:"rail", windowTop:0.2, windowHeight:0.22},
+    // 在来線サイズの車体で走るミニ新幹線(E3系つばさ・E6系こまち)。
+    // フル規格と連結したときに、ひと回り小さいことが分かるようにする。
+    miniShinkansen: {widthRatio:1, heightRatio:0.85, cabRatio:0.4, doors:0, windowCount:4,
+      face:"nose", cab:"nose", band:"swoosh", roof:"smooth", pantographEvery:3,
+      wheels:"rail", windowTop:0.22, windowHeight:0.18},
     // 新交通システムとモノレール。小さく低い車体、ゴムタイヤ、パンタグラフなし。
     newtransit: {widthRatio:0.9, heightRatio:0.72, cabRatio:0.26, doors:1,
       face:"round", cab:"compact", band:"low", roof:"flat", pantographEvery:0,
       wheels:"tire", windowTop:0.18, windowHeight:0.26},
   };
 
-  // 新幹線のノーズ長（車体幅に対する比）。E5/E6系は長く、N700系は中くらい。
-  const NOSE_RATIOS = {
-    hayabusa: 0.62, yamabiko: 0.62, komachi: 0.58,
-    nozomi: 0.5, hikari: 0.5, kodama: 0.5, doctoryellow: 0.5,
-    blueGoldShinkansen: 0.55,
+  // 新幹線の先頭形状。車種ごとに実車の顔つきへ寄せる。
+  //   len      ノーズの長さ（車体幅に対する比）
+  //   tipY     鼻先が来る高さ（車体高に対する比。小さいほど高い位置で尖る）
+  //   shoulder 屋根が水平に伸びる長さ。大きいほど平らに伸びてから下がる
+  //   bulge    先端のふくらみ。大きいほどカモノハシのように丸く前へ張り出す
+  const DEFAULT_NOSE = {len:0.5, tipY:0.78, shoulder:0.32, bulge:0.28};
+  const NOSE_SHAPES = {
+    // N700系。低い位置まで下りてから前へ張り出すエアロ形状。
+    nozomi: {len:0.46, tipY:0.86, shoulder:0.22, bulge:0.46},
+    hikari: {len:0.46, tipY:0.86, shoulder:0.22, bulge:0.46},
+    kodama: {len:0.46, tipY:0.86, shoulder:0.22, bulge:0.46},
+    // 923形ドクターイエロー。700系ゆずりのカモノハシ。
+    doctoryellow: {len:0.46, tipY:0.88, shoulder:0.14, bulge:0.56},
+    // E5系。15m級の超ロングノーズで、水平に伸びてから細く尖る。
+    hayabusa: {len:0.7, tipY:0.7, shoulder:0.58, bulge:0.08},
+    yamabiko: {len:0.7, tipY:0.7, shoulder:0.58, bulge:0.08},
+    // E6系。E5系よりわずかに短い。
+    komachi: {len:0.62, tipY:0.72, shoulder:0.5, bulge:0.12},
+    // E7/W7系。中くらいの長さで先端は丸め。
+    blueGoldShinkansen: {len:0.5, tipY:0.76, shoulder:0.36, bulge:0.22},
+    // 800系。短くころんとした九州の顔。
+    redShinkansen: {len:0.3, tipY:0.72, shoulder:0.1, bulge:0.5},
+    // N700S。N700系に近いが先端はやや絞られている。
+    orangeShinkansen: {len:0.5, tipY:0.84, shoulder:0.26, bulge:0.38},
+    // E3系つばさ。ミニ新幹線らしい短いノーズ。
+    purpleShinkansen: {len:0.38, tipY:0.76, shoulder:0.26, bulge:0.24},
   };
-  for (const [key, ratio] of Object.entries(NOSE_RATIOS)) {
-    if (TRAINS[key]) TRAINS[key].noseRatio = ratio;
+  for (const [key, nose] of Object.entries(NOSE_SHAPES)) {
+    if (TRAINS[key]) TRAINS[key].nose = nose;
+  }
+  // ミニ新幹線は在来線サイズの車体で走る。
+  for (const key of ["komachi", "purpleShinkansen"]) {
+    if (TRAINS[key]) TRAINS[key].profile = "miniShinkansen";
+  }
+
+  function carNose(carTrain) {
+    return carTrain.nose || DEFAULT_NOSE;
   }
 
   function carProfile(carTrain) {
@@ -2223,6 +2260,34 @@
     return CAR_PROFILES[carTrain.profile]
       || CAR_PROFILES[carTrain.kind]
       || CAR_PROFILES.shinkansen;
+  }
+
+  // 編成ごとに色が違う形式は、色ちがいを "キー#色名" として TRAINS へ展開してある。
+  // 選択画面には基本の色だけを並べ、実際に走らせるときにどの編成が来るかを決める。
+  // weight は実車の編成数に合わせた出やすさ。特別塗装が1〜2編成しかない路線では、
+  // その色がめったに来ないようにする。
+  const TRAIN_VARIANTS = new Map();
+  for (const [key, type] of Object.entries(TRAINS)) {
+    if (!type.variants) continue;
+    const entries = [{key, weight: type.variantWeight ?? 1}];
+    for (const variant of type.variants) {
+      const variantKey = `${key}#${variant.name}`;
+      TRAINS[variantKey] = {...type, ...variant, variants: undefined, variantOf: key};
+      entries.push({key: variantKey, weight: variant.weight ?? 1});
+    }
+    TRAIN_VARIANTS.set(key, entries);
+  }
+
+  function pickTrainVariant(key) {
+    const entries = TRAIN_VARIANTS.get(key);
+    if (!entries) return key;
+    const total = entries.reduce((sum, entry) => sum + entry.weight, 0);
+    let roll = Math.random() * total;
+    for (const entry of entries) {
+      roll -= entry.weight;
+      if (roll < 0) return entry.key;
+    }
+    return key;
   }
 
   // 「どの でんしゃに のる？」の絵は、走行画面と同じ drawRailCarOn で描く。
@@ -4406,12 +4471,22 @@
     nextOpposingTrainIn = (minimum + Math.random() * variation) * (initial ? 0.7 : 1);
   }
 
+  // すれ違う列車も、色ちがいのある形式なら1本ごとに違う編成が来る。
+  function opposingTypeWithVariant(type) {
+    if (!type.sourceKey) return type;
+    const variantKey = pickTrainVariant(type.sourceKey);
+    const variant = TRAINS[variantKey];
+    if (!variant || variantKey === type.sourceKey) return type;
+    return {...type, name:variant.callName || variant.name,
+      body:variant.body, stripe:variant.stripe, stripe2:variant.stripe2};
+  }
+
   function spawnOpposingTrain(typeIndex = null) {
     const pool = opposingTrainPoolForSegment();
     const index = typeIndex === null
       ? Math.floor(Math.random() * pool.length)
       : typeIndex % pool.length;
-    const type = pool[index];
+    const type = opposingTypeWithVariant(pool[index]);
     const { x0, x1 } = viewRange();
     const cars = Array.isArray(type.cars)
       ? type.cars[Math.floor(Math.random() * type.cars.length)]
@@ -5247,13 +5322,13 @@ function drawAirports() {
   function drawRailCarOn(g, carTrain, profile, left, top, bodyW, bodyH, opts) {
     const {isHead = false, isTail = false, index = 0,
       wheelY = null, wheelSpin = 0, night = false} = opts || {};
-    const noseLen = bodyW * (carTrain.noseRatio || 0.5);
+    const nose = carNose(carTrain);
 
     // 屋根上機器を先に描き、車体で足元が隠れるようにする。
     drawCarRoofOn(g, carTrain, profile, left, top, bodyW, bodyH, index);
 
     g.save();
-    traceCarBodyOn(g, left, top, bodyW, bodyH, profile, isHead, isTail, noseLen);
+    traceCarBodyOn(g, left, top, bodyW, bodyH, profile, isHead, isTail, nose);
     g.fillStyle = carTrain.body;
     g.fill();
     // 前面や帯が車体からはみ出さないよう、内側は車体の形で切り抜いて描く。
@@ -5263,13 +5338,13 @@ function drawAirports() {
       g.fillStyle = carTrain.upper;
       g.fillRect(left, top, bodyW, bodyH * 0.47);
     }
-    drawCarBandOn(g, carTrain, profile, left, top, bodyW, bodyH, isHead, isTail, noseLen);
+    drawCarBandOn(g, carTrain, profile, left, top, bodyW, bodyH, isHead, isTail, nose);
     drawCabFaceOn(g, carTrain, profile, left, top, bodyW, bodyH, isHead, isTail);
     const cabW = bodyW * profile.cabRatio;
     drawCarSideOn(g, profile, left, top, bodyW, bodyH,
       isTail ? cabW : bodyW * 0.06, isHead ? cabW : bodyW * 0.06, night);
     g.restore();
-    traceCarBodyOn(g, left, top, bodyW, bodyH, profile, isHead, isTail, noseLen);
+    traceCarBodyOn(g, left, top, bodyW, bodyH, profile, isHead, isTail, nose);
     g.strokeStyle = carTrain.edge || "#aeb8be";
     g.lineWidth = 2;
     g.stroke();
@@ -5288,33 +5363,29 @@ function drawAirports() {
   }
 
   // 車体の輪郭。前面の形（切妻・傾斜・丸型・ロングノーズ）がいちばんの識別点になる。
-  function traceCarBodyOn(g, left, top, w, h, profile, isHead, isTail, noseLen) {
+  function traceCarBodyOn(g, left, top, w, h, profile, isHead, isTail, nose) {
     const right = left + w;
     const bottom = top + h;
     const rB = Math.max(3, h * 0.12);
     if (profile.face === "nose" && (isHead || isTail)) {
+      // 先頭は右向き、後尾は左向き。dir で左右を反転させ、同じ式で両方描く。
+      const dir = isHead ? 1 : -1;
+      const frontX = isHead ? right : left;
+      const backX = isHead ? left : right;
+      const len = w * nose.len;
+      const tip = top + h * nose.tipY;
       g.beginPath();
-      if (isHead) {
-        g.moveTo(left, top + rB);
-        g.quadraticCurveTo(left, top, left + rB, top);
-        g.lineTo(right - noseLen, top);
-        g.bezierCurveTo(right - noseLen * 0.5, top + h * 0.04,
-          right - noseLen * 0.28, top + h * 0.38, right - noseLen * 0.06, top + h * 0.68);
-        g.quadraticCurveTo(right, top + h * 0.82, right, bottom - 5);
-        g.quadraticCurveTo(right, bottom, right - 8, bottom);
-        g.lineTo(left + rB, bottom);
-        g.quadraticCurveTo(left, bottom, left, bottom - rB);
-      } else {
-        g.moveTo(left, bottom - 5);
-        g.quadraticCurveTo(left, top + h * 0.82, left + noseLen * 0.06, top + h * 0.68);
-        g.bezierCurveTo(left + noseLen * 0.28, top + h * 0.38,
-          left + noseLen * 0.5, top + h * 0.04, left + noseLen, top);
-        g.lineTo(right - rB, top);
-        g.quadraticCurveTo(right, top, right, top + rB);
-        g.lineTo(right, bottom - rB);
-        g.quadraticCurveTo(right, bottom, right - rB, bottom);
-        g.lineTo(left + 8, bottom);
-      }
+      g.moveTo(backX, top + rB);
+      g.quadraticCurveTo(backX, top, backX + dir * rB, top);
+      g.lineTo(frontX - dir * len, top);
+      g.bezierCurveTo(
+        frontX - dir * len * (1 - nose.shoulder), top + h * 0.02,
+        frontX - dir * len * nose.bulge, top + h * nose.tipY * 0.55,
+        frontX, tip);
+      g.quadraticCurveTo(frontX, top + h * (nose.tipY + (1 - nose.tipY) * 0.55), frontX, bottom - 4);
+      g.quadraticCurveTo(frontX, bottom, frontX - dir * 8, bottom);
+      g.lineTo(backX + dir * rB, bottom);
+      g.quadraticCurveTo(backX, bottom, backX, bottom - rB);
       g.closePath();
       return;
     }
@@ -5352,7 +5423,7 @@ function drawAirports() {
   }
 
   // 帯の位置。通勤・地下鉄・私鉄は腰帯、新幹線は前面へ回り込むスウォッシュ、新交通は窓下と足元。
-  function drawCarBandOn(g, carTrain, profile, left, top, bodyW, bodyH, isHead, isTail, noseLen) {
+  function drawCarBandOn(g, carTrain, profile, left, top, bodyW, bodyH, isHead, isTail, nose) {
     const right = left + bodyW;
     g.fillStyle = carTrain.stripe;
     if (profile.band === "waist") {
@@ -5372,13 +5443,15 @@ function drawAirports() {
       return;
     }
     if (isHead || isTail) {
+      // ノーズの傾斜に沿って前へ回り込む帯。長い鼻ほど帯も長く伸びる。
       const dir = isHead ? 1 : -1;
       const frontX = isHead ? right : left;
+      const len = bodyW * nose.len;
       g.beginPath();
       g.moveTo(frontX - dir * bodyW, top + bodyH * 0.45);
-      g.lineTo(frontX - dir * noseLen * 0.85, top + bodyH * 0.42);
-      g.lineTo(frontX - dir * noseLen * 0.06, top + bodyH * 0.76);
-      g.lineTo(frontX - dir * noseLen * 0.06, top + bodyH * 0.9);
+      g.lineTo(frontX - dir * len * 0.85, top + bodyH * 0.42);
+      g.lineTo(frontX - dir * len * 0.06, top + bodyH * (nose.tipY + 0.04));
+      g.lineTo(frontX - dir * len * 0.06, top + bodyH * (nose.tipY + 0.18));
       g.lineTo(frontX - dir * bodyW, top + bodyH * 0.62);
       g.closePath();
       g.fill();
@@ -5397,6 +5470,24 @@ function drawAirports() {
     const doorW = Math.max(4, bodyW * 0.1);
     const bounds = [start];
     const doorCenters = [];
+
+    // 新幹線は客用ドアを描かないかわりに、小さな窓を等間隔に並べる。
+    if (profile.doors === 0) {
+      g.save();
+      g.fillStyle = night ? "#ffe58a" : "#333";
+      if (night) {
+        g.shadowColor = "rgba(255, 221, 112, 0.9)";
+        g.shadowBlur = 8;
+      }
+      const count = profile.windowCount || 5;
+      const pitch = usable / count;
+      for (let i = 0; i < count; i++) {
+        roundRectOn(g, start + pitch * (i + 0.18), winTop, pitch * 0.64, winH, 2);
+        g.fill();
+      }
+      g.restore();
+      return;
+    }
 
     if (profile.doors > 0) {
       g.save();
@@ -5479,20 +5570,22 @@ function drawAirports() {
       g.fill();
     } else {
       // 新幹線はノーズの傾斜に沿った運転台窓と、鼻先のライト。
-      const noseLen = bodyW * (carTrain.noseRatio || 0.5);
+      const nose = carNose(carTrain);
+      const len = bodyW * nose.len;
       const dir = isHead ? 1 : -1;
-      const baseX = isHead ? right - noseLen * 0.6 : left + noseLen * 0.6;
+      const frontX = isHead ? right : left;
+      const baseX = frontX - dir * len * 0.62;
       g.fillStyle = "#293947";
       g.beginPath();
       g.moveTo(baseX, top + bodyH * 0.14);
-      g.lineTo(baseX + dir * noseLen * 0.26, top + bodyH * 0.34);
-      g.lineTo(baseX + dir * noseLen * 0.2, top + bodyH * 0.5);
-      g.lineTo(baseX - dir * noseLen * 0.06, top + bodyH * 0.3);
+      g.lineTo(baseX + dir * len * 0.28, top + bodyH * 0.34);
+      g.lineTo(baseX + dir * len * 0.22, top + bodyH * 0.5);
+      g.lineTo(baseX - dir * len * 0.06, top + bodyH * 0.3);
       g.closePath();
       g.fill();
       g.fillStyle = "#ffeeb0";
       g.beginPath();
-      g.arc(isHead ? right - bodyW * 0.04 : left + bodyW * 0.04, top + bodyH * 0.82, lightR * 0.9, 0, Math.PI * 2);
+      g.arc(frontX - dir * bodyW * 0.03, top + bodyH * (nose.tipY + 0.1), lightR * 0.9, 0, Math.PI * 2);
       g.fill();
     }
     g.restore();
@@ -5567,18 +5660,21 @@ function drawAirports() {
       ? noseX + komachiGap
       : worldScreenOffset(komachiStationX) + noseX + komachiGap;
     const bob = state === "running" ? Math.sin(distance * 0.05 + 1) * 1.5 : 0;
-    const top = y - carH - 10 + bob;
-
+    // こまちはミニ新幹線なので、はやぶさより車体が小さい。床の高さはそろえる。
     const profile = carProfile(TRAINS.komachi);
+    const bodyW = carW * profile.widthRatio;
+    const bodyH = carH * profile.heightRatio;
+    const top = y - bodyH - 10 + bob;
+
     for (let i = 0; i < 2; i++) {
       const left = connectionX + i * (carW + gap);
       // i=0 は緑の新幹線側を向く連結用の先頭車、i=1 は編成の外側を向く先頭車。
       // 本体と同じ関数で描き、ノーズの形と屋根上をそろえる。
       if (i === 0) {
         ctx.fillStyle = "#666";
-        ctx.fillRect(left + carW, top + carH * 0.6, gap, 6);
+        ctx.fillRect(left + bodyW, y - 10 - carH * 0.3 - 3, carW + gap - bodyW, 6);
       }
-      drawRailCarOn(ctx, TRAINS.komachi, profile, left, top, carW, carH, {
+      drawRailCarOn(ctx, TRAINS.komachi, profile, left, top, bodyW, bodyH, {
         isHead: i === 1,
         isTail: i === 0,
         index: i,
@@ -5586,7 +5682,7 @@ function drawAirports() {
         wheelSpin: wheelAngle,
         night: timeOfDay === "night",
       });
-      drawCarNumber(left + carW * 0.52, top + carH * 0.72, 2 - i, carH);
+      drawCarNumber(left + bodyW * 0.52, top + bodyH * 0.72, 2 - i, bodyH);
     }
   }
 
