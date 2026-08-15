@@ -89,6 +89,7 @@
     rinkai: "jrTokyo",
     yokosuka: "jrTokyo",
     uchibo: "jrMain",
+    takasaki: "jrMain",
     osakaLoop: "jrTokyo",
     // 地下鉄
     ginza: "metro",
@@ -114,6 +115,7 @@
     keikyu: "private",
     hankyuTakarazuka: "private",
     yurikamome: "private",
+    newShuttle: "private",
     // 新幹線
     tokaido: "shinkansen",
     tohoku: "shinkansen",
