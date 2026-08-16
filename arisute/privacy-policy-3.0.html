@@ -11,6 +11,17 @@
 	<link rel="stylesheet" href="css/style2.css?2017905-0105">
 	<link rel="stylesheet" href="css/arisute.css?2017905-0105">
 	<link rel="shortcut icon" href="img/favicon.ico" type="image/vnd.microsoft.ico"/>
+	<style>
+		/* 共通の reset.css が list-style を消しているため、このページだけ行頭に点を戻す。
+		   点が無いと、箇条書きが前後の本文と地続きに見えて、どこまでが一覧か分からない。 */
+		.policy-list { margin: 0.6em 0 1.1em; }
+		.policy-list li { position: relative; padding-left: 1.2em; margin-bottom: 0.4em; }
+		.policy-list li::before { content: "・"; position: absolute; left: 0; }
+
+		/* 段落どうし・章どうしの間を空けて、目が切れ目を拾えるようにする */
+		.boardtext p { line-height: 1.75; margin-bottom: 0.55em; }
+		.boardtext p.space { margin-top: 2.2em; margin-bottom: 0.7em; }
+	</style>
 </head>
 
 <body class="background">
@@ -32,7 +43,7 @@
 					   data-en="While you are taking part in the ranking, the App sends the following information to the developer's server after each play. You can choose whether to take part at any time within the App.">
 						ランキングに参加している場合、本アプリはプレイのたびに次の情報を開発者のサーバーへ送信します。参加するかどうかは、アプリ内でいつでもお選びいただけます。
 					</p>
-					<ul>
+					<ul class="policy-list">
 						<li data-ja="プレイの記録と内容（スコア、精度、遊んだ曲や難易度など）" data-en="Your play results and how you played (such as score, accuracy, and the song and difficulty you played)">プレイの記録と内容（スコア、精度、遊んだ曲や難易度など）</li>
 						<li data-ja="国と地域（端末の設定から取得します。現在地は使用しません）" data-en="Country or region (taken from your device settings; your location is not used)">国と地域（端末の設定から取得します。現在地は使用しません）</li>
 						<li data-ja="端末内で作成した識別子と、それに対して発行される番号" data-en="An identifier created on your device, and the number issued for it">端末内で作成した識別子と、それに対して発行される番号</li>
