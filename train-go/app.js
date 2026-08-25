@@ -218,6 +218,12 @@
       "あきはばら", "しんおかちまち", "あさくさ", "みなみせんじゅ",
       "きたせんじゅ", "あおい", "ろくちょう", "つくば",
     ]),
+    jobanLocal: new Set([
+      "よよぎうえはら", "よよぎこうえん", "めいじじんぐうまえ", "おもてさんどう",
+      "のぎざか", "あかさか", "こっかいぎじどうまえ", "かすみがせき", "ひびや",
+      "にじゅうばしまえ", "おおてまち", "しんおちゃのみず", "ゆしま", "ねづ",
+      "せんだぎ", "にしにっぽり", "まちや", "きたせんじゅ", "あやせ",
+    ]),
     osakaChuo: new Set([
       "ながた", "たかいだ", "ふかえばし", "みどりばし", "もりのみや",
       "たにまちよんちょうめ", "さかいすじほんまち", "ほんまち", "あわざ",
@@ -2370,7 +2376,8 @@
     "akita", "yamagata", "joetsu", "hokuriku",
     "yamanote", "keihinTohoku", "chuo", "sobu", "tsukubaExpress",
     "saikyo", "shonanShinjuku", "uenoTokyo", "takasaki",
-    "joban", "keiyo", "yokosuka", "uchibo",
+    "joban", "jobanLocal", "musashino", "yokohama", "nambu", "sagami",
+    "keiyo", "yokosuka", "uchibo",
     "ginza", "marunouchi", "hibiya", "tozai", "chiyoda",
     "yurakucho", "hanzomon", "namboku", "fukutoshin",
     "asakusa", "mita", "shinjukuSubway", "oedo",
