@@ -237,6 +237,11 @@
   ]) {
     UNDERGROUND_STATIONS[key] = new Set(stationNamesForRoute(ROUTES[key]));
   }
+  for (const [key, route] of Object.entries(ROUTES)) {
+    if (route.undergroundStations?.length) {
+      UNDERGROUND_STATIONS[key] = new Set(route.undergroundStations);
+    }
+  }
 
   const STATION_CELEBRATIONS = {
     chuo: {
@@ -2383,6 +2388,7 @@
     "asakusa", "mita", "shinjukuSubway", "oedo",
     "keio", "inokashira", "odakyu", "toyoko", "keikyu", "tobuSkytree",
     "yurikamome", "rinkai", "newShuttle",
+    ...(window.TRAIN_GO_ROUTE_DATA?.kantoRouteKeys || []),
     "osakaLoop", "osakaChuo", "hankyuTakarazuka",
     "yuiRail",
     "airOsaka", "airHokkaido", "airOkinawa", "airFukuoka", "airKomatsu",
