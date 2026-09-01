@@ -88,9 +88,64 @@ function getUrlParams() {
 	}
 	return params;
 }
+
+// --- 表示言語(日本語 / 英語) ---------------------------------------------
+// 訳は日英の2本。?lang= が来ていればそれに従い、無ければブラウザの言語で決める。
+// アプリのプライバシーポリシーと同じ考え方で、ja 以外はすべて英語で見せる。
+var SITE_TITLE = { ja: "ありすのステージ", en: "Stage of Arisu" };
+var LANG_LABEL = { ja: "English", en: "日本語" };
+var current_lang = "ja";
+
+function render_lang(lang)
+{
+	var nodes = document.querySelectorAll('[data-' + lang + ']');
+	for (var i = 0; i < nodes.length; i++)
+	{
+		var text = nodes[i].getAttribute('data-' + lang);
+		if (text == null) continue;
+		// data-* にはリンクや <br /> をエンティティで入れているので innerHTML で戻す
+		nodes[i].innerHTML = text;
+	}
+	document.documentElement.setAttribute('lang', lang);
+	document.title = SITE_TITLE[lang];
+	var button = document.getElementById('langToggle');
+	if (button)
+	{
+		button.textContent = LANG_LABEL[lang];
+		// ボタンの文字は「切り替え先」なので、説明も切り替え先の言語で書く
+		button.setAttribute('lang', lang === 'ja' ? 'en' : 'ja');
+		button.setAttribute('aria-label', lang === 'ja' ? 'Switch to English' : '日本語に切り替える');
+	}
+	current_lang = lang;
+}
+
+function initial_lang(params)
+{
+	var requested = (params["lang"] || '').toLowerCase();
+	if (requested !== '') return (requested === 'ja') ? 'ja' : 'en';
+	var browser = (navigator.language || 'ja').toLowerCase();
+	return (browser.indexOf('ja') === 0) ? 'ja' : 'en';
+}
+
+function setup_lang_toggle(params)
+{
+	render_lang(initial_lang(params));
+	var button = document.getElementById('langToggle');
+	if (!button) return;
+	button.addEventListener('click', function ()
+	{
+		render_lang(current_lang === 'ja' ? 'en' : 'ja');
+		// 共有したリンクでも同じ言語で開けるよう URL を書き換える
+		var query = new URLSearchParams(window.location.search);
+		query.set('lang', current_lang);
+		history.replaceState(null, '', window.location.pathname + '?' + query.toString());
+	});
+}
+
 window.onload = function()
 {
 	var params = getUrlParams();
+	setup_lang_toggle(params);
 	var target = params["tab"];
 	switch (target)
 	{
