@@ -33,6 +33,17 @@
 	<link rel="stylesheet" href="css/style2.css?2017905-0105">
 	<link rel="stylesheet" href="css/arisute.css?2017905-0105">
 	<link rel="shortcut icon" href="img/favicon.ico" type="image/vnd.microsoft.ico"/>
+	<style>
+		/* 言語切り替え。タブ列の上に小さく置く */
+		.lang-switch { text-align: right; margin: 0 0 0.4em; padding: 0 0.6em; }
+		.lang-switch button {
+			font: inherit; font-size: 0.85em; line-height: 1;
+			padding: 0.45em 0.9em; border-radius: 999px;
+			border: 1px solid #c98aa6; background: rgba(255,255,255,0.75);
+			color: #7a3f57; cursor: pointer;
+		}
+		.lang-switch button:hover { background: #fff; }
+	</style>
 </head>
 
 <body class="background">
@@ -57,41 +68,42 @@
         <div class="c92-margin c92">
         </div>
 
+		<div class="lang-switch"><button type="button" id="langToggle"></button></div>
 		<div class="tabs">
 			<button class="tab-button mobile-tab tab-select" value="リンク" onClick="toggle_mobile(); return false;">
-				iOS/Android版
+				<span data-ja="iOS/Android版" data-en="iOS / Android">iOS/Android版</span>
 			</button>
 			<button class="tab-button c92-tab" value="リンク" onClick="toggle_c92(); return false;">
-				PC版(c92)
+				<span data-ja="PC版(c92)" data-en="PC (C92)">PC版(c92)</span>
 			</button>
 			<button class="tab-button c90-tab" value="リンク" onClick="toggle_c90(); return false;">
-				PC版(c90)
+				<span data-ja="PC版(c90)" data-en="PC (C90)">PC版(c90)</span>
 			</button>
         </div>
 
 		<div class="board boardtext left board-banner c92">
             <div class="boardmargin">
-				<p class="space"><b>■概要</b></p>
+				<p class="space"><b data-ja="■概要" data-en="■Overview">■概要</b></p>
 				<ul>
-					<li>【タイトル】 ありすのステージ マカロン☆アンコール</li>
-					<li>【ジャンル】 音楽ゲーム</li>
-					<li>【配布場所】 C92 1日目(2017/8/11 金曜日) 東7ホール す27-b (<a href="https://webcatalog-free.circle.ms/Map#13320315/day=Day1/hall=e7/scale=2">会場MAP</a>)</li>
-					<li>【対応環境】 XP SP2以降 / Mac OS X 10.9以降 (<a href="https://unity3d.com/jp/unity/system-requirements">詳細</a>)</li>
-					<li>【頒布価格】 500円(DLカード配布)</li>
-                    <li>【頒布内容】 ゲーム「ありすのステージ マカロン☆アンコール」<br /> 
+					<li><span data-ja="【タイトル】" data-en="[Title]">【タイトル】</span> <span data-ja="ありすのステージ マカロン☆アンコール" data-en="Stage of Arisu: Macaron Encore">ありすのステージ マカロン☆アンコール</span></li>
+					<li><span data-ja="【ジャンル】" data-en="[Genre]">【ジャンル】</span> <span data-ja="音楽ゲーム" data-en="Music game">音楽ゲーム</span></li>
+					<li><span data-ja="【配布場所】" data-en="[Where]">【配布場所】</span> <span data-ja="C92 1日目(2017/8/11 金曜日) 東7ホール す27-b" data-en="Comiket 92, Day 1 (Fri, 11 Aug 2017), East Hall 7, su-27-b">C92 1日目(2017/8/11 金曜日) 東7ホール す27-b</span> (<a href="https://webcatalog-free.circle.ms/Map#13320315/day=Day1/hall=e7/scale=2"><span data-ja="会場MAP" data-en="Venue map">会場MAP</span></a>)</li>
+					<li><span data-ja="【対応環境】" data-en="[Requirements]">【対応環境】</span> <span data-ja="XP SP2以降 / Mac OS X 10.9以降" data-en="Windows XP SP2 or later / macOS 10.9 or later">XP SP2以降 / Mac OS X 10.9以降</span> (<a href="https://unity3d.com/jp/unity/system-requirements"><span data-ja="詳細" data-en="details">詳細</span></a>)</li>
+					<li><span data-ja="【頒布価格】" data-en="[Price]">【頒布価格】</span> <span data-ja="500円(DLカード配布)" data-en="500 yen (download card)">500円(DLカード配布)</span></li>
+                    <li><span data-ja="【頒布内容】" data-en="[Contents]">【頒布内容】</span> <span data-ja="ゲーム「ありすのステージ マカロン☆アンコール」" data-en="The game &quot;Stage of Arisu: Macaron Encore&quot;">ゲーム「ありすのステージ マカロン☆アンコール」</span><br /> 
                     <!-- ソースコードが闇だけどどうしても縦揃えたかったんです -->
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    楽曲「Nouveau Monde(ショートサイズ)」「マカロン☆ハート(ショートサイズ)」の音源</li>
+                    <span data-ja="楽曲「Nouveau Monde(ショートサイズ)」「マカロン☆ハート(ショートサイズ)」の音源" data-en="plus the audio for &quot;Nouveau Monde&quot; and &quot;Macaron Heart&quot; (short versions)">楽曲「Nouveau Monde(ショートサイズ)」「マカロン☆ハート(ショートサイズ)」の音源</span></li>
 				</ul>
 
-				<p class="space"><b>■動画</b></p>
+				<p class="space"><b data-ja="■動画" data-en="■Video">■動画</b></p>
 				<div class="center space">
                     <div class="iframe-wrapper">
 						<iframe src="https://www.youtube.com/embed/rhLz3Wu9LuI?rel=0" frameborder="0" allowfullscreen></iframe>
 					</div>
 		        </div>
 
-				<p class="space"><b>■スクリーンショット</b></p>
+				<p class="space"><b data-ja="■スクリーンショット" data-en="■Screenshots">■スクリーンショット</b></p>
 				<div class="screenshot">
 					<img src="img/scr_c92_01.jpg" alt="Screen Shot" title="タイトル画面"><br />
 					<img src="img/scr_c92_02.jpg" alt="Screen Shot" title="クルッと一回転前"><br />
@@ -101,41 +113,41 @@
                     <img src="img/scr_c92_06.jpg" alt="Screen Shot" title="ゆびさし"><br />
 				</div>
 
-				<p class="space"><b>■クレジット</b></p>
+				<p class="space"><b data-ja="■クレジット" data-en="■Credits">■クレジット</b></p>
 				<div class="paragraph">
 					<ul>
-						<li><b>企画・プログラム</b>：<a href="https://twitter.com/fumilin">ふみ</a></li>
-                        <li><b>3Dキャラ</b>：<a href="https://twitter.com/108tooya">十矢</a></li>
-						<li><b>3Dステージ</b>：ハピコ</li>
-						<li><b>3Dステージ動画</b>：<a href="https://twitter.com/yamamotion">Yamamotion</a></li>
-						<li><b>デザイン監修</b>：クク</li>
-						<li><b>UIデザイン</b>：しおじゃけ</li>
-						<li><b>BGM・SE</b>：<a href="http://nanosizemir.com/">塚越雄一朗(NanosizeMir)</a></li>
+						<li><b data-ja="企画・プログラム" data-en="Planning &amp; Programming">企画・プログラム</b>：<a href="https://twitter.com/fumilin">ふみ</a></li>
+                        <li><b data-ja="3Dキャラ" data-en="3D Character">3Dキャラ</b>：<a href="https://twitter.com/108tooya">十矢</a></li>
+						<li><b data-ja="3Dステージ" data-en="3D Stage">3Dステージ</b>：ハピコ</li>
+						<li><b data-ja="3Dステージ動画" data-en="3D Stage Video">3Dステージ動画</b>：<a href="https://twitter.com/yamamotion">Yamamotion</a></li>
+						<li><b data-ja="デザイン監修" data-en="Design Supervision">デザイン監修</b>：クク</li>
+						<li><b data-ja="UIデザイン" data-en="UI Design">UIデザイン</b>：しおじゃけ</li>
+						<li><b data-ja="BGM・SE" data-en="Music &amp; SE">BGM・SE</b>：<a href="http://nanosizemir.com/">塚越雄一朗(NanosizeMir)</a></li>
 						<li><b>VOICE</b>：<a href="http://confetto.chu.jp/">ななひら</a></li>
 						<li><b>Special Thanks</b>：プロデューサーK</li>
 						<br />
-						<li><b>・Nouveau Monde</b></li>
+						<li><b><span data-ja="・Nouveau Monde" data-en="- Nouveau Monde">・Nouveau Monde</span></b></li>
 						<div class="paragraph">
-							<li><b>歌</b>：加賀美ありす(CV:<a href="http://confetto.chu.jp/">ななひら</a>)</li>
-							<li><b>作詞・作曲・編曲</b>：<a href="http://nanosizemir.com/">塚越雄一朗(NanosizeMir)</a></li>
-	                        <li><b>モーションアクター</b>：<a href="https://twitter.com/shizuki_70 ">シヅキ</a></li>
-	                        <li><b>モーションキャプチャ協力</b>：<a href="https://twitter.com/ksilogic">k-shi</a></li>
-	                        <li><b>モーション修正</b>：久保田</li>
-                            <li><b>ジャケットキャライラスト</b>：<a href="https://twitter.com/108tooya">十矢</a></li>
-							<li><b>曲名ロゴ</b>：DELIKA</li>
+							<li><b data-ja="歌" data-en="Vocals">歌</b>：<span data-ja="加賀美ありす(CV:&lt;a href=&quot;http://confetto.chu.jp/&quot;&gt;ななひら&lt;/a&gt;)" data-en="Arisu Kagami (CV: &lt;a href=&quot;http://confetto.chu.jp/&quot;&gt;Nanahira&lt;/a&gt;)">加賀美ありす(CV:<a href="http://confetto.chu.jp/">ななひら</a>)</span></li>
+							<li><b data-ja="作詞・作曲・編曲" data-en="Lyrics, Music &amp; Arrangement">作詞・作曲・編曲</b>：<a href="http://nanosizemir.com/">塚越雄一朗(NanosizeMir)</a></li>
+	                        <li><b data-ja="モーションアクター" data-en="Motion Actor">モーションアクター</b>：<a href="https://twitter.com/shizuki_70 ">シヅキ</a></li>
+	                        <li><b data-ja="モーションキャプチャ協力" data-en="Motion Capture Support">モーションキャプチャ協力</b>：<a href="https://twitter.com/ksilogic">k-shi</a></li>
+	                        <li><b data-ja="モーション修正" data-en="Motion Retouch">モーション修正</b>：久保田</li>
+                            <li><b data-ja="ジャケットキャライラスト" data-en="Jacket Character Illustration">ジャケットキャライラスト</b>：<a href="https://twitter.com/108tooya">十矢</a></li>
+							<li><b data-ja="曲名ロゴ" data-en="Song Title Logo">曲名ロゴ</b>：DELIKA</li>
                         </div>
                         <br />
-                        <li><b>・マカロン☆ハート</b></li>
+                        <li><b><span data-ja="・マカロン☆ハート" data-en="- Macaron Heart">・マカロン☆ハート</span></b></li>
                         <div class="paragraph">
-                            <li><b>歌</b>：加賀美ありす(CV:<a href="http://confetto.chu.jp/">ななひら</a>)</li>
-                            <li><b>作詞・作曲・編曲</b>：<a href="https://twitter.com/katahotori">かたほとり</a></li>
-                            <li><b>ジャケットイラスト</b>：<a href="https://twitter.com/108tooya">十矢</a></li>
+                            <li><b data-ja="歌" data-en="Vocals">歌</b>：<span data-ja="加賀美ありす(CV:&lt;a href=&quot;http://confetto.chu.jp/&quot;&gt;ななひら&lt;/a&gt;)" data-en="Arisu Kagami (CV: &lt;a href=&quot;http://confetto.chu.jp/&quot;&gt;Nanahira&lt;/a&gt;)">加賀美ありす(CV:<a href="http://confetto.chu.jp/">ななひら</a>)</span></li>
+                            <li><b data-ja="作詞・作曲・編曲" data-en="Lyrics, Music &amp; Arrangement">作詞・作曲・編曲</b>：<a href="https://twitter.com/katahotori">かたほとり</a></li>
+                            <li><b data-ja="ジャケットイラスト" data-en="Jacket Illustration">ジャケットイラスト</b>：<a href="https://twitter.com/108tooya">十矢</a></li>
                         </div>
 						<br />
 						<li>© Unity Technologies Japan/<a href="http://unity-chan.com/contents/license_jp/">UCL</a></li>
 					</ul>
 					<p class="space">
-					※このコンテンツは、<a href="http://idlp.jp/">アイドリズム</a>の<a href="http://idlp.jp/guidelines/">キャラクター利用に関するガイドライン</a>に従って作られた二次創作物です。<br />
+					<span data-ja="※このコンテンツは、&lt;a href=&quot;http://idlp.jp/&quot;&gt;アイドリズム&lt;/a&gt;の&lt;a href=&quot;http://idlp.jp/guidelines/&quot;&gt;キャラクター利用に関するガイドライン&lt;/a&gt;に従って作られた二次創作物です。" data-en="This is a derivative work created in accordance with &lt;a href=&quot;http://idlp.jp/&quot;&gt;IDOLRISM&lt;/a&gt;'s &lt;a href=&quot;http://idlp.jp/guidelines/&quot;&gt;character usage guidelines&lt;/a&gt;.">※このコンテンツは、<a href="http://idlp.jp/">アイドリズム</a>の<a href="http://idlp.jp/guidelines/">キャラクター利用に関するガイドライン</a>に従って作られた二次創作物です。</span><br />
 					</p>
 				</div>
 			</div>
@@ -145,27 +157,27 @@
 			<div class="boardmargin">
 				<br />
 				<p class="center"><b>
-				「今度ありす、新曲と一緒にパリデビューしちゃうんだよ☆」</b></p>
+				<span data-ja="「今度ありす、新曲と一緒にパリデビューしちゃうんだよ☆」" data-en="&quot;Guess what? Arisu is making her Paris debut with a brand-new song!&quot;">「今度ありす、新曲と一緒にパリデビューしちゃうんだよ☆」</span></b></p>
 				<br />
 				<p>
-				アイドリズムの加賀美ありすが、3Dステージで歌って踊る！<br />
-				かわいいありすの3Dリズムゲーム登場！<br />
+				<span data-ja="アイドリズムの加賀美ありすが、3Dステージで歌って踊る！" data-en="IDOLRISM's Arisu Kagami sings and dances on a 3D stage!">アイドリズムの加賀美ありすが、3Dステージで歌って踊る！</span><br />
+				<span data-ja="かわいいありすの3Dリズムゲーム登場！" data-en="A cute 3D rhythm game starring Arisu!">かわいいありすの3Dリズムゲーム登場！</span><br />
 				</p>
 				<br />
 				<p>
-				曲はこのゲームのための書き下ろし！<br />
-				歌もダンスも頑張って、みんなをファンにするって決めたの…！<br />
-				だから、今後のありすの活躍も見ててよね！<br />
+				<span data-ja="曲はこのゲームのための書き下ろし！" data-en="Every song was written just for this game!">曲はこのゲームのための書き下ろし！</span><br />
+				<span data-ja="歌もダンスも頑張って、みんなをファンにするって決めたの…！" data-en="She's giving her all to singing and dancing, determined to make a fan out of everyone...!">歌もダンスも頑張って、みんなをファンにするって決めたの…！</span><br />
+				<span data-ja="だから、今後のありすの活躍も見ててよね！" data-en="So keep your eyes on Arisu from here on out!">だから、今後のありすの活躍も見ててよね！</span><br />
 				</p>
 
-				<p class="space"><b>■動画</b></p>
+				<p class="space"><b data-ja="■動画" data-en="■Video">■動画</b></p>
 				<div class="center space">
 					<div class="iframe-wrapper">
 						<iframe src="https://www.youtube.com/embed/4JCMpoLUMK0?rel=0" frameborder="0" allowfullscreen></iframe>
 					</div>
 				</div>
 
-				<p class="space"><b>■スクリーンショット</b></p>
+				<p class="space"><b data-ja="■スクリーンショット" data-en="■Screenshots">■スクリーンショット</b></p>
 				<div class="screenshot">
 					<img src="img/scr_01m_2017.jpg" alt="Screen Shot" title="タイトル画面"><br />
 					<img src="img/scr_02m_2017.jpg" alt="Screen Shot" title="ジャンプ"><br />
@@ -174,41 +186,41 @@
 					<img src="img/scr_05m_2017.jpg" alt="Screen Shot" title="手を差し出して"><br />
 				</div>
 
-				<p class="space"><b>■クレジット</b></p>
+				<p class="space"><b data-ja="■クレジット" data-en="■Credits">■クレジット</b></p>
 				<div class="paragraph">
 					<ul>
-						<li><b>企画・プログラム</b>：<a href="https://twitter.com/fumilin">ふみ</a></li>
-                        <li><b>3Dキャラ</b>：<a href="https://twitter.com/108tooya">十矢</a></li>
-						<li><b>3Dステージ</b>：ハピコ</li>
-						<li><b>3Dステージ動画</b>：<a href="https://twitter.com/yamamotion">Yamamotion</a></li>
-						<li><b>デザイン監修</b>：クク</li>
-						<li><b>UIデザイン</b>：しおじゃけ</li>
-						<li><b>BGM・SE</b>：<a href="http://nanosizemir.com/">塚越雄一朗(NanosizeMir)</a></li>
+						<li><b data-ja="企画・プログラム" data-en="Planning &amp; Programming">企画・プログラム</b>：<a href="https://twitter.com/fumilin">ふみ</a></li>
+                        <li><b data-ja="3Dキャラ" data-en="3D Character">3Dキャラ</b>：<a href="https://twitter.com/108tooya">十矢</a></li>
+						<li><b data-ja="3Dステージ" data-en="3D Stage">3Dステージ</b>：ハピコ</li>
+						<li><b data-ja="3Dステージ動画" data-en="3D Stage Video">3Dステージ動画</b>：<a href="https://twitter.com/yamamotion">Yamamotion</a></li>
+						<li><b data-ja="デザイン監修" data-en="Design Supervision">デザイン監修</b>：クク</li>
+						<li><b data-ja="UIデザイン" data-en="UI Design">UIデザイン</b>：しおじゃけ</li>
+						<li><b data-ja="BGM・SE" data-en="Music &amp; SE">BGM・SE</b>：<a href="http://nanosizemir.com/">塚越雄一朗(NanosizeMir)</a></li>
 						<li><b>VOICE</b>：<a href="http://confetto.chu.jp/">ななひら</a></li>
 						<li><b>Special Thanks</b>：プロデューサーK</li>
 						<br />
-						<li><b>・Nouveau Monde</b></li>
+						<li><b><span data-ja="・Nouveau Monde" data-en="- Nouveau Monde">・Nouveau Monde</span></b></li>
 						<div class="paragraph">
-							<li><b>歌</b>：加賀美ありす(CV:<a href="http://confetto.chu.jp/">ななひら</a>)</li>
-							<li><b>作詞・作曲・編曲</b>：<a href="http://nanosizemir.com/">塚越雄一朗(NanosizeMir)</a></li>
-	                        <li><b>モーションアクター</b>：<a href="https://twitter.com/shizuki_70 ">シヅキ</a></li>
-	                        <li><b>モーションキャプチャ協力</b>：<a href="https://twitter.com/ksilogic">k-shi</a></li>
-	                        <li><b>モーション修正</b>：久保田</li>
-                            <li><b>ジャケットキャライラスト</b>：<a href="https://twitter.com/108tooya">十矢</a></li>
-							<li><b>曲名ロゴ</b>：DELIKA</li>
+							<li><b data-ja="歌" data-en="Vocals">歌</b>：<span data-ja="加賀美ありす(CV:&lt;a href=&quot;http://confetto.chu.jp/&quot;&gt;ななひら&lt;/a&gt;)" data-en="Arisu Kagami (CV: &lt;a href=&quot;http://confetto.chu.jp/&quot;&gt;Nanahira&lt;/a&gt;)">加賀美ありす(CV:<a href="http://confetto.chu.jp/">ななひら</a>)</span></li>
+							<li><b data-ja="作詞・作曲・編曲" data-en="Lyrics, Music &amp; Arrangement">作詞・作曲・編曲</b>：<a href="http://nanosizemir.com/">塚越雄一朗(NanosizeMir)</a></li>
+	                        <li><b data-ja="モーションアクター" data-en="Motion Actor">モーションアクター</b>：<a href="https://twitter.com/shizuki_70 ">シヅキ</a></li>
+	                        <li><b data-ja="モーションキャプチャ協力" data-en="Motion Capture Support">モーションキャプチャ協力</b>：<a href="https://twitter.com/ksilogic">k-shi</a></li>
+	                        <li><b data-ja="モーション修正" data-en="Motion Retouch">モーション修正</b>：久保田</li>
+                            <li><b data-ja="ジャケットキャライラスト" data-en="Jacket Character Illustration">ジャケットキャライラスト</b>：<a href="https://twitter.com/108tooya">十矢</a></li>
+							<li><b data-ja="曲名ロゴ" data-en="Song Title Logo">曲名ロゴ</b>：DELIKA</li>
                         </div>
                         <br />
-                        <li><b>・マカロン☆ハート</b></li>
+                        <li><b><span data-ja="・マカロン☆ハート" data-en="- Macaron Heart">・マカロン☆ハート</span></b></li>
                         <div class="paragraph">
-                            <li><b>歌</b>：加賀美ありす(CV:<a href="http://confetto.chu.jp/">ななひら</a>)</li>
-                            <li><b>作詞・作曲・編曲</b>：<a href="https://twitter.com/katahotori">かたほとり</a></li>
-                            <li><b>ジャケットイラスト</b>：<a href="https://twitter.com/108tooya">十矢</a></li>
+                            <li><b data-ja="歌" data-en="Vocals">歌</b>：<span data-ja="加賀美ありす(CV:&lt;a href=&quot;http://confetto.chu.jp/&quot;&gt;ななひら&lt;/a&gt;)" data-en="Arisu Kagami (CV: &lt;a href=&quot;http://confetto.chu.jp/&quot;&gt;Nanahira&lt;/a&gt;)">加賀美ありす(CV:<a href="http://confetto.chu.jp/">ななひら</a>)</span></li>
+                            <li><b data-ja="作詞・作曲・編曲" data-en="Lyrics, Music &amp; Arrangement">作詞・作曲・編曲</b>：<a href="https://twitter.com/katahotori">かたほとり</a></li>
+                            <li><b data-ja="ジャケットイラスト" data-en="Jacket Illustration">ジャケットイラスト</b>：<a href="https://twitter.com/108tooya">十矢</a></li>
                         </div>
 						<br />
 						<li>© Unity Technologies Japan/<a href="http://unity-chan.com/contents/license_jp/">UCL</a></li>
 					</ul>
 					<p class="space">
-					※このコンテンツは、<a href="http://idlp.jp/">アイドリズム</a>の<a href="http://idlp.jp/guidelines/">キャラクター利用に関するガイドライン</a>に従って作られた二次創作物です。<br />
+					<span data-ja="※このコンテンツは、&lt;a href=&quot;http://idlp.jp/&quot;&gt;アイドリズム&lt;/a&gt;の&lt;a href=&quot;http://idlp.jp/guidelines/&quot;&gt;キャラクター利用に関するガイドライン&lt;/a&gt;に従って作られた二次創作物です。" data-en="This is a derivative work created in accordance with &lt;a href=&quot;http://idlp.jp/&quot;&gt;IDOLRISM&lt;/a&gt;'s &lt;a href=&quot;http://idlp.jp/guidelines/&quot;&gt;character usage guidelines&lt;/a&gt;.">※このコンテンツは、<a href="http://idlp.jp/">アイドリズム</a>の<a href="http://idlp.jp/guidelines/">キャラクター利用に関するガイドライン</a>に従って作られた二次創作物です。</span><br />
 					</p>
 				</div>
 			</div>
@@ -216,60 +228,60 @@
 
 		<div class="board boardtext left board-banner c90">
 			<div class="boardmargin">
-				<p class="space"><b>■概要</b></p>
+				<p class="space"><b data-ja="■概要" data-en="■Overview">■概要</b></p>
 				<ul>
-					<li>【タイトル】 ありすのステージ(体験版)</li>
-					<li>【ジャンル】 音楽ゲーム</li>
-					<li>【配布場所】 C90 3日目(2016/8/14 日曜日) 西4階 e35-a (<a href="https://webcatalog-free.circle.ms/Map/Hall?day=Day3&hall=w34#e35a">会場MAP</a>)</li>
-					<li>【対応環境】 Windows XP SP2以降 / Mac OS X 10.8以降</li>
-					<li>【頒布価格】 200円(DLカード配布)</li>
-					<li>【頒布内容】 ありすのステージ(体験版)と楽曲「Nouveau Monde(ショートサイズ)」の音源</li>
+					<li><span data-ja="【タイトル】" data-en="[Title]">【タイトル】</span> <span data-ja="ありすのステージ(体験版)" data-en="Stage of Arisu (trial version)">ありすのステージ(体験版)</span></li>
+					<li><span data-ja="【ジャンル】" data-en="[Genre]">【ジャンル】</span> <span data-ja="音楽ゲーム" data-en="Music game">音楽ゲーム</span></li>
+					<li><span data-ja="【配布場所】" data-en="[Where]">【配布場所】</span> <span data-ja="C90 3日目(2016/8/14 日曜日) 西4階 e35-a" data-en="Comiket 90, Day 3 (Sun, 14 Aug 2016), West Hall 4F, e35-a">C90 3日目(2016/8/14 日曜日) 西4階 e35-a</span> (<a href="https://webcatalog-free.circle.ms/Map/Hall?day=Day3&hall=w34#e35a"><span data-ja="会場MAP" data-en="Venue map">会場MAP</span></a>)</li>
+					<li><span data-ja="【対応環境】" data-en="[Requirements]">【対応環境】</span> <span data-ja="Windows XP SP2以降 / Mac OS X 10.8以降" data-en="Windows XP SP2 or later / macOS 10.8 or later">Windows XP SP2以降 / Mac OS X 10.8以降</span></li>
+					<li><span data-ja="【頒布価格】" data-en="[Price]">【頒布価格】</span> <span data-ja="200円(DLカード配布)" data-en="200 yen (download card)">200円(DLカード配布)</span></li>
+					<li><span data-ja="【頒布内容】" data-en="[Contents]">【頒布内容】</span> <span data-ja="ありすのステージ(体験版)" data-en="Stage of Arisu (trial version)">ありすのステージ(体験版)</span>と楽曲「Nouveau Monde(ショートサイズ)」の音源</li>
 				</ul>
 
-				<p class="space"><b>■動画</b></p>
+				<p class="space"><b data-ja="■動画" data-en="■Video">■動画</b></p>
 				<div class="center space">
 					<div class="iframe-wrapper">
 						<iframe src="https://www.youtube.com/embed/HkUInld2_nE?rel=0" frameborder="0" allowfullscreen></iframe>
 					</div>
 				</div>
 
-				<p class="space"><b>■スクリーンショット</b></p>
+				<p class="space"><b data-ja="■スクリーンショット" data-en="■Screenshots">■スクリーンショット</b></p>
 				<div class="screenshot">
 					<img src="img/scr_01.jpg" alt="Screen Shot" title="タイトル画面"><br />
 					<img src="img/scr_02.jpg" alt="Screen Shot" title="クルッと一回転"><br />
 					<img src="img/scr_03.jpg" alt="Screen Shot" title="どやぁ"><br />
 				</div>
 
-				<p class="space"><b>■クレジット</b></p>
+				<p class="space"><b data-ja="■クレジット" data-en="■Credits">■クレジット</b></p>
 				<div class="paragraph">
 					<ul>
-						<li><b>企画・プログラム</b>：<a href="https://twitter.com/fumilin">ふみ</a></li>
+						<li><b data-ja="企画・プログラム" data-en="Planning &amp; Programming">企画・プログラム</b>：<a href="https://twitter.com/fumilin">ふみ</a></li>
 						<br />
-						<li><b>3Dキャラ</b>：十矢</li>
-						<li><b>3Dステージ</b>：ハピコ</li>
-						<li><b>3Dステージ動画</b>：Yamamotion</li>
+						<li><b data-ja="3Dキャラ" data-en="3D Character">3Dキャラ</b>：十矢</li>
+						<li><b data-ja="3Dステージ" data-en="3D Stage">3Dステージ</b>：ハピコ</li>
+						<li><b data-ja="3Dステージ動画" data-en="3D Stage Video">3Dステージ動画</b>：Yamamotion</li>
 						<br />
-						<li><b>UI監修</b>：クク</li>
-						<li><b>UIデザイン</b>：しおじゃけ</li>
+						<li><b data-ja="UI監修" data-en="UI Supervision">UI監修</b>：クク</li>
+						<li><b data-ja="UIデザイン" data-en="UI Design">UIデザイン</b>：しおじゃけ</li>
 						<br />
-						<li><b>BGM・SE</b>：<a href="http://nanosizemir.com/">塚越雄一朗(NanosizeMir)</a></li>
+						<li><b data-ja="BGM・SE" data-en="Music &amp; SE">BGM・SE</b>：<a href="http://nanosizemir.com/">塚越雄一朗(NanosizeMir)</a></li>
 						<br />
-						<li><b>ボイス</b>：<a href="http://confetto.chu.jp/">ななひら</a></li>
+						<li><b data-ja="ボイス" data-en="Voice">ボイス</b>：<a href="http://confetto.chu.jp/">ななひら</a></li>
 						<br />
 						<li><b>Special Thanks</b>：プロデューサーK</li>
 						<br />
 						<li><b>☆NouveauMonde</b></li>
 						<div class="paragraph">
-                            <li><b>歌</b>：加賀美ありす(CV:<a href="http://confetto.chu.jp/">ななひら</a>)</li>
-							<li><b>作詞・作曲・編曲</b>：<a href="http://nanosizemir.com/">塚越雄一朗(NanosizeMir)</a></li>
-                            <li><b>ジャケットイラスト</b>：<a href="https://twitter.com/108tooya">十矢</a></li>
-							<li><b>曲名ロゴ</b>：DELIKA</li>
+                            <li><b data-ja="歌" data-en="Vocals">歌</b>：<span data-ja="加賀美ありす(CV:&lt;a href=&quot;http://confetto.chu.jp/&quot;&gt;ななひら&lt;/a&gt;)" data-en="Arisu Kagami (CV: &lt;a href=&quot;http://confetto.chu.jp/&quot;&gt;Nanahira&lt;/a&gt;)">加賀美ありす(CV:<a href="http://confetto.chu.jp/">ななひら</a>)</span></li>
+							<li><b data-ja="作詞・作曲・編曲" data-en="Lyrics, Music &amp; Arrangement">作詞・作曲・編曲</b>：<a href="http://nanosizemir.com/">塚越雄一朗(NanosizeMir)</a></li>
+                            <li><b data-ja="ジャケットイラスト" data-en="Jacket Illustration">ジャケットイラスト</b>：<a href="https://twitter.com/108tooya">十矢</a></li>
+							<li><b data-ja="曲名ロゴ" data-en="Song Title Logo">曲名ロゴ</b>：DELIKA</li>
 						</div>
 						<br />
 						<li>© Unity Technologies Japan/<a href="http://unity-chan.com/contents/license_jp/">UCL</a></li>
 					</ul>
 					<p class="space">
-					※このコンテンツは、<a href="http://idlp.jp/">アイドリズム</a>の<a href="http://idlp.jp/guidelines/">キャラクター利用に関するガイドライン</a>に従って作られた二次創作物です。<br />
+					<span data-ja="※このコンテンツは、&lt;a href=&quot;http://idlp.jp/&quot;&gt;アイドリズム&lt;/a&gt;の&lt;a href=&quot;http://idlp.jp/guidelines/&quot;&gt;キャラクター利用に関するガイドライン&lt;/a&gt;に従って作られた二次創作物です。" data-en="This is a derivative work created in accordance with &lt;a href=&quot;http://idlp.jp/&quot;&gt;IDOLRISM&lt;/a&gt;'s &lt;a href=&quot;http://idlp.jp/guidelines/&quot;&gt;character usage guidelines&lt;/a&gt;.">※このコンテンツは、<a href="http://idlp.jp/">アイドリズム</a>の<a href="http://idlp.jp/guidelines/">キャラクター利用に関するガイドライン</a>に従って作られた二次創作物です。</span><br />
 					</p>
 				</div>
 			</div>
@@ -280,10 +292,10 @@
 		<div class="box clearfix mobile">
 			<p class="icon"><img src="img/icon2.png" width="60"></p>
 			<p class="txt">
-				【タイトル】 ありすのステージ<br />
-				【ジャンル】 音楽ゲーム<br />
-				【iOS版配信日】 2016年9月4日<br />
-				【Android版配信日】 2017年9月4日<br />
+				<span data-ja="【タイトル】" data-en="[Title]">【タイトル】</span> ありすのステージ<br />
+				<span data-ja="【ジャンル】" data-en="[Genre]">【ジャンル】</span> <span data-ja="音楽ゲーム" data-en="Music game">音楽ゲーム</span><br />
+				<span data-ja="【iOS版配信日】" data-en="[iOS release]">【iOS版配信日】</span> <span data-ja="2016年9月4日" data-en="4 September 2016">2016年9月4日</span><br />
+				<span data-ja="【Android版配信日" data-en="[Android release">【Android版配信日</span>】 <span data-ja="2017年9月4日" data-en="4 September 2017">2017年9月4日</span><br />
 			</p>
 		</div>
 	</div>
