@@ -21,6 +21,16 @@
 		/* 段落どうし・章どうしの間を空けて、目が切れ目を拾えるようにする */
 		.boardtext p { line-height: 1.75; margin-bottom: 0.55em; }
 		.boardtext p.space { margin-top: 2.2em; margin-bottom: 0.7em; }
+
+		/* 言語切り替え。本文の右上に小さく置く。押すと日本語と英語を行き来する */
+		.lang-switch { text-align: right; margin: 0 0 0.8em; }
+		.lang-switch button {
+			font: inherit; font-size: 0.85em; line-height: 1;
+			padding: 0.45em 0.9em; border-radius: 999px;
+			border: 1px solid #c98aa6; background: rgba(255,255,255,0.75);
+			color: #7a3f57; cursor: pointer;
+		}
+		.lang-switch button:hover { background: #fff; }
 	</style>
 </head>
 
@@ -29,6 +39,7 @@
 
 		<div class="board boardtext left board-banner">
             <div class="boardmargin">
+				<div class="lang-switch"><button type="button" id="langToggle"></button></div>
 				<p class="space"><b data-ja="■プライバシーポリシー" data-en="■Privacy Policy">■プライバシーポリシー</b></p>
 				<div>
 					<p data-ja="本ポリシーは、ありすのステージ 3.x（以下「本アプリ」）における情報の取り扱いについて定めるものです。"
@@ -126,22 +137,47 @@
 	</article>
 	<script>
 		(function () {
+			// 訳は日英の2本だけ。アプリからは解決済みの言語コードが ?lang= で渡ってくるので、
+			// ja か未指定のときだけ日本語、それ以外(海外の利用者)は英語で見せる。
+			// ボタンを押したときは、共有したリンクでも同じ言語で開けるよう URL も書き換える。
+			var TITLE = { ja: "ありすのステージ・プライバシーポリシー 3.x",
+			              en: "Stage of Arisu - Privacy Policy 3.x" };
+			var LABEL = { ja: "English", en: "日本語" };
+
+			function render(lang) {
+				var nodes = document.querySelectorAll('[data-' + lang + ']');
+				for (var i = 0; i < nodes.length; i++) {
+					var text = nodes[i].getAttribute('data-' + lang);
+					if (text == null) continue;
+					// data-* の値には HTML エンティティ(&lt;br /&gt; など)を入れているので、
+					// そのまま innerHTML へ流して <br> やリンクを復元する。
+					nodes[i].innerHTML = text;
+				}
+				document.documentElement.setAttribute('lang', lang);
+				document.title = TITLE[lang];
+				var button = document.getElementById('langToggle');
+				if (button) {
+					button.textContent = LABEL[lang];
+					// ボタンの文字は「切り替え先」なので、読み上げ用の説明は切り替え先の言語で書く。
+					button.setAttribute('lang', lang === 'ja' ? 'en' : 'ja');
+					button.setAttribute('aria-label',
+						lang === 'ja' ? 'Switch to English' : '日本語に切り替える');
+				}
+			}
+
 			var params = new URLSearchParams(window.location.search);
-			var lang = (params.get('lang') || '').toLowerCase();
-			// 訳は日英の2本だけ。ja か空のときだけ日本語で、それ以外はすべて英語で見せる。
-			if (lang === '' || lang === 'ja') return;
+			var requested = (params.get('lang') || '').toLowerCase();
+			var current = (requested === '' || requested === 'ja') ? 'ja' : 'en';
+			render(current);
 
-			document.documentElement.setAttribute('lang', 'en');
-			document.title = "Stage of Arisu - Privacy Policy 3.x";
-
-			var nodes = document.querySelectorAll('[data-en]');
-			for (var i = 0; i < nodes.length; i++) {
-				var node = nodes[i];
-				var enText = node.getAttribute('data-en');
-				if (enText == null) continue;
-				// data-en の値には HTML エンティティ(&lt;br /&gt; など)を入れているので、
-				// そのまま innerHTML へ流して <br> やリンクを復元する。
-				node.innerHTML = enText;
+			var button = document.getElementById('langToggle');
+			if (button) {
+				button.addEventListener('click', function () {
+					current = (current === 'ja') ? 'en' : 'ja';
+					render(current);
+					params.set('lang', current);
+					history.replaceState(null, '', window.location.pathname + '?' + params.toString());
+				});
 			}
 		})();
 	</script>
