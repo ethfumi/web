@@ -2,77 +2,42 @@ var background = document.getElementsByClassName("background")[0];
 var titlebg = document.getElementsByClassName("title-bg")[0];
 var waitloads = document.getElementsByClassName("waitload");
 
-var mobiles = document.getElementsByClassName("mobile");
-var c90s = document.getElementsByClassName("c90");
-var c92s = document.getElementsByClassName("c92");
-
-var mobile_tab = document.getElementsByClassName("mobile-tab")[0];
-var c90_tab = document.getElementsByClassName("c90-tab")[0];
-var c92_tab = document.getElementsByClassName("c92-tab")[0];
+// タブごとの表示グループ。要素は class 名で束ね、タブは "<name>-tab" のボタン。
+// 1 つの要素が複数のタブに属してもよい(ストアリンクは mobile と kimagure の両方に出す)
+var TABS = {
+	kimagure: { titlebg: "title-bg-03", background: "background-02" },	// 3系(きまぐれリプライズ、2026)
+	mobile:   { titlebg: "title-bg-03", background: "background-02" },	// 2系までの iOS/Android(2016〜2019)
+	c92:      { titlebg: "title-bg-02", background: "background-02" },
+	c90:      { titlebg: "title-bg-01", background: "background-01" }
+};
 function set_waitload(state)
 {
-    for(var i=0; i<waitloads.length; i++)
-    {
-        var element = waitloads[i] ;
-        element.style.display = state;
-    }
+	set_group("waitload", state);
 }
-function set_mobile(state)
+function set_group(name, state)
 {
-	for(var i=0; i<mobiles.length; i++)
+	var elements = document.getElementsByClassName(name);
+	for(var i=0; i<elements.length; i++)
 	{
-		var element = mobiles[i] ;
-		element.style.display = state;
+		elements[i].style.display = state;
 	}
 }
-function set_c90(state)
+function toggle_tab(name)
 {
-	for(var i=0; i<c90s.length; i++)
+	var tab = TABS[name] || TABS.kimagure;
+	if(!TABS[name]) name = "kimagure";
+	// 先に全部隠してから、選んだタブの要素だけ出す(両方に属する要素は最後の block が勝つ)
+	for(var key in TABS)
 	{
-		var element = c90s[i] ;
-		element.style.display = state;
+		set_group(key, "none");
+		var button = document.getElementsByClassName(key + "-tab")[0];
+		if(button) button.classList.remove('tab-select');
 	}
-}
-function set_c92(state)
-{
-	for(var i=0; i<c92s.length; i++)
-	{
-		var element = c92s[i] ;
-		element.style.display = state;
-	}
-}
-function toggle_mobile()
-{
-	set_mobile("block");
-    set_c90("none");
-	set_c92("none");
-	mobile_tab.classList.add('tab-select');
-	c90_tab.classList.remove('tab-select');
-	c92_tab.classList.remove('tab-select');
-    titlebg.className = "title-bg-03"
-    background.className = "background-02"
-}
-function toggle_c90()
-{
-	set_mobile("none");
-	set_c90("block");
-    set_c92("none");
-	mobile_tab.classList.remove('tab-select');
-	c90_tab.classList.add('tab-select');
-	c92_tab.classList.remove('tab-select');
-    titlebg.className = "title-bg-01"
-    background.className = "background-01"
-}
-function toggle_c92()
-{
-	set_mobile("none");
-    set_c90("none");
-	set_c92("block");
-	mobile_tab.classList.remove('tab-select');
-	c90_tab.classList.remove('tab-select');
-	c92_tab.classList.add('tab-select');
-    titlebg.className = "title-bg-02"
-    background.className = "background-02"
+	set_group(name, "block");
+	var selected = document.getElementsByClassName(name + "-tab")[0];
+	if(selected) selected.classList.add('tab-select');
+	titlebg.className = tab.titlebg;
+	background.className = tab.background;
 }
 function getUrlParams() {
 	var params = {};
@@ -146,13 +111,7 @@ window.onload = function()
 {
 	var params = getUrlParams();
 	setup_lang_toggle(params);
-	var target = params["tab"];
-	switch (target)
-	{
-		case "c90": toggle_c90(); break;
-		case "c92": toggle_c92(); break;
-		default:
-		case "mobile": toggle_mobile(); break;
-	}
+	// ?tab= が無ければ最新の 3系(kimagure)を出す
+	toggle_tab(params["tab"]);
     set_waitload("none");
 };

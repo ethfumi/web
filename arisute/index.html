@@ -31,7 +31,7 @@
 
 	<link rel="stylesheet" href="css/reset.css">
 	<link rel="stylesheet" href="css/style2.css?2017905-0105">
-	<link rel="stylesheet" href="css/arisute.css?2017905-0105">
+	<link rel="stylesheet" href="css/arisute.css?20260904-3">
 	<link rel="shortcut icon" href="img/favicon.ico" type="image/vnd.microsoft.ico"/>
 	<style>
 		/* 言語切り替え。タブ列の上に小さく置く */
@@ -182,20 +182,147 @@
 					</ul>
 				</div>
 
+				<p class="space"><b data-ja="■更新履歴" data-en="■Update history">■更新履歴</b></p>
+				<div class="paragraph">
+				<details class="changelog">
+					<summary><b data-ja="3.2(2026年9月4日 Android)" data-en="3.2 (4 September 2026, Android)">3.2(2026年9月4日 Android)</b></summary>
+					<p class="space"><b data-ja="■ありす" data-en="■Arisu">■ありす</b></p>
+					<ul>
+						<li data-ja="2回目以降の再生で目線がカメラに合わなくなるのを直しました" data-en="Fixed Arisu no longer making eye contact with the camera from the second play onward">2回目以降の再生で目線がカメラに合わなくなるのを直しました</li>
+						<li data-ja="曲の終わりとリザルトでウィンクが崩れるのを直しました" data-en="Fixed her wink breaking at the end of the song and on the results screen">曲の終わりとリザルトでウィンクが崩れるのを直しました</li>
+						<li data-ja="MVの終わりに前のリザルトの表情が残るのを直しました" data-en="Fixed the previous result&#x27;s expression lingering at the end of an MV">MVの終わりに前のリザルトの表情が残るのを直しました</li>
+					</ul>
+					<p class="space"><b data-ja="■判定" data-en="■Judgment">■判定</b></p>
+					<ul>
+						<li data-ja="レーンの間を叩いてもノーツを拾うようにしました。中心に近いほど広く判定します" data-en="Taps between lanes now register notes; the closer to a lane&#x27;s center, the wider the window">レーンの間を叩いてもノーツを拾うようにしました。中心に近いほど広く判定します</li>
+						<li data-ja="ワイド端末で判定位置が横にずれるのを直しました" data-en="Fixed the judgment position drifting sideways on wide devices">ワイド端末で判定位置が横にずれるのを直しました</li>
+					</ul>
+					<p class="space"><b data-ja="■タイミング調整" data-en="■Timing adjustment">■タイミング調整</b></p>
+					<ul>
+						<li data-ja="タイミング調整(ms)と判定調整(ms)の幅を広げました" data-en="Widened the range of timing offset (ms) and judgment offset (ms)">タイミング調整(ms)と判定調整(ms)の幅を広げました</li>
+						<li data-ja="タイミング自動調整を追加しました。最近のプレイ記録のずれをタイミング調整に反映します" data-en="Added automatic timing adjustment, which applies the drift from your recent plays to the timing offset">タイミング自動調整を追加しました。最近のプレイ記録のずれをタイミング調整に反映します</li>
+					</ul>
+					<p class="space"><b data-ja="■音と振動" data-en="■Sound &amp; haptics">■音と振動</b></p>
+					<ul>
+						<li data-ja="タップ音の遅れを縮めました" data-en="Reduced tap sound latency">タップ音の遅れを縮めました</li>
+						<li data-ja="タップ音・長押し音・スライド音の音量を個別に調整できます" data-en="Tap, hold, and slide sounds now have separate volume controls">タップ音・長押し音・スライド音の音量を個別に調整できます</li>
+						<li data-ja="タップとスライドの振動(ハプティクス)を追加しました。既定はスライドのみONです" data-en="Added haptics for taps and slides (slides only by default)">タップとスライドの振動(ハプティクス)を追加しました。既定はスライドのみONです</li>
+						<li data-ja="音量スライダーの効き方を見直し、真ん中あたりでも聞こえる大きさにしました" data-en="Reworked the volume sliders so the middle of the range is clearly audible">音量スライダーの効き方を見直し、真ん中あたりでも聞こえる大きさにしました</li>
+					</ul>
+					<p class="space"><b data-ja="■プレイ設定" data-en="■Play Settings">■プレイ設定</b></p>
+					<ul>
+						<li data-ja="譜面／タイミング／音と振動／表示の4つに区切りました" data-en="Split into four groups: Chart / Timing / Sound &amp; Haptics / Display">譜面／タイミング／音と振動／表示の4つに区切りました</li>
+					</ul>
+					<p class="space"><b data-ja="■プレイ記録" data-en="■History">■プレイ記録</b></p>
+					<ul>
+						<li data-ja="ゲームオーバーの回も記録に残り、詳細を開けます" data-en="Game-over plays are now recorded and their details can be opened">ゲームオーバーの回も記録に残り、詳細を開けます</li>
+					</ul>
+					<p class="space"><b data-ja="■ランキング" data-en="■Rankings">■ランキング</b></p>
+					<ul>
+						<li data-ja="自分のユーザーIDをランキングとオプションに表示します" data-en="Your user ID is shown in the rankings and in Options">自分のユーザーIDをランキングとオプションに表示します</li>
+						<li data-ja="ランキングの見出しに自分の番号と順位を出します" data-en="Ranking headers show your number and position">ランキングの見出しに自分の番号と順位を出します</li>
+					</ul>
+					<p class="space"><b data-ja="■そのほか" data-en="■Other">■そのほか</b></p>
+					<ul>
+						<li data-ja="リザルト詳細を開いている間は背景の3Dを止めて負荷を下げました" data-en="The 3D background pauses while detailed results are open, reducing load">リザルト詳細を開いている間は背景の3Dを止めて負荷を下げました</li>
+						<li data-ja="リザルトに入る瞬間のちらつきと、前回の数字の残りを直しました" data-en="Fixed flicker when entering results and the previous numbers lingering">リザルトに入る瞬間のちらつきと、前回の数字の残りを直しました</li>
+						<li data-ja="FPS表示を画面上部の1行にしました。MVモードでは曲クレジット表示中だけ下に寄せます" data-en="The FPS display is now a single line at the top; in MV mode it moves down only while song credits are shown">FPS表示を画面上部の1行にしました。MVモードでは曲クレジット表示中だけ下に寄せます</li>
+					</ul>
+				</details>
+				<details class="changelog">
+					<summary><b data-ja="3.1(2026年9月4日 iOS)" data-en="3.1 (4 September 2026, iOS)">3.1(2026年9月4日 iOS)</b></summary>
+					<p class="space"><b data-ja="■新たな難易度KIMAGUREを追加" data-en="■New difficulty: KIMAGURE">■新たな難易度KIMAGUREを追加</b></p>
+					<ul>
+						<li data-ja="遊ぶたびに譜面が変わる難易度を追加しました" data-en="The chart changes every time you play">遊ぶたびに譜面が変わる難易度を追加しました</li>
+						<li data-ja="みんなと同じ譜面が遊べる「今日の譜面」があります" data-en="Today&#x27;s Chart lets you play the same chart as everyone else">みんなと同じ譜面が遊べる「今日の譜面」があります</li>
+						<li data-ja="レベルは「プレイ設定」から選べます" data-en="Choose the level in Play Settings">レベルは「プレイ設定」から選べます</li>
+						<li data-ja="シードを固定すると、同じ譜面をもう一度遊べます" data-en="Lock the seed to replay the same chart">シードを固定すると、同じ譜面をもう一度遊べます</li>
+					</ul>
+					<p class="space"><b data-ja="■ローカライズ" data-en="■Localization">■ローカライズ</b></p>
+					<ul>
+						<li data-ja="AI翻訳ベースにはなりますが、UIと歌詞を20言語に対応しました" data-en="UI and lyrics now support 20 languages (AI-translation based)">AI翻訳ベースにはなりますが、UIと歌詞を20言語に対応しました</li>
+					</ul>
+					<p class="space"><b data-ja="■MVモードを追加" data-en="■New: MV mode">■MVモードを追加</b></p>
+					<ul>
+						<li data-ja="ステージを鑑賞できるモードを追加しました" data-en="Added a mode for simply watching the stage">ステージを鑑賞できるモードを追加しました</li>
+						<li data-ja="画面を左右へスワイプすると、見る位置(カメラ)が切り替わります" data-en="Swipe left or right to switch the camera">画面を左右へスワイプすると、見る位置(カメラ)が切り替わります</li>
+						<li data-ja="音源は「歌あり」「歌なし」から選べます" data-en="Choose between vocal and instrumental audio">音源は「歌あり」「歌なし」から選べます</li>
+					</ul>
+					<p class="space"><b data-ja="■MVの歌詞表示" data-en="■Lyrics in MV">■MVの歌詞表示</b></p>
+					<ul>
+						<li data-ja="日本語、訳、ローマ字、意味訳、カラオケ表示を自由に組み合わせられます" data-en="Freely combine Japanese, translation, romaji, meaning, and karaoke display">日本語、訳、ローマ字、意味訳、カラオケ表示を自由に組み合わせられます</li>
+						<li data-ja="歌詞の先行表示を切り替えられます" data-en="Toggle lyrics pre-display">歌詞の先行表示を切り替えられます</li>
+					</ul>
+					<p class="space"><b data-ja="■リザルト" data-en="■Results">■リザルト</b></p>
+					<ul>
+						<li data-ja="EXCELLENTを2段階に分けました。判定がより厳しい方は虹で表示します" data-en="EXCELLENT is now split into two tiers — the stricter one shows as a rainbow">EXCELLENTを2段階に分けました。判定がより厳しい方は虹で表示します</li>
+						<li data-ja="精度(Accuracy)の表示を追加しました。すべて虹のEXCELLENTなら101%になります" data-en="Added Accuracy: an all-rainbow-EXCELLENT play reaches 101%">精度(Accuracy)の表示を追加しました。すべて虹のEXCELLENTなら101%になります</li>
+						<li data-ja="リザルト詳細を追加しました。プレイ結果、タイミング、判定、ノート種類を、散布図と数字で振り返れます" data-en="Added detailed results: review your play, timing, judgments, and note types with scatter plots and numbers">リザルト詳細を追加しました。プレイ結果、タイミング、判定、ノート種類を、散布図と数字で振り返れます</li>
+						<li data-ja="タイミングは中央値とばらつき、FAST／SLOWの内訳、小節ごとの推移、曲の区間(イントロ／Aメロ／サビなど)ごとの成績を確認できます" data-en="See timing median and spread, FAST/SLOW breakdown, per-measure trends, and per-section (intro/verse/chorus) performance">タイミングは中央値とばらつき、FAST／SLOWの内訳、小節ごとの推移、曲の区間(イントロ／Aメロ／サビなど)ごとの成績を確認できます</li>
+						<li data-ja="リザルト詳細はWebページでも開けます。共有もできます" data-en="Detailed results also open as a web page and can be shared">リザルト詳細はWebページでも開けます。共有もできます</li>
+					</ul>
+					<p class="space"><b data-ja="■プレイ記録とランキング" data-en="■History &amp; rankings">■プレイ記録とランキング</b></p>
+					<ul>
+						<li data-ja="タイトルに「プレイ記録」を追加しました。過去のプレイの詳細を見返せます" data-en="Added History to the title screen to revisit past plays">タイトルに「プレイ記録」を追加しました。過去のプレイの詳細を見返せます</li>
+						<li data-ja="オンラインランキングを追加しました" data-en="Added online rankings">オンラインランキングを追加しました</li>
+						<li data-ja="通算ベストと「みんなの記録」、クリア数も見られます" data-en="See all-time bests, everyone&#x27;s records, and clear counts">通算ベストと「みんなの記録」、クリア数も見られます</li>
+						<li data-ja="ランキングへの送信は同意制です。あとからオプションでいつでも変えられます" data-en="Ranking submission is opt-in — change it anytime in Options">ランキングへの送信は同意制です。あとからオプションでいつでも変えられます</li>
+					</ul>
+					<p class="space"><b data-ja="■プレイ設定" data-en="■Play Settings">■プレイ設定</b></p>
+					<ul>
+						<li data-ja="「判定調整(ms)」を追加。見た目を動かさずに判定だけを合わせられます" data-en="Added judgment offset (ms): adjust judgment timing without moving the visuals">「判定調整(ms)」を追加。見た目を動かさずに判定だけを合わせられます</li>
+						<li data-ja="※従来の「タイミング調整」は見た目と判定が一緒に動きます" data-en="*The existing timing adjustment moves visuals and judgment together">※従来の「タイミング調整」は見た目と判定が一緒に動きます</li>
+						<li data-ja="FAST／SLOW表示をGREAT／GOODとEXCELLENTで別々に切り替えられます" data-en="Toggle FAST/SLOW display separately for GREAT/GOOD and EXCELLENT">FAST／SLOW表示をGREAT／GOODとEXCELLENTで別々に切り替えられます</li>
+						<li data-ja="レーン別判定表示を追加しました" data-en="Added per-lane judgment display">レーン別判定表示を追加しました</li>
+						<li data-ja="背景の暗さを調整できます" data-en="Adjustable background dimming">背景の暗さを調整できます</li>
+						<li data-ja="通常の譜面で「ミラー」「ランダム」を選べます" data-en="Mirror and Random for normal charts">通常の譜面で「ミラー」「ランダム」を選べます</li>
+					</ul>
+					<p class="space"><b data-ja="■グラフィックとサウンド" data-en="■Graphics &amp; sound">■グラフィックとサウンド</b></p>
+					<ul>
+						<li data-ja="DOF、ブルーム、光源、ステージ演出、手元パーティクル、アンチエイリアス、レンダースケールを個別に調整できます" data-en="Individually adjust DOF, bloom, lighting, stage effects, hand particles, anti-aliasing, and render scale">DOF、ブルーム、光源、ステージ演出、手元パーティクル、アンチエイリアス、レンダースケールを個別に調整できます</li>
+						<li data-ja="クオリティ調整に最低〜最高とカスタムを用意し、端末に合わせて自動で選ぶようにしました" data-en="Quality presets from lowest to highest plus custom, auto-selected to fit your device">クオリティ調整に最低〜最高とカスタムを用意し、端末に合わせて自動で選ぶようにしました</li>
+						<li data-ja="フレームレートとFPS表示を追加しました" data-en="Added frame rate options and an FPS display">フレームレートとFPS表示を追加しました</li>
+						<li data-ja="「音の応答」を追加。反応優先／バランス／録画・安定から選べます" data-en="Added audio response: responsive / balanced / recording-stable">「音の応答」を追加。反応優先／バランス／録画・安定から選べます</li>
+					</ul>
+					<p class="space"><b data-ja="■そのほか" data-en="■Other">■そのほか</b></p>
+					<ul>
+						<li data-ja="スライドがすっぽ抜ける不具合を改善しました" data-en="Fixed slides dropping inputs">スライドがすっぽ抜ける不具合を改善しました</li>
+						<li data-ja="内部エンジンをUnity 6.3へ更新し、最新のOSに対応しました。それに伴い、各種エフェクトや見た目にも変更が入っています" data-en="Updated the engine to Unity 6.3 for the latest OS versions — effects and visuals have changed accordingly">内部エンジンをUnity 6.3へ更新し、最新のOSに対応しました。それに伴い、各種エフェクトや見た目にも変更が入っています</li>
+						<li data-ja="エンジン更新に伴い、対応OSはiOS 15.0以上になりました" data-en="The engine update raises the requirement to iOS 15.0 or later">エンジン更新に伴い、対応OSはiOS 15.0以上になりました</li>
+						<li data-ja="3Dステージのサイリウム表示を変更しました" data-en="Changed the glow stick display on the 3D stage">3Dステージのサイリウム表示を変更しました</li>
+						<li data-ja="ステージ演出映像のカウント表示が歌詞と合っていなかったのを直しました" data-en="Fixed the stage screen countdown being out of sync with the lyrics">ステージ演出映像のカウント表示が歌詞と合っていなかったのを直しました</li>
+						<li data-ja="ポーズから戻るとき、いきなり再開せず少し前に巻き戻してから始まるようにしました" data-en="Unpausing now rewinds slightly instead of resuming instantly">ポーズから戻るとき、いきなり再開せず少し前に巻き戻してから始まるようにしました</li>
+						<li data-ja="ミスしたときのライフの減りを緩めました" data-en="Softened life loss on miss">ミスしたときのライフの減りを緩めました</li>
+						<li data-ja="ありすの髪や衣装の揺れ方と当たり判定を、3Dモデルから設定しなおしました" data-en="Re-tuned Arisu&#x27;s hair and outfit physics and colliders from the 3D model">ありすの髪や衣装の揺れ方と当たり判定を、3Dモデルから設定しなおしました</li>
+						<li data-ja="ありすの口パク、表情、カメラの追従を調整しました" data-en="Adjusted Arisu&#x27;s lip sync, expressions, and camera tracking">ありすの口パク、表情、カメラの追従を調整しました</li>
+						<li data-ja="画面の切り替えをシームレスにしました" data-en="Made screen transitions seamless">画面の切り替えをシームレスにしました</li>
+						<li data-ja="いくつかのチュートリアルを追加しました" data-en="Added several tutorials">いくつかのチュートリアルを追加しました</li>
+						<li data-ja="クレジットにSNSへのリンクを追加しました" data-en="Added SNS links to the credits">クレジットにSNSへのリンクを追加しました</li>
+						<li data-ja="オプションにプレイ記録の削除、ランキングのユーザーID削除を追加しました" data-en="Added options to delete play history and your ranking ID">オプションにプレイ記録の削除、ランキングのユーザーID削除を追加しました</li>
+						<li data-ja="プライバシーポリシーの表示をオプション内へ移動しました" data-en="Moved the privacy policy into Options">プライバシーポリシーの表示をオプション内へ移動しました</li>
+						<li data-ja="起動にかかる時間を短縮しました" data-en="Shortened startup time">起動にかかる時間を短縮しました</li>
+					</ul>
+				</details>
+				</div>
+
 				<p class="space"><b data-ja="■動画" data-en="■Video">■動画</b></p>
 				<div class="center space">
 					<div class="iframe-wrapper">
-						<iframe src="https://www.youtube.com/embed/4JCMpoLUMK0?rel=0" frameborder="0" allowfullscreen></iframe>
+						<iframe src="https://www.youtube.com/embed/7lLq8a9zUg8?rel=0" frameborder="0" allowfullscreen></iframe>
 					</div>
 				</div>
 
 				<p class="space"><b data-ja="■スクリーンショット" data-en="■Screenshots">■スクリーンショット</b></p>
 				<div class="screenshot">
-					<img src="img/scr_01m_2017.jpg" alt="Screen Shot" title="タイトル画面"><br />
-					<img src="img/scr_02m_2017.jpg" alt="Screen Shot" title="ジャンプ"><br />
-					<img src="img/scr_03m_2017.jpg" alt="Screen Shot" title="決めポーズ"><br />
-					<img src="img/scr_04m_2017.jpg" alt="Screen Shot" title="クルッと一回転前"><br />
-					<img src="img/scr_05m_2017.jpg" alt="Screen Shot" title="手を差し出して"><br />
+					<img src="img/scr_01m_2026.jpg" alt="Screen Shot" title="タイトル画面"><br />
+					<img src="img/scr_02m_2026.jpg" alt="Screen Shot" title="スライドノート"><br />
+					<img src="img/scr_03m_2026.jpg" alt="Screen Shot" title="虹のアーク"><br />
+					<img src="img/scr_04m_2026.jpg" alt="Screen Shot" title="フルコンボ"><br />
+					<img src="img/scr_05m_2026.jpg" alt="Screen Shot" title="リザルト"><br />
+					<img src="img/scr_06m_2026.jpg" alt="Screen Shot" title="リザルト詳細(Web)"><br />
+					<img src="img/scr_07m_2026.jpg" alt="Screen Shot" title="MV: Nouveau Monde"><br />
+					<img src="img/scr_08m_2026.jpg" alt="Screen Shot" title="MV: マカロン☆ハート(英訳歌詞)"><br />
+					<img src="img/scr_09m_2026.jpg" alt="Screen Shot" title="MV: Nouveau Monde(引き)"><br />
 				</div>
 
 				<p class="space"><b data-ja="■クレジット" data-en="■Credits">■クレジット</b></p>
@@ -312,7 +439,7 @@
 		</div>
 	</div>
 	<footer>
-		© 2016-2017 <span data-ja="&lt;a href=&quot;https://twitter.com/fumilin&quot;&gt;ふみ&lt;/a&gt;" data-en="&lt;a href=&quot;https://twitter.com/fumilin&quot;&gt;Fumi&lt;/a&gt;"><a href="https://twitter.com/fumilin">ふみ</a></span>/べりはろ
+		© 2016-2026 <span data-ja="&lt;a href=&quot;https://twitter.com/fumilin&quot;&gt;ふみ&lt;/a&gt;" data-en="&lt;a href=&quot;https://twitter.com/fumilin&quot;&gt;Fumi&lt;/a&gt;"><a href="https://twitter.com/fumilin">ふみ</a></span>/べりはろ
 	</footer>
 </body>
 
