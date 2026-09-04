@@ -194,24 +194,17 @@ footer a:link,footer a:visited,footer a:hover,footer a:active{
 	text-decoration:none;
 }
 
-/* iframe要素内でサイズ指定している場合は必要なし */
-iframe {
-  width: 560px;
-  height: 315px;
+/* 動画は板の横幅いっぱいに、16:9 を保って出す(スクリーンショットと同じ幅) */
+.iframe-wrapper {
+  position: relative;
+  padding: calc(9 / 16 * 100%) 0 0;
 }
-/* CSSでレスポンシブ対応 */
-@media screen and (max-width: 700px) {
-  .iframe-wrapper {
-    position: relative;
-    padding: calc(315 / 560 * 100%) 0 0;
-  }
-  iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-  }
+.iframe-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 /* 更新履歴の折りたたみ */
 .changelog{
