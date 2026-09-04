@@ -52,12 +52,12 @@
         </div>
 		<div class="store-link">
 			<ul>
-				<li class="mobile kimagure">
+				<li class="mobile">
 					<a href="http://apple.co/2ci5OAm">
 						<img src="img/appstore_ja.png" alt="App Storeからダウンロード" title="AppStoreの説明ページに飛ぶよ。">
 					</a>
 				</li>
-				<li class="mobile kimagure">
+				<li class="mobile">
 					<a href="https://play.google.com/store/apps/details?id=li.fumi.arisute">
 						<img src="img/googleplay_ja.png" alt="Google Playで手に入れよう" title="GooglePlayの説明ページに飛ぶよ。">
 					</a>
@@ -70,16 +70,13 @@
 
 		<div class="lang-switch"><button type="button" id="langToggle"></button></div>
 		<div class="tabs">
-			<button class="tab-button kimagure-tab tab-select" value="リンク" onClick="toggle_tab('kimagure'); return false;">
-				<span data-ja="iOS/Android版 (2026)" data-en="iOS / Android (2026)">iOS/Android版 (2026)</span>
+			<button class="tab-button mobile-tab tab-select" value="リンク" onClick="toggle_mobile(); return false;">
+				<span data-ja="iOS/Android版" data-en="iOS / Android">iOS/Android版</span>
 			</button>
-			<button class="tab-button mobile-tab" value="リンク" onClick="toggle_tab('mobile'); return false;">
-				<span data-ja="iOS/Android版 (2019)" data-en="iOS / Android (2019)">iOS/Android版 (2019)</span>
-			</button>
-			<button class="tab-button c92-tab" value="リンク" onClick="toggle_tab('c92'); return false;">
+			<button class="tab-button c92-tab" value="リンク" onClick="toggle_c92(); return false;">
 				<span data-ja="PC版(c92)" data-en="PC (C92)">PC版(c92)</span>
 			</button>
-			<button class="tab-button c90-tab" value="リンク" onClick="toggle_tab('c90'); return false;">
+			<button class="tab-button c90-tab" value="リンク" onClick="toggle_c90(); return false;">
 				<span data-ja="PC版(c90)" data-en="PC (C90)">PC版(c90)</span>
 			</button>
         </div>
@@ -156,7 +153,7 @@
 			</div>
 		</div>
 
-		<div class="board boardtext left board-banner kimagure">
+		<div class="board boardtext left board-banner mobile">
 			<div class="boardmargin">
 				<br />
 				<p class="center"><b>
@@ -184,79 +181,6 @@
 						<li><a href="https://arisute-ranking.fumilin.workers.dev/t/" data-ja="通算のまとめ" data-en="Overall summary">通算のまとめ</a>：<span data-ja="どこで何人が遊んでいるか" data-en="Where and how many people are playing">どこで何人が遊んでいるか</span></li>
 					</ul>
 				</div>
-
-				<p class="space"><b data-ja="■動画" data-en="■Video">■動画</b></p>
-				<div class="center space">
-					<div class="iframe-wrapper">
-						<iframe src="https://www.youtube.com/embed/4JCMpoLUMK0?rel=0" frameborder="0" allowfullscreen></iframe>
-					</div>
-				</div>
-
-				<p class="space"><b data-ja="■スクリーンショット" data-en="■Screenshots">■スクリーンショット</b></p>
-				<div class="screenshot">
-					<img src="img/scr_01m_2017.jpg" alt="Screen Shot" title="タイトル画面"><br />
-					<img src="img/scr_02m_2017.jpg" alt="Screen Shot" title="ジャンプ"><br />
-					<img src="img/scr_03m_2017.jpg" alt="Screen Shot" title="決めポーズ"><br />
-					<img src="img/scr_04m_2017.jpg" alt="Screen Shot" title="クルッと一回転前"><br />
-					<img src="img/scr_05m_2017.jpg" alt="Screen Shot" title="手を差し出して"><br />
-				</div>
-
-				<p class="space"><b data-ja="■クレジット" data-en="■Credits">■クレジット</b></p>
-				<div class="paragraph">
-					<ul>
-						<li><b data-ja="企画・プログラム" data-en="Planning &amp; Programming">企画・プログラム</b>：<span data-ja="&lt;a href=&quot;https://twitter.com/fumilin&quot;&gt;ふみ&lt;/a&gt;" data-en="&lt;a href=&quot;https://twitter.com/fumilin&quot;&gt;Fumi&lt;/a&gt;"><a href="https://twitter.com/fumilin">ふみ</a></span></li>
-                        <li><b data-ja="3Dキャラ" data-en="3D Character">3Dキャラ</b>：<span data-ja="&lt;a href=&quot;https://twitter.com/108tooya&quot;&gt;十矢&lt;/a&gt;" data-en="&lt;a href=&quot;https://twitter.com/108tooya&quot;&gt;Tooya&lt;/a&gt;"><a href="https://twitter.com/108tooya">十矢</a></span></li>
-						<li><b data-ja="3Dステージ" data-en="3D Stage">3Dステージ</b>：<span data-ja="ハピコ" data-en="Hapiko">ハピコ</span></li>
-						<li><b data-ja="3Dステージ動画" data-en="Stage Screen Visuals">3Dステージ動画</b>：<a href="https://twitter.com/yamamotion">Yamamotion</a></li>
-						<li><b data-ja="デザイン監修" data-en="Design Supervision">デザイン監修</b>：<span data-ja="クク" data-en="Kuku">クク</span></li>
-						<li><b data-ja="UIデザイン" data-en="UI Design">UIデザイン</b>：<span data-ja="しおじゃけ" data-en="Shiojake">しおじゃけ</span></li>
-						<li><b data-ja="BGM・SE" data-en="Music &amp; SFX">BGM・SE</b>：<span data-ja="&lt;a href=&quot;http://nanosizemir.com/&quot;&gt;塚越雄一朗(NanosizeMir)&lt;/a&gt;" data-en="&lt;a href=&quot;http://nanosizemir.com/&quot;&gt;Yuichiro Tsukagoshi (NanosizeMir)&lt;/a&gt;"><a href="http://nanosizemir.com/">塚越雄一朗(NanosizeMir)</a></span></li>
-						<li><b data-ja="VOICE" data-en="Voice">VOICE</b>：<span data-ja="&lt;a href=&quot;http://confetto.chu.jp/&quot;&gt;ななひら&lt;/a&gt;" data-en="&lt;a href=&quot;http://confetto.chu.jp/&quot;&gt;Nanahira&lt;/a&gt;"><a href="http://confetto.chu.jp/">ななひら</a></span></li>
-						<li><b>Special Thanks</b>：<span data-ja="プロデューサーK" data-en="Producer K">プロデューサーK</span></li>
-						<br />
-						<li><b><span data-ja="・Nouveau Monde" data-en="- Nouveau Monde">・Nouveau Monde</span></b></li>
-						<div class="paragraph">
-							<li><b data-ja="歌" data-en="Vocals">歌</b>：<span data-ja="加賀美ありす(CV:&lt;a href=&quot;http://confetto.chu.jp/&quot;&gt;ななひら&lt;/a&gt;)" data-en="Arisu Kagami (CV: &lt;a href=&quot;http://confetto.chu.jp/&quot;&gt;Nanahira&lt;/a&gt;)">加賀美ありす(CV:<span data-ja="&lt;a href=&quot;http://confetto.chu.jp/&quot;&gt;ななひら&lt;/a&gt;" data-en="&lt;a href=&quot;http://confetto.chu.jp/&quot;&gt;Nanahira&lt;/a&gt;"><a href="http://confetto.chu.jp/">ななひら</a></span>)</span></li>
-							<li><b data-ja="作詞・作曲・編曲" data-en="Lyrics &amp; Music">作詞・作曲・編曲</b>：<span data-ja="&lt;a href=&quot;http://nanosizemir.com/&quot;&gt;塚越雄一朗(NanosizeMir)&lt;/a&gt;" data-en="&lt;a href=&quot;http://nanosizemir.com/&quot;&gt;Yuichiro Tsukagoshi (NanosizeMir)&lt;/a&gt;"><a href="http://nanosizemir.com/">塚越雄一朗(NanosizeMir)</a></span></li>
-	                        <li><b data-ja="モーションアクター" data-en="Motion Actor">モーションアクター</b>：<span data-ja="&lt;a href=&quot;https://twitter.com/shizuki_70 &quot;&gt;シヅキ&lt;/a&gt;" data-en="&lt;a href=&quot;https://twitter.com/shizuki_70 &quot;&gt;Shizuki&lt;/a&gt;"><a href="https://twitter.com/shizuki_70 ">シヅキ</a></span></li>
-	                        <li><b data-ja="モーションキャプチャ協力" data-en="Mocap Support">モーションキャプチャ協力</b>：<a href="https://twitter.com/ksilogic">k-shi</a></li>
-	                        <li><b data-ja="モーション修正" data-en="Motion Cleanup">モーション修正</b>：<span data-ja="久保田" data-en="Kubota">久保田</span></li>
-                            <li><b data-ja="ジャケットキャライラスト" data-en="Jacket Character Art">ジャケットキャライラスト</b>：<span data-ja="&lt;a href=&quot;https://twitter.com/108tooya&quot;&gt;十矢&lt;/a&gt;" data-en="&lt;a href=&quot;https://twitter.com/108tooya&quot;&gt;Tooya&lt;/a&gt;"><a href="https://twitter.com/108tooya">十矢</a></span></li>
-							<li><b data-ja="曲名ロゴ" data-en="Song Title Logo">曲名ロゴ</b>：DELIKA</li>
-                        </div>
-                        <br />
-                        <li><b><span data-ja="・マカロン☆ハート" data-en="- Macaron Heart">・マカロン☆ハート</span></b></li>
-                        <div class="paragraph">
-                            <li><b data-ja="歌" data-en="Vocals">歌</b>：<span data-ja="加賀美ありす(CV:&lt;a href=&quot;http://confetto.chu.jp/&quot;&gt;ななひら&lt;/a&gt;)" data-en="Arisu Kagami (CV: &lt;a href=&quot;http://confetto.chu.jp/&quot;&gt;Nanahira&lt;/a&gt;)">加賀美ありす(CV:<span data-ja="&lt;a href=&quot;http://confetto.chu.jp/&quot;&gt;ななひら&lt;/a&gt;" data-en="&lt;a href=&quot;http://confetto.chu.jp/&quot;&gt;Nanahira&lt;/a&gt;"><a href="http://confetto.chu.jp/">ななひら</a></span>)</span></li>
-                            <li><b data-ja="作詞・作曲・編曲" data-en="Lyrics &amp; Music">作詞・作曲・編曲</b>：<span data-ja="&lt;a href=&quot;https://twitter.com/katahotori&quot;&gt;かたほとり&lt;/a&gt;" data-en="&lt;a href=&quot;https://twitter.com/katahotori&quot;&gt;Katahotori&lt;/a&gt;"><a href="https://twitter.com/katahotori">かたほとり</a></span></li>
-                            <li><b data-ja="ジャケットイラスト" data-en="Jacket Illustration">ジャケットイラスト</b>：<span data-ja="&lt;a href=&quot;https://twitter.com/108tooya&quot;&gt;十矢&lt;/a&gt;" data-en="&lt;a href=&quot;https://twitter.com/108tooya&quot;&gt;Tooya&lt;/a&gt;"><a href="https://twitter.com/108tooya">十矢</a></span></li>
-                        </div>
-						<br />
-						<li>© Unity Technologies Japan/<a href="http://unity-chan.com/contents/license_jp/">UCL</a></li>
-					</ul>
-					<p class="space">
-					<span data-ja="※このコンテンツは、&lt;a href=&quot;http://idlp.jp/&quot;&gt;アイドリズム&lt;/a&gt;の&lt;a href=&quot;http://idlp.jp/guidelines/&quot;&gt;キャラクター利用に関するガイドライン&lt;/a&gt;に従って作られた二次創作物です。" data-en="This is a derivative work created in accordance with &lt;a href=&quot;http://idlp.jp/&quot;&gt;IDOLRISM&lt;/a&gt;'s &lt;a href=&quot;http://idlp.jp/guidelines/&quot;&gt;character usage guidelines&lt;/a&gt;.">※このコンテンツは、<a href="http://idlp.jp/">アイドリズム</a>の<a href="http://idlp.jp/guidelines/">キャラクター利用に関するガイドライン</a>に従って作られた二次創作物です。</span><br />
-					</p>
-				</div>
-			</div>
-		</div>
-
-		<div class="board boardtext left board-banner mobile">
-			<div class="boardmargin">
-				<br />
-				<p class="center"><b>
-				<span data-ja="「今度ありす、新曲と一緒にパリデビューしちゃうんだよ☆」" data-en="&quot;Guess what? Arisu is making her Paris debut with a brand-new song!&quot;">「今度ありす、新曲と一緒にパリデビューしちゃうんだよ☆」</span></b></p>
-				<br />
-				<p>
-				<span data-ja="アイドリズムの加賀美ありすが、3Dステージで歌って踊る！" data-en="IDOLRISM's Arisu Kagami sings and dances on a 3D stage!">アイドリズムの加賀美ありすが、3Dステージで歌って踊る！</span><br />
-				<span data-ja="かわいいありすの3Dリズムゲーム登場！" data-en="A cute 3D rhythm game starring Arisu!">かわいいありすの3Dリズムゲーム登場！</span><br />
-				</p>
-				<br />
-				<p>
-				<span data-ja="曲はこのゲームのための書き下ろし！" data-en="Every song was written just for this game!">曲はこのゲームのための書き下ろし！</span><br />
-				<span data-ja="歌もダンスも頑張って、みんなをファンにするって決めたの…！" data-en="She's giving her all to singing and dancing, determined to make a fan out of everyone...!">歌もダンスも頑張って、みんなをファンにするって決めたの…！</span><br />
-				<span data-ja="だから、今後のありすの活躍も見ててよね！" data-en="So keep your eyes on Arisu from here on out!">だから、今後のありすの活躍も見ててよね！</span><br />
-				</p>
 
 				<p class="space"><b data-ja="■動画" data-en="■Video">■動画</b></p>
 				<div class="center space">
@@ -377,7 +301,7 @@
 	</article>
 
 	<div id="appli">
-		<div class="box clearfix mobile kimagure">
+		<div class="box clearfix mobile">
 			<p class="icon"><img src="img/icon2.png" width="60"></p>
 			<p class="txt">
 				<span data-ja="【タイトル】" data-en="[Title]">【タイトル】</span> ありすのステージ<br />
@@ -392,6 +316,6 @@
 	</footer>
 </body>
 
-<script type="text/javascript" src="js/pager.js?20260904-1"></script>
+<script type="text/javascript" src="js/pager.js?2017905-0105"></script>
 
 </html>
