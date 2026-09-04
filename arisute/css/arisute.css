@@ -213,3 +213,13 @@ iframe {
     height: 100%;
   }
 }
+/* 更新履歴の折りたたみ */
+.changelog{
+	margin: 0.5em 0;
+}
+.changelog summary{
+	cursor: pointer;
+}
+.changelog ul{
+	margin: 0.2em 0 0.6em;
+}
