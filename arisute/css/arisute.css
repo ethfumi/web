@@ -149,6 +149,8 @@
 .screenshot img{
 	text-align: center;
 	margin: 1.5% 0px;
+	max-width: 100%;	/* スマホで板からはみ出さない */
+	height: auto;
 	/*
 	width: 250px;
 	margin: 9px;
