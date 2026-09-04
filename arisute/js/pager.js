@@ -10,6 +10,10 @@ var TABS = {
 	c92:      { titlebg: "title-bg-02", background: "background-02" },
 	c90:      { titlebg: "title-bg-01", background: "background-01" }
 };
+function set_waitload(state)
+{
+	set_group("waitload", state);
+}
 function set_group(name, state)
 {
 	var elements = document.getElementsByClassName(name);
