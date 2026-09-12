@@ -154,7 +154,22 @@
     projectMapPath(map.coords);
     map.worldBounds = {minX: mapWorldX(map.minLon), maxX: mapWorldX(map.maxLon),
       minY: mapWorldY(map.maxLat), maxY: mapWorldY(map.minLat)};
+    // 駅間の平均距離 (m)。縮尺を掛けると画面上の駅間隔になり、駅の点や名前の間引きに使う。
+    let spanTotal = 0;
+    for (let i = 1; i < map.points.length; i++) {
+      spanTotal += Math.hypot(map.points[i].worldX - map.points[i - 1].worldX, map.points[i].worldY - map.points[i - 1].worldY);
+    }
+    map.meanStationSpanMeters = map.points.length > 1 ? spanTotal / (map.points.length - 1) : 0;
   }
+  // 乗換駅: 2 つ以上の路線に同じ駅名がある。引いた地図で残す駅名と、周辺路線の駅の点の基準。
+  const MAP_INTERCHANGE_STATIONS = (() => {
+    const counts = new Map();
+    for (const map of Object.values(ROUTE_MAPS)) {
+      if (map.kind === "air" || map.kind === "sea") continue;
+      for (const name of new Set(map.points.map((point) => point.name))) counts.set(name, (counts.get(name) || 0) + 1);
+    }
+    return new Set([...counts].filter(([, count]) => count >= 2).map(([name]) => name));
+  })();
   for (const items of Object.values(MAP_GEOGRAPHY)) {
     if (!Array.isArray(items)) continue;
     for (const item of items) {
@@ -3714,8 +3729,8 @@
     }
     ctx.setLineDash([]);
     ctx.globalAlpha = 1;
+    drawRelatedRouteStations(scene, candidates, labelSize);
     for (const {map} of candidates) {
-
       const labelPoint = map.points[Math.floor(map.points.length / 2)];
       const labelX = scene.screenCenterX + (mapWorldX(labelPoint.lon) - scene.centerWorldX) * scene.scale;
       const labelY = scene.screenCenterY + (mapWorldY(labelPoint.lat) - scene.centerWorldY) * scene.scale;
@@ -3729,6 +3744,38 @@
       relatedLineLabelCount++;
     }
     ctx.restore();
+  }
+
+  // 周辺路線の駅の点。路線色の縁取りの小さな白丸で、走行中路線の駅より小さい。
+  // 画面上の駅間隔が狭い路線は乗換駅だけにし、さらに狭ければ描かない。
+  function drawRelatedRouteStations(scene, candidates, labelSize) {
+    const dotRadius = Math.max(2, Math.min(4.5, labelSize * 0.17));
+    ctx.save();
+    ctx.fillStyle = "#ffffff";
+    ctx.lineWidth = Math.max(1, dotRadius * 0.45);
+    let drawn = 0;
+    for (const {map} of candidates) {
+      if (map.kind === "air" || map.kind === "sea") continue;
+      const spacingPx = map.meanStationSpanMeters * scene.scale;
+      if (spacingPx < dotRadius * 1.5) continue;
+      const onlyInterchange = spacingPx < dotRadius * 4;
+      ctx.strokeStyle = map.color;
+      ctx.beginPath();
+      let any = false;
+      for (const point of map.points) {
+        if (onlyInterchange && !MAP_INTERCHANGE_STATIONS.has(point.name)) continue;
+        const x = scene.screenCenterX + (point.worldX - scene.centerWorldX) * scene.scale;
+        const y = scene.screenCenterY + (point.worldY - scene.centerWorldY) * scene.scale;
+        if (!mapPointIsVisible(scene, x, y, 10)) continue;
+        ctx.moveTo(x + dotRadius, y);
+        ctx.arc(x, y, dotRadius, 0, Math.PI * 2);
+        any = true;
+        drawn++;
+      }
+      if (any) { ctx.fill(); ctx.stroke(); }
+    }
+    ctx.restore();
+    if (isDebug) canvas.dataset.mapRelatedStationDots = String(drawn);
   }
 
   // 周辺路線の名前。駅名より弱く、ぶつかる時は名前のほうを消す。
@@ -3816,14 +3863,27 @@
     while (routeStationMapPositions.length < stationList.length) routeStationMapPositions.push({});
     ctx.font = "bold " + labelSize + "px sans-serif";
     ctx.textBaseline = "bottom";
+    // 駅の重要度: 0 = いま走っている駅と次の駅、1 = 乗換駅・急行停車駅・両端、2 = それ以外。
+    const stationTier = (station, index) => {
+      if (station.name === currentStationName || station.name === nextStationName) return 0;
+      if (MAP_INTERCHANGE_STATIONS.has(station.name) || activeRoute.expressStops.has(station.name)
+        || index === 0 || index === stationList.length - 1) return 1;
+      return 2;
+    };
+    let spacingTotal = 0;
+    let spacingCount = 0;
     for (let index = 0; index < stationList.length; index++) {
       const station = stationList[index];
       const position = yamanoteMapPositionAt(station.km, routeStationMapPositions[index], map);
       position.screenX = scene.screenCenterX + (position.worldX - scene.centerWorldX) * scene.scale;
       position.screenY = scene.screenCenterY + (position.worldY - scene.centerWorldY) * scene.scale;
+      if (index) {
+        const previous = routeStationMapPositions[index - 1];
+        spacingTotal += Math.hypot(position.screenX - previous.screenX, position.screenY - previous.screenY);
+        spacingCount++;
+      }
       if (!mapPointIsVisible(scene, position.screenX, position.screenY)) continue;
-      const important = activeRoute.cityStations.has(station.name)
-        || station.name === currentStationName || station.name === nextStationName;
+      const important = stationTier(station, index) <= 1;
       // 駅の点は縮尺に関係なく必ず描き、引いた図でも見える大きさを保つ。
       const dotRadius = important ? Math.max(5.5, labelSize * 0.32) : Math.max(4, labelSize * 0.24);
       ctx.fillStyle = "#ffffff";
@@ -3835,29 +3895,44 @@
       ctx.stroke();
     }
 
-    // 名前は点をすべて描いてから、優先度の高い順に 3 段で置く。
-    //   0: いま走っている駅と次の駅（混んだ区間でも先着のラベルに負けない）
-    //   1: 乗換駅・終点（cityStations）
-    //   2: それ以外。隣の駅と画面上で近すぎる（引いた図）ときは置かない
+    // 名前は点をすべて描いてから、重要度の高い順に置く。どこまで置くかは画面上の駅間隔で決める。
+    //   間隔が広い(寄っている): 全駅
+    //   中くらい: 乗換駅・急行停車駅・両端だけ
+    //   狭い(引いている): さらに、名前を置いた駅から十分離れた乗換駅だけ
     // 置けなかった駅も点は残る。重なりは claimMapLabelBox が最終判定する。
     ctx.fillStyle = timeOfDay === "night" ? "#f4f7fb" : "#344054";
     ctx.textAlign = "center";
-    const minorLabelGap = labelSize * 1.6;
-    const stationTier = (station) => (station.name === currentStationName || station.name === nextStationName) ? 0
-      : activeRoute.cityStations.has(station.name) ? 1 : 2;
-    for (let pass = 0; pass < 3; pass++) {
+    const spacingPx = spacingCount ? spacingTotal / spacingCount : Infinity;
+    // 駅名はおよそ 5 文字ぶんの幅。駅間隔がその 1.5 倍以上あるときだけ全駅、
+    // 半分を切ったら乗換駅も名前どうしを離して置く。
+    const nameWidthPx = labelSize * 5;
+    const maxTier = spacingPx >= nameWidthPx * 1.5 ? 2 : 1;
+    const sparse = spacingPx < nameWidthPx * 0.5;
+    const sparseGap = nameWidthPx * 1.2;
+    if (isDebug) canvas.dataset.mapStationSpacing = spacingPx.toFixed(1);
+    const placedByIndex = new Array(stationList.length).fill(false);
+    for (let pass = 0; pass <= maxTier; pass++) {
       for (let index = 0; index < stationList.length; index++) {
         const station = stationList[index];
         const position = routeStationMapPositions[index];
         if (!mapPointIsVisible(scene, position.screenX, position.screenY)) continue;
-        if (stationTier(station) !== pass) continue;
+        if (stationTier(station, index) !== pass) continue;
+        if (pass === 1 && sparse) {
+          // 引いた図では、名前を置いた駅から近すぎる乗換駅は飛ばす(走行中の駅は別枠)。
+          let tooClose = false;
+          for (let other = 0; other < stationList.length && !tooClose; other++) {
+            if (!placedByIndex[other] || other === index) continue;
+            const placed = routeStationMapPositions[other];
+            tooClose = Math.hypot(placed.screenX - position.screenX, placed.screenY - position.screenY) < sparseGap;
+          }
+          if (tooClose) continue;
+        }
         if (pass === 2) {
           const previous = routeStationMapPositions[index - 1];
-          const next = routeStationMapPositions[index + 1];
+          const next = index + 1 < stationList.length ? routeStationMapPositions[index + 1] : null;
           const gapPrev = previous ? Math.hypot(previous.screenX - position.screenX, previous.screenY - position.screenY) : Infinity;
-          const gapNext = next && index + 1 < stationList.length
-            ? Math.hypot(next.screenX - position.screenX, next.screenY - position.screenY) : Infinity;
-          if (Math.min(gapPrev, gapNext) < minorLabelGap) continue;
+          const gapNext = next ? Math.hypot(next.screenX - position.screenX, next.screenY - position.screenY) : Infinity;
+          if (Math.min(gapPrev, gapNext) < labelSize * 1.6) continue;
         }
         const labelWidth = measureMapText(station.name).width + labelSize * 0.4;
         // 上に置けないときは点の下を試す。両隣の名前に挟まれた駅もこれで入ることが多い。
@@ -3867,6 +3942,7 @@
           : claimMapLabelBox(position.screenX, below, labelWidth, labelSize) ? below : null;
         if (labelY === null) continue;
         ctx.fillText(station.name, position.screenX, labelY);
+        placedByIndex[index] = true;
       }
     }
     ctx.restore();
