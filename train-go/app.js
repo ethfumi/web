@@ -2853,7 +2853,9 @@
     document.body.classList.toggle("map-camera-pan-manual", active && !mapScrollAuto);
   }
   function resetMapCamera() {
-    mapScrollAuto = true;
+    // うえからは最初からカメラを手動にする。列車を追い続けるより、指でスクロールして
+    // 周りの路線や駅を眺めたいことが多い。「カメラ じどう」でいつでも追従に戻せる。
+    mapScrollAuto = mapMode !== "follow";
     mapZoomAuto = true;
     mapManualCenterWorldX = NaN;
     mapManualCenterWorldY = NaN;
@@ -3243,6 +3245,11 @@
   }
 
   function applyManualMapCamera(scene) {
+    // 手動カメラの位置が未定なら、その時点の自動カメラ(列車の位置)から始める。
+    if (!mapScrollAuto && !Number.isFinite(mapManualCenterWorldX)) {
+      mapManualCenterWorldX = scene.centerWorldX;
+      mapManualCenterWorldY = scene.centerWorldY;
+    }
     if (!mapScrollAuto && Number.isFinite(mapManualCenterWorldX)) {
       scene.centerWorldX = mapManualCenterWorldX;
       scene.centerWorldY = mapManualCenterWorldY;
