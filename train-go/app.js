@@ -3780,13 +3780,12 @@
   }
 
   // 周辺路線の駅名。走行中路線の駅名を置いたあと、少し小さい字で置く。
-  // どこまで置くかはその路線の画面上の駅間隔で決める(走行中路線と同じ段の切り方)。
-  // 走行中路線にもある駅(乗換駅)はそちらで描いているので飛ばす。
+  // 乗換駅を先に全路線ぶん試し、次にそれ以外。縮尺で丸ごと落とさず、
+  // 他の駅名と重ならなければ置く。走行中路線にもある駅(乗換駅)はそちらで描いているので飛ばす。
   let relatedRouteCandidates = [];
   function drawRelatedStationLabels(scene, labelSize) {
     if (!relatedRouteCandidates.length) return;
     const fontSize = Math.max(9, labelSize * 0.8);
-    const nameWidthPx = fontSize * 5;
     const ownNames = new Set([activeRoute.start, ...activeRoute.stations.map((station) => station.name)]);
     const placedNames = new Set();
     ctx.save();
@@ -3799,9 +3798,6 @@
     for (let pass = 0; pass < 2; pass++) {
       for (const {map} of relatedRouteCandidates) {
         if (map.kind === "air" || map.kind === "sea") continue;
-        const spacingPx = map.meanStationSpanMeters * scene.scale;
-        if (spacingPx < nameWidthPx * 0.5) continue;
-        if (pass === 1 && spacingPx < nameWidthPx * 1.5) continue;
         for (const point of map.points) {
           const interchange = MAP_INTERCHANGE_STATIONS.has(point.name);
           if ((pass === 0) !== interchange) continue;
@@ -3942,45 +3938,19 @@
       ctx.stroke();
     }
 
-    // 名前は点をすべて描いてから、重要度の高い順に置く。どこまで置くかは画面上の駅間隔で決める。
-    //   間隔が広い(寄っている): 全駅
-    //   中くらい: 乗換駅・急行停車駅・両端だけ
-    //   狭い(引いている): さらに、名前を置いた駅から十分離れた乗換駅だけ
-    // 置けなかった駅も点は残る。重なりは claimMapLabelBox が最終判定する。
+    // 名前は点をすべて描いてから、重要度の高い順に全駅を試す。
+    // 縮尺で丸ごと落とすことはせず、他の駅名と重ならず隙間があれば置く。
+    // 引いた図では乗換駅が先に場所を取るので、残りは入る所にだけ入る。置けなかった駅も点は残る。
     ctx.fillStyle = timeOfDay === "night" ? "#f4f7fb" : "#344054";
     ctx.textAlign = "center";
     const spacingPx = spacingCount ? spacingTotal / spacingCount : Infinity;
-    // 駅名はおよそ 5 文字ぶんの幅。駅間隔がその 1.5 倍以上あるときだけ全駅、
-    // 半分を切ったら乗換駅も名前どうしを離して置く。
-    const nameWidthPx = labelSize * 5;
-    const maxTier = spacingPx >= nameWidthPx * 1.5 ? 2 : 1;
-    const sparse = spacingPx < nameWidthPx * 0.5;
-    const sparseGap = nameWidthPx * 1.2;
     if (isDebug) canvas.dataset.mapStationSpacing = spacingPx.toFixed(1);
-    const placedByIndex = new Array(stationList.length).fill(false);
-    for (let pass = 0; pass <= maxTier; pass++) {
+    for (let pass = 0; pass <= 2; pass++) {
       for (let index = 0; index < stationList.length; index++) {
         const station = stationList[index];
         const position = routeStationMapPositions[index];
         if (!mapPointIsVisible(scene, position.screenX, position.screenY)) continue;
         if (stationTier(station, index) !== pass) continue;
-        if (pass === 1 && sparse) {
-          // 引いた図では、名前を置いた駅から近すぎる乗換駅は飛ばす(走行中の駅は別枠)。
-          let tooClose = false;
-          for (let other = 0; other < stationList.length && !tooClose; other++) {
-            if (!placedByIndex[other] || other === index) continue;
-            const placed = routeStationMapPositions[other];
-            tooClose = Math.hypot(placed.screenX - position.screenX, placed.screenY - position.screenY) < sparseGap;
-          }
-          if (tooClose) continue;
-        }
-        if (pass === 2) {
-          const previous = routeStationMapPositions[index - 1];
-          const next = index + 1 < stationList.length ? routeStationMapPositions[index + 1] : null;
-          const gapPrev = previous ? Math.hypot(previous.screenX - position.screenX, previous.screenY - position.screenY) : Infinity;
-          const gapNext = next ? Math.hypot(next.screenX - position.screenX, next.screenY - position.screenY) : Infinity;
-          if (Math.min(gapPrev, gapNext) < labelSize * 1.6) continue;
-        }
         const labelWidth = measureMapText(station.name).width + labelSize * 0.4;
         // 上に置けないときは点の下を試す。両隣の名前に挟まれた駅もこれで入ることが多い。
         const above = position.screenY - labelSize * 0.55;
@@ -3989,7 +3959,6 @@
           : claimMapLabelBox(position.screenX, below, labelWidth, labelSize) ? below : null;
         if (labelY === null) continue;
         ctx.fillText(station.name, position.screenX, labelY);
-        placedByIndex[index] = true;
       }
     }
     ctx.restore();
