@@ -13,8 +13,9 @@
     if (entry) {
       entry.ms += ms;
       entry.calls += 1;
+      entry.maxMs = Math.max(entry.maxMs, ms);
     } else {
-      profileTotals.set(name, { ms, calls: 1 });
+      profileTotals.set(name, { ms, calls: 1, maxMs: ms });
     }
   }
   function profiled(name, draw) {
@@ -138,6 +139,29 @@
   const MAP_REFERENCE_LATITUDE = (YAMANOTE_MAP_BOUNDS.minLat + YAMANOTE_MAP_BOUNDS.maxLat) / 2;
   const MAP_METERS_PER_LONGITUDE = MAP_METERS_PER_LATITUDE * Math.cos(MAP_REFERENCE_LATITUDE * Math.PI / 180);
   const MAP_REFERENCE_LONGITUDE = (YAMANOTE_MAP_BOUNDS.minLon + YAMANOTE_MAP_BOUNDS.maxLon) / 2;
+  // 地図データは不変なので、投影と各区間の向きを読込時に一度だけ計算しておく。
+  const mapProjectedPaths = new WeakMap();
+  for (const map of Object.values(ROUTE_MAPS)) {
+    for (let i = 0; i < map.points.length; i++) {
+      const point = map.points[i];
+      point.worldX = mapWorldX(point.lon);
+      point.worldY = mapWorldY(point.lat);
+      if (i) {
+        const previous = map.points[i - 1];
+        point.segmentAngle = Math.atan2(point.worldY - previous.worldY, point.worldX - previous.worldX);
+      }
+    }
+    projectMapPath(map.coords);
+    map.worldBounds = {minX: mapWorldX(map.minLon), maxX: mapWorldX(map.maxLon),
+      minY: mapWorldY(map.maxLat), maxY: mapWorldY(map.minLat)};
+  }
+  for (const items of Object.values(MAP_GEOGRAPHY)) {
+    if (!Array.isArray(items)) continue;
+    for (const item of items) {
+      const points = Array.isArray(item) ? item : item.points;
+      if (points?.length) projectMapPath(points);
+    }
+  }
 
   const ROUTE_AUTO_SPEED_KMH = {
     chuo: 100, tokaido: 285, tohoku: 320, sobu: 95,
@@ -458,7 +482,7 @@
 
   // ---- 要素 ----
   const canvas = document.getElementById("game");
-  const ctx = canvas.getContext("2d");
+  let ctx = canvas.getContext("2d");
   const selectScreen = document.getElementById("select-screen");
   const runUi = document.getElementById("run-ui");
   const arrivalBanner = document.getElementById("arrival-banner");
@@ -527,10 +551,12 @@
   const playTimeValue = document.getElementById("play-time-value");
 
   let W = 0, H = 0, DPR = 1;
+  const MAP_DPR_CAP = 1.5;
+  let mapPixelRatioActive = false;
   let forcedSize = false; // デバッグ用: 非表示タブでも描画検証できるようにサイズを固定する
   function resize() {
     if (forcedSize) return;
-    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    DPR = Math.min(window.devicePixelRatio || 1, mapPixelRatioActive ? MAP_DPR_CAP : 2);
     W = window.innerWidth;
     H = window.innerHeight;
     canvas.width = W * DPR;
@@ -2912,6 +2938,10 @@
     mapMode = MAP_MODE_SEQUENCE.includes(nextMode) ? nextMode : "scenery";
     if (mapMode !== previousMode) resetMapCamera();
     const active = mapMode !== "scenery";
+    if (mapPixelRatioActive !== active) {
+      mapPixelRatioActive = active;
+      resize();
+    }
     const nextLabel = mapMode === "scenery" ? "うえから" : mapMode === "follow" ? "ぜんたい" : "よこから";
     const nextAria = mapMode === "scenery"
       ? "うえからのちずをひらく"
@@ -3067,6 +3097,22 @@
     return (MAP_REFERENCE_LATITUDE - lat) * MAP_METERS_PER_LATITUDE;
   }
 
+  function projectMapPath(points) {
+    let projected = mapProjectedPaths.get(points);
+    if (!projected) {
+      projected = points.map(([lon, lat]) => [mapWorldX(lon), mapWorldY(lat)]);
+      projected.bounds = {minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity};
+      for (const [x, y] of projected) {
+        projected.bounds.minX = Math.min(projected.bounds.minX, x);
+        projected.bounds.maxX = Math.max(projected.bounds.maxX, x);
+        projected.bounds.minY = Math.min(projected.bounds.minY, y);
+        projected.bounds.maxY = Math.max(projected.bounds.maxY, y);
+      }
+      mapProjectedPaths.set(points, projected);
+    }
+    return projected;
+  }
+
   function yamanoteMapPositionAt(rawKm, target = {}, map = activeRouteMap()) {
     if (!map) return target;
     let km = rawKm;
@@ -3078,16 +3124,16 @@
     const previous = points[nextIndex - 1];
     const next = points[nextIndex];
     const progress = (km - previous.km) / Math.max(next.km - previous.km, 0.001);
-    const previousX = mapWorldX(previous.lon);
-    const previousY = mapWorldY(previous.lat);
-    const nextX = mapWorldX(next.lon);
-    const nextY = mapWorldY(next.lat);
+    const previousX = previous.worldX;
+    const previousY = previous.worldY;
+    const nextX = next.worldX;
+    const nextY = next.worldY;
     target.km = km;
     target.lon = previous.lon + (next.lon - previous.lon) * progress;
     target.lat = previous.lat + (next.lat - previous.lat) * progress;
     target.worldX = previousX + (nextX - previousX) * progress;
     target.worldY = previousY + (nextY - previousY) * progress;
-    target.angle = Math.atan2(nextY - previousY, nextX - previousX);
+    target.angle = next.segmentAngle;
     return target;
   }
   function yamanoteMapPosition() {
@@ -3196,16 +3242,17 @@
   }
 
   function drawMapGeoPath(scene, points, pixelOffset = 0) {
+    points = projectMapPath(points);
     ctx.beginPath();
     for (let index = 0; index < points.length; index++) {
       const point = points[index];
       const previous = points[Math.max(0, index - 1)];
       const next = points[Math.min(points.length - 1, index + 1)];
-      let x = scene.screenCenterX + (mapWorldX(point[0]) - scene.centerWorldX) * scene.scale;
-      let y = scene.screenCenterY + (mapWorldY(point[1]) - scene.centerWorldY) * scene.scale;
+      let x = scene.screenCenterX + (point[0] - scene.centerWorldX) * scene.scale;
+      let y = scene.screenCenterY + (point[1] - scene.centerWorldY) * scene.scale;
       if (pixelOffset) {
-        const dx = (mapWorldX(next[0]) - mapWorldX(previous[0])) * scene.scale;
-        const dy = (mapWorldY(next[1]) - mapWorldY(previous[1])) * scene.scale;
+        const dx = next[0] - previous[0];
+        const dy = next[1] - previous[1];
         const length = Math.max(Math.hypot(dx, dy), 0.001);
         x += -dy / length * pixelOffset;
         y += dx / length * pixelOffset;
@@ -3215,7 +3262,8 @@
     }
   }
   function mapPointIsVisible(scene, x, y, margin = 30) {
-    return x >= -margin && x <= W + margin && y >= -margin && y <= H + margin;
+    return x >= -mapCachePadding - margin && x <= W + mapCachePadding + margin
+      && y >= -mapCachePadding - margin && y <= H + mapCachePadding + margin;
   }
 
   // 地図の文字が重ならないよう、1フレーム内で確定したラベルの矩形を持つ。
@@ -3243,6 +3291,7 @@
   }
 
   function mapSegmentIsVisible(x0, y0, x1, y1, margin) {
+    margin += mapCachePadding;
     if (x0 < -margin && x1 < -margin) return false;
     if (x0 > W + margin && x1 > W + margin) return false;
     if (y0 < -margin && y1 < -margin) return false;
@@ -3252,22 +3301,23 @@
 
   // 折れ線用。画面外の連続区間は moveTo で飛ばし、長い路線でもパスを短く保つ。
   // 面を塗る地形 (海岸線・湖) には使わない。切れたパスは closePath できない。
-  function drawMapGeoPathCulled(scene, points, pixelOffset = 0) {
+  function drawMapGeoPathCulled(scene, points, pixelOffset = 0, append = false) {
+    points = projectMapPath(points);
     const margin = 80 + Math.abs(pixelOffset);
-    ctx.beginPath();
+    if (!append) ctx.beginPath();
     let prevX = 0;
     let prevY = 0;
     let hasPrev = false;
     let penDown = false;
     for (let index = 0; index < points.length; index++) {
       const point = points[index];
-      let x = scene.screenCenterX + (mapWorldX(point[0]) - scene.centerWorldX) * scene.scale;
-      let y = scene.screenCenterY + (mapWorldY(point[1]) - scene.centerWorldY) * scene.scale;
+      let x = scene.screenCenterX + (point[0] - scene.centerWorldX) * scene.scale;
+      let y = scene.screenCenterY + (point[1] - scene.centerWorldY) * scene.scale;
       if (pixelOffset) {
         const previous = points[Math.max(0, index - 1)];
         const next = points[Math.min(points.length - 1, index + 1)];
-        const dx = (mapWorldX(next[0]) - mapWorldX(previous[0])) * scene.scale;
-        const dy = (mapWorldY(next[1]) - mapWorldY(previous[1])) * scene.scale;
+        const dx = next[0] - previous[0];
+        const dy = next[1] - previous[1];
         const length = Math.max(Math.hypot(dx, dy), 0.001);
         x += -dy / length * pixelOffset;
         y += dx / length * pixelOffset;
@@ -3286,6 +3336,7 @@
   }
 
   function sceneWorldBounds(scene, marginMeters = 80000) {
+    marginMeters += mapCachePadding / Math.max(scene.scale, 1e-9);
     const inv = 1 / Math.max(scene.scale, 1e-9);
     return {
       minX: scene.centerWorldX + (0 - scene.screenCenterX) * inv - marginMeters,
@@ -3298,10 +3349,7 @@
   function mapIntersectsScene(scene, map, marginMeters) {
     if (!map) return false;
     const view = sceneWorldBounds(scene, marginMeters);
-    const minX = mapWorldX(map.minLon);
-    const maxX = mapWorldX(map.maxLon);
-    const minY = mapWorldY(map.maxLat);
-    const maxY = mapWorldY(map.minLat);
+    const {minX, maxX, minY, maxY} = map.worldBounds;
     return maxX >= view.minX && minX <= view.maxX && maxY >= view.minY && minY <= view.maxY;
   }
 
@@ -3309,10 +3357,7 @@
   // 画面を横切る長い路線を「遠い」と誤判定しない。
   function mapViewGapDistance(scene, map) {
     const view = sceneWorldBounds(scene, 0);
-    const minX = mapWorldX(map.minLon);
-    const maxX = mapWorldX(map.maxLon);
-    const minY = mapWorldY(map.maxLat);
-    const maxY = mapWorldY(map.minLat);
+    const {minX, maxX, minY, maxY} = map.worldBounds;
     const gapX = Math.max(view.minX - maxX, minX - view.maxX, 0);
     const gapY = Math.max(view.minY - maxY, minY - view.maxY, 0);
     return Math.hypot(gapX, gapY);
@@ -3355,29 +3400,26 @@
   }
 
   function drawMapTownscape(scene) {
-    // 極端に引いた全体図、または空路・海路では街を描かない。
-    if (scene.scale < 0.004 || isNonRailRoute()) return;
     ensureMapTownBlocks();
     const view = sceneWorldBounds(scene, 120);
-    // うえから（追従）は見える範囲が狭いのに全件変換していたのが重い。
-    const maxBlocks = scene.mode === "follow" ? 280 : 700;
     let drawn = 0;
     ctx.save();
+    const distant = scene.scale < 0.007;
+    if (distant) {
+      ctx.fillStyle = timeOfDay === "night" ? "rgba(255,220,120,0.62)" : "rgba(151,164,152,0.58)";
+      ctx.beginPath();
+    }
     for (let index = 0; index < MAP_TOWN_BLOCKS.length; index++) {
       const block = MAP_TOWN_BLOCKS[index];
       if (block.worldX < view.minX || block.worldX > view.maxX
         || block.worldY < view.minY || block.worldY > view.maxY) continue;
-      if (scene.scale < 0.01 && index % 3) continue;
       const x = scene.screenCenterX + (block.worldX - scene.centerWorldX) * scene.scale;
       const y = scene.screenCenterY + (block.worldY - scene.centerWorldY) * scene.scale;
       if (!mapPointIsVisible(scene, x, y, 35)) continue;
-      if (scene.scale < 0.007) {
-        if (index % 12) continue;
-        ctx.fillStyle = timeOfDay === "night" ? "rgba(255,220,120,0.62)" : "rgba(151,164,152,0.58)";
-        ctx.beginPath();
+      if (distant) {
+        ctx.moveTo(x + 2.3, y);
         ctx.arc(x, y, 2.3, 0, Math.PI * 2);
-        ctx.fill();
-        if (++drawn >= maxBlocks) break;
+        drawn++;
         continue;
       }
       const width = Math.max(4, Math.min(30, block.width * scene.scale));
@@ -3392,21 +3434,22 @@
           ? ["#46505a", "#3f4d59", "#554b50", "#445148"][block.colorIndex]
           : BUILDING_COLORS[block.colorIndex];
         ctx.fillRect(x - width / 2, y - height / 2, width, height);
-        if (scene.scale >= 0.02) {
+        {
           ctx.strokeStyle = timeOfDay === "night" ? "rgba(255,222,130,0.40)" : "rgba(95,105,110,0.20)";
           ctx.lineWidth = 1;
           ctx.strokeRect(x - width / 2, y - height / 2, width, height);
         }
       }
-      if (++drawn >= maxBlocks) break;
+      drawn++;
     }
+    if (distant) ctx.fill();
     ctx.restore();
+    if (isDebug) canvas.dataset.mapTownBlocks = String(drawn);
   }
 
   function drawMapLocalGrid(scene) {
     if (scene.mode !== "follow" || scene.scale <= 0) return;
     // 空路・海路のうえからでは格子を薄く・疎に（見た目より軽さ優先）。
-    if (isNonRailRoute() && scene.scale < 0.015) return;
     const minWorldX = scene.centerWorldX + (scene.left - scene.screenCenterX) / scene.scale;
     const maxWorldX = scene.centerWorldX + (scene.right - scene.screenCenterX) / scene.scale;
     const minWorldY = scene.centerWorldY + (scene.top - scene.screenCenterY) / scene.scale;
@@ -3453,29 +3496,12 @@
 
   function geoLonLatPathIntersectsScene(scene, points) {
     if (!points?.length) return false;
-    let minLon = Infinity;
-    let maxLon = -Infinity;
-    let minLat = Infinity;
-    let maxLat = -Infinity;
-    for (const point of points) {
-      const lon = point[0];
-      const lat = point[1];
-      if (lon < minLon) minLon = lon;
-      if (lon > maxLon) maxLon = lon;
-      if (lat < minLat) minLat = lat;
-      if (lat > maxLat) maxLat = lat;
-    }
     const view = sceneWorldBounds(scene, 50000);
-    const minX = mapWorldX(minLon);
-    const maxX = mapWorldX(maxLon);
-    const minY = mapWorldY(maxLat);
-    const maxY = mapWorldY(minLat);
+    const {minX, maxX, minY, maxY} = projectMapPath(points).bounds;
     return maxX >= view.minX && minX <= view.maxX && maxY >= view.minY && minY <= view.maxY;
   }
 
   function drawMapPrefectureLabels(scene) {
-    // 全体図で引きすぎたときは県名を消し、文字の重なりを減らす。
-    if (scene.mode !== "overview" || scene.scale < 0.012) return;
     ctx.save();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -3494,20 +3520,19 @@
     mapGradient.addColorStop(0, timeOfDay === "night" ? "#17344a" : "#d9f0f6");
     mapGradient.addColorStop(1, timeOfDay === "night" ? "#10283c" : "#b9dfea");
     ctx.fillStyle = mapGradient;
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(-mapCachePadding, -mapCachePadding, W + mapCachePadding * 2, H + mapCachePadding * 2);
 
     // うえからでは巨大な国土ポリゴンの fill が毎フレーム重たいので、塗りつぶしを避ける。
     const isFollow = scene.mode === "follow";
-    const drawBorders = !isFollow && (scene.mode === "overview" || scene.scale < 0.08)
-      || (isFollow && scene.scale < 0.05 && !isNonRailRoute());
-    const drawWaterNames = scene.scale >= 0.01 && !isNonRailRoute() && !isFollow;
+    const drawBorders = true;
+    const drawWaterNames = true;
 
     if (isFollow) {
       // ベース色だけ敷いて、海岸は線のみ（画面内に交差するものだけ）。
       ctx.fillStyle = isNonRailRoute()
         ? (timeOfDay === "night" ? "rgba(20,50,70,0.55)" : "rgba(150,210,230,0.45)")
         : (timeOfDay === "night" ? "rgba(38,63,71,0.92)" : "rgba(228,240,207,0.96)");
-      ctx.fillRect(0, 0, W, H);
+      ctx.fillRect(-mapCachePadding, -mapCachePadding, W + mapCachePadding * 2, H + mapCachePadding * 2);
       ctx.strokeStyle = timeOfDay === "night" ? "rgba(139,180,185,0.72)" : "rgba(81,130,139,0.66)";
       ctx.lineWidth = Math.max(1.2, Math.min(W, H) * 0.0023);
       for (const coastline of MAP_GEOGRAPHY.coastlines) {
@@ -3528,7 +3553,7 @@
       }
     }
 
-    // 県境は全体図と広域の追従表示だけに出し、近距離では線路を邪魔しない。
+    // 県境はどの縮尺でも描く（キャッシュ済みなので毎フレームの負荷にならない）。
     if (drawBorders) {
       ctx.save();
       ctx.setLineDash([5, 5]);
@@ -3578,7 +3603,7 @@
         drawMapGeoPath(scene, river.points);
         ctx.stroke();
       }
-      if (((scene.mode === "overview" && scene.scale >= 0.025) || (isFollow && scene.scale >= 0.08))) {
+      {
         ctx.strokeStyle = timeOfDay === "night" ? "#69a5c4" : "#4ca4cb";
         ctx.lineWidth = Math.max(2, Math.min(5, scene.scale * 34));
         for (const moat of MAP_GEOGRAPHY.moats) {
@@ -3589,7 +3614,7 @@
       }
     }
 
-    // 広域では湖・川の名前を隠し、線路と駅を優先する。
+    // 湖・川の名前もどの縮尺でも描く。重なりはラベル衝突判定に任せる。
     if (drawWaterNames) {
       ctx.font = "bold " + Math.max(9, Math.min(W, H) * 0.014) + "px sans-serif";
       ctx.textAlign = "center";
@@ -3607,7 +3632,7 @@
         const y = scene.screenCenterY + (mapWorldY(point[1]) - scene.centerWorldY) * scene.scale;
         if (mapPointIsVisible(scene, x, y, 20)) ctx.fillText(river.name, x, y - 3);
       }
-      if (((scene.mode === "overview" && scene.scale >= 0.025) || (scene.mode === "follow" && scene.scale >= 0.08))) {
+      {
         for (const moat of MAP_GEOGRAPHY.moats) {
           const point = moat.points[1];
           const x = scene.screenCenterX + (mapWorldX(point[0]) - scene.centerWorldX) * scene.scale;
@@ -3619,7 +3644,7 @@
 
     drawMapPrefectureLabels(scene);
 
-    if (scene.mode === "follow" && scene.scale >= 0.04) {
+    if (scene.mode === "follow") {
       const palaceX = scene.screenCenterX + (mapWorldX(139.7528) - scene.centerWorldX) * scene.scale;
       const palaceY = scene.screenCenterY + (mapWorldY(35.6852) - scene.centerWorldY) * scene.scale;
       if (mapPointIsVisible(scene, palaceX, palaceY, 50)) {
@@ -3637,11 +3662,6 @@
 
   function drawYamanoteRelatedLines(scene, labelSize) {
     relatedLineLabelCount = 0;
-    // 極端に引いた全体図、または空路・海路では周辺路線を描かない。
-    if (scene.scale < 0.003 || isNonRailRoute()) {
-      if (isDebug) canvas.dataset.mapRelatedLines = "";
-      return;
-    }
     const currentKey = activeRouteMapKey();
     const routeWidth = scene.mode === "follow"
       ? Math.max(2, Math.min(4.5, scene.scale * 3.2))
@@ -3655,41 +3675,51 @@
       if (mapKey === currentKey) continue;
       const map = ROUTE_MAPS[mapKey];
       if (!map || !mapIntersectsScene(scene, map, viewMargin)) continue;
-      if (scene.scale < 0.01 && (map.kind === "air" || map.kind === "sea")) continue;
       candidates.push({ mapKey, map, dist: mapViewGapDistance(scene, map) });
     }
-    // 画面に重なる路線 (gap 0) が先に来る。上限で落ちるのは画面外のものだけ。
+    // 画面に重なる路線 (gap 0) が先に来る順で、路線名の優先順位を保つ。線はまとめて描く。
     candidates.sort((a, b) => a.dist - b.dist);
-    const maxRelated = scene.mode === "follow" ? 16 : 20;
     ctx.save();
-    ctx.lineJoin = "round";
+    ctx.lineJoin = "bevel";
     ctx.lineCap = "round";
-    const drawnCount = Math.min(candidates.length, maxRelated);
+    const drawnCount = candidates.length;
     if (isDebug) {
       canvas.dataset.mapScale = String(scene.scale);
       canvas.dataset.mapRelatedLines = candidates.slice(0, drawnCount).map((c) => c.mapKey).join(",");
       canvas.dataset.mapRelatedDropped = String(candidates.length - drawnCount);
     }
-    for (let index = 0; index < drawnCount; index++) {
-      const { mapKey, map } = candidates[index];
-      const offset = MAP_ROUTE_LANE_OFFSETS[mapKey] || 0;
-      ctx.strokeStyle = "rgba(255,255,255,0.78)";
-      ctx.lineWidth = routeWidth + 3.5;
-      drawMapGeoPathCulled(scene, map.coords, offset);
+    ctx.strokeStyle = "rgba(255,255,255,0.78)";
+    ctx.lineWidth = routeWidth + 3.5;
+    ctx.beginPath();
+    const strokeGroups = new Map();
+    for (const candidate of candidates) {
+      const {mapKey, map} = candidate;
+      drawMapGeoPathCulled(scene, map.coords, MAP_ROUTE_LANE_OFFSETS[mapKey] || 0, true);
+      const dashed = map.kind === "air" || map.kind === "sea";
+      const key = `${map.color}|${dashed}`;
+      if (!strokeGroups.has(key)) strokeGroups.set(key, {color: map.color, dashed, lines: []});
+      strokeGroups.get(key).lines.push(candidate);
+    }
+    ctx.stroke();
+    ctx.globalAlpha = 0.76;
+    ctx.lineWidth = routeWidth;
+    for (const group of strokeGroups.values()) {
+      ctx.strokeStyle = group.color;
+      ctx.setLineDash(group.dashed ? [routeWidth * 3, routeWidth * 2] : []);
+      ctx.beginPath();
+      for (const {mapKey, map} of group.lines) {
+        drawMapGeoPathCulled(scene, map.coords, MAP_ROUTE_LANE_OFFSETS[mapKey] || 0, true);
+      }
       ctx.stroke();
-      ctx.strokeStyle = map.color;
-      ctx.globalAlpha = 0.76;
-      ctx.lineWidth = routeWidth;
-      ctx.setLineDash(map.kind === "air" || map.kind === "sea" ? [routeWidth * 3, routeWidth * 2] : []);
-      drawMapGeoPathCulled(scene, map.coords, offset);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.globalAlpha = 1;
+    }
+    ctx.setLineDash([]);
+    ctx.globalAlpha = 1;
+    for (const {map} of candidates) {
 
       const labelPoint = map.points[Math.floor(map.points.length / 2)];
       const labelX = scene.screenCenterX + (mapWorldX(labelPoint.lon) - scene.centerWorldX) * scene.scale;
       const labelY = scene.screenCenterY + (mapWorldY(labelPoint.lat) - scene.centerWorldY) * scene.scale;
-      if (!mapPointIsVisible(scene, labelX, labelY) || scene.scale < 0.02 || (scene.mode === "follow" && scene.scale < 0.12)) continue;
+      if (!mapPointIsVisible(scene, labelX, labelY)) continue;
       // 名前はここでは描かず、駅名を置いたあとに回す (drawMapRelatedLineLabels)。
       const pending = relatedLineLabels[relatedLineLabelCount]
         || (relatedLineLabels[relatedLineLabelCount] = {});
@@ -3715,7 +3745,7 @@
     for (let index = 0; index < relatedLineLabelCount; index++) {
       const label = relatedLineLabels[index];
       const y = label.y - 5;
-      const width = ctx.measureText(label.name).width + fontSize * 0.4;
+      const width = measureMapText(label.name).width + fontSize * 0.4;
       if (!claimMapLabelBox(label.x, y, width, fontSize)) continue;
       ctx.fillText(label.name, label.x, y);
     }
@@ -3814,13 +3844,8 @@
         if (!mapPointIsVisible(scene, position.screenX, position.screenY)) continue;
         const running = station.name === currentStationName || station.name === nextStationName;
         if ((pass === 0) !== running) continue;
-        const important = activeRoute.cityStations.has(station.name) || running;
-        const showLabel = scene.mode === "overview"
-          ? important && scene.scale >= 0.006
-          : important || scene.scale >= 0.7;
-        if (!showLabel) continue;
         const labelY = position.screenY - labelSize * 0.55;
-        const labelWidth = ctx.measureText(station.name).width;
+        const labelWidth = measureMapText(station.name).width;
         if (!claimMapLabelBox(position.screenX, labelY, labelWidth + labelSize * 0.4, labelSize)) continue;
         ctx.fillText(station.name, position.screenX, labelY);
       }
@@ -3829,8 +3854,6 @@
   }
 
   function drawYamanoteLandmarks(scene, labelSize) {
-    // かなり引いた全体図ではランドマーク名も抑える。
-    if (scene.mode === "overview" && scene.scale < 0.008) return;
     ctx.save();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -3844,7 +3867,7 @@
       const nameSize = Math.max(8, labelSize * 0.68);
       const nameY = y + labelSize * 0.95;
       ctx.font = "bold " + nameSize + "px sans-serif";
-      if (!claimMapLabelBox(x, nameY + nameSize / 2, ctx.measureText(landmark.name).width + nameSize * 0.4, nameSize)) continue;
+      if (!claimMapLabelBox(x, nameY + nameSize / 2, measureMapText(landmark.name).width + nameSize * 0.4, nameSize)) continue;
       ctx.fillStyle = timeOfDay === "night" ? "#e9eef6" : "#51606f";
       ctx.fillText(landmark.name, x, nameY);
     }
@@ -3857,7 +3880,7 @@
       const nameSize = Math.max(9, labelSize * 0.72);
       const nameY = y + labelSize * 1.15;
       ctx.font = "bold " + nameSize + "px sans-serif";
-      if (!claimMapLabelBox(x, nameY + nameSize / 2, ctx.measureText(landmark.name).width + nameSize * 0.4, nameSize)) continue;
+      if (!claimMapLabelBox(x, nameY + nameSize / 2, measureMapText(landmark.name).width + nameSize * 0.4, nameSize)) continue;
       ctx.fillStyle = timeOfDay === "night" ? "#eef5ff" : "#526578";
       ctx.fillText(landmark.name, x, nameY);
     }
@@ -4060,7 +4083,7 @@
     ctx.textBaseline = "middle";
     const boostText = `×${type.multiplier}`;
     ctx.font = `bold ${Math.max(11, radius * 0.55)}px sans-serif`;
-    const pillWidth = ctx.measureText(boostText).width + radius * 0.75;
+    const pillWidth = measureMapText(boostText).width + radius * 0.75;
     ctx.fillStyle = type.badge;
     ctx.strokeStyle = type.accent;
     ctx.lineWidth = 2;
@@ -4072,10 +4095,25 @@
     ctx.restore();
   }
 
-  function drawYamanoteMap() {
-    const automaticScene = mapMode === "follow" ? yamanoteFollowScene() : yamanoteOverviewScene();
-    const scene = applyManualMapCamera(automaticScene);
-    const labelSize = Math.max(10, Math.min(W, H) * (scene.portrait ? 0.024 : 0.021));
+  let mapCachePadding = 0;
+  let mapStaticCache = null;
+  const mapTextMetrics = new Map();
+  function measureMapText(text) {
+    const key = `${ctx.font}\n${text}`;
+    let metrics = mapTextMetrics.get(key);
+    if (!metrics) {
+      if (mapTextMetrics.size >= 4096) mapTextMetrics.clear();
+      metrics = ctx.measureText(text);
+      mapTextMetrics.set(key, metrics);
+    }
+    return metrics;
+  }
+  if (document.fonts) document.fonts.addEventListener("loadingdone", () => {
+    mapTextMetrics.clear();
+    mapStaticCache = null;
+  });
+
+  function drawMapStaticLayer(scene, labelSize) {
     resetMapLabelBoxes();
     ctx.save();
     profiled("map:background", () => drawYamanoteMapBackground(scene));
@@ -4083,9 +4121,59 @@
     profiled("map:relatedLines", () => drawYamanoteRelatedLines(scene, labelSize));
     profiled("map:route", () => drawYamanoteRoute(scene, labelSize));
     profiled("map:relatedLabels", () => drawMapRelatedLineLabels(scene, labelSize));
-    if (!(isNonRailRoute() && scene.mode === "follow")) {
-      profiled("map:landmarks", () => drawYamanoteLandmarks(scene, labelSize));
+    profiled("map:landmarks", () => drawYamanoteLandmarks(scene, labelSize));
+    ctx.restore();
+  }
+
+  function drawCachedMap(scene, labelSize) {
+    const key = [activeRouteMapKey(), activeRoute.variant, currentStationName, nextStationName,
+      scene.mode, scene.scale, timeOfDay, W, H, DPR, scene.screenCenterX, scene.screenCenterY].join("|");
+    let cache = mapStaticCache;
+    let dx = cache ? (cache.centerX - scene.centerWorldX) * scene.scale : 0;
+    let dy = cache ? (cache.centerY - scene.centerWorldY) * scene.scale : 0;
+    if (!cache || cache.key !== key || Math.abs(dx) > cache.padding * 0.75
+      || Math.abs(dy) > cache.padding * 0.75) {
+      profiled("map:cache-rebuild", () => {
+        const padding = scene.mode === "follow" ? Math.ceil(Math.min(W, H) * 0.25) : 0;
+        const width = Math.ceil((W + padding * 2) * DPR);
+        const height = Math.ceil((H + padding * 2) * DPR);
+        const surface = cache?.surface || (typeof OffscreenCanvas === "function"
+          ? new OffscreenCanvas(width, height) : document.createElement("canvas"));
+        surface.width = width;
+        surface.height = height;
+        const displayContext = ctx;
+        try {
+          ctx = surface.getContext("2d");
+          ctx.setTransform(DPR, 0, 0, DPR, padding * DPR, padding * DPR);
+          mapCachePadding = padding;
+          drawMapStaticLayer({...scene, left: -padding, top: -padding,
+            right: W + padding, bottom: H + padding}, labelSize);
+        } finally {
+          ctx = displayContext;
+          mapCachePadding = 0;
+        }
+        cache = mapStaticCache = {key, surface, padding,
+          centerX: scene.centerWorldX, centerY: scene.centerWorldY};
+        if (isDebug) {
+          canvas.dataset.mapCacheRebuilds = String(Number(canvas.dataset.mapCacheRebuilds || 0) + 1);
+          canvas.dataset.mapCacheTimeOfDay = timeOfDay;
+          canvas.dataset.mapCacheRoute = activeRouteMapKey();
+          canvas.dataset.mapCacheScale = String(scene.scale);
+          canvas.dataset.mapCacheBackend = surface instanceof HTMLCanvasElement ? "canvas" : "offscreen";
+        }
+      });
+      dx = dy = 0;
     }
+    ctx.drawImage(cache.surface, 0, 0, cache.surface.width, cache.surface.height,
+      dx - cache.padding, dy - cache.padding, cache.surface.width / DPR, cache.surface.height / DPR);
+  }
+
+  function drawYamanoteMap() {
+    const automaticScene = mapMode === "follow" ? yamanoteFollowScene() : yamanoteOverviewScene();
+    const scene = applyManualMapCamera(automaticScene);
+    const labelSize = Math.max(10, Math.min(W, H) * (scene.portrait ? 0.024 : 0.021));
+    ctx.save();
+    drawCachedMap(scene, labelSize);
 
     const position = yamanoteMapPosition();
     let trainPoint;
@@ -4110,7 +4198,7 @@
     const badgeText = scene.portrait
       ? `${modeText}　${roundedKm}km　${vehicleText}　🧭↑${boostText}`
       : `${modeText}　${roundedKm} km　${vehicleText}　🧭 きた↑${boostText}`;
-    const badgeWidth = ctx.measureText(badgeText).width + labelSize * 1.6;
+    const badgeWidth = measureMapText(badgeText).width + labelSize * 1.6;
     ctx.fillStyle = "rgba(255,255,255,0.91)";
     roundRect(W * 0.5 - badgeWidth / 2, H * 0.022, badgeWidth, labelSize * 1.8, labelSize * 0.8);
     ctx.fill();
@@ -5832,7 +5920,8 @@ function drawAirports() {
     }
 
     // バックグラウンド起動などで resize イベントを取りこぼしても復帰できるようにする
-    if (!forcedSize && (window.innerWidth !== W || window.innerHeight !== H || canvas.width === 0)) {
+    if (!forcedSize && (window.innerWidth !== W || window.innerHeight !== H || canvas.width === 0
+      || DPR !== Math.min(window.devicePixelRatio || 1, mapPixelRatioActive ? MAP_DPR_CAP : 2))) {
       resize();
     }
 
@@ -6025,7 +6114,8 @@ function drawAirports() {
       // 描画段階ごとの平均所要時間 (ms/フレーム)。呼ぶたびに集計をリセットする。
       profile() {
         const rows = [...profileTotals.entries()]
-          .map(([name, { ms, calls }]) => ({ name, calls, avgMs: Math.round((ms / calls) * 1000) / 1000 }))
+          .map(([name, { ms, calls, maxMs }]) => ({ name, calls,
+            avgMs: Math.round((ms / calls) * 1000) / 1000, maxMs: Math.round(maxMs * 1000) / 1000 }))
           .sort((a, b) => b.avgMs - a.avgMs);
         profileTotals.clear();
         return rows;

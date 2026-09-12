@@ -117,6 +117,11 @@ https なので service worker が有効になり、ホーム画面に追加す�
 
 ## 既知の挙動
 
+- 地図の背景・街・路線・固定ラベルは OffscreenCanvas（非対応時は通常の canvas）へまとめてキャッシュする。
+- 追従表示では画面外に余白を持ち、移動中は画像を平行移動する。余白の端、縮尺・モード・路線・現在駅/次駅・昼夜・画面サイズ・DPR・フォントの変更で再生成する。
+- 地図モードだけ DPR を `MAP_DPR_CAP`（既定1.5）以下に抑え、文字幅とラベル配置も再利用する。再生成は1フレームに最大1枚。
+- 路線数・街ブロック数・ラベルの縮尺による間引きは行わず、画面外の除外とラベル衝突回避だけを残す。遠景の街は点の LOD で表示する。
+- `?debug` の `__tg.profile()` で `map:cache-rebuild` を確認でき、`canvas.dataset.mapCacheRebuilds` / `mapRelatedDropped` / `mapTownBlocks` に再生成回数・省略路線数・街の描画数を出す。
 - タブ/アプリが非表示の間は 200ms 間隔の低頻度更新に落ちる(電池対策と検証容易性の折衷)
 - 走行中の数値表示は毎秒10回に抑え、100両編成でも描画ごとの一時オブジェクトを増やさない
 - 基本の車両・鉄道路線データは `train-route-data.js`、全国追加分は `national-rail-route-data.js`、関東追加分は `kanto-rail-route-data.js`、空路データは `air-route-data.js`、地図データは `map-data.js` に分離し、`app.js` はゲーム処理を担当する
