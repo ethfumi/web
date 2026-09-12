@@ -3730,6 +3730,7 @@
     ctx.setLineDash([]);
     ctx.globalAlpha = 1;
     drawRelatedRouteStations(scene, candidates, labelSize);
+    relatedRouteCandidates = candidates;
     for (const {map} of candidates) {
       const labelPoint = map.points[Math.floor(map.points.length / 2)];
       const labelX = scene.screenCenterX + (mapWorldX(labelPoint.lon) - scene.centerWorldX) * scene.scale;
@@ -3776,6 +3777,52 @@
     }
     ctx.restore();
     if (isDebug) canvas.dataset.mapRelatedStationDots = String(drawn);
+  }
+
+  // 周辺路線の駅名。走行中路線の駅名を置いたあと、少し小さい字で置く。
+  // どこまで置くかはその路線の画面上の駅間隔で決める(走行中路線と同じ段の切り方)。
+  // 走行中路線にもある駅(乗換駅)はそちらで描いているので飛ばす。
+  let relatedRouteCandidates = [];
+  function drawRelatedStationLabels(scene, labelSize) {
+    if (!relatedRouteCandidates.length) return;
+    const fontSize = Math.max(9, labelSize * 0.8);
+    const nameWidthPx = fontSize * 5;
+    const ownNames = new Set([activeRoute.start, ...activeRoute.stations.map((station) => station.name)]);
+    const placedNames = new Set();
+    ctx.save();
+    ctx.font = "bold " + fontSize + "px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.fillStyle = timeOfDay === "night" ? "rgba(236,242,250,0.9)" : "rgba(70,84,100,0.95)";
+    let drawn = 0;
+    // 乗換駅を先に全路線ぶん置いてから、それ以外を置く。
+    for (let pass = 0; pass < 2; pass++) {
+      for (const {map} of relatedRouteCandidates) {
+        if (map.kind === "air" || map.kind === "sea") continue;
+        const spacingPx = map.meanStationSpanMeters * scene.scale;
+        if (spacingPx < nameWidthPx * 0.5) continue;
+        if (pass === 1 && spacingPx < nameWidthPx * 1.5) continue;
+        for (const point of map.points) {
+          const interchange = MAP_INTERCHANGE_STATIONS.has(point.name);
+          if ((pass === 0) !== interchange) continue;
+          if (ownNames.has(point.name) || placedNames.has(point.name)) continue;
+          const x = scene.screenCenterX + (point.worldX - scene.centerWorldX) * scene.scale;
+          const y = scene.screenCenterY + (point.worldY - scene.centerWorldY) * scene.scale;
+          if (!mapPointIsVisible(scene, x, y)) continue;
+          const width = measureMapText(point.name).width + fontSize * 0.4;
+          const above = y - fontSize * 0.5;
+          const below = y + fontSize * 1.4;
+          const labelY = claimMapLabelBox(x, above, width, fontSize) ? above
+            : claimMapLabelBox(x, below, width, fontSize) ? below : null;
+          if (labelY === null) continue;
+          ctx.fillText(point.name, x, labelY);
+          placedNames.add(point.name);
+          drawn++;
+        }
+      }
+    }
+    ctx.restore();
+    if (isDebug) canvas.dataset.mapRelatedStationLabels = String(drawn);
   }
 
   // 周辺路線の名前。駅名より弱く、ぶつかる時は名前のほうを消す。
@@ -4215,6 +4262,7 @@
     profiled("map:townscape", () => drawMapTownscape(scene));
     profiled("map:relatedLines", () => drawYamanoteRelatedLines(scene, labelSize));
     profiled("map:route", () => drawYamanoteRoute(scene, labelSize));
+    profiled("map:relatedStationLabels", () => drawRelatedStationLabels(scene, labelSize));
     profiled("map:relatedLabels", () => drawMapRelatedLineLabels(scene, labelSize));
     profiled("map:landmarks", () => drawYamanoteLandmarks(scene, labelSize));
     ctx.restore();
