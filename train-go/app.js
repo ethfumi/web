@@ -3824,29 +3824,48 @@
       if (!mapPointIsVisible(scene, position.screenX, position.screenY)) continue;
       const important = activeRoute.cityStations.has(station.name)
         || station.name === currentStationName || station.name === nextStationName;
-      ctx.fillStyle = important ? "#ffffff" : "#dfe8d7";
+      // 駅の点は縮尺に関係なく必ず描き、引いた図でも見える大きさを保つ。
+      const dotRadius = important ? Math.max(5.5, labelSize * 0.32) : Math.max(4, labelSize * 0.24);
+      ctx.fillStyle = "#ffffff";
       ctx.strokeStyle = important ? "#334155" : "#617064";
-      ctx.lineWidth = important ? 2.5 : 1.2;
+      ctx.lineWidth = important ? 2.5 : 1.8;
       ctx.beginPath();
-      ctx.arc(position.screenX, position.screenY, important ? 5.5 : 3, 0, Math.PI * 2);
+      ctx.arc(position.screenX, position.screenY, dotRadius, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
     }
 
-    // 名前は点をすべて描いてから、いま走っている駅を先に置く。
-    // 混んだ区間で「つぎの駅」の名前が先着のラベルに負けて消えるのを防ぐ。
+    // 名前は点をすべて描いてから、優先度の高い順に 3 段で置く。
+    //   0: いま走っている駅と次の駅（混んだ区間でも先着のラベルに負けない）
+    //   1: 乗換駅・終点（cityStations）
+    //   2: それ以外。隣の駅と画面上で近すぎる（引いた図）ときは置かない
+    // 置けなかった駅も点は残る。重なりは claimMapLabelBox が最終判定する。
     ctx.fillStyle = timeOfDay === "night" ? "#f4f7fb" : "#344054";
     ctx.textAlign = "center";
-    for (let pass = 0; pass < 2; pass++) {
+    const minorLabelGap = labelSize * 1.6;
+    const stationTier = (station) => (station.name === currentStationName || station.name === nextStationName) ? 0
+      : activeRoute.cityStations.has(station.name) ? 1 : 2;
+    for (let pass = 0; pass < 3; pass++) {
       for (let index = 0; index < stationList.length; index++) {
         const station = stationList[index];
         const position = routeStationMapPositions[index];
         if (!mapPointIsVisible(scene, position.screenX, position.screenY)) continue;
-        const running = station.name === currentStationName || station.name === nextStationName;
-        if ((pass === 0) !== running) continue;
-        const labelY = position.screenY - labelSize * 0.55;
-        const labelWidth = measureMapText(station.name).width;
-        if (!claimMapLabelBox(position.screenX, labelY, labelWidth + labelSize * 0.4, labelSize)) continue;
+        if (stationTier(station) !== pass) continue;
+        if (pass === 2) {
+          const previous = routeStationMapPositions[index - 1];
+          const next = routeStationMapPositions[index + 1];
+          const gapPrev = previous ? Math.hypot(previous.screenX - position.screenX, previous.screenY - position.screenY) : Infinity;
+          const gapNext = next && index + 1 < stationList.length
+            ? Math.hypot(next.screenX - position.screenX, next.screenY - position.screenY) : Infinity;
+          if (Math.min(gapPrev, gapNext) < minorLabelGap) continue;
+        }
+        const labelWidth = measureMapText(station.name).width + labelSize * 0.4;
+        // 上に置けないときは点の下を試す。両隣の名前に挟まれた駅もこれで入ることが多い。
+        const above = position.screenY - labelSize * 0.55;
+        const below = position.screenY + labelSize * 1.45;
+        const labelY = claimMapLabelBox(position.screenX, above, labelWidth, labelSize) ? above
+          : claimMapLabelBox(position.screenX, below, labelWidth, labelSize) ? below : null;
+        if (labelY === null) continue;
         ctx.fillText(station.name, position.screenX, labelY);
       }
     }
