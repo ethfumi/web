@@ -1,0 +1,6881 @@
+{
+  "source": "OpenStreetMap contributors / ODbL 1.0",
+  "osmBase": "2026-09-22T08:45:51Z",
+  "note": "サービスエリア・休憩施設のうち道の駅と記載された地点。読みは登録値を優先し、未登録分は自動変換。公式登録駅の全件網羅を示すデータではない。",
+  "entries": [
+    {
+      "name": "230ルスツ",
+      "kana": "230るすつ",
+      "lon": 140.8847,
+      "lat": 42.74041,
+      "source": "https://www.openstreetmap.org/way/562731649"
+    },
+    {
+      "name": "251いいもりじゃがーロード",
+      "kana": "251いいもりじゃがーろーど",
+      "lon": 130.04601,
+      "lat": 32.78537,
+      "source": "https://www.openstreetmap.org/way/1516216831"
+    },
+    {
+      "name": "275つきがた",
+      "kana": "275つきがた",
+      "lon": 141.68015,
+      "lat": 43.34192,
+      "source": "https://www.openstreetmap.org/way/1350668611"
+    },
+    {
+      "name": ":ようか但馬蔵",
+      "kana": ":ようかたじまくら",
+      "lon": 134.74288,
+      "lat": 35.39384,
+      "source": "https://www.openstreetmap.org/way/1445432046"
+    },
+    {
+      "name": ":ハチ北",
+      "kana": ":はちきた",
+      "lon": 134.5999,
+      "lat": 35.41132,
+      "source": "https://www.openstreetmap.org/way/829708810"
+    },
+    {
+      "name": "KOKOくろべ",
+      "kana": "KOKOくろべ",
+      "lon": 137.42759,
+      "lat": 36.87772,
+      "source": "https://www.openstreetmap.org/way/633720522"
+    },
+    {
+      "name": "YOU･遊･もり",
+      "kana": "YOUYOUゆうゆうもり",
+      "lon": 140.56772,
+      "lat": 42.09953,
+      "source": "https://www.openstreetmap.org/way/460603176"
+    },
+    {
+      "name": "☆ロマン街道しょさんべつ",
+      "kana": "☆ろまんかいどうしょさんべつ",
+      "lon": 141.77811,
+      "lat": 44.56299,
+      "source": "https://www.openstreetmap.org/way/1107005913"
+    },
+    {
+      "name": "あいお",
+      "kana": "あいお",
+      "lon": 131.45731,
+      "lat": 34.02888,
+      "source": "https://www.openstreetmap.org/way/442979055"
+    },
+    {
+      "name": "あいおい",
+      "kana": "あいおい",
+      "lon": 143.98002,
+      "lat": 43.54501,
+      "source": "https://www.openstreetmap.org/way/561697769"
+    },
+    {
+      "name": "あいおい白龍城",
+      "kana": "あいおいはくりゅうしろ",
+      "lon": 134.46109,
+      "lat": 34.80422,
+      "source": "https://www.openstreetmap.org/way/481775729"
+    },
+    {
+      "name": "あいづ 湯川・会津坂下",
+      "kana": "あいづ ゆかわ・あいづばんげ",
+      "lon": 139.86243,
+      "lat": 37.55738,
+      "source": "https://www.openstreetmap.org/way/311152706"
+    },
+    {
+      "name": "あいの土山",
+      "kana": "あいのつちやま",
+      "lon": 136.2959,
+      "lat": 34.92796,
+      "source": "https://www.openstreetmap.org/way/808828981"
+    },
+    {
+      "name": "あいぽーと佐渡",
+      "kana": "あいぽーとさど",
+      "lon": 138.43614,
+      "lat": 38.08391,
+      "source": "https://www.openstreetmap.org/way/966781011"
+    },
+    {
+      "name": "あおがき",
+      "kana": "あおがき",
+      "lon": 135.00951,
+      "lat": 35.24138,
+      "source": "https://www.openstreetmap.org/way/1080673239"
+    },
+    {
+      "name": "あおき",
+      "kana": "あおき",
+      "lon": 138.14036,
+      "lat": 36.37262,
+      "source": "https://www.openstreetmap.org/way/442950813"
+    },
+    {
+      "name": "あかいがわ",
+      "kana": "あかいがわ",
+      "lon": 140.84484,
+      "lat": 43.05136,
+      "source": "https://www.openstreetmap.org/way/562742125"
+    },
+    {
+      "name": "あかばねロコステーション",
+      "kana": "あかばねろこすてーしょん",
+      "lon": 137.18961,
+      "lat": 34.60759,
+      "source": "https://www.openstreetmap.org/way/441602970"
+    },
+    {
+      "name": "あがつま峡",
+      "kana": "あがつまきょう",
+      "lon": 138.73588,
+      "lat": 36.56998,
+      "source": "https://www.openstreetmap.org/way/525401321"
+    },
+    {
+      "name": "あがの",
+      "kana": "あがの",
+      "lon": 139.16485,
+      "lat": 37.83696,
+      "source": "https://www.openstreetmap.org/way/824700984"
+    },
+    {
+      "name": "あきた港",
+      "kana": "あきたみなと",
+      "lon": 140.0614,
+      "lat": 39.75231,
+      "source": "https://www.openstreetmap.org/way/433848962"
+    },
+    {
+      "name": "あぐりーむ昭和",
+      "kana": "あぐりーむしょうわ",
+      "lon": 139.06912,
+      "lat": 36.61264,
+      "source": "https://www.openstreetmap.org/way/492265067"
+    },
+    {
+      "name": "あぐり窪川",
+      "kana": "あぐりくぼかわ",
+      "lon": 133.14957,
+      "lat": 33.23125,
+      "source": "https://www.openstreetmap.org/way/442744177"
+    },
+    {
+      "name": "あさひかわ",
+      "kana": "あさひかわ",
+      "lon": 142.34845,
+      "lat": 43.7599,
+      "source": "https://www.openstreetmap.org/way/458753568"
+    },
+    {
+      "name": "あさむし温泉",
+      "kana": "あさむしおんせん",
+      "lon": 140.86144,
+      "lat": 40.8917,
+      "source": "https://www.openstreetmap.org/way/768727737"
+    },
+    {
+      "name": "あしょろ銀河ホール21",
+      "kana": "あしょろぎんがほーる21",
+      "lon": 143.5466,
+      "lat": 43.24448,
+      "source": "https://www.openstreetmap.org/way/674676856"
+    },
+    {
+      "name": "あずの里いちはら",
+      "kana": "あずのさといちはら",
+      "lon": 140.10923,
+      "lat": 35.46394,
+      "source": "https://www.openstreetmap.org/way/320638813"
+    },
+    {
+      "name": "あそ",
+      "kana": "あそ",
+      "lon": 131.081,
+      "lat": 32.93666,
+      "source": "https://www.openstreetmap.org/way/436808993"
+    },
+    {
+      "name": "あっさぶ",
+      "kana": "あっさぶ",
+      "lon": 140.21622,
+      "lat": 41.91672,
+      "source": "https://www.openstreetmap.org/way/561541010"
+    },
+    {
+      "name": "あつみ",
+      "kana": "あつみ",
+      "lon": 139.55865,
+      "lat": 38.58033,
+      "source": "https://www.openstreetmap.org/way/438380170"
+    },
+    {
+      "name": "あに",
+      "kana": "あに",
+      "lon": 140.45716,
+      "lat": 39.90152,
+      "source": "https://www.openstreetmap.org/way/439962211"
+    },
+    {
+      "name": "あびら D51(デゴイチ)ステーション",
+      "kana": "あびらD51（でごいち）すてーしょん",
+      "lon": 141.81848,
+      "lat": 42.87626,
+      "source": "https://www.openstreetmap.org/relation/11140968"
+    },
+    {
+      "name": "あびら鰊番屋",
+      "kana": "あびらにしんばんや",
+      "lon": 141.65508,
+      "lat": 44.13741,
+      "source": "https://www.openstreetmap.org/way/946509308"
+    },
+    {
+      "name": "あぷた",
+      "kana": "あぷた",
+      "lon": 140.77855,
+      "lat": 42.52887,
+      "source": "https://www.openstreetmap.org/way/562443650"
+    },
+    {
+      "name": "あまるべ",
+      "kana": "あまるべ",
+      "lon": 134.55995,
+      "lat": 35.64935,
+      "source": "https://www.openstreetmap.org/way/436846897"
+    },
+    {
+      "name": "あゆの里矢田川",
+      "kana": "あゆのりやたがわ",
+      "lon": 134.57049,
+      "lat": 35.55637,
+      "source": "https://www.openstreetmap.org/way/556390352"
+    },
+    {
+      "name": "あらい",
+      "kana": "あらい",
+      "lon": 138.22751,
+      "lat": 37.02694,
+      "source": "https://www.openstreetmap.org/relation/18369124"
+    },
+    {
+      "name": "あらかわ",
+      "kana": "あらかわ",
+      "lon": 139.01278,
+      "lat": 35.95422,
+      "source": "https://www.openstreetmap.org/way/168581143"
+    },
+    {
+      "name": "あらエッサ",
+      "kana": "あらえっさ",
+      "lon": 133.31252,
+      "lat": 35.40943,
+      "source": "https://www.openstreetmap.org/way/387038356"
+    },
+    {
+      "name": "あわじ",
+      "kana": "あわじ",
+      "lon": 135.00857,
+      "lat": 34.60188,
+      "source": "https://www.openstreetmap.org/way/642757201"
+    },
+    {
+      "name": "あ・ら・伊達な道の駅",
+      "kana": "あ・ら・だてなみちのえき",
+      "lon": 140.83326,
+      "lat": 38.70745,
+      "source": "https://www.openstreetmap.org/way/1160628512"
+    },
+    {
+      "name": "いいで",
+      "kana": "いいで",
+      "lon": 139.99382,
+      "lat": 38.02593,
+      "source": "https://www.openstreetmap.org/way/1071871808"
+    },
+    {
+      "name": "いおり",
+      "kana": "いおり",
+      "lon": 137.04681,
+      "lat": 37.02854,
+      "source": "https://www.openstreetmap.org/way/442992842"
+    },
+    {
+      "name": "いかりがせき",
+      "kana": "いかりがせき",
+      "lon": 140.62245,
+      "lat": 40.48119,
+      "source": "https://www.openstreetmap.org/way/434714804"
+    },
+    {
+      "name": "いくさかの郷",
+      "kana": "いくさかのさと",
+      "lon": 137.93241,
+      "lat": 36.42433,
+      "source": "https://www.openstreetmap.org/way/1056798550"
+    },
+    {
+      "name": "いたこ",
+      "kana": "いたこ",
+      "lon": 140.58917,
+      "lat": 35.94655,
+      "source": "https://www.openstreetmap.org/way/343200274"
+    },
+    {
+      "name": "いたの",
+      "kana": "いたの",
+      "lon": 134.47397,
+      "lat": 34.13632,
+      "source": "https://www.openstreetmap.org/way/1461675283"
+    },
+    {
+      "name": "いちかわ",
+      "kana": "いちかわ",
+      "lon": 139.91971,
+      "lat": 35.74929,
+      "source": "https://www.openstreetmap.org/way/593133120"
+    },
+    {
+      "name": "いちごの里よしみ",
+      "kana": "いちごのさとよしみ",
+      "lon": 139.45821,
+      "lat": 36.03667,
+      "source": "https://www.openstreetmap.org/way/441406808"
+    },
+    {
+      "name": "いっぷく処横川",
+      "kana": "いっぷくところよこかわ",
+      "lon": 137.87148,
+      "lat": 34.90518,
+      "source": "https://www.openstreetmap.org/way/648355517"
+    },
+    {
+      "name": "いとだ",
+      "kana": "いとだ",
+      "lon": 130.76522,
+      "lat": 33.64208,
+      "source": "https://www.openstreetmap.org/way/436908948"
+    },
+    {
+      "name": "いとまん",
+      "kana": "いとまん",
+      "lon": 127.66155,
+      "lat": 26.13829,
+      "source": "https://www.openstreetmap.org/way/460202138"
+    },
+    {
+      "name": "いなかだて",
+      "kana": "いなかだて",
+      "lon": 140.57777,
+      "lat": 40.63394,
+      "source": "https://www.openstreetmap.org/way/434716074"
+    },
+    {
+      "name": "いぶすき",
+      "kana": "いぶすき",
+      "lon": 130.58958,
+      "lat": 31.30207,
+      "source": "https://www.openstreetmap.org/way/436884039"
+    },
+    {
+      "name": "いまべつ",
+      "kana": "いまべつ",
+      "lon": 140.51399,
+      "lat": 41.14561,
+      "source": "https://www.openstreetmap.org/way/439666031"
+    },
+    {
+      "name": "いわいずみ",
+      "kana": "いわいずみ",
+      "lon": 141.86274,
+      "lat": 39.84237,
+      "source": "https://www.openstreetmap.org/way/436709854"
+    },
+    {
+      "name": "いわき・ら・ら・ミュウ",
+      "kana": "いわき・ら・ら・みゅう",
+      "lon": 140.90573,
+      "lat": 36.94461,
+      "source": "https://www.openstreetmap.org/way/1462592883"
+    },
+    {
+      "name": "いんない",
+      "kana": "いんない",
+      "lon": 131.32014,
+      "lat": 33.42399,
+      "source": "https://www.openstreetmap.org/way/675370140"
+    },
+    {
+      "name": "うき",
+      "kana": "うき",
+      "lon": 130.69836,
+      "lat": 32.65105,
+      "source": "https://www.openstreetmap.org/way/791595051"
+    },
+    {
+      "name": "うご 「端縫いの郷",
+      "kana": "うご 「はじぬいのさと",
+      "lon": 140.41322,
+      "lat": 39.20084,
+      "source": "https://www.openstreetmap.org/way/602211315"
+    },
+    {
+      "name": "うしぶか海彩館",
+      "kana": "うしぶかうみさいかん",
+      "lon": 130.02734,
+      "lat": 32.194,
+      "source": "https://www.openstreetmap.org/way/585063708"
+    },
+    {
+      "name": "うすい",
+      "kana": "うすい",
+      "lon": 130.7132,
+      "lat": 33.5639,
+      "source": "https://www.openstreetmap.org/way/411023736"
+    },
+    {
+      "name": "うずしお",
+      "kana": "うずしお",
+      "lon": 134.66023,
+      "lat": 34.24256,
+      "source": "https://www.openstreetmap.org/way/442750132"
+    },
+    {
+      "name": "うたしないチロルの湯",
+      "kana": "うたしないちろるのゆ",
+      "lon": 142.00616,
+      "lat": 43.50306,
+      "source": "https://www.openstreetmap.org/way/524311720"
+    },
+    {
+      "name": "うつのみや ろまんちっく村",
+      "kana": "うつのみや ろまんちっくむら",
+      "lon": 139.83303,
+      "lat": 36.63266,
+      "source": "https://www.openstreetmap.org/way/377692945"
+    },
+    {
+      "name": "うとろ・シリエトク",
+      "kana": "うとろ・しりえとく",
+      "lon": 144.99048,
+      "lat": 44.06858,
+      "source": "https://www.openstreetmap.org/way/561670555"
+    },
+    {
+      "name": "うみてらす名立",
+      "kana": "うみてらすなだち",
+      "lon": 138.08634,
+      "lat": 37.16305,
+      "source": "https://www.openstreetmap.org/way/256294180"
+    },
+    {
+      "name": "うみんぴあ大飯",
+      "kana": "うみんぴあおおい",
+      "lon": 135.63057,
+      "lat": 35.48103,
+      "source": "https://www.openstreetmap.org/way/442988842"
+    },
+    {
+      "name": "うれしの まるく",
+      "kana": "うれしの まるく",
+      "lon": 129.99786,
+      "lat": 33.10638,
+      "source": "https://www.openstreetmap.org/way/1041092977"
+    },
+    {
+      "name": "うわじま きさいや広場",
+      "kana": "うわじま きさいやひろば",
+      "lon": 132.55828,
+      "lat": 33.2224,
+      "source": "https://www.openstreetmap.org/way/440436800"
+    },
+    {
+      "name": "えびの",
+      "kana": "えびの",
+      "lon": 130.80558,
+      "lat": 32.05018,
+      "source": "https://www.openstreetmap.org/way/441558896"
+    },
+    {
+      "name": "えんべつ富士見",
+      "kana": "えんべつふじみ",
+      "lon": 141.7924,
+      "lat": 44.71403,
+      "source": "https://www.openstreetmap.org/way/1106726866"
+    },
+    {
+      "name": "おいらせ",
+      "kana": "おいらせ",
+      "lon": 141.11835,
+      "lat": 40.58599,
+      "source": "https://www.openstreetmap.org/way/558458095"
+    },
+    {
+      "name": "おおえ",
+      "kana": "おおえ",
+      "lon": 140.21277,
+      "lat": 38.36785,
+      "source": "https://www.openstreetmap.org/way/683652191"
+    },
+    {
+      "name": "おおがた",
+      "kana": "おおがた",
+      "lon": 139.95153,
+      "lat": 40.01536,
+      "source": "https://www.openstreetmap.org/way/293490351"
+    },
+    {
+      "name": "おおぎみ やんばるの森ビジターセンター",
+      "kana": "おおぎみ やんばるのもりびじたーせんたー",
+      "lon": 128.10207,
+      "lat": 26.661,
+      "source": "https://www.openstreetmap.org/way/1027241153"
+    },
+    {
+      "name": "おおさと",
+      "kana": "おおさと",
+      "lon": 140.99259,
+      "lat": 38.42426,
+      "source": "https://www.openstreetmap.org/way/434694072"
+    },
+    {
+      "name": "おおすみ弥五郎伝説の里",
+      "kana": "おおすみやごろうでんせつのさと",
+      "lon": 130.99042,
+      "lat": 31.59026,
+      "source": "https://www.openstreetmap.org/way/1414009877"
+    },
+    {
+      "name": "おおた",
+      "kana": "おおた",
+      "lon": 139.29613,
+      "lat": 36.26426,
+      "source": "https://www.openstreetmap.org/way/439329477"
+    },
+    {
+      "name": "おおつの里 花倶楽部",
+      "kana": "おおつのさと はなくらぶ",
+      "lon": 139.8611,
+      "lat": 35.0577,
+      "source": "https://www.openstreetmap.org/way/234949773"
+    },
+    {
+      "name": "おおの；岩手",
+      "kana": "おおのおおのいわて",
+      "lon": 141.66606,
+      "lat": 40.27772,
+      "source": "https://www.openstreetmap.org/way/436643794"
+    },
+    {
+      "name": "おおやま",
+      "kana": "おおやま",
+      "lon": 130.97194,
+      "lat": 33.24822,
+      "source": "https://www.openstreetmap.org/way/1149010879"
+    },
+    {
+      "name": "おおゆ",
+      "kana": "おおゆ",
+      "lon": 140.82623,
+      "lat": 40.29545,
+      "source": "https://www.openstreetmap.org/way/584919503"
+    },
+    {
+      "name": "おかべ",
+      "kana": "おかべ",
+      "lon": 139.2418,
+      "lat": 36.21842,
+      "source": "https://www.openstreetmap.org/way/439459634"
+    },
+    {
+      "name": "おが",
+      "kana": "おが",
+      "lon": 139.84818,
+      "lat": 39.88191,
+      "source": "https://www.openstreetmap.org/way/612290322"
+    },
+    {
+      "name": "おがち",
+      "kana": "おがち",
+      "lon": 140.46036,
+      "lat": 39.06516,
+      "source": "https://www.openstreetmap.org/way/1443165222"
+    },
+    {
+      "name": "おがわ",
+      "kana": "おがわ",
+      "lon": 137.99061,
+      "lat": 36.61315,
+      "source": "https://www.openstreetmap.org/way/435144245"
+    },
+    {
+      "name": "おがわら湖",
+      "kana": "おがわらみずうみ",
+      "lon": 141.27472,
+      "lat": 40.7283,
+      "source": "https://www.openstreetmap.org/way/295707156"
+    },
+    {
+      "name": "おこっぺ",
+      "kana": "おこっぺ",
+      "lon": 143.11726,
+      "lat": 44.46936,
+      "source": "https://www.openstreetmap.org/way/1095316887"
+    },
+    {
+      "name": "おだいとう",
+      "kana": "おだいとう",
+      "lon": 145.23691,
+      "lat": 43.53276,
+      "source": "https://www.openstreetmap.org/way/561668545"
+    },
+    {
+      "name": "おといねっぷ",
+      "kana": "おといねっぷ",
+      "lon": 142.25768,
+      "lat": 44.72913,
+      "source": "https://www.openstreetmap.org/way/562504274"
+    },
+    {
+      "name": "おとふけ",
+      "kana": "おとふけ",
+      "lon": 143.18179,
+      "lat": 42.97502,
+      "source": "https://www.openstreetmap.org/way/563165569"
+    },
+    {
+      "name": "おのこ",
+      "kana": "おのこ",
+      "lon": 138.95276,
+      "lat": 36.5481,
+      "source": "https://www.openstreetmap.org/relation/11977112"
+    },
+    {
+      "name": "おばあちゃん市・山岡",
+      "kana": "おばあちゃんし・やまおか",
+      "lon": 137.3063,
+      "lat": 35.32836,
+      "source": "https://www.openstreetmap.org/way/688809283"
+    },
+    {
+      "name": "おびら鰊番屋",
+      "kana": "おびらにしんばんや",
+      "lon": 141.65497,
+      "lat": 44.13752,
+      "source": "https://www.openstreetmap.org/way/1550326539"
+    },
+    {
+      "name": "おふく",
+      "kana": "おふく",
+      "lon": 131.20839,
+      "lat": 34.23851,
+      "source": "https://www.openstreetmap.org/way/669543097"
+    },
+    {
+      "name": "おりつめ",
+      "kana": "おりつめ",
+      "lon": 141.41723,
+      "lat": 40.24866,
+      "source": "https://www.openstreetmap.org/way/559684583"
+    },
+    {
+      "name": "おんねゆ温泉",
+      "kana": "おんねゆおんせん",
+      "lon": 143.50083,
+      "lat": 43.7535,
+      "source": "https://www.openstreetmap.org/way/473903166"
+    },
+    {
+      "name": "かきのきむら",
+      "kana": "かきのきむら",
+      "lon": 131.86775,
+      "lat": 34.4426,
+      "source": "https://www.openstreetmap.org/relation/4188026"
+    },
+    {
+      "name": "かくだ",
+      "kana": "かくだ",
+      "lon": 140.80748,
+      "lat": 37.96887,
+      "source": "https://www.openstreetmap.org/way/1005612765"
+    },
+    {
+      "name": "かさま",
+      "kana": "かさま",
+      "lon": 140.27412,
+      "lat": 36.35607,
+      "source": "https://www.openstreetmap.org/way/1095056547"
+    },
+    {
+      "name": "かぞわたらせ",
+      "kana": "かぞわたらせ",
+      "lon": 139.66224,
+      "lat": 36.21132,
+      "source": "https://www.openstreetmap.org/way/438559017"
+    },
+    {
+      "name": "かつら",
+      "kana": "かつら",
+      "lon": 140.3328,
+      "lat": 36.54482,
+      "source": "https://www.openstreetmap.org/way/319201376"
+    },
+    {
+      "name": "かづの",
+      "kana": "かづの",
+      "lon": 140.78577,
+      "lat": 40.18168,
+      "source": "https://www.openstreetmap.org/way/434710355"
+    },
+    {
+      "name": "かでな",
+      "kana": "かでな",
+      "lon": 127.77419,
+      "lat": 26.36794,
+      "source": "https://www.openstreetmap.org/way/460200287"
+    },
+    {
+      "name": "かなん",
+      "kana": "かなん",
+      "lon": 135.61739,
+      "lat": 34.47823,
+      "source": "https://www.openstreetmap.org/way/60745854"
+    },
+    {
+      "name": "かまえ",
+      "kana": "かまえ",
+      "lon": 131.92433,
+      "lat": 32.8019,
+      "source": "https://www.openstreetmap.org/way/436895120"
+    },
+    {
+      "name": "かみおか",
+      "kana": "かみおか",
+      "lon": 140.37699,
+      "lat": 39.52198,
+      "source": "https://www.openstreetmap.org/way/453434231"
+    },
+    {
+      "name": "かみこあに",
+      "kana": "かみこあに",
+      "lon": 140.29726,
+      "lat": 40.06339,
+      "source": "https://www.openstreetmap.org/way/439887474"
+    },
+    {
+      "name": "かみしほろ",
+      "kana": "かみしほろ",
+      "lon": 143.29167,
+      "lat": 43.2245,
+      "source": "https://www.openstreetmap.org/way/1112450051"
+    },
+    {
+      "name": "かみゆうべつ温泉チューリップの湯",
+      "kana": "かみゆうべつおんせんちゅーりっぷのゆ",
+      "lon": 143.59525,
+      "lat": 44.18503,
+      "source": "https://www.openstreetmap.org/way/561731909"
+    },
+    {
+      "name": "かよう",
+      "kana": "かよう",
+      "lon": 133.70517,
+      "lat": 34.81613,
+      "source": "https://www.openstreetmap.org/way/709191810"
+    },
+    {
+      "name": "かわうその里すさき",
+      "kana": "かわうそのさとすさき",
+      "lon": 133.27474,
+      "lat": 33.38762,
+      "source": "https://www.openstreetmap.org/way/442742906"
+    },
+    {
+      "name": "かわうち湖",
+      "kana": "かわうちみずうみ",
+      "lon": 140.88836,
+      "lat": 41.27044,
+      "source": "https://www.openstreetmap.org/way/439633260"
+    },
+    {
+      "name": "かわもと",
+      "kana": "かわもと",
+      "lon": 139.28866,
+      "lat": 36.15141,
+      "source": "https://www.openstreetmap.org/way/441119895"
+    },
+    {
+      "name": "きくがわ",
+      "kana": "きくがわ",
+      "lon": 131.03197,
+      "lat": 34.12619,
+      "source": "https://www.openstreetmap.org/way/363137530"
+    },
+    {
+      "name": "きつれがわ",
+      "kana": "きつれがわ",
+      "lon": 140.03235,
+      "lat": 36.71562,
+      "source": "https://www.openstreetmap.org/way/139812473"
+    },
+    {
+      "name": "きなはい屋しろかわ",
+      "kana": "きなはいやしろかわ",
+      "lon": 132.74949,
+      "lat": 33.37985,
+      "source": "https://www.openstreetmap.org/way/1205855490"
+    },
+    {
+      "name": "きょなん",
+      "kana": "きょなん",
+      "lon": 139.8365,
+      "lat": 35.12848,
+      "source": "https://www.openstreetmap.org/way/457180973"
+    },
+    {
+      "name": "きよかわ",
+      "kana": "きよかわ",
+      "lon": 131.51761,
+      "lat": 32.97141,
+      "source": "https://www.openstreetmap.org/way/1148785276"
+    },
+    {
+      "name": "きらら289",
+      "kana": "きらら289",
+      "lon": 139.54272,
+      "lat": 37.22173,
+      "source": "https://www.openstreetmap.org/way/550632492"
+    },
+    {
+      "name": "きららあじす",
+      "kana": "きららあじす",
+      "lon": 131.36922,
+      "lat": 34.01274,
+      "source": "https://www.openstreetmap.org/way/442979189"
+    },
+    {
+      "name": "きんぽう木花館",
+      "kana": "きんぽうきはなかん",
+      "lon": 130.34543,
+      "lat": 31.46489,
+      "source": "https://www.openstreetmap.org/way/436878985"
+    },
+    {
+      "name": "ぎのざ",
+      "kana": "ぎのざ",
+      "lon": 127.95197,
+      "lat": 26.47362,
+      "source": "https://www.openstreetmap.org/way/460196055"
+    },
+    {
+      "name": "くしがきの里",
+      "kana": "くしがきのさと",
+      "lon": 135.47688,
+      "lat": 34.31798,
+      "source": "https://www.openstreetmap.org/way/712465176"
+    },
+    {
+      "name": "くしま",
+      "kana": "くしま",
+      "lon": 131.22806,
+      "lat": 31.46265,
+      "source": "https://www.openstreetmap.org/way/915136279"
+    },
+    {
+      "name": "くしもと橋杭岩",
+      "kana": "くしもとはしぐいいわ",
+      "lon": 135.79433,
+      "lat": 33.48772,
+      "source": "https://www.openstreetmap.org/way/483464791"
+    },
+    {
+      "name": "くす",
+      "kana": "くす",
+      "lon": 131.1572,
+      "lat": 33.28973,
+      "source": "https://www.openstreetmap.org/way/433648425"
+    },
+    {
+      "name": "くずまき高原",
+      "kana": "くずまきこうげん",
+      "lon": 141.33956,
+      "lat": 39.98435,
+      "source": "https://www.openstreetmap.org/way/62288580"
+    },
+    {
+      "name": "くちくまの",
+      "kana": "くちくまの",
+      "lon": 135.41422,
+      "lat": 33.69156,
+      "source": "https://www.openstreetmap.org/way/442764023"
+    },
+    {
+      "name": "くつき新本陣",
+      "kana": "くつきしんぽんじん",
+      "lon": 135.91558,
+      "lat": 35.35108,
+      "source": "https://www.openstreetmap.org/way/1282537782"
+    },
+    {
+      "name": "くにさき",
+      "kana": "くにさき",
+      "lon": 131.73966,
+      "lat": 33.54548,
+      "source": "https://www.openstreetmap.org/way/436899889"
+    },
+    {
+      "name": "くにみ",
+      "kana": "くにみ",
+      "lon": 131.60539,
+      "lat": 33.68029,
+      "source": "https://www.openstreetmap.org/way/436900851"
+    },
+    {
+      "name": "くみはまSANKAIKAN",
+      "kana": "くみはまSANKAIKAN",
+      "lon": 134.93176,
+      "lat": 35.63045,
+      "source": "https://www.openstreetmap.org/way/441948832"
+    },
+    {
+      "name": "くめなん",
+      "kana": "くめなん",
+      "lon": 133.94712,
+      "lat": 34.91209,
+      "source": "https://www.openstreetmap.org/way/872059172"
+    },
+    {
+      "name": "くらぶち小栗の里",
+      "kana": "くらぶちおぐりのさと",
+      "lon": 138.79309,
+      "lat": 36.42444,
+      "source": "https://www.openstreetmap.org/way/306241849"
+    },
+    {
+      "name": "くりもと",
+      "kana": "くりもと",
+      "lon": 140.47053,
+      "lat": 35.80616,
+      "source": "https://www.openstreetmap.org/way/420472823"
+    },
+    {
+      "name": "くるくる なると",
+      "kana": "くるくる なると",
+      "lon": 134.57979,
+      "lat": 34.15835,
+      "source": "https://www.openstreetmap.org/way/1037497928"
+    },
+    {
+      "name": "くるら戸田",
+      "kana": "くるらとだ",
+      "lon": 138.78696,
+      "lat": 34.97131,
+      "source": "https://www.openstreetmap.org/way/667959360"
+    },
+    {
+      "name": "くろほね・やまびこ",
+      "kana": "くろほね・やまびこ",
+      "lon": 139.27171,
+      "lat": 36.4913,
+      "source": "https://www.openstreetmap.org/way/436926506"
+    },
+    {
+      "name": "くろまつない",
+      "kana": "くろまつない",
+      "lon": 140.3802,
+      "lat": 42.67319,
+      "source": "https://www.openstreetmap.org/way/562727756"
+    },
+    {
+      "name": "ぐるっとパノラマ美幌峠",
+      "kana": "ぐるっとぱのらまびほろとうげ",
+      "lon": 144.24796,
+      "lat": 43.64828,
+      "source": "https://www.openstreetmap.org/way/376530063"
+    },
+    {
+      "name": "こさか",
+      "kana": "こさか",
+      "lon": 140.78205,
+      "lat": 40.35671,
+      "source": "https://www.openstreetmap.org/way/434712225"
+    },
+    {
+      "name": "こすげ",
+      "kana": "こすげ",
+      "lon": 138.94998,
+      "lat": 35.75348,
+      "source": "https://www.openstreetmap.org/way/392893158"
+    },
+    {
+      "name": "ことおか",
+      "kana": "ことおか",
+      "lon": 140.08072,
+      "lat": 40.02165,
+      "source": "https://www.openstreetmap.org/way/433846001"
+    },
+    {
+      "name": "こどまり",
+      "kana": "こどまり",
+      "lon": 140.32078,
+      "lat": 41.1457,
+      "source": "https://www.openstreetmap.org/way/658462853"
+    },
+    {
+      "name": "こまつ木場潟",
+      "kana": "こまつきばかた",
+      "lon": 136.46277,
+      "lat": 36.36997,
+      "source": "https://www.openstreetmap.org/way/891952782"
+    },
+    {
+      "name": "こもち",
+      "kana": "こもち",
+      "lon": 139.01652,
+      "lat": 36.51477,
+      "source": "https://www.openstreetmap.org/way/443011417"
+    },
+    {
+      "name": "ころ柿の里しか",
+      "kana": "ころかきのさとしか",
+      "lon": 136.78,
+      "lat": 37.00745,
+      "source": "https://www.openstreetmap.org/way/706168520"
+    },
+    {
+      "name": "ごか",
+      "kana": "ごか",
+      "lon": 139.75771,
+      "lat": 36.09529,
+      "source": "https://www.openstreetmap.org/way/335171550"
+    },
+    {
+      "name": "さいかい",
+      "kana": "さいかい",
+      "lon": 129.69605,
+      "lat": 33.04283,
+      "source": "https://www.openstreetmap.org/way/436873493"
+    },
+    {
+      "name": "さかい",
+      "kana": "さかい",
+      "lon": 139.79504,
+      "lat": 36.10237,
+      "source": "https://www.openstreetmap.org/relation/10163558"
+    },
+    {
+      "name": "さかきた",
+      "kana": "さかきた",
+      "lon": 138.01184,
+      "lat": 36.42591,
+      "source": "https://www.openstreetmap.org/way/442951681"
+    },
+    {
+      "name": "させぼっくす99",
+      "kana": "させぼっくす99",
+      "lon": 129.67194,
+      "lat": 33.20144,
+      "source": "https://www.openstreetmap.org/way/1199351701"
+    },
+    {
+      "name": "さとみ",
+      "kana": "さとみ",
+      "lon": 140.50947,
+      "lat": 36.70605,
+      "source": "https://www.openstreetmap.org/way/323042597"
+    },
+    {
+      "name": "さらべつ",
+      "kana": "さらべつ",
+      "lon": 143.27175,
+      "lat": 42.63305,
+      "source": "https://www.openstreetmap.org/way/562108850"
+    },
+    {
+      "name": "さんさん南三陸",
+      "kana": "さんさんみなみさんりく",
+      "lon": 141.44795,
+      "lat": 38.67851,
+      "source": "https://www.openstreetmap.org/way/1053272808"
+    },
+    {
+      "name": "さんない",
+      "kana": "さんない",
+      "lon": 140.62518,
+      "lat": 39.28885,
+      "source": "https://www.openstreetmap.org/way/1317316657"
+    },
+    {
+      "name": "さんのへ",
+      "kana": "さんのへ",
+      "lon": 141.25585,
+      "lat": 40.38736,
+      "source": "https://www.openstreetmap.org/way/442880295"
+    },
+    {
+      "name": "さんりく",
+      "kana": "さんりく",
+      "lon": 141.79912,
+      "lat": 39.12136,
+      "source": "https://www.openstreetmap.org/way/432717808"
+    },
+    {
+      "name": "しおのえ",
+      "kana": "しおのえ",
+      "lon": 134.08241,
+      "lat": 34.16997,
+      "source": "https://www.openstreetmap.org/way/1174536198"
+    },
+    {
+      "name": "しかおい",
+      "kana": "しかおい",
+      "lon": 142.98866,
+      "lat": 43.09754,
+      "source": "https://www.openstreetmap.org/way/562022562"
+    },
+    {
+      "name": "しかべ間歇泉公園",
+      "kana": "しかべかんけついずみこうえん",
+      "lon": 140.83044,
+      "lat": 42.02886,
+      "source": "https://www.openstreetmap.org/way/460600360"
+    },
+    {
+      "name": "したら",
+      "kana": "したら",
+      "lon": 137.549,
+      "lat": 35.06415,
+      "source": "https://www.openstreetmap.org/way/973062620"
+    },
+    {
+      "name": "しちのへ",
+      "kana": "しちのへ",
+      "lon": 141.15536,
+      "lat": 40.71696,
+      "source": "https://www.openstreetmap.org/way/560529785"
+    },
+    {
+      "name": "しなの",
+      "kana": "しなの",
+      "lon": 138.19007,
+      "lat": 36.81798,
+      "source": "https://www.openstreetmap.org/way/433258582"
+    },
+    {
+      "name": "しほろ温泉",
+      "kana": "しほろおんせん",
+      "lon": 143.36718,
+      "lat": 43.13904,
+      "source": "https://www.openstreetmap.org/way/428008031"
+    },
+    {
+      "name": "しまなみの駅御島",
+      "kana": "しまなみのえきおしま",
+      "lon": 133.00549,
+      "lat": 34.24908,
+      "source": "https://www.openstreetmap.org/way/1211902631"
+    },
+    {
+      "name": "しもごう",
+      "kana": "しもごう",
+      "lon": 139.91631,
+      "lat": 37.20359,
+      "source": "https://www.openstreetmap.org/way/434698416"
+    },
+    {
+      "name": "しもつけ",
+      "kana": "しもつけ",
+      "lon": 139.88322,
+      "lat": 36.39665,
+      "source": "https://www.openstreetmap.org/way/212751599"
+    },
+    {
+      "name": "しもつま",
+      "kana": "しもつま",
+      "lon": 139.9869,
+      "lat": 36.21657,
+      "source": "https://www.openstreetmap.org/way/387545690"
+    },
+    {
+      "name": "しもにた",
+      "kana": "しもにた",
+      "lon": 138.80232,
+      "lat": 36.22407,
+      "source": "https://www.openstreetmap.org/way/436801461"
+    },
+    {
+      "name": "しもべ",
+      "kana": "しもべ",
+      "lon": 138.51346,
+      "lat": 35.46929,
+      "source": "https://www.openstreetmap.org/way/433824868"
+    },
+    {
+      "name": "しゃり",
+      "kana": "しゃり",
+      "lon": 144.66414,
+      "lat": 43.91178,
+      "source": "https://www.openstreetmap.org/way/561670946"
+    },
+    {
+      "name": "しょうない",
+      "kana": "しょうない",
+      "lon": 139.98438,
+      "lat": 38.79467,
+      "source": "https://www.openstreetmap.org/way/435112047"
+    },
+    {
+      "name": "しょうなん",
+      "kana": "しょうなん",
+      "lon": 140.02238,
+      "lat": 35.85747,
+      "source": "https://www.openstreetmap.org/way/1254514973"
+    },
+    {
+      "name": "しらね",
+      "kana": "しらね",
+      "lon": 138.47107,
+      "lat": 35.63785,
+      "source": "https://www.openstreetmap.org/way/442571309"
+    },
+    {
+      "name": "しらやまさん",
+      "kana": "しらやまさん",
+      "lon": 136.6302,
+      "lat": 36.43645,
+      "source": "https://www.openstreetmap.org/way/436762317"
+    },
+    {
+      "name": "しりうち",
+      "kana": "しりうち",
+      "lon": 140.33677,
+      "lat": 41.60123,
+      "source": "https://www.openstreetmap.org/way/562441110"
+    },
+    {
+      "name": "しろいし",
+      "kana": "しろいし",
+      "lon": 130.19572,
+      "lat": 33.17723,
+      "source": "https://www.openstreetmap.org/way/975312323"
+    },
+    {
+      "name": "しんごう",
+      "kana": "しんごう",
+      "lon": 141.06859,
+      "lat": 40.42981,
+      "source": "https://www.openstreetmap.org/way/442877928"
+    },
+    {
+      "name": "しんしのつ",
+      "kana": "しんしのつ",
+      "lon": 141.64294,
+      "lat": 43.21404,
+      "source": "https://www.openstreetmap.org/way/562743452"
+    },
+    {
+      "name": "しんよしとみ",
+      "kana": "しんよしとみ",
+      "lon": 131.15422,
+      "lat": 33.58868,
+      "source": "https://www.openstreetmap.org/way/675372295"
+    },
+    {
+      "name": "すくも",
+      "kana": "すくも",
+      "lon": 132.7126,
+      "lat": 32.916,
+      "source": "https://www.openstreetmap.org/way/441713656"
+    },
+    {
+      "name": "すさみ",
+      "kana": "すさみ",
+      "lon": 135.59972,
+      "lat": 33.50572,
+      "source": "https://www.openstreetmap.org/way/442770513"
+    },
+    {
+      "name": "すばしり",
+      "kana": "すばしり",
+      "lon": 138.85953,
+      "lat": 35.36277,
+      "source": "https://www.openstreetmap.org/way/301603944"
+    },
+    {
+      "name": "せせらぎ郷かみつえ",
+      "kana": "せせらぎさとかみつえ",
+      "lon": 130.96159,
+      "lat": 33.11233,
+      "source": "https://www.openstreetmap.org/way/924800943"
+    },
+    {
+      "name": "そうべつ情報館 i (アイ)",
+      "kana": "そうべつじょうほうかん i (あい)",
+      "lon": 140.89899,
+      "lat": 42.5587,
+      "source": "https://www.openstreetmap.org/way/971819234"
+    },
+    {
+      "name": "そうま",
+      "kana": "そうま",
+      "lon": 140.94782,
+      "lat": 37.76078,
+      "source": "https://www.openstreetmap.org/way/517582555"
+    },
+    {
+      "name": "そばの郷らっせいみさと",
+      "kana": "そばのさとらっせいみさと",
+      "lon": 137.35862,
+      "lat": 35.40574,
+      "source": "https://www.openstreetmap.org/way/492599578"
+    },
+    {
+      "name": "たいじ",
+      "kana": "たいじ",
+      "lon": 135.93374,
+      "lat": 33.59244,
+      "source": "https://www.openstreetmap.org/way/712085617"
+    },
+    {
+      "name": "たいら",
+      "kana": "たいら",
+      "lon": 136.97355,
+      "lat": 36.44563,
+      "source": "https://www.openstreetmap.org/way/435716934"
+    },
+    {
+      "name": "たいらだて",
+      "kana": "たいらだて",
+      "lon": 140.64103,
+      "lat": 41.1751,
+      "source": "https://www.openstreetmap.org/way/387161044"
+    },
+    {
+      "name": "たかねざわ 元気あっぷ村",
+      "kana": "たかねざわ げんきあっぷむら",
+      "lon": 140.05333,
+      "lat": 36.63311,
+      "source": "https://www.openstreetmap.org/way/977458569"
+    },
+    {
+      "name": "たかのす",
+      "kana": "たかのす",
+      "lon": 140.37574,
+      "lat": 40.25116,
+      "source": "https://www.openstreetmap.org/way/439880105"
+    },
+    {
+      "name": "たかはた",
+      "kana": "たかはた",
+      "lon": 140.2174,
+      "lat": 38.00687,
+      "source": "https://www.openstreetmap.org/way/568624873"
+    },
+    {
+      "name": "たからだの里さいた",
+      "kana": "たからだのさとさいた",
+      "lon": 133.79823,
+      "lat": 34.11036,
+      "source": "https://www.openstreetmap.org/way/1174259430"
+    },
+    {
+      "name": "たきかわ",
+      "kana": "たきかわ",
+      "lon": 141.94096,
+      "lat": 43.62345,
+      "source": "https://www.openstreetmap.org/way/562748397"
+    },
+    {
+      "name": "たくみの里",
+      "kana": "たくみのさと",
+      "lon": 138.90834,
+      "lat": 36.69613,
+      "source": "https://www.openstreetmap.org/way/432835677"
+    },
+    {
+      "name": "たけはら",
+      "kana": "たけはら",
+      "lon": 132.91226,
+      "lat": 34.34385,
+      "source": "https://www.openstreetmap.org/way/1117343021"
+    },
+    {
+      "name": "たけゆらの里おおたき",
+      "kana": "たけゆらのさとおおたき",
+      "lon": 140.25839,
+      "lat": 35.25483,
+      "source": "https://www.openstreetmap.org/way/320638814"
+    },
+    {
+      "name": "たじま",
+      "kana": "たじま",
+      "lon": 139.72795,
+      "lat": 37.08653,
+      "source": "https://www.openstreetmap.org/way/420551321"
+    },
+    {
+      "name": "たのうら",
+      "kana": "たのうら",
+      "lon": 130.51274,
+      "lat": 32.36459,
+      "source": "https://www.openstreetmap.org/way/336674254"
+    },
+    {
+      "name": "たのはた",
+      "kana": "たのはた",
+      "lon": 141.90338,
+      "lat": 39.91388,
+      "source": "https://www.openstreetmap.org/way/384811947"
+    },
+    {
+      "name": "たばやま",
+      "kana": "たばやま",
+      "lon": 138.92427,
+      "lat": 35.78964,
+      "source": "https://www.openstreetmap.org/way/171744145"
+    },
+    {
+      "name": "たびら",
+      "kana": "たびら",
+      "lon": 129.60268,
+      "lat": 33.31806,
+      "source": "https://www.openstreetmap.org/way/434705275"
+    },
+    {
+      "name": "たまかわ",
+      "kana": "たまかわ",
+      "lon": 140.41871,
+      "lat": 37.22274,
+      "source": "https://www.openstreetmap.org/way/440594185"
+    },
+    {
+      "name": "たまつくり",
+      "kana": "たまつくり",
+      "lon": 140.40303,
+      "lat": 36.09586,
+      "source": "https://www.openstreetmap.org/way/441636884"
+    },
+    {
+      "name": "たるみず",
+      "kana": "たるみず",
+      "lon": 130.74544,
+      "lat": 31.55874,
+      "source": "https://www.openstreetmap.org/way/441553531"
+    },
+    {
+      "name": "たるみずはまびら",
+      "kana": "たるみずはまびら",
+      "lon": 130.69828,
+      "lat": 31.46843,
+      "source": "https://www.openstreetmap.org/way/969234489"
+    },
+    {
+      "name": "たろう",
+      "kana": "たろう",
+      "lon": 141.97175,
+      "lat": 39.73767,
+      "source": "https://www.openstreetmap.org/way/439644359"
+    },
+    {
+      "name": "ちくら・潮風王国",
+      "kana": "ちくら・しおかぜおうこく",
+      "lon": 139.95151,
+      "lat": 34.92953,
+      "source": "https://www.openstreetmap.org/way/320638815"
+    },
+    {
+      "name": "ちちぶ",
+      "kana": "ちちぶ",
+      "lon": 139.0891,
+      "lat": 35.99756,
+      "source": "https://www.openstreetmap.org/way/168581868"
+    },
+    {
+      "name": "ちぢみの里おぢや",
+      "kana": "ちぢみのさとおぢや",
+      "lon": 138.82281,
+      "lat": 37.30501,
+      "source": "https://www.openstreetmap.org/way/405589120"
+    },
+    {
+      "name": "ちはやあかさか",
+      "kana": "ちはやあかさか",
+      "lon": 135.62606,
+      "lat": 34.46416,
+      "source": "https://www.openstreetmap.org/way/60621677"
+    },
+    {
+      "name": "つど～る・プラザ・さわら",
+      "kana": "つど～る・ぷらざ・さわら",
+      "lon": 140.6677,
+      "lat": 42.12521,
+      "source": "https://www.openstreetmap.org/way/460612086"
+    },
+    {
+      "name": "つの",
+      "kana": "つの",
+      "lon": 131.55765,
+      "lat": 32.26026,
+      "source": "https://www.openstreetmap.org/way/441569062"
+    },
+    {
+      "name": "つる",
+      "kana": "つる",
+      "lon": 138.93108,
+      "lat": 35.5829,
+      "source": "https://www.openstreetmap.org/way/704732168"
+    },
+    {
+      "name": "つるた",
+      "kana": "つるた",
+      "lon": 140.44253,
+      "lat": 40.73681,
+      "source": "https://www.openstreetmap.org/way/436718171"
+    },
+    {
+      "name": "つるぬま",
+      "kana": "つるぬま",
+      "lon": 141.83512,
+      "lat": 43.45104,
+      "source": "https://www.openstreetmap.org/way/562746614"
+    },
+    {
+      "name": "てしお",
+      "kana": "てしお",
+      "lon": 141.74821,
+      "lat": 44.88468,
+      "source": "https://www.openstreetmap.org/way/1560647571"
+    },
+    {
+      "name": "てんのう",
+      "kana": "てんのう",
+      "lon": 140.00946,
+      "lat": 39.85697,
+      "source": "https://www.openstreetmap.org/way/442560584"
+    },
+    {
+      "name": "とうま",
+      "kana": "とうま",
+      "lon": 142.4895,
+      "lat": 43.84436,
+      "source": "https://www.openstreetmap.org/way/592161784"
+    },
+    {
+      "name": "とうや湖",
+      "kana": "とうやみずうみ",
+      "lon": 140.82217,
+      "lat": 42.66458,
+      "source": "https://www.openstreetmap.org/way/562729125"
+    },
+    {
+      "name": "とうわ",
+      "kana": "とうわ",
+      "lon": 141.2223,
+      "lat": 39.38245,
+      "source": "https://www.openstreetmap.org/way/605888331"
+    },
+    {
+      "name": "とくのしま",
+      "kana": "とくのしま",
+      "lon": 128.95441,
+      "lat": 27.82653,
+      "source": "https://www.openstreetmap.org/way/1539365830"
+    },
+    {
+      "name": "とざわ",
+      "kana": "とざわ",
+      "lon": 140.16111,
+      "lat": 38.7285,
+      "source": "https://www.openstreetmap.org/way/435112678"
+    },
+    {
+      "name": "とっとパーク小島",
+      "kana": "とっとぱーくこじま",
+      "lon": 135.10054,
+      "lat": 34.31481,
+      "source": "https://www.openstreetmap.org/way/442753626"
+    },
+    {
+      "name": "とみうら 枇杷倶楽部",
+      "kana": "とみうら びわくらぶ",
+      "lon": 139.83766,
+      "lat": 35.03766,
+      "source": "https://www.openstreetmap.org/way/234949774"
+    },
+    {
+      "name": "とようら",
+      "kana": "とようら",
+      "lon": 140.72231,
+      "lat": 42.57764,
+      "source": "https://www.openstreetmap.org/way/562444754"
+    },
+    {
+      "name": "とよとみ",
+      "kana": "とよとみ",
+      "lon": 138.54559,
+      "lat": 35.58495,
+      "source": "https://www.openstreetmap.org/way/433819409"
+    },
+    {
+      "name": "とよはま",
+      "kana": "とよはま",
+      "lon": 133.60086,
+      "lat": 34.04277,
+      "source": "https://www.openstreetmap.org/way/301207389"
+    },
+    {
+      "name": "とわだ",
+      "kana": "とわだ",
+      "lon": 141.26521,
+      "lat": 40.57504,
+      "source": "https://www.openstreetmap.org/way/558186546"
+    },
+    {
+      "name": "どうし",
+      "kana": "どうし",
+      "lon": 138.98977,
+      "lat": 35.50333,
+      "source": "https://www.openstreetmap.org/way/168436903"
+    },
+    {
+      "name": "どなり",
+      "kana": "どなり",
+      "lon": 134.35247,
+      "lat": 34.15092,
+      "source": "https://www.openstreetmap.org/way/437566883"
+    },
+    {
+      "name": "どまんなかたぬま",
+      "kana": "どまんなかたぬま",
+      "lon": 139.5723,
+      "lat": 36.34376,
+      "source": "https://www.openstreetmap.org/way/397723820"
+    },
+    {
+      "name": "どんぶり会館",
+      "kana": "どんぶりかいかん",
+      "lon": 137.22327,
+      "lat": 35.33616,
+      "source": "https://www.openstreetmap.org/way/564540584"
+    },
+    {
+      "name": "どんぶり館",
+      "kana": "どんぶりかん",
+      "lon": 132.52747,
+      "lat": 33.35526,
+      "source": "https://www.openstreetmap.org/way/987595670"
+    },
+    {
+      "name": "なかがわ",
+      "kana": "なかがわ",
+      "lon": 142.06704,
+      "lat": 44.80144,
+      "source": "https://www.openstreetmap.org/way/562505887"
+    },
+    {
+      "name": "なかさつない",
+      "kana": "なかさつない",
+      "lon": 143.12726,
+      "lat": 42.69254,
+      "source": "https://www.openstreetmap.org/way/1306737870"
+    },
+    {
+      "name": "なかせん",
+      "kana": "なかせん",
+      "lon": 140.53289,
+      "lat": 39.53861,
+      "source": "https://www.openstreetmap.org/way/397404325"
+    },
+    {
+      "name": "なかつ",
+      "kana": "なかつ",
+      "lon": 131.21316,
+      "lat": 33.55114,
+      "source": "https://www.openstreetmap.org/relation/15505077"
+    },
+    {
+      "name": "なかとさ",
+      "kana": "なかとさ",
+      "lon": 133.23473,
+      "lat": 33.32227,
+      "source": "https://www.openstreetmap.org/way/1168510071"
+    },
+    {
+      "name": "なかやま",
+      "kana": "なかやま",
+      "lon": 132.69476,
+      "lat": 33.66999,
+      "source": "https://www.openstreetmap.org/way/1135079864"
+    },
+    {
+      "name": "ながお",
+      "kana": "ながお",
+      "lon": 134.17428,
+      "lat": 34.22109,
+      "source": "https://www.openstreetmap.org/way/301209386"
+    },
+    {
+      "name": "ながおか花火館",
+      "kana": "ながおかはなびかん",
+      "lon": 138.8053,
+      "lat": 37.45561,
+      "source": "https://www.openstreetmap.org/way/908800370"
+    },
+    {
+      "name": "ながら",
+      "kana": "ながら",
+      "lon": 140.20675,
+      "lat": 35.45709,
+      "source": "https://www.openstreetmap.org/way/321265243"
+    },
+    {
+      "name": "なち",
+      "kana": "なち",
+      "lon": 135.9364,
+      "lat": 33.64446,
+      "source": "https://www.openstreetmap.org/way/690153950"
+    },
+    {
+      "name": "なとわ・えさん",
+      "kana": "なとわ・えさん",
+      "lon": 141.10153,
+      "lat": 41.77953,
+      "source": "https://www.openstreetmap.org/way/456807022"
+    },
+    {
+      "name": "なないろ・ななえ",
+      "kana": "なないろ・ななえ",
+      "lon": 140.65737,
+      "lat": 41.92567,
+      "source": "https://www.openstreetmap.org/way/1094399470"
+    },
+    {
+      "name": "なみえ",
+      "kana": "なみえ",
+      "lon": 140.99978,
+      "lat": 37.49633,
+      "source": "https://www.openstreetmap.org/way/785075921"
+    },
+    {
+      "name": "なみおか",
+      "kana": "なみおか",
+      "lon": 140.57984,
+      "lat": 40.71798,
+      "source": "https://www.openstreetmap.org/way/439866611"
+    },
+    {
+      "name": "ならは",
+      "kana": "ならは",
+      "lon": 140.99746,
+      "lat": 37.25016,
+      "source": "https://www.openstreetmap.org/way/105432592"
+    },
+    {
+      "name": "なるさわ",
+      "kana": "なるさわ",
+      "lon": 138.69221,
+      "lat": 35.4782,
+      "source": "https://www.openstreetmap.org/way/168574418"
+    },
+    {
+      "name": "なんごう",
+      "kana": "なんごう",
+      "lon": 141.43052,
+      "lat": 40.40646,
+      "source": "https://www.openstreetmap.org/way/436646397"
+    },
+    {
+      "name": "なんごう",
+      "kana": "なんごう",
+      "lon": 131.37838,
+      "lat": 31.50298,
+      "source": "https://www.openstreetmap.org/way/436646833"
+    },
+    {
+      "name": "なんぶ",
+      "kana": "なんぶ",
+      "lon": 138.44686,
+      "lat": 35.30565,
+      "source": "https://www.openstreetmap.org/way/884098508"
+    },
+    {
+      "name": "にしいや",
+      "kana": "にしいや",
+      "lon": 133.81099,
+      "lat": 33.88886,
+      "source": "https://www.openstreetmap.org/way/304159961"
+    },
+    {
+      "name": "にしおこっぺ花夢",
+      "kana": "にしおこっぺはなゆめ",
+      "lon": 142.86816,
+      "lat": 44.33601,
+      "source": "https://www.openstreetmap.org/way/562511860"
+    },
+    {
+      "name": "にしかた",
+      "kana": "にしかた",
+      "lon": 139.74274,
+      "lat": 36.46648,
+      "source": "https://www.openstreetmap.org/way/380022572"
+    },
+    {
+      "name": "にしかわ",
+      "kana": "にしかわ",
+      "lon": 140.0997,
+      "lat": 38.43616,
+      "source": "https://www.openstreetmap.org/way/480992595"
+    },
+    {
+      "name": "にしなすの",
+      "kana": "にしなすの",
+      "lon": 139.96927,
+      "lat": 36.89948,
+      "source": "https://www.openstreetmap.org/way/434696446"
+    },
+    {
+      "name": "にしめ",
+      "kana": "にしめ",
+      "lon": 140.01467,
+      "lat": 39.36287,
+      "source": "https://www.openstreetmap.org/way/673865342"
+    },
+    {
+      "name": "にのみや",
+      "kana": "にのみや",
+      "lon": 139.96526,
+      "lat": 36.36789,
+      "source": "https://www.openstreetmap.org/way/199340981"
+    },
+    {
+      "name": "にらさき",
+      "kana": "にらさき",
+      "lon": 138.43881,
+      "lat": 35.74817,
+      "source": "https://www.openstreetmap.org/way/684805716"
+    },
+    {
+      "name": "ねごろ歴史の丘",
+      "kana": "ねごろれきしのおか",
+      "lon": 135.3113,
+      "lat": 34.287,
+      "source": "https://www.openstreetmap.org/way/712449912"
+    },
+    {
+      "name": "のだ",
+      "kana": "のだ",
+      "lon": 141.81867,
+      "lat": 40.11597,
+      "source": "https://www.openstreetmap.org/way/558643277"
+    },
+    {
+      "name": "はが",
+      "kana": "はが",
+      "lon": 140.05788,
+      "lat": 36.5525,
+      "source": "https://www.openstreetmap.org/way/180968846"
+    },
+    {
+      "name": "はくしゅう",
+      "kana": "はくしゅう",
+      "lon": 138.33129,
+      "lat": 35.81045,
+      "source": "https://www.openstreetmap.org/way/435773623"
+    },
+    {
+      "name": "はしかみ",
+      "kana": "はしかみ",
+      "lon": 141.60828,
+      "lat": 40.45844,
+      "source": "https://www.openstreetmap.org/way/436644889"
+    },
+    {
+      "name": "はちもり",
+      "kana": "はちもり",
+      "lon": 139.94885,
+      "lat": 40.4213,
+      "source": "https://www.openstreetmap.org/way/587123512"
+    },
+    {
+      "name": "はっとう",
+      "kana": "はっとう",
+      "lon": 134.33995,
+      "lat": 35.36635,
+      "source": "https://www.openstreetmap.org/way/462729555"
+    },
+    {
+      "name": "はなぞの",
+      "kana": "はなぞの",
+      "lon": 139.22618,
+      "lat": 36.12167,
+      "source": "https://www.openstreetmap.org/way/440746540"
+    },
+    {
+      "name": "はなやか小清水",
+      "kana": "はなやかこしみず",
+      "lon": 144.4528,
+      "lat": 43.93359,
+      "source": "https://www.openstreetmap.org/way/561671731"
+    },
+    {
+      "name": "はなわ",
+      "kana": "はなわ",
+      "lon": 140.4148,
+      "lat": 36.95,
+      "source": "https://www.openstreetmap.org/way/438367100"
+    },
+    {
+      "name": "はにゅう",
+      "kana": "はにゅう",
+      "lon": 139.51032,
+      "lat": 36.18844,
+      "source": "https://www.openstreetmap.org/way/63000120"
+    },
+    {
+      "name": "はやちね",
+      "kana": "はやちね",
+      "lon": 141.34087,
+      "lat": 39.53677,
+      "source": "https://www.openstreetmap.org/way/442072434"
+    },
+    {
+      "name": "ばとう",
+      "kana": "ばとう",
+      "lon": 140.15005,
+      "lat": 36.74767,
+      "source": "https://www.openstreetmap.org/way/374667842"
+    },
+    {
+      "name": "ばんだい 徳一の里きらり",
+      "kana": "ばんだい とくいちのさときらり",
+      "lon": 139.98684,
+      "lat": 37.56279,
+      "source": "https://www.openstreetmap.org/way/443048738"
+    },
+    {
+      "name": "ひがしかわ「道草館",
+      "kana": "ひがしかわ「みちくさかん",
+      "lon": 142.50879,
+      "lat": 43.69724,
+      "source": "https://www.openstreetmap.org/way/1094893106"
+    },
+    {
+      "name": "ひたちおおた",
+      "kana": "ひたちおおた",
+      "lon": 140.5255,
+      "lat": 36.51044,
+      "source": "https://www.openstreetmap.org/way/434693062"
+    },
+    {
+      "name": "ひない",
+      "kana": "ひない",
+      "lon": 140.58538,
+      "lat": 40.21976,
+      "source": "https://www.openstreetmap.org/way/434712654"
+    },
+    {
+      "name": "ひなの里かつうら",
+      "kana": "ひなのさとかつうら",
+      "lon": 134.5232,
+      "lat": 33.9323,
+      "source": "https://www.openstreetmap.org/way/1468130747"
+    },
+    {
+      "name": "ひらた",
+      "kana": "ひらた",
+      "lon": 140.56037,
+      "lat": 37.25025,
+      "source": "https://www.openstreetmap.org/way/440591034"
+    },
+    {
+      "name": "ひろさき",
+      "kana": "ひろさき",
+      "lon": 140.54883,
+      "lat": 40.55517,
+      "source": "https://www.openstreetmap.org/way/434715543"
+    },
+    {
+      "name": "ひろさき　サンフェスタ石川",
+      "kana": "ひろさき　さんふぇすたいしかわ",
+      "lon": 140.54893,
+      "lat": 40.55526,
+      "source": "https://www.openstreetmap.org/way/434715541"
+    },
+    {
+      "name": "ひろた",
+      "kana": "ひろた",
+      "lon": 132.79969,
+      "lat": 33.64082,
+      "source": "https://www.openstreetmap.org/way/1135080714"
+    },
+    {
+      "name": "びえい「丘のくら",
+      "kana": "びえい「おかのくら",
+      "lon": 142.46398,
+      "lat": 43.59228,
+      "source": "https://www.openstreetmap.org/way/1094400433"
+    },
+    {
+      "name": "びえい「白金ビルケ",
+      "kana": "びえい「しろがねびるけ",
+      "lon": 142.59688,
+      "lat": 43.5033,
+      "source": "https://www.openstreetmap.org/way/673344704"
+    },
+    {
+      "name": "びふか",
+      "kana": "びふか",
+      "lon": 142.32007,
+      "lat": 44.55824,
+      "source": "https://www.openstreetmap.org/way/562507538"
+    },
+    {
+      "name": "びんご府中",
+      "kana": "びんごふちゅう",
+      "lon": 133.23601,
+      "lat": 34.57016,
+      "source": "https://www.openstreetmap.org/way/965666007"
+    },
+    {
+      "name": "ふぉれすと君田",
+      "kana": "ふぉれすときみた",
+      "lon": 132.84966,
+      "lat": 34.89892,
+      "source": "https://www.openstreetmap.org/way/783208735"
+    },
+    {
+      "name": "ふかうら",
+      "kana": "ふかうら",
+      "lon": 140.00033,
+      "lat": 40.74373,
+      "source": "https://www.openstreetmap.org/way/433841166"
+    },
+    {
+      "name": "ふくえ",
+      "kana": "ふくえ",
+      "lon": 131.48273,
+      "lat": 34.43413,
+      "source": "https://www.openstreetmap.org/way/432750766"
+    },
+    {
+      "name": "ふくしま",
+      "kana": "ふくしま",
+      "lon": 140.41112,
+      "lat": 37.80451,
+      "source": "https://www.openstreetmap.org/way/1037493552"
+    },
+    {
+      "name": "ふじおやま",
+      "kana": "ふじおやま",
+      "lon": 138.95011,
+      "lat": 35.34499,
+      "source": "https://www.openstreetmap.org/way/441629195"
+    },
+    {
+      "name": "ふじみ",
+      "kana": "ふじみ",
+      "lon": 139.09435,
+      "lat": 36.46913,
+      "source": "https://www.openstreetmap.org/way/432830455"
+    },
+    {
+      "name": "ふたかみパーク當麻",
+      "kana": "ふたかみぱーくとうま",
+      "lon": 135.69302,
+      "lat": 34.52673,
+      "source": "https://www.openstreetmap.org/way/998325444"
+    },
+    {
+      "name": "ふたつい",
+      "kana": "ふたつい",
+      "lon": 140.25983,
+      "lat": 40.21611,
+      "source": "https://www.openstreetmap.org/way/707968114"
+    },
+    {
+      "name": "ふるさとセンター大塔",
+      "kana": "ふるさとせんたーおおとう",
+      "lon": 135.50206,
+      "lat": 33.7428,
+      "source": "https://www.openstreetmap.org/way/712476723"
+    },
+    {
+      "name": "ふるさと豊田",
+      "kana": "ふるさととよだ",
+      "lon": 138.32256,
+      "lat": 36.80074,
+      "source": "https://www.openstreetmap.org/way/433261859"
+    },
+    {
+      "name": "ふるどの",
+      "kana": "ふるどの",
+      "lon": 140.52953,
+      "lat": 37.09311,
+      "source": "https://www.openstreetmap.org/relation/11508770"
+    },
+    {
+      "name": "ふるびらたらこミュージアム",
+      "kana": "ふるびらたらこみゅーじあむ",
+      "lon": 140.63891,
+      "lat": 43.26519,
+      "source": "https://www.openstreetmap.org/way/1537876207"
+    },
+    {
+      "name": "ふれあいの里HASUパーク",
+      "kana": "ふれあいのさとHASUぱーく",
+      "lon": 136.69547,
+      "lat": 35.14417,
+      "source": "https://www.openstreetmap.org/relation/21216571"
+    },
+    {
+      "name": "ふれあいパークみの",
+      "kana": "ふれあいぱーくみの",
+      "lon": 133.7222,
+      "lat": 34.22639,
+      "source": "https://www.openstreetmap.org/way/624778417"
+    },
+    {
+      "name": "ふれあいパーク・きみつ",
+      "kana": "ふれあいぱーく・きみつ",
+      "lon": 140.06942,
+      "lat": 35.19784,
+      "source": "https://www.openstreetmap.org/way/320607948"
+    },
+    {
+      "name": "べに花の郷おけがわ",
+      "kana": "べにはなのさとおけがわ",
+      "lon": 139.5272,
+      "lat": 35.99303,
+      "source": "https://www.openstreetmap.org/way/1441696972"
+    },
+    {
+      "name": "ほっと♡はぼろ",
+      "kana": "ほっと♡はぼろ",
+      "lon": 141.7073,
+      "lat": 44.36656,
+      "source": "https://www.openstreetmap.org/way/1108948715"
+    },
+    {
+      "name": "ほっとぱ～く・浅科",
+      "kana": "ほっとぱ～く・あさしな",
+      "lon": 138.40417,
+      "lat": 36.25769,
+      "source": "https://www.openstreetmap.org/way/492363890"
+    },
+    {
+      "name": "まえばし赤城",
+      "kana": "まえばしあかぎ",
+      "lon": 139.05324,
+      "lat": 36.43966,
+      "source": "https://www.openstreetmap.org/way/1160810325"
+    },
+    {
+      "name": "まくらがの里こが",
+      "kana": "まくらがのさとこが",
+      "lon": 139.79006,
+      "lat": 36.19209,
+      "source": "https://www.openstreetmap.org/way/464500680"
+    },
+    {
+      "name": "ましこ",
+      "kana": "ましこ",
+      "lon": 140.07236,
+      "lat": 36.43124,
+      "source": "https://www.openstreetmap.org/way/450175955"
+    },
+    {
+      "name": "まつだいふるさと会館",
+      "kana": "まつだいふるさとかいかん",
+      "lon": 138.61415,
+      "lat": 37.1326,
+      "source": "https://www.openstreetmap.org/way/608660384"
+    },
+    {
+      "name": "まるせっぷ",
+      "kana": "まるせっぷ",
+      "lon": 143.32874,
+      "lat": 43.99565,
+      "source": "https://www.openstreetmap.org/way/630654696"
+    },
+    {
+      "name": "みかも",
+      "kana": "みかも",
+      "lon": 139.62529,
+      "lat": 36.29683,
+      "source": "https://www.openstreetmap.org/way/438491773"
+    },
+    {
+      "name": "みかわ",
+      "kana": "みかわ",
+      "lon": 132.9698,
+      "lat": 33.6143,
+      "source": "https://www.openstreetmap.org/way/1134737167"
+    },
+    {
+      "name": "みき",
+      "kana": "みき",
+      "lon": 134.97734,
+      "lat": 34.78717,
+      "source": "https://www.openstreetmap.org/way/1346579698"
+    },
+    {
+      "name": "みさき",
+      "kana": "みさき",
+      "lon": 135.17416,
+      "lat": 34.32561,
+      "source": "https://www.openstreetmap.org/way/712447458"
+    },
+    {
+      "name": "みさわ",
+      "kana": "みさわ",
+      "lon": 141.36204,
+      "lat": 40.78697,
+      "source": "https://www.openstreetmap.org/way/245399758"
+    },
+    {
+      "name": "みしょうMIC",
+      "kana": "みしょうMIC",
+      "lon": 132.56166,
+      "lat": 32.95891,
+      "source": "https://www.openstreetmap.org/way/437439671"
+    },
+    {
+      "name": "みそぎの郷 きこない",
+      "kana": "みそぎのさと きこない",
+      "lon": 140.43546,
+      "lat": 41.67779,
+      "source": "https://www.openstreetmap.org/way/1106745895"
+    },
+    {
+      "name": "みたら室蘭",
+      "kana": "みたらむろらん",
+      "lon": 140.94352,
+      "lat": 42.34178,
+      "source": "https://www.openstreetmap.org/way/562447769"
+    },
+    {
+      "name": "みついし",
+      "kana": "みついし",
+      "lon": 142.63531,
+      "lat": 42.22067,
+      "source": "https://www.openstreetmap.org/way/1462014111"
+    },
+    {
+      "name": "みつまた",
+      "kana": "みつまた",
+      "lon": 138.77729,
+      "lat": 36.90013,
+      "source": "https://www.openstreetmap.org/way/596962902"
+    },
+    {
+      "name": "みとう",
+      "kana": "みとう",
+      "lon": 131.34412,
+      "lat": 34.21825,
+      "source": "https://www.openstreetmap.org/way/434741284"
+    },
+    {
+      "name": "みとみ",
+      "kana": "みとみ",
+      "lon": 138.75627,
+      "lat": 35.85934,
+      "source": "https://www.openstreetmap.org/way/468566277"
+    },
+    {
+      "name": "みなとま〜れ寿都",
+      "kana": "みなとまーれすっつ",
+      "lon": 140.23198,
+      "lat": 42.79554,
+      "source": "https://www.openstreetmap.org/way/430467305"
+    },
+    {
+      "name": "みなべうめ振興館",
+      "kana": "みなべうめしんこうかん",
+      "lon": 135.32755,
+      "lat": 33.79093,
+      "source": "https://www.openstreetmap.org/way/442762145"
+    },
+    {
+      "name": "みなみ波賀",
+      "kana": "みなみはが",
+      "lon": 134.53995,
+      "lat": 35.14851,
+      "source": "https://www.openstreetmap.org/way/216812351"
+    },
+    {
+      "name": "みねはま",
+      "kana": "みねはま",
+      "lon": 140.02836,
+      "lat": 40.26457,
+      "source": "https://www.openstreetmap.org/way/433842885"
+    },
+    {
+      "name": "みのかも",
+      "kana": "みのかも",
+      "lon": 137.02986,
+      "lat": 35.47366,
+      "source": "https://www.openstreetmap.org/way/242921884"
+    },
+    {
+      "name": "みのりの郷 東金",
+      "kana": "みのりのさと とうがね",
+      "lon": 140.38335,
+      "lat": 35.57746,
+      "source": "https://www.openstreetmap.org/way/383620646"
+    },
+    {
+      "name": "みぶ",
+      "kana": "みぶ",
+      "lon": 139.80709,
+      "lat": 36.45514,
+      "source": "https://www.openstreetmap.org/way/286297621"
+    },
+    {
+      "name": "みま",
+      "kana": "みま",
+      "lon": 132.59588,
+      "lat": 33.28615,
+      "source": "https://www.openstreetmap.org/way/441716678"
+    },
+    {
+      "name": "みまき",
+      "kana": "みまき",
+      "lon": 138.35971,
+      "lat": 36.33475,
+      "source": "https://www.openstreetmap.org/way/415084770"
+    },
+    {
+      "name": "みやこ",
+      "kana": "みやこ",
+      "lon": 141.97003,
+      "lat": 39.63908,
+      "source": "https://www.openstreetmap.org/way/432811520"
+    },
+    {
+      "name": "みやま公園",
+      "kana": "みやまこうえん",
+      "lon": 133.92723,
+      "lat": 34.51963,
+      "source": "https://www.openstreetmap.org/way/438238874"
+    },
+    {
+      "name": "みょうぎ",
+      "kana": "みょうぎ",
+      "lon": 138.76565,
+      "lat": 36.29945,
+      "source": "https://www.openstreetmap.org/way/436800530"
+    },
+    {
+      "name": "みろく",
+      "kana": "みろく",
+      "lon": 134.24226,
+      "lat": 34.2585,
+      "source": "https://www.openstreetmap.org/way/301206882"
+    },
+    {
+      "name": "みわ",
+      "kana": "みわ",
+      "lon": 140.27969,
+      "lat": 36.65567,
+      "source": "https://www.openstreetmap.org/way/439021832"
+    },
+    {
+      "name": "みんまや",
+      "kana": "みんまや",
+      "lon": 140.34669,
+      "lat": 41.25355,
+      "source": "https://www.openstreetmap.org/way/559137412"
+    },
+    {
+      "name": "むいかいち温泉",
+      "kana": "むいかいちおんせん",
+      "lon": 131.94353,
+      "lat": 34.35316,
+      "source": "https://www.openstreetmap.org/way/492575987"
+    },
+    {
+      "name": "むかわ四季の館",
+      "kana": "むかわしきのやかた",
+      "lon": 141.92542,
+      "lat": 42.57401,
+      "source": "https://www.openstreetmap.org/way/700337986"
+    },
+    {
+      "name": "むつざわ つどいの郷",
+      "kana": "むつざわ つどいのさと",
+      "lon": 140.30309,
+      "lat": 35.35352,
+      "source": "https://www.openstreetmap.org/way/1136940290"
+    },
+    {
+      "name": "むなかた",
+      "kana": "むなかた",
+      "lon": 130.50389,
+      "lat": 33.84839,
+      "source": "https://www.openstreetmap.org/way/436863042"
+    },
+    {
+      "name": "むろね",
+      "kana": "むろね",
+      "lon": 141.44846,
+      "lat": 38.93132,
+      "source": "https://www.openstreetmap.org/way/784243687"
+    },
+    {
+      "name": "めぐみ白山",
+      "kana": "めぐみはくさん",
+      "lon": 136.54665,
+      "lat": 36.50123,
+      "source": "https://www.openstreetmap.org/way/604426734"
+    },
+    {
+      "name": "めじかの里土佐清水",
+      "kana": "めじかのさととさしみず",
+      "lon": 132.88346,
+      "lat": 32.79348,
+      "source": "https://www.openstreetmap.org/way/441711916"
+    },
+    {
+      "name": "めぬま",
+      "kana": "めぬま",
+      "lon": 139.36956,
+      "lat": 36.21489,
+      "source": "https://www.openstreetmap.org/way/439106333"
+    },
+    {
+      "name": "もち米の里☆なよろ",
+      "kana": "もちこめのさと☆なよろ",
+      "lon": 142.41401,
+      "lat": 44.2869,
+      "source": "https://www.openstreetmap.org/way/562508304"
+    },
+    {
+      "name": "もっくる新城",
+      "kana": "もっくるしんじょう",
+      "lon": 137.53352,
+      "lat": 34.91745,
+      "source": "https://www.openstreetmap.org/way/997266227"
+    },
+    {
+      "name": "もてぎ",
+      "kana": "もてぎ",
+      "lon": 140.17371,
+      "lat": 36.52811,
+      "source": "https://www.openstreetmap.org/way/432525942"
+    },
+    {
+      "name": "もみじ川温泉",
+      "kana": "もみじかわおんせん",
+      "lon": 134.44603,
+      "lat": 33.79765,
+      "source": "https://www.openstreetmap.org/way/1472554831"
+    },
+    {
+      "name": "もりおか渋民",
+      "kana": "もりおかしぶたみ",
+      "lon": 141.17331,
+      "lat": 39.84623,
+      "source": "https://www.openstreetmap.org/way/1394512076"
+    },
+    {
+      "name": "もりた",
+      "kana": "もりた",
+      "lon": 140.3223,
+      "lat": 40.78463,
+      "source": "https://www.openstreetmap.org/way/433842401"
+    },
+    {
+      "name": "やいた",
+      "kana": "やいた",
+      "lon": 139.92133,
+      "lat": 36.80543,
+      "source": "https://www.openstreetmap.org/way/335158699"
+    },
+    {
+      "name": "やす",
+      "kana": "やす",
+      "lon": 133.75418,
+      "lat": 33.53401,
+      "source": "https://www.openstreetmap.org/way/442741606"
+    },
+    {
+      "name": "やたて峠",
+      "kana": "やたてとうげ",
+      "lon": 140.62526,
+      "lat": 40.42142,
+      "source": "https://www.openstreetmap.org/way/434713933"
+    },
+    {
+      "name": "やちよ",
+      "kana": "やちよ",
+      "lon": 140.10699,
+      "lat": 35.7585,
+      "source": "https://www.openstreetmap.org/way/320607949"
+    },
+    {
+      "name": "やまがた",
+      "kana": "やまがた",
+      "lon": 141.57293,
+      "lat": 40.15024,
+      "source": "https://www.openstreetmap.org/way/436645950"
+    },
+    {
+      "name": "やまくに",
+      "kana": "やまくに",
+      "lon": 131.06188,
+      "lat": 33.40657,
+      "source": "https://www.openstreetmap.org/way/675371631"
+    },
+    {
+      "name": "やまだ",
+      "kana": "やまだ",
+      "lon": 141.97333,
+      "lat": 39.43688,
+      "source": "https://www.openstreetmap.org/way/436707737"
+    },
+    {
+      "name": "やまびこ館",
+      "kana": "やまびこかん",
+      "lon": 141.58906,
+      "lat": 39.64867,
+      "source": "https://www.openstreetmap.org/way/440218553"
+    },
+    {
+      "name": "やよい",
+      "kana": "やよい",
+      "lon": 131.83849,
+      "lat": 32.96458,
+      "source": "https://www.openstreetmap.org/way/441572413"
+    },
+    {
+      "name": "やんばるパイナップルの丘 安波",
+      "kana": "やんばるぱいなっぷるのおか あは",
+      "lon": 128.28075,
+      "lat": 26.705,
+      "source": "https://www.openstreetmap.org/way/1037499481"
+    },
+    {
+      "name": "ゆいゆい国頭",
+      "kana": "ゆいゆいくにがみ",
+      "lon": 128.16945,
+      "lat": 26.73192,
+      "source": "https://www.openstreetmap.org/way/412912391"
+    },
+    {
+      "name": "ゆうひパーク三隅",
+      "kana": "ゆうひぱーくみすみ",
+      "lon": 131.97708,
+      "lat": 34.82014,
+      "source": "https://www.openstreetmap.org/way/434750674"
+    },
+    {
+      "name": "ゆうひパーク浜田",
+      "kana": "ゆうひぱーくはまだ",
+      "lon": 132.07209,
+      "lat": 34.88939,
+      "source": "https://www.openstreetmap.org/way/513964356"
+    },
+    {
+      "name": "ゆとりパークたまがわ",
+      "kana": "ゆとりぱーくたまがわ",
+      "lon": 131.66494,
+      "lat": 34.64847,
+      "source": "https://www.openstreetmap.org/way/572935444"
+    },
+    {
+      "name": "ゆめランド布野",
+      "kana": "ゆめらんどふの",
+      "lon": 132.79678,
+      "lat": 34.85579,
+      "source": "https://www.openstreetmap.org/way/442981738"
+    },
+    {
+      "name": "よこはま",
+      "kana": "よこはま",
+      "lon": 141.25704,
+      "lat": 41.08376,
+      "source": "https://www.openstreetmap.org/way/433827941"
+    },
+    {
+      "name": "よこはま 菜の花プラザ",
+      "kana": "よこはま なのはなぷらざ",
+      "lon": 141.25723,
+      "lat": 41.0837,
+      "source": "https://www.openstreetmap.org/way/433827939"
+    },
+    {
+      "name": "よしうみいきいき館",
+      "kana": "よしうみいきいきかん",
+      "lon": 133.02146,
+      "lat": 34.12778,
+      "source": "https://www.openstreetmap.org/way/625736144"
+    },
+    {
+      "name": "よしおか温泉",
+      "kana": "よしおかおんせん",
+      "lon": 139.0344,
+      "lat": 36.44114,
+      "source": "https://www.openstreetmap.org/way/674915236"
+    },
+    {
+      "name": "よしかわ",
+      "kana": "よしかわ",
+      "lon": 138.3766,
+      "lat": 37.24199,
+      "source": "https://www.openstreetmap.org/way/433503140"
+    },
+    {
+      "name": "よってけ！島牧",
+      "kana": "よってけ！しままき",
+      "lon": 140.01289,
+      "lat": 42.68656,
+      "source": "https://www.openstreetmap.org/way/437445672"
+    },
+    {
+      "name": "よって西土佐",
+      "kana": "よってにしとさ",
+      "lon": 132.78907,
+      "lat": 33.17317,
+      "source": "https://www.openstreetmap.org/way/1327834051"
+    },
+    {
+      "name": "よつくら港",
+      "kana": "よつくらみなと",
+      "lon": 140.99387,
+      "lat": 37.10731,
+      "source": "https://www.openstreetmap.org/way/387128528"
+    },
+    {
+      "name": "らんこし・ふるさとの丘",
+      "kana": "らんこしふるさとのおか",
+      "lon": 140.47915,
+      "lat": 42.76199,
+      "source": "https://www.openstreetmap.org/way/1459986443"
+    },
+    {
+      "name": "るもい",
+      "kana": "るもい",
+      "lon": 141.64862,
+      "lat": 43.94477,
+      "source": "https://www.openstreetmap.org/way/830189134"
+    },
+    {
+      "name": "ろくのへ",
+      "kana": "ろくのへ",
+      "lon": 141.32455,
+      "lat": 40.60666,
+      "source": "https://www.openstreetmap.org/way/432719421"
+    },
+    {
+      "name": "わきのさわ",
+      "kana": "わきのさわ",
+      "lon": 140.80507,
+      "lat": 41.16785,
+      "source": "https://www.openstreetmap.org/way/437342500"
+    },
+    {
+      "name": "アグリパークゆめすぎと",
+      "kana": "あぐりぱーくゆめすぎと",
+      "lon": 139.76722,
+      "lat": 36.02444,
+      "source": "https://www.openstreetmap.org/way/438553792"
+    },
+    {
+      "name": "アリストぬまくま",
+      "kana": "ありすとぬまくま",
+      "lon": 133.31713,
+      "lat": 34.39499,
+      "source": "https://www.openstreetmap.org/way/436970289"
+    },
+    {
+      "name": "アルプス安曇野ほりがねの里",
+      "kana": "あるぷすあずみのほりがねのさと",
+      "lon": 137.87773,
+      "lat": 36.29331,
+      "source": "https://www.openstreetmap.org/way/684054140"
+    },
+    {
+      "name": "アルプ飛騨古川",
+      "kana": "あるぷひだふるかわ",
+      "lon": 137.19289,
+      "lat": 36.22023,
+      "source": "https://www.openstreetmap.org/way/686604491"
+    },
+    {
+      "name": "イノブータンランド・すさみ",
+      "kana": "いのぶーたんらんど・すさみ",
+      "lon": 135.54551,
+      "lat": 33.52035,
+      "source": "https://www.openstreetmap.org/way/442767710"
+    },
+    {
+      "name": "ウェルネスあらお",
+      "kana": "うぇるねすあらお",
+      "lon": 130.42791,
+      "lat": 32.99115,
+      "source": "https://www.openstreetmap.org/way/1526904051"
+    },
+    {
+      "name": "ウェーブパークなめりかわ",
+      "kana": "うぇーぶぱーくなめりかわ",
+      "lon": 137.34521,
+      "lat": 36.77442,
+      "source": "https://www.openstreetmap.org/way/490956166"
+    },
+    {
+      "name": "ウッディー京北",
+      "kana": "うっでぃーけいほく",
+      "lon": 135.63332,
+      "lat": 35.15592,
+      "source": "https://www.openstreetmap.org/way/1520188246"
+    },
+    {
+      "name": "ウトナイ湖",
+      "kana": "うとないこ",
+      "lon": 141.69398,
+      "lat": 42.69997,
+      "source": "https://www.openstreetmap.org/way/1111263711"
+    },
+    {
+      "name": "オアシスなんもく",
+      "kana": "おあしすなんもく",
+      "lon": 138.74179,
+      "lat": 36.17817,
+      "source": "https://www.openstreetmap.org/way/167828500"
+    },
+    {
+      "name": "オホーツク紋別",
+      "kana": "おほーつくもんべつ",
+      "lon": 143.37442,
+      "lat": 44.32869,
+      "source": "https://www.openstreetmap.org/way/629165354"
+    },
+    {
+      "name": "オライはすぬま",
+      "kana": "おらいはすぬま",
+      "lon": 140.50137,
+      "lat": 35.60158,
+      "source": "https://www.openstreetmap.org/relation/8035233"
+    },
+    {
+      "name": "オーロラタウン93りくべつ",
+      "kana": "おーろらたうん93りくべつ",
+      "lon": 143.74257,
+      "lat": 43.46765,
+      "source": "https://www.openstreetmap.org/way/1111270923"
+    },
+    {
+      "name": "カモンパーク新湊",
+      "kana": "かもんぱーくしんみなと",
+      "lon": 137.08443,
+      "lat": 36.75168,
+      "source": "https://www.openstreetmap.org/way/621684312"
+    },
+    {
+      "name": "ガレリアかめおか",
+      "kana": "がれりあかめおか",
+      "lon": 135.5669,
+      "lat": 35.01513,
+      "source": "https://www.openstreetmap.org/way/416313142"
+    },
+    {
+      "name": "ガーデンスパ十勝川温泉",
+      "kana": "がーでんすぱとかちがわおんせん",
+      "lon": 143.30098,
+      "lat": 42.93328,
+      "source": "https://www.openstreetmap.org/way/939146400"
+    },
+    {
+      "name": "キラメッセ室戸",
+      "kana": "きらめっせむろと",
+      "lon": 134.11008,
+      "lat": 33.30675,
+      "source": "https://www.openstreetmap.org/way/442740599"
+    },
+    {
+      "name": "クレール平田",
+      "kana": "くれーるひらた",
+      "lon": 136.67134,
+      "lat": 35.27513,
+      "source": "https://www.openstreetmap.org/way/1550950571"
+    },
+    {
+      "name": "クロスウェイなかまち",
+      "kana": "くろすうぇいなかまち",
+      "lon": 135.75433,
+      "lat": 34.6693,
+      "source": "https://www.openstreetmap.org/way/1343222275"
+    },
+    {
+      "name": "クロスロードみつぎ",
+      "kana": "くろすろーどみつぎ",
+      "lon": 133.14448,
+      "lat": 34.51167,
+      "source": "https://www.openstreetmap.org/way/690871397"
+    },
+    {
+      "name": "グランテラス筑西",
+      "kana": "ぐらんてらすちくせい",
+      "lon": 139.99416,
+      "lat": 36.32318,
+      "source": "https://www.openstreetmap.org/way/921411597"
+    },
+    {
+      "name": "グリーンファーム館山",
+      "kana": "ぐりーんふぁーむたてやま",
+      "lon": 139.9067,
+      "lat": 35.00069,
+      "source": "https://www.openstreetmap.org/way/1441530765"
+    },
+    {
+      "name": "グリーンロード大和",
+      "kana": "ぐりーんろーどやまと",
+      "lon": 132.64166,
+      "lat": 34.96805,
+      "source": "https://www.openstreetmap.org/way/442982801"
+    },
+    {
+      "name": "コスモール大樹",
+      "kana": "こすもーるたいじゅ",
+      "lon": 143.27368,
+      "lat": 42.4896,
+      "source": "https://www.openstreetmap.org/way/562110202"
+    },
+    {
+      "name": "サザンセトとうわ",
+      "kana": "さざんせととうわ",
+      "lon": 132.34155,
+      "lat": 33.90433,
+      "source": "https://www.openstreetmap.org/way/442978398"
+    },
+    {
+      "name": "サシバの里いちかい",
+      "kana": "さしばのさといちかい",
+      "lon": 140.0999,
+      "lat": 36.54312,
+      "source": "https://www.openstreetmap.org/way/436662267"
+    },
+    {
+      "name": "サラブレッドロード新冠",
+      "kana": "さらぶれっどろーどにいかっぷ",
+      "lon": 142.3155,
+      "lat": 42.36034,
+      "source": "https://www.openstreetmap.org/way/1462029516"
+    },
+    {
+      "name": "サロマ湖",
+      "kana": "さろまこ",
+      "lon": 143.82351,
+      "lat": 44.09991,
+      "source": "https://www.openstreetmap.org/way/561722125"
+    },
+    {
+      "name": "サンピコごうつ",
+      "kana": "さんぴこごうつ",
+      "lon": 132.29872,
+      "lat": 35.04536,
+      "source": "https://www.openstreetmap.org/way/433739591"
+    },
+    {
+      "name": "サーモンパーク千歳",
+      "kana": "さーもんぱーくちとせ",
+      "lon": 141.65907,
+      "lat": 42.83385,
+      "source": "https://www.openstreetmap.org/way/606170716"
+    },
+    {
+      "name": "シルクウェイにちはら",
+      "kana": "しるくうぇいにちはら",
+      "lon": 131.80726,
+      "lat": 34.55315,
+      "source": "https://www.openstreetmap.org/way/434749646"
+    },
+    {
+      "name": "シーサイド高浜",
+      "kana": "しーさいどたかはま",
+      "lon": 135.59581,
+      "lat": 35.48875,
+      "source": "https://www.openstreetmap.org/way/442984942"
+    },
+    {
+      "name": "スタープラザ芦別",
+      "kana": "すたーぷらざあしべつ",
+      "lon": 142.18867,
+      "lat": 43.52527,
+      "source": "https://www.openstreetmap.org/way/624214791"
+    },
+    {
+      "name": "スパ羅漢",
+      "kana": "すぱらかん",
+      "lon": 132.10457,
+      "lat": 34.38936,
+      "source": "https://www.openstreetmap.org/relation/3257530"
+    },
+    {
+      "name": "スペース・アップルよいち",
+      "kana": "すぺーす・あっぷるよいち",
+      "lon": 140.78864,
+      "lat": 43.18911,
+      "source": "https://www.openstreetmap.org/way/701030283"
+    },
+    {
+      "name": "スワン44ねむろ",
+      "kana": "すわんよんじゅうよんねむろ",
+      "lon": 145.43844,
+      "lat": 43.2617,
+      "source": "https://www.openstreetmap.org/way/561667620"
+    },
+    {
+      "name": "ソレーネ周南",
+      "kana": "それーねしゅうなん",
+      "lon": 131.6882,
+      "lat": 34.07472,
+      "source": "https://www.openstreetmap.org/way/315264932"
+    },
+    {
+      "name": "ニセコビュープラザ",
+      "kana": "にせこびゅーぷらざ",
+      "lon": 140.7027,
+      "lat": 42.79939,
+      "source": "https://www.openstreetmap.org/way/562728644"
+    },
+    {
+      "name": "ノンキーランドひがしもこと",
+      "kana": "のんきーらんどひがしもこと",
+      "lon": 144.29484,
+      "lat": 43.84495,
+      "source": "https://www.openstreetmap.org/way/662886904"
+    },
+    {
+      "name": "ハウスヤルビ奈井江",
+      "kana": "はうすやるびないえ",
+      "lon": 141.88883,
+      "lat": 43.43285,
+      "source": "https://www.openstreetmap.org/way/562745853"
+    },
+    {
+      "name": "パスカル清見",
+      "kana": "ぱすかるきよみ",
+      "lon": 137.08245,
+      "lat": 35.94071,
+      "source": "https://www.openstreetmap.org/way/686886250"
+    },
+    {
+      "name": "パティオにいがた",
+      "kana": "ぱてぃおにいがた",
+      "lon": 138.88359,
+      "lat": 37.54519,
+      "source": "https://www.openstreetmap.org/relation/19621991"
+    },
+    {
+      "name": "パパスランドさっつる",
+      "kana": "ぱぱすらんどさっつる",
+      "lon": 144.53445,
+      "lat": 43.79056,
+      "source": "https://www.openstreetmap.org/way/561677414"
+    },
+    {
+      "name": "パレットピアおおの",
+      "kana": "ぱれっとぴあおおの",
+      "lon": 136.62925,
+      "lat": 35.43187,
+      "source": "https://www.openstreetmap.org/way/1426199373"
+    },
+    {
+      "name": "ビオスおおがた",
+      "kana": "びおすおおがた",
+      "lon": 133.02777,
+      "lat": 33.03424,
+      "source": "https://www.openstreetmap.org/way/442748244"
+    },
+    {
+      "name": "ビーナスライン蓼科湖",
+      "kana": "びーなすらいんたてしなみずうみ",
+      "lon": 138.25774,
+      "lat": 36.05143,
+      "source": "https://www.openstreetmap.org/way/1056795874"
+    },
+    {
+      "name": "ピア２１しほろ",
+      "kana": "ぴあ２１しほろ",
+      "lon": 143.23947,
+      "lat": 43.14428,
+      "source": "https://www.openstreetmap.org/way/562015197"
+    },
+    {
+      "name": "ピュアラインにしき",
+      "kana": "ぴゅあらいんにしき",
+      "lon": 131.96923,
+      "lat": 34.27857,
+      "source": "https://www.openstreetmap.org/way/492575209"
+    },
+    {
+      "name": "ピンネシリ",
+      "kana": "ぴんねしり",
+      "lon": 142.21313,
+      "lat": 44.87729,
+      "source": "https://www.openstreetmap.org/way/562502836"
+    },
+    {
+      "name": "フェニックス",
+      "kana": "ふぇにっくす",
+      "lon": 131.47851,
+      "lat": 31.76891,
+      "source": "https://www.openstreetmap.org/way/436887076"
+    },
+    {
+      "name": "ヘルシーテラス佐久南",
+      "kana": "へるしーてらすさくみなみ",
+      "lon": 138.44016,
+      "lat": 36.23664,
+      "source": "https://www.openstreetmap.org/way/513109721"
+    },
+    {
+      "name": "ポート赤碕",
+      "kana": "ぽーとあかさき",
+      "lon": 133.66351,
+      "lat": 35.50679,
+      "source": "https://www.openstreetmap.org/way/580919224"
+    },
+    {
+      "name": "マオイの丘公園",
+      "kana": "まおいのおかこうえん",
+      "lon": 141.71669,
+      "lat": 42.94934,
+      "source": "https://www.openstreetmap.org/way/562153639"
+    },
+    {
+      "name": "マキノ追坂峠",
+      "kana": "まきのついさかとうげ",
+      "lon": 136.0828,
+      "lat": 35.48177,
+      "source": "https://www.openstreetmap.org/way/1232541342"
+    },
+    {
+      "name": "マチテラス日進",
+      "kana": "まちてらすにっしん",
+      "lon": 137.04405,
+      "lat": 35.13801,
+      "source": "https://www.openstreetmap.org/way/1200054280"
+    },
+    {
+      "name": "マリンドリーム能生",
+      "kana": "まりんどりーむのう",
+      "lon": 138.00334,
+      "lat": 37.11367,
+      "source": "https://www.openstreetmap.org/way/256293717"
+    },
+    {
+      "name": "マリーンアイランド岡島",
+      "kana": "まりーんあいらんどおかじま",
+      "lon": 142.63131,
+      "lat": 44.87818,
+      "source": "https://www.openstreetmap.org/way/1094539988"
+    },
+    {
+      "name": "マルメロの駅ながと",
+      "kana": "まるめろのえきながと",
+      "lon": 138.25769,
+      "lat": 36.27314,
+      "source": "https://www.openstreetmap.org/way/492362454"
+    },
+    {
+      "name": "メルヘンおやべ",
+      "kana": "めるへんおやべ",
+      "lon": 136.87622,
+      "lat": 36.68945,
+      "source": "https://www.openstreetmap.org/way/621683965"
+    },
+    {
+      "name": "メルヘンの丘めまんべつ",
+      "kana": "めるへんのおかめまんべつ",
+      "lon": 144.18849,
+      "lat": 43.91729,
+      "source": "https://www.openstreetmap.org/way/561696618"
+    },
+    {
+      "name": "ライスランドふかがわ",
+      "kana": "らいすらんどふかがわ",
+      "lon": 142.07017,
+      "lat": 43.69977,
+      "source": "https://www.openstreetmap.org/way/619075761"
+    },
+    {
+      "name": "レスティ唐古・鍵",
+      "kana": "れすてぃからこ・かぎ",
+      "lon": 135.79751,
+      "lat": 34.57135,
+      "source": "https://www.openstreetmap.org/way/589752493"
+    },
+    {
+      "name": "レストセンター あわくらんど",
+      "kana": "れすとせんたー あわくらんど",
+      "lon": 134.33544,
+      "lat": 35.17973,
+      "source": "https://www.openstreetmap.org/way/391806716"
+    },
+    {
+      "name": "ロック・ガーデンひちそう",
+      "kana": "ろっく・がーでんひちそう",
+      "lon": 137.11422,
+      "lat": 35.53491,
+      "source": "https://www.openstreetmap.org/way/686810206"
+    },
+    {
+      "name": "ローズマリー公園",
+      "kana": "ろーずまりーこうえん",
+      "lon": 139.97538,
+      "lat": 35.00863,
+      "source": "https://www.openstreetmap.org/way/320607950"
+    },
+    {
+      "name": "ロード銀山",
+      "kana": "ろーどぎんざん",
+      "lon": 132.5143,
+      "lat": 35.22213,
+      "source": "https://www.openstreetmap.org/way/433743834"
+    },
+    {
+      "name": "・両神温泉薬師の湯",
+      "kana": "・りょうかみおんせんくすりしのゆ",
+      "lon": 138.97123,
+      "lat": 36.00505,
+      "source": "https://www.openstreetmap.org/way/603990937"
+    },
+    {
+      "name": "・天竜相津「花桃の里",
+      "kana": "・てんりゅうあいづ「はなもものさと",
+      "lon": 137.81489,
+      "lat": 34.9119,
+      "source": "https://www.openstreetmap.org/way/647994445"
+    },
+    {
+      "name": "一本松展望園",
+      "kana": "いっぽんまつてんぼうその",
+      "lon": 134.16633,
+      "lat": 34.65685,
+      "source": "https://www.openstreetmap.org/way/507478002"
+    },
+    {
+      "name": "一枚岩",
+      "kana": "いちまいいわ",
+      "lon": 135.72046,
+      "lat": 33.54563,
+      "source": "https://www.openstreetmap.org/way/712158896"
+    },
+    {
+      "name": "七ヶ宿",
+      "kana": "しちがしゅく",
+      "lon": 140.50471,
+      "lat": 37.97118,
+      "source": "https://www.openstreetmap.org/way/442872175"
+    },
+    {
+      "name": "万葉の里",
+      "kana": "まんようのさと",
+      "lon": 138.89806,
+      "lat": 36.10951,
+      "source": "https://www.openstreetmap.org/way/439765660"
+    },
+    {
+      "name": "三岳",
+      "kana": "みたけ",
+      "lon": 137.64812,
+      "lat": 35.82241,
+      "source": "https://www.openstreetmap.org/way/759541247"
+    },
+    {
+      "name": "三方五湖",
+      "kana": "みかたごみずうみ",
+      "lon": 135.89363,
+      "lat": 35.55967,
+      "source": "https://www.openstreetmap.org/way/1058590039"
+    },
+    {
+      "name": "三朝",
+      "kana": "みささ",
+      "lon": 133.85046,
+      "lat": 35.36689,
+      "source": "https://www.openstreetmap.org/way/441779993"
+    },
+    {
+      "name": "三本木",
+      "kana": "さんぼんぎ",
+      "lon": 140.93829,
+      "lat": 38.52146,
+      "source": "https://www.openstreetmap.org/relation/16277685"
+    },
+    {
+      "name": "三滝堂",
+      "kana": "みたきどう",
+      "lon": 141.32818,
+      "lat": 38.70769,
+      "source": "https://www.openstreetmap.org/way/436705742"
+    },
+    {
+      "name": "三田貝分校",
+      "kana": "みたかいぶんこう",
+      "lon": 141.58959,
+      "lat": 39.87089,
+      "source": "https://www.openstreetmap.org/way/440174726"
+    },
+    {
+      "name": "三笠",
+      "kana": "みかさ",
+      "lon": 141.8046,
+      "lat": 43.24671,
+      "source": "https://www.openstreetmap.org/way/1157286505"
+    },
+    {
+      "name": "三芳村 鄙の里",
+      "kana": "みよしむら ひのさと",
+      "lon": 139.89481,
+      "lat": 35.03395,
+      "source": "https://www.openstreetmap.org/way/320607952"
+    },
+    {
+      "name": "上ノ国もんじゅ",
+      "kana": "うえのくにもんじゅ",
+      "lon": 140.09498,
+      "lat": 41.80845,
+      "source": "https://www.openstreetmap.org/way/561540110"
+    },
+    {
+      "name": "上品の郷",
+      "kana": "じょうひんのさと",
+      "lon": 141.29567,
+      "lat": 38.501,
+      "source": "https://www.openstreetmap.org/way/388330628"
+    },
+    {
+      "name": "上州おにし",
+      "kana": "じょうしゅうおにし",
+      "lon": 139.04066,
+      "lat": 36.14303,
+      "source": "https://www.openstreetmap.org/way/184431750"
+    },
+    {
+      "name": "上平",
+      "kana": "かみたいら",
+      "lon": 136.87117,
+      "lat": 36.37764,
+      "source": "https://www.openstreetmap.org/way/1547995395"
+    },
+    {
+      "name": "上野",
+      "kana": "うえの",
+      "lon": 138.78399,
+      "lat": 36.07998,
+      "source": "https://www.openstreetmap.org/way/439335642"
+    },
+    {
+      "name": "上関海峡",
+      "kana": "うえのせきかいきょう",
+      "lon": 132.11673,
+      "lat": 33.83459,
+      "source": "https://www.openstreetmap.org/way/435011016"
+    },
+    {
+      "name": "下賀茂温泉 湯の花",
+      "kana": "しもがもおんせん ゆのはな",
+      "lon": 138.86651,
+      "lat": 34.64998,
+      "source": "https://www.openstreetmap.org/way/441618428"
+    },
+    {
+      "name": "不知火",
+      "kana": "しらぬい",
+      "lon": 130.62923,
+      "lat": 32.63354,
+      "source": "https://www.openstreetmap.org/way/770619615"
+    },
+    {
+      "name": "中山盆地",
+      "kana": "なかやまぼんち",
+      "lon": 138.9551,
+      "lat": 36.62267,
+      "source": "https://www.openstreetmap.org/way/432833211"
+    },
+    {
+      "name": "中条",
+      "kana": "ちゅうじょう",
+      "lon": 138.01618,
+      "lat": 36.60392,
+      "source": "https://www.openstreetmap.org/way/435144604"
+    },
+    {
+      "name": "丹後王国 「食のみやこ",
+      "kana": "たんごおうこく 「しょくのみやこ",
+      "lon": 135.0685,
+      "lat": 35.67457,
+      "source": "https://www.openstreetmap.org/way/368706631"
+    },
+    {
+      "name": "久米の里",
+      "kana": "くめのさと",
+      "lon": 133.9229,
+      "lat": 35.05599,
+      "source": "https://www.openstreetmap.org/way/580825247"
+    },
+    {
+      "name": "五城目",
+      "kana": "ごじょうめ",
+      "lon": 140.14422,
+      "lat": 39.94738,
+      "source": "https://www.openstreetmap.org/way/439891101"
+    },
+    {
+      "name": "五木のやかた・かわうえ",
+      "kana": "いつきのやかた・かわうえ",
+      "lon": 137.50192,
+      "lat": 35.60239,
+      "source": "https://www.openstreetmap.org/way/1210932262"
+    },
+    {
+      "name": "井波",
+      "kana": "いなみ",
+      "lon": 136.97794,
+      "lat": 36.56146,
+      "source": "https://www.openstreetmap.org/way/423248632"
+    },
+    {
+      "name": "京都新光悦村",
+      "kana": "きょうとしんこうえつむら",
+      "lon": 135.48264,
+      "lat": 35.12422,
+      "source": "https://www.openstreetmap.org/way/46149256"
+    },
+    {
+      "name": "人吉",
+      "kana": "ひとよし",
+      "lon": 130.78933,
+      "lat": 32.19341,
+      "source": "https://www.openstreetmap.org/way/1004372743"
+    },
+    {
+      "name": "仁保の郷",
+      "kana": "にいほのさと",
+      "lon": 131.55933,
+      "lat": 34.2108,
+      "source": "https://www.openstreetmap.org/way/442979476"
+    },
+    {
+      "name": "今治市多々羅しまなみ公園",
+      "kana": "いまばりしたたらしまなみこうえん",
+      "lon": 133.05429,
+      "lat": 34.25433,
+      "source": "https://www.openstreetmap.org/way/162341341"
+    },
+    {
+      "name": "今治湯ノ浦温泉",
+      "kana": "いまばりゆのうらおんせん",
+      "lon": 133.04873,
+      "lat": 33.99287,
+      "source": "https://www.openstreetmap.org/way/436969893"
+    },
+    {
+      "name": "伊万里",
+      "kana": "いまり",
+      "lon": 129.92918,
+      "lat": 33.3136,
+      "source": "https://www.openstreetmap.org/way/704274843"
+    },
+    {
+      "name": "伊勢志摩",
+      "kana": "いせしま",
+      "lon": 136.7989,
+      "lat": 34.359,
+      "source": "https://www.openstreetmap.org/way/441601242"
+    },
+    {
+      "name": "伊勢本街道 御杖",
+      "kana": "いせほんかいどう みつえ",
+      "lon": 136.19991,
+      "lat": 34.51557,
+      "source": "https://www.openstreetmap.org/way/425947728"
+    },
+    {
+      "name": "伊吹の里",
+      "kana": "いぶきのさと",
+      "lon": 136.371,
+      "lat": 35.39686,
+      "source": "https://www.openstreetmap.org/way/1551216657"
+    },
+    {
+      "name": "伊方きらら館",
+      "kana": "いかたきららかん",
+      "lon": 132.30754,
+      "lat": 33.48086,
+      "source": "https://www.openstreetmap.org/way/437562715"
+    },
+    {
+      "name": "伊東",
+      "kana": "いとう",
+      "lon": 139.09414,
+      "lat": 34.98547,
+      "source": "https://www.openstreetmap.org/way/441616120"
+    },
+    {
+      "name": "伊根駐車ゾーン",
+      "kana": "いねちゅうしゃぞーん",
+      "lon": 135.29305,
+      "lat": 35.67634,
+      "source": "https://www.openstreetmap.org/way/435212370"
+    },
+    {
+      "name": "伊良湖クリスタルポルト",
+      "kana": "いらこくりすたるぽると",
+      "lon": 137.02037,
+      "lat": 34.58347,
+      "source": "https://www.openstreetmap.org/way/441602361"
+    },
+    {
+      "name": "伊豆ゲートウェイ函南",
+      "kana": "いずげーとうぇいかんなみ",
+      "lon": 138.92598,
+      "lat": 35.0759,
+      "source": "https://www.openstreetmap.org/way/560602764"
+    },
+    {
+      "name": "伊豆月ヶ瀬",
+      "kana": "いずがつゖせ",
+      "lon": 138.93145,
+      "lat": 34.92302,
+      "source": "https://www.openstreetmap.org/way/1558861530"
+    },
+    {
+      "name": "伊達の郷りょうぜん",
+      "kana": "だてのさとりょうぜん",
+      "lon": 140.58814,
+      "lat": 37.76706,
+      "source": "https://www.openstreetmap.org/way/701565032"
+    },
+    {
+      "name": "伯方SCパーク",
+      "kana": "はかたSCぱーく",
+      "lon": 133.07561,
+      "lat": 34.20231,
+      "source": "https://www.openstreetmap.org/way/627420875"
+    },
+    {
+      "name": "佐賀関",
+      "kana": "さがのせき",
+      "lon": 131.82776,
+      "lat": 33.24711,
+      "source": "https://www.openstreetmap.org/way/436897356"
+    },
+    {
+      "name": "保田小学校",
+      "kana": "やすだしょうがっこう",
+      "lon": 139.84383,
+      "lat": 35.14308,
+      "source": "https://www.openstreetmap.org/way/387457773"
+    },
+    {
+      "name": "信州さかえ",
+      "kana": "しんしゅうさかえ",
+      "lon": 138.58159,
+      "lat": 36.98854,
+      "source": "https://www.openstreetmap.org/way/641570319"
+    },
+    {
+      "name": "信州新町",
+      "kana": "しんしゅうしんまち",
+      "lon": 138.05258,
+      "lat": 36.58481,
+      "source": "https://www.openstreetmap.org/way/435145205"
+    },
+    {
+      "name": "信州新野千石平",
+      "kana": "しんしゅうしんのせんごくたいら",
+      "lon": 137.74525,
+      "lat": 35.25744,
+      "source": "https://www.openstreetmap.org/way/856211372"
+    },
+    {
+      "name": "信州蔦木宿",
+      "kana": "しんしゅうつたきやど",
+      "lon": 138.2767,
+      "lat": 35.86352,
+      "source": "https://www.openstreetmap.org/way/434367301"
+    },
+    {
+      "name": "信濃路下條",
+      "kana": "しなのみちしもじょう",
+      "lon": 137.79451,
+      "lat": 35.41738,
+      "source": "https://www.openstreetmap.org/way/857034906"
+    },
+    {
+      "name": "八ッ場ふるさと館",
+      "kana": "はちっばふるさとかん",
+      "lon": 138.68469,
+      "lat": 36.54804,
+      "source": "https://www.openstreetmap.org/way/620591284"
+    },
+    {
+      "name": "八千穂高原",
+      "kana": "やちほこうげん",
+      "lon": 138.46519,
+      "lat": 36.12867,
+      "source": "https://www.openstreetmap.org/way/1324661275"
+    },
+    {
+      "name": "八王子滝山",
+      "kana": "はちおうじたきやま",
+      "lon": 139.3416,
+      "lat": 35.68648,
+      "source": "https://www.openstreetmap.org/way/203110498"
+    },
+    {
+      "name": "公方の郷なかがわ",
+      "kana": "くぼうのさとなかがわ",
+      "lon": 134.66768,
+      "lat": 33.95304,
+      "source": "https://www.openstreetmap.org/way/1519474666"
+    },
+    {
+      "name": "内子",
+      "kana": "うちこ",
+      "lon": 132.65844,
+      "lat": 33.555,
+      "source": "https://www.openstreetmap.org/way/1135883497"
+    },
+    {
+      "name": "内灘サンセットパーク",
+      "kana": "うちなださんせっとぱーく",
+      "lon": 136.64912,
+      "lat": 36.65908,
+      "source": "https://www.openstreetmap.org/way/435999173"
+    },
+    {
+      "name": "利賀",
+      "kana": "とが",
+      "lon": 137.02708,
+      "lat": 36.52388,
+      "source": "https://www.openstreetmap.org/way/547411473"
+    },
+    {
+      "name": "加子母",
+      "kana": "かしも",
+      "lon": 137.37497,
+      "lat": 35.70866,
+      "source": "https://www.openstreetmap.org/way/687246420"
+    },
+    {
+      "name": "北の関宿安芸高田",
+      "kana": "きたのせきやどあきたかた",
+      "lon": 132.68099,
+      "lat": 34.72134,
+      "source": "https://www.openstreetmap.org/way/455015912"
+    },
+    {
+      "name": "北オホーツクはまとんべつ",
+      "kana": "きたおほーつくはまとんべつ",
+      "lon": 142.36071,
+      "lat": 45.12523,
+      "source": "https://www.openstreetmap.org/way/999816817"
+    },
+    {
+      "name": "北前船松前",
+      "kana": "きたまえふなまつまえ",
+      "lon": 140.10643,
+      "lat": 41.42633,
+      "source": "https://www.openstreetmap.org/way/493277762"
+    },
+    {
+      "name": "北川はゆま",
+      "kana": "きたがわはゆま",
+      "lon": 131.70441,
+      "lat": 32.66638,
+      "source": "https://www.openstreetmap.org/way/441570801"
+    },
+    {
+      "name": "北方よっちみろ屋",
+      "kana": "ほっぽうよっちみろや",
+      "lon": 131.49167,
+      "lat": 32.5954,
+      "source": "https://www.openstreetmap.org/way/969656405"
+    },
+    {
+      "name": "北条公園",
+      "kana": "ほうじょうこうえん",
+      "lon": 133.82048,
+      "lat": 35.49781,
+      "source": "https://www.openstreetmap.org/way/436855642"
+    },
+    {
+      "name": "北欧の風 道の駅とうべつ",
+      "kana": "ほくおうのかぜ みちのえきとうべつ",
+      "lon": 141.44867,
+      "lat": 43.17699,
+      "source": "https://www.openstreetmap.org/way/539129193"
+    },
+    {
+      "name": "北浦",
+      "kana": "きたうら",
+      "lon": 131.80088,
+      "lat": 32.68497,
+      "source": "https://www.openstreetmap.org/way/1111558696"
+    },
+    {
+      "name": "区界高原",
+      "kana": "くかいこうげん",
+      "lon": 141.35395,
+      "lat": 39.65121,
+      "source": "https://www.openstreetmap.org/way/436597878"
+    },
+    {
+      "name": "十三湖高原",
+      "kana": "じゅうさんみずうみこうげん",
+      "lon": 140.38439,
+      "lat": 41.04542,
+      "source": "https://www.openstreetmap.org/way/433838317"
+    },
+    {
+      "name": "十和田湖",
+      "kana": "とわだこ",
+      "lon": 140.85771,
+      "lat": 40.41771,
+      "source": "https://www.openstreetmap.org/way/1321579830"
+    },
+    {
+      "name": "十文字",
+      "kana": "じゅうもんじ",
+      "lon": 140.52121,
+      "lat": 39.22631,
+      "source": "https://www.openstreetmap.org/way/439894939"
+    },
+    {
+      "name": "十津川郷",
+      "kana": "とつがわさと",
+      "lon": 135.79404,
+      "lat": 33.98826,
+      "source": "https://www.openstreetmap.org/way/598982675"
+    },
+    {
+      "name": "南きよさと",
+      "kana": "みなみきよさと",
+      "lon": 138.42832,
+      "lat": 35.86545,
+      "source": "https://www.openstreetmap.org/way/435775733"
+    },
+    {
+      "name": "南ふらの",
+      "kana": "みなみふらの",
+      "lon": 142.57271,
+      "lat": 43.16904,
+      "source": "https://www.openstreetmap.org/way/1094400006"
+    },
+    {
+      "name": "南アルプスむら長谷",
+      "kana": "みなみあるぷすむらはせ",
+      "lon": 138.0836,
+      "lat": 35.80972,
+      "source": "https://www.openstreetmap.org/way/433816880"
+    },
+    {
+      "name": "南信州とよおかマルシェ",
+      "kana": "なんしんしゅうとよおかまるしぇ",
+      "lon": 137.89108,
+      "lat": 35.54443,
+      "source": "https://www.openstreetmap.org/way/746047539"
+    },
+    {
+      "name": "南房パラダイス",
+      "kana": "なんぼうぱらだいす",
+      "lon": 139.82139,
+      "lat": 34.93996,
+      "source": "https://www.openstreetmap.org/way/725842209"
+    },
+    {
+      "name": "南相馬",
+      "kana": "みなみそうま",
+      "lon": 140.9835,
+      "lat": 37.63559,
+      "source": "https://www.openstreetmap.org/way/106475700"
+    },
+    {
+      "name": "厚岸グルメパーク",
+      "kana": "あっけしぐるめぱーく",
+      "lon": 144.84355,
+      "lat": 43.05766,
+      "source": "https://www.openstreetmap.org/way/561665803"
+    },
+    {
+      "name": "原鶴",
+      "kana": "はらつる",
+      "lon": 130.78488,
+      "lat": 33.3537,
+      "source": "https://www.openstreetmap.org/way/1080050780"
+    },
+    {
+      "name": "厳木",
+      "kana": "きゅうらぎ",
+      "lon": 130.07234,
+      "lat": 33.31112,
+      "source": "https://www.openstreetmap.org/way/1402981628"
+    },
+    {
+      "name": "古今伝授の里やまと",
+      "kana": "ここんでんじゅのさとやまと",
+      "lon": 136.90202,
+      "lat": 35.81605,
+      "source": "https://www.openstreetmap.org/way/686756892"
+    },
+    {
+      "name": "吉野ヶ里",
+      "kana": "よしのがり",
+      "lon": 130.39715,
+      "lat": 33.38086,
+      "source": "https://www.openstreetmap.org/way/709186174"
+    },
+    {
+      "name": "吉野路上北山",
+      "kana": "よしのろじょうきたやま",
+      "lon": 136.00007,
+      "lat": 34.13931,
+      "source": "https://www.openstreetmap.org/way/543530935"
+    },
+    {
+      "name": "吉野路大塔",
+      "kana": "よしのみちおおとう",
+      "lon": 135.73264,
+      "lat": 34.21434,
+      "source": "https://www.openstreetmap.org/way/565464713"
+    },
+    {
+      "name": "吉野路大淀iセンター",
+      "kana": "よしのみちおおよどiせんたー",
+      "lon": 135.79734,
+      "lat": 34.41237,
+      "source": "https://www.openstreetmap.org/way/998325443"
+    },
+    {
+      "name": "吉野路黒滝",
+      "kana": "よしのみちくろたき",
+      "lon": 135.82323,
+      "lat": 34.30603,
+      "source": "https://www.openstreetmap.org/way/712475134"
+    },
+    {
+      "name": "名水の郷きょうごく",
+      "kana": "めいすいのさときょうごく",
+      "lon": 140.87085,
+      "lat": 42.85891,
+      "source": "https://www.openstreetmap.org/way/426269404"
+    },
+    {
+      "name": "名田庄",
+      "kana": "なたしょう",
+      "lon": 135.58435,
+      "lat": 35.39467,
+      "source": "https://www.openstreetmap.org/way/846069210"
+    },
+    {
+      "name": "和田浦WA・O！",
+      "kana": "わだうらWA・O！",
+      "lon": 140.02087,
+      "lat": 35.04267,
+      "source": "https://www.openstreetmap.org/way/321265244"
+    },
+    {
+      "name": "和紙の里ひがしちちぶ",
+      "kana": "わしのさとひがしちちぶ",
+      "lon": 139.20361,
+      "lat": 36.05215,
+      "source": "https://www.openstreetmap.org/way/699057883"
+    },
+    {
+      "name": "和良",
+      "kana": "かずよし",
+      "lon": 137.06777,
+      "lat": 35.74254,
+      "source": "https://www.openstreetmap.org/way/686888579"
+    },
+    {
+      "name": "喜入",
+      "kana": "きいれ",
+      "lon": 130.54526,
+      "lat": 31.37923,
+      "source": "https://www.openstreetmap.org/way/387047036"
+    },
+    {
+      "name": "喜名番所",
+      "kana": "きめいばんしょ",
+      "lon": 127.75795,
+      "lat": 26.39854,
+      "source": "https://www.openstreetmap.org/way/189192553"
+    },
+    {
+      "name": "喜多の郷",
+      "kana": "きたのさと",
+      "lon": 139.87897,
+      "lat": 37.70164,
+      "source": "https://www.openstreetmap.org/way/387524920"
+    },
+    {
+      "name": "四万十とおわ",
+      "kana": "しまんととおわ",
+      "lon": 132.83522,
+      "lat": 33.22363,
+      "source": "https://www.openstreetmap.org/way/1324114227"
+    },
+    {
+      "name": "四万十大正",
+      "kana": "しまんとたいしょう",
+      "lon": 132.97163,
+      "lat": 33.1821,
+      "source": "https://www.openstreetmap.org/way/1321817369"
+    },
+    {
+      "name": "国上",
+      "kana": "くにうえ",
+      "lon": 138.82442,
+      "lat": 37.66353,
+      "source": "https://www.openstreetmap.org/way/608707930"
+    },
+    {
+      "name": "国見 あつかしの郷",
+      "kana": "くにみ あつかしのさと",
+      "lon": 140.54672,
+      "lat": 37.87264,
+      "source": "https://www.openstreetmap.org/way/1310426167"
+    },
+    {
+      "name": "土佐佐賀",
+      "kana": "とささが",
+      "lon": 133.10167,
+      "lat": 33.08721,
+      "source": "https://www.openstreetmap.org/way/442745238"
+    },
+    {
+      "name": "塩津海道あぢかまの里",
+      "kana": "しおずかいどうあぢかまのさと",
+      "lon": 136.16277,
+      "lat": 35.5208,
+      "source": "https://www.openstreetmap.org/way/1169248776"
+    },
+    {
+      "name": "夕張メロード",
+      "kana": "ゆうばりめろーど",
+      "lon": 142.03805,
+      "lat": 42.93679,
+      "source": "https://www.openstreetmap.org/way/1110211340"
+    },
+    {
+      "name": "夕陽が丘そとめ",
+      "kana": "みち の えき ゆうひがおかそ とめ",
+      "lon": 129.70412,
+      "lat": 32.83579,
+      "source": "https://www.openstreetmap.org/way/1286581717"
+    },
+    {
+      "name": "多古",
+      "kana": "たこ",
+      "lon": 140.47499,
+      "lat": 35.73215,
+      "source": "https://www.openstreetmap.org/way/457740792"
+    },
+    {
+      "name": "大和路へぐり",
+      "kana": "やまとみちへぐり",
+      "lon": 135.70633,
+      "lat": 34.62327,
+      "source": "https://www.openstreetmap.org/way/310662819"
+    },
+    {
+      "name": "大坂城残石記念公園",
+      "kana": "おおさかしろざんいしきねんこうえん",
+      "lon": 134.24186,
+      "lat": 34.53389,
+      "source": "https://www.openstreetmap.org/way/251110674"
+    },
+    {
+      "name": "大山",
+      "kana": "おおやま",
+      "lon": 133.9443,
+      "lat": 33.47059,
+      "source": "https://www.openstreetmap.org/way/442741063"
+    },
+    {
+      "name": "大日岳",
+      "kana": "だいにちだけ",
+      "lon": 136.89068,
+      "lat": 35.98799,
+      "source": "https://www.openstreetmap.org/way/1547000520"
+    },
+    {
+      "name": "大月",
+      "kana": "おおつき",
+      "lon": 132.70946,
+      "lat": 32.82913,
+      "source": "https://www.openstreetmap.org/way/441712504"
+    },
+    {
+      "name": "大栄",
+      "kana": "だいえい",
+      "lon": 133.76189,
+      "lat": 35.49904,
+      "source": "https://www.openstreetmap.org/way/405972044"
+    },
+    {
+      "name": "大桑",
+      "kana": "おおくわ",
+      "lon": 137.65302,
+      "lat": 35.68182,
+      "source": "https://www.openstreetmap.org/way/630625108"
+    },
+    {
+      "name": "大歩危",
+      "kana": "おおぼけ",
+      "lon": 133.7602,
+      "lat": 33.88118,
+      "source": "https://www.openstreetmap.org/way/437443473"
+    },
+    {
+      "name": "大滝温泉",
+      "kana": "おおたきおんせん",
+      "lon": 138.93823,
+      "lat": 35.95003,
+      "source": "https://www.openstreetmap.org/way/711617613"
+    },
+    {
+      "name": "大社ご縁広場",
+      "kana": "たいしゃごへりひろば",
+      "lon": 132.68693,
+      "lat": 35.38929,
+      "source": "https://www.openstreetmap.org/way/433745861"
+    },
+    {
+      "name": "大芝高原",
+      "kana": "おおしばこうげん",
+      "lon": 137.94389,
+      "lat": 35.8874,
+      "source": "https://www.openstreetmap.org/way/1056799064"
+    },
+    {
+      "name": "大谷海岸",
+      "kana": "おおやかいがん",
+      "lon": 141.56319,
+      "lat": 38.8148,
+      "source": "https://www.openstreetmap.org/way/961452555"
+    },
+    {
+      "name": "天城越え",
+      "kana": "あまぎごえ",
+      "lon": 138.92235,
+      "lat": 34.85589,
+      "source": "https://www.openstreetmap.org/way/388705200"
+    },
+    {
+      "name": "天空の郷さんさん",
+      "kana": "てんくうのさとさんさん",
+      "lon": 132.8984,
+      "lat": 33.66147,
+      "source": "https://www.openstreetmap.org/way/625531091"
+    },
+    {
+      "name": "天草市イルカセンター",
+      "kana": "あまくさしいるかせんたー",
+      "lon": 130.13125,
+      "lat": 32.54552,
+      "source": "https://www.openstreetmap.org/relation/12595766"
+    },
+    {
+      "name": "太良",
+      "kana": "たら",
+      "lon": 130.16929,
+      "lat": 33.04723,
+      "source": "https://www.openstreetmap.org/way/1229504115"
+    },
+    {
+      "name": "奄美大島住用",
+      "kana": "あまみおおしますみよう",
+      "lon": 129.40936,
+      "lat": 28.25929,
+      "source": "https://www.openstreetmap.org/way/458823655"
+    },
+    {
+      "name": "奥久慈だいご",
+      "kana": "おくくじだいご",
+      "lon": 140.35904,
+      "lat": 36.76835,
+      "source": "https://www.openstreetmap.org/way/440487260"
+    },
+    {
+      "name": "奥会津かねやま",
+      "kana": "おくあいづかねやま",
+      "lon": 139.52959,
+      "lat": 37.47186,
+      "source": "https://www.openstreetmap.org/way/1484291503"
+    },
+    {
+      "name": "奥出雲おろちループ",
+      "kana": "おくいずもおろちるーぷ",
+      "lon": 133.12762,
+      "lat": 35.0958,
+      "source": "https://www.openstreetmap.org/way/566057241"
+    },
+    {
+      "name": "奥大山",
+      "kana": "おくおおやま",
+      "lon": 133.47418,
+      "lat": 35.29568,
+      "source": "https://www.openstreetmap.org/way/457158261"
+    },
+    {
+      "name": "奥永源寺渓流の里",
+      "kana": "おくながげんてらけいりゅうのさと",
+      "lon": 136.37198,
+      "lat": 35.1054,
+      "source": "https://www.openstreetmap.org/way/1556710010"
+    },
+    {
+      "name": "奥河内くろまろの郷",
+      "kana": "おくかわうちくろまろのさと",
+      "lon": 135.55108,
+      "lat": 34.43572,
+      "source": "https://www.openstreetmap.org/way/754214901"
+    },
+    {
+      "name": "奥津温泉",
+      "kana": "おくつおんせん",
+      "lon": 133.9227,
+      "lat": 35.22322,
+      "source": "https://www.openstreetmap.org/way/713665072"
+    },
+    {
+      "name": "奥熊野古道ほんぐう",
+      "kana": "おくくまのこどうほんぐう",
+      "lon": 135.76198,
+      "lat": 33.86504,
+      "source": "https://www.openstreetmap.org/way/711998700"
+    },
+    {
+      "name": "女神の里たてしな",
+      "kana": "めがみのさとたてしな",
+      "lon": 138.32943,
+      "lat": 36.27592,
+      "source": "https://www.openstreetmap.org/way/694106028"
+    },
+    {
+      "name": "妹子の郷",
+      "kana": "いもこのさと",
+      "lon": 135.90139,
+      "lat": 35.1598,
+      "source": "https://www.openstreetmap.org/way/480043338"
+    },
+    {
+      "name": "季の里天栄",
+      "kana": "きのさとてんえい",
+      "lon": 140.245,
+      "lat": 37.24366,
+      "source": "https://www.openstreetmap.org/way/440595802"
+    },
+    {
+      "name": "季楽里あさひ",
+      "kana": "きらりあさひ",
+      "lon": 140.67539,
+      "lat": 35.71795,
+      "source": "https://www.openstreetmap.org/way/420457885"
+    },
+    {
+      "name": "宇津ノ谷峠 (藤枝側)",
+      "kana": "うづのたにとうげ (ふじえだがわ)",
+      "lon": 138.30135,
+      "lat": 34.92641,
+      "source": "https://www.openstreetmap.org/way/169079786"
+    },
+    {
+      "name": "宇津ノ谷峠　下り",
+      "kana": "うづのたにとうげ　くだり",
+      "lon": 138.31021,
+      "lat": 34.93765,
+      "source": "https://www.openstreetmap.org/way/385602324"
+    },
+    {
+      "name": "宇陀路室生",
+      "kana": "うだみちむろう",
+      "lon": 136.03473,
+      "lat": 34.57701,
+      "source": "https://www.openstreetmap.org/way/998325445"
+    },
+    {
+      "name": "安曇野松川",
+      "kana": "あずみのまつかわ",
+      "lon": 137.86775,
+      "lat": 36.39609,
+      "source": "https://www.openstreetmap.org/way/1064815996"
+    },
+    {
+      "name": "安達 智恵子の里 上り線",
+      "kana": "あだち ちえこのさと のぼりせん",
+      "lon": 140.48362,
+      "lat": 37.63608,
+      "source": "https://www.openstreetmap.org/way/387536345"
+    },
+    {
+      "name": "安達 智恵子の里 下り線",
+      "kana": "あだち ちえこのさと くだりせん",
+      "lon": 140.48176,
+      "lat": 37.63616,
+      "source": "https://www.openstreetmap.org/way/1310787176"
+    },
+    {
+      "name": "宍喰温泉",
+      "kana": "ししくいおんせん",
+      "lon": 134.30723,
+      "lat": 33.5691,
+      "source": "https://www.openstreetmap.org/way/313767903"
+    },
+    {
+      "name": "宙ドーム・神岡",
+      "kana": "ちゅうどーむ・かみおか",
+      "lon": 137.30712,
+      "lat": 36.32881,
+      "source": "https://www.openstreetmap.org/way/554784593"
+    },
+    {
+      "name": "宮地岳かかしの里",
+      "kana": "みやぢがくかかしのさと",
+      "lon": 130.12645,
+      "lat": 32.38489,
+      "source": "https://www.openstreetmap.org/way/1516208301"
+    },
+    {
+      "name": "宿場町ひらふく",
+      "kana": "しゅくばまちひらふく",
+      "lon": 134.36947,
+      "lat": 35.04449,
+      "source": "https://www.openstreetmap.org/way/280452765"
+    },
+    {
+      "name": "富士 (上り)",
+      "kana": "ふじ (のぼり)",
+      "lon": 138.64726,
+      "lat": 35.13331,
+      "source": "https://www.openstreetmap.org/way/168588605"
+    },
+    {
+      "name": "富士 (下り)",
+      "kana": "ふじ (くだり)",
+      "lon": 138.64665,
+      "lat": 35.13256,
+      "source": "https://www.openstreetmap.org/way/168588625"
+    },
+    {
+      "name": "富士吉田",
+      "kana": "ふじよしだ",
+      "lon": 138.80277,
+      "lat": 35.45876,
+      "source": "https://www.openstreetmap.org/way/1472476795"
+    },
+    {
+      "name": "富士川",
+      "kana": "ふじがわ",
+      "lon": 138.4718,
+      "lat": 35.5572,
+      "source": "https://www.openstreetmap.org/way/442574596"
+    },
+    {
+      "name": "富士川楽座",
+      "kana": "ふじがわらくざ",
+      "lon": 138.61822,
+      "lat": 35.16181,
+      "source": "https://www.openstreetmap.org/way/769102670"
+    },
+    {
+      "name": "富弘美術館 商業ゾーン",
+      "kana": "とみひろびじゅつかん しょうぎょうぞーん",
+      "lon": 139.37321,
+      "lat": 36.55046,
+      "source": "https://www.openstreetmap.org/way/409220112"
+    },
+    {
+      "name": "富有柿の里いとぬき",
+      "kana": "ふゆうかきのさといとぬき",
+      "lon": 136.67596,
+      "lat": 35.47272,
+      "source": "https://www.openstreetmap.org/way/581243500"
+    },
+    {
+      "name": "小国",
+      "kana": "しょうこく",
+      "lon": 131.06474,
+      "lat": 33.12311,
+      "source": "https://www.openstreetmap.org/way/1148771135"
+    },
+    {
+      "name": "小坂田公園",
+      "kana": "こさかたこうえん",
+      "lon": 137.98796,
+      "lat": 36.10616,
+      "source": "https://www.openstreetmap.org/way/870596304"
+    },
+    {
+      "name": "小田の郷せせらぎ",
+      "kana": "おだのさとせせらぎ",
+      "lon": 132.80072,
+      "lat": 33.5685,
+      "source": "https://www.openstreetmap.org/way/1135081904"
+    },
+    {
+      "name": "小石原",
+      "kana": "こいしわら",
+      "lon": 130.82599,
+      "lat": 33.4652,
+      "source": "https://www.openstreetmap.org/way/441580189"
+    },
+    {
+      "name": "小谷",
+      "kana": "こたに",
+      "lon": 137.90033,
+      "lat": 36.84551,
+      "source": "https://www.openstreetmap.org/way/345418516"
+    },
+    {
+      "name": "小豆島ふるさと村",
+      "kana": "しょうずしまふるさとむら",
+      "lon": 134.23607,
+      "lat": 34.47108,
+      "source": "https://www.openstreetmap.org/way/1349134342"
+    },
+    {
+      "name": "尾瀬かたしな",
+      "kana": "おぜかたしな",
+      "lon": 139.22598,
+      "lat": 36.77241,
+      "source": "https://www.openstreetmap.org/way/681352249"
+    },
+    {
+      "name": "尾瀬檜枝岐",
+      "kana": "おぜひえき",
+      "lon": 139.39662,
+      "lat": 37.03336,
+      "source": "https://www.openstreetmap.org/way/683399440"
+    },
+    {
+      "name": "尾瀬街道みしま宿",
+      "kana": "おぜかいどうみしまじゅく",
+      "lon": 139.67002,
+      "lat": 37.47742,
+      "source": "https://www.openstreetmap.org/way/1447493450"
+    },
+    {
+      "name": "尾花沢",
+      "kana": "おばなざわ",
+      "lon": 140.36385,
+      "lat": 38.65728,
+      "source": "https://www.openstreetmap.org/way/484509196"
+    },
+    {
+      "name": "山内",
+      "kana": "やまうち",
+      "lon": 129.95593,
+      "lat": 33.19168,
+      "source": "https://www.openstreetmap.org/way/476875754"
+    },
+    {
+      "name": "山北",
+      "kana": "さんぽく",
+      "lon": 139.03126,
+      "lat": 35.37951,
+      "source": "https://www.openstreetmap.org/way/541554911"
+    },
+    {
+      "name": "山川港活お海道",
+      "kana": "やまかわみなとかつおかいどう",
+      "lon": 130.63488,
+      "lat": 31.20289,
+      "source": "https://www.openstreetmap.org/way/436886455"
+    },
+    {
+      "name": "山陽道やかげ宿",
+      "kana": "さんようどうやかげやど",
+      "lon": 133.59289,
+      "lat": 34.62358,
+      "source": "https://www.openstreetmap.org/way/1361378980"
+    },
+    {
+      "name": "岩城",
+      "kana": "いわき",
+      "lon": 140.05318,
+      "lat": 39.54268,
+      "source": "https://www.openstreetmap.org/way/1233567744"
+    },
+    {
+      "name": "川口・あんぎょう",
+      "kana": "かわぐち・あんぎょう",
+      "lon": 139.76578,
+      "lat": 35.84822,
+      "source": "https://www.openstreetmap.org/way/168583438"
+    },
+    {
+      "name": "川場田園プラザ",
+      "kana": "かわばでんえんぷらざ",
+      "lon": 139.10677,
+      "lat": 36.68695,
+      "source": "https://www.openstreetmap.org/way/248678745"
+    },
+    {
+      "name": "川辺",
+      "kana": "かわべ",
+      "lon": 130.43294,
+      "lat": 31.41265,
+      "source": "https://www.openstreetmap.org/way/436882568"
+    },
+    {
+      "name": "常総",
+      "kana": "じょうそう",
+      "lon": 139.98533,
+      "lat": 36.08313,
+      "source": "https://www.openstreetmap.org/way/1110641945"
+    },
+    {
+      "name": "常陸大宮～かわプラザ～",
+      "kana": "ひたちおおみや～かわぷらざ～",
+      "lon": 140.40862,
+      "lat": 36.59762,
+      "source": "https://www.openstreetmap.org/way/434693545"
+    },
+    {
+      "name": "平成",
+      "kana": "へいせい",
+      "lon": 136.99739,
+      "lat": 35.55206,
+      "source": "https://www.openstreetmap.org/way/694005193"
+    },
+    {
+      "name": "広瀬富田城",
+      "kana": "ひろせとみたしろ",
+      "lon": 133.18069,
+      "lat": 35.36833,
+      "source": "https://www.openstreetmap.org/way/422193288"
+    },
+    {
+      "name": "広見森の三角ぼうし",
+      "kana": "ひろみもりのさんかくぼうし",
+      "lon": 132.68704,
+      "lat": 33.2538,
+      "source": "https://www.openstreetmap.org/way/1332418032"
+    },
+    {
+      "name": "庄和",
+      "kana": "しょうわ",
+      "lon": 139.79463,
+      "lat": 35.99712,
+      "source": "https://www.openstreetmap.org/way/798808172"
+    },
+    {
+      "name": "庄川",
+      "kana": "しょうがわ",
+      "lon": 136.97977,
+      "lat": 36.57436,
+      "source": "https://www.openstreetmap.org/way/1547007548"
+    },
+    {
+      "name": "庭園の郷 保内",
+      "kana": "ていえんのさと ほない",
+      "lon": 139.02665,
+      "lat": 37.64679,
+      "source": "https://www.openstreetmap.org/way/608597692"
+    },
+    {
+      "name": "彼杵の荘",
+      "kana": "そのぎのそう",
+      "lon": 129.91958,
+      "lat": 33.03567,
+      "source": "https://www.openstreetmap.org/way/1552792570"
+    },
+    {
+      "name": "志原海岸",
+      "kana": "こころざしはらかいがん",
+      "lon": 135.4312,
+      "lat": 33.57054,
+      "source": "https://www.openstreetmap.org/way/442767148"
+    },
+    {
+      "name": "思川",
+      "kana": "おもいがわ",
+      "lon": 139.76056,
+      "lat": 36.30821,
+      "source": "https://www.openstreetmap.org/way/437102833"
+    },
+    {
+      "name": "愛ランド湧別",
+      "kana": "あいらんどゆうべつ",
+      "lon": 143.71884,
+      "lat": 44.13131,
+      "source": "https://www.openstreetmap.org/way/561725571"
+    },
+    {
+      "name": "掛合の里",
+      "kana": "かけやのさと",
+      "lon": 132.81665,
+      "lat": 35.21072,
+      "source": "https://www.openstreetmap.org/way/1472693563"
+    },
+    {
+      "name": "掛川",
+      "kana": "かけがわ",
+      "lon": 138.07619,
+      "lat": 34.79414,
+      "source": "https://www.openstreetmap.org/way/452157609"
+    },
+    {
+      "name": "摩周温泉",
+      "kana": "ましゅうおんせん",
+      "lon": 144.44746,
+      "lat": 43.49232,
+      "source": "https://www.openstreetmap.org/way/561694642"
+    },
+    {
+      "name": "播磨いちのみや",
+      "kana": "はりまいちのみや",
+      "lon": 134.58805,
+      "lat": 35.0883,
+      "source": "https://www.openstreetmap.org/way/1511499262"
+    },
+    {
+      "name": "日光 日光街道ニコニコ本陣",
+      "kana": "にっこう にっこうかいどうにこにこほんじん",
+      "lon": 139.68798,
+      "lat": 36.72473,
+      "source": "https://www.openstreetmap.org/way/432719467"
+    },
+    {
+      "name": "日向",
+      "kana": "ひゅうが",
+      "lon": 131.62412,
+      "lat": 32.34322,
+      "source": "https://www.openstreetmap.org/way/441569547"
+    },
+    {
+      "name": "日和佐",
+      "kana": "ひわさ",
+      "lon": 134.53003,
+      "lat": 33.72991,
+      "source": "https://www.openstreetmap.org/way/443115937"
+    },
+    {
+      "name": "日立おさかなセンター",
+      "kana": "ひたちおさかなせんたー",
+      "lon": 140.61487,
+      "lat": 36.49217,
+      "source": "https://www.openstreetmap.org/way/94166407"
+    },
+    {
+      "name": "日義 木曽駒高原",
+      "kana": "ひよし きそこまこうげん",
+      "lon": 137.73981,
+      "lat": 35.86668,
+      "source": "https://www.openstreetmap.org/way/764495097"
+    },
+    {
+      "name": "明宝 磨墨の里公園",
+      "kana": "めいほう するすみのさとこうえん",
+      "lon": 137.02853,
+      "lat": 35.84499,
+      "source": "https://www.openstreetmap.org/way/691205176"
+    },
+    {
+      "name": "明恵ふるさと館",
+      "kana": "あきえふるさとかん",
+      "lon": 135.26273,
+      "lat": 34.05414,
+      "source": "https://www.openstreetmap.org/way/712482102"
+    },
+    {
+      "name": "明治の森黒磯",
+      "kana": "めいじのもりくろいそ",
+      "lon": 139.98566,
+      "lat": 37.00038,
+      "source": "https://www.openstreetmap.org/way/415190302"
+    },
+    {
+      "name": "月夜野矢瀬親水公園",
+      "kana": "つきよのやぜしんすいこうえん",
+      "lon": 138.98118,
+      "lat": 36.69762,
+      "source": "https://www.openstreetmap.org/way/432837865"
+    },
+    {
+      "name": "月山",
+      "kana": "がっさん",
+      "lon": 139.87409,
+      "lat": 38.58751,
+      "source": "https://www.openstreetmap.org/way/433855409"
+    },
+    {
+      "name": "有明",
+      "kana": "ありあけ",
+      "lon": 130.30548,
+      "lat": 32.50433,
+      "source": "https://www.openstreetmap.org/way/459282747"
+    },
+    {
+      "name": "望羊中山",
+      "kana": "ぼうひつじなかやま",
+      "lon": 141.09697,
+      "lat": 42.85591,
+      "source": "https://www.openstreetmap.org/way/562740973"
+    },
+    {
+      "name": "朝日",
+      "kana": "あさひ",
+      "lon": 139.52296,
+      "lat": 38.28274,
+      "source": "https://www.openstreetmap.org/way/434382341"
+    },
+    {
+      "name": "朝霧高原",
+      "kana": "あさぎりこうげん",
+      "lon": 138.5913,
+      "lat": 35.41382,
+      "source": "https://www.openstreetmap.org/way/1016168500"
+    },
+    {
+      "name": "木更津うまくたの里",
+      "kana": "きさらづうまくたのさと",
+      "lon": 140.05246,
+      "lat": 35.36006,
+      "source": "https://www.openstreetmap.org/way/609765104"
+    },
+    {
+      "name": "木曽ならかわ",
+      "kana": "きそならかわ",
+      "lon": 137.84225,
+      "lat": 35.98627,
+      "source": "https://www.openstreetmap.org/way/685996332"
+    },
+    {
+      "name": "本庄",
+      "kana": "ほんじょう",
+      "lon": 133.13658,
+      "lat": 35.51812,
+      "source": "https://www.openstreetmap.org/way/434804718"
+    },
+    {
+      "name": "杉の湯川上",
+      "kana": "すぎのゆかわうえ",
+      "lon": 135.95501,
+      "lat": 34.33712,
+      "source": "https://www.openstreetmap.org/way/711989004"
+    },
+    {
+      "name": "村田",
+      "kana": "むらた",
+      "lon": 140.71771,
+      "lat": 38.11884,
+      "source": "https://www.openstreetmap.org/way/441541222"
+    },
+    {
+      "name": "来夢とごうち",
+      "kana": "らいむとごうち",
+      "lon": 132.26985,
+      "lat": 34.57538,
+      "source": "https://www.openstreetmap.org/relation/19839101"
+    },
+    {
+      "name": "東山道伊王野",
+      "kana": "とうさんどういおうの",
+      "lon": 140.1572,
+      "lat": 36.95432,
+      "source": "https://www.openstreetmap.org/way/345410748"
+    },
+    {
+      "name": "東松島",
+      "kana": "ひがしまつしま",
+      "lon": 141.18326,
+      "lat": 38.42424,
+      "source": "https://www.openstreetmap.org/way/1320346526"
+    },
+    {
+      "name": "東浦",
+      "kana": "ひがしうら",
+      "lon": 134.99253,
+      "lat": 34.53788,
+      "source": "https://www.openstreetmap.org/way/437564438"
+    },
+    {
+      "name": "東由利",
+      "kana": "ひがしゆり",
+      "lon": 140.28508,
+      "lat": 39.30086,
+      "source": "https://www.openstreetmap.org/way/683815839"
+    },
+    {
+      "name": "松浦海のふるさと館",
+      "kana": "まつうらうみのふるさとかん",
+      "lon": 129.70185,
+      "lat": 33.34829,
+      "source": "https://www.openstreetmap.org/way/441598921"
+    },
+    {
+      "name": "林林館",
+      "kana": "りんりんかん",
+      "lon": 141.31638,
+      "lat": 38.74246,
+      "source": "https://www.openstreetmap.org/way/436706186"
+    },
+    {
+      "name": "果樹公園あしがくぼ",
+      "kana": "かじゅこうえんあしがくぼ",
+      "lon": 139.13589,
+      "lat": 35.97714,
+      "source": "https://www.openstreetmap.org/way/168581144"
+    },
+    {
+      "name": "柳津",
+      "kana": "やなつ",
+      "lon": 136.73146,
+      "lat": 35.36983,
+      "source": "https://www.openstreetmap.org/way/1503601185"
+    },
+    {
+      "name": "柿の里くどやま",
+      "kana": "かきのさとくどやま",
+      "lon": 135.55573,
+      "lat": 34.29292,
+      "source": "https://www.openstreetmap.org/way/432844126"
+    },
+    {
+      "name": "根占",
+      "kana": "ねじめ",
+      "lon": 130.76727,
+      "lat": 31.18564,
+      "source": "https://www.openstreetmap.org/relation/10369171"
+    },
+    {
+      "name": "根来さくらの里",
+      "kana": "ねごろさくらのさと",
+      "lon": 135.30706,
+      "lat": 34.3117,
+      "source": "https://www.openstreetmap.org/way/442757646"
+    },
+    {
+      "name": "桜の郷 荘川",
+      "kana": "さくらのさと しょうかわ",
+      "lon": 136.96596,
+      "lat": 36.02141,
+      "source": "https://www.openstreetmap.org/way/686831660"
+    },
+    {
+      "name": "桜峠",
+      "kana": "さくらとうげ",
+      "lon": 137.01121,
+      "lat": 37.33165,
+      "source": "https://www.openstreetmap.org/way/291623922"
+    },
+    {
+      "name": "森と湖の里ほろかない",
+      "kana": "もりとみずうみのさとほろかない",
+      "lon": 142.13876,
+      "lat": 44.1151,
+      "source": "https://www.openstreetmap.org/way/562510764"
+    },
+    {
+      "name": "椿はなの湯",
+      "kana": "つばきはなのゆ",
+      "lon": 135.39189,
+      "lat": 33.60335,
+      "source": "https://www.openstreetmap.org/way/442765607"
+    },
+    {
+      "name": "横綱の里ふくしま",
+      "kana": "よこづなのさとふくしま",
+      "lon": 140.25572,
+      "lat": 41.4795,
+      "source": "https://www.openstreetmap.org/way/561538626"
+    },
+    {
+      "name": "樹海ロード日高",
+      "kana": "じゅかいろーどひだか",
+      "lon": 142.44206,
+      "lat": 42.87704,
+      "source": "https://www.openstreetmap.org/way/1547074416"
+    },
+    {
+      "name": "歌舞伎の里大鹿",
+      "kana": "かぶきのさとおおしか",
+      "lon": 138.03736,
+      "lat": 35.56504,
+      "source": "https://www.openstreetmap.org/way/722442406"
+    },
+    {
+      "name": "歓遊舎ひこさん",
+      "kana": "かんゆうしゃひこさん",
+      "lon": 130.86005,
+      "lat": 33.54963,
+      "source": "https://www.openstreetmap.org/way/1027254229"
+    },
+    {
+      "name": "水の郷さわら",
+      "kana": "みずのさとさわら",
+      "lon": 140.50684,
+      "lat": 35.89628,
+      "source": "https://www.openstreetmap.org/way/62111068"
+    },
+    {
+      "name": "水の郷日高川龍游",
+      "kana": "みずのさとひだかがわりゅうゆう",
+      "lon": 135.43957,
+      "lat": 33.8952,
+      "source": "https://www.openstreetmap.org/way/1360657041"
+    },
+    {
+      "name": "水上町水紀行館",
+      "kana": "すいじょうまちみずきこうかん",
+      "lon": 138.96823,
+      "lat": 36.76443,
+      "source": "https://www.openstreetmap.org/way/432836427"
+    },
+    {
+      "name": "氷見",
+      "kana": "ひみ",
+      "lon": 136.98692,
+      "lat": 36.8645,
+      "source": "https://www.openstreetmap.org/way/1465362692"
+    },
+    {
+      "name": "江差",
+      "kana": "えさし",
+      "lon": 140.13923,
+      "lat": 41.89479,
+      "source": "https://www.openstreetmap.org/way/589813571"
+    },
+    {
+      "name": "河野",
+      "kana": "こうの",
+      "lon": 136.09209,
+      "lat": 35.7968,
+      "source": "https://www.openstreetmap.org/way/442989879"
+    },
+    {
+      "name": "波賀",
+      "kana": "はが",
+      "lon": 134.52198,
+      "lat": 35.20172,
+      "source": "https://www.openstreetmap.org/way/216816852"
+    },
+    {
+      "name": "波野",
+      "kana": "なみの",
+      "lon": 131.19731,
+      "lat": 32.95965,
+      "source": "https://www.openstreetmap.org/way/413671616"
+    },
+    {
+      "name": "津山",
+      "kana": "つやま",
+      "lon": 141.32548,
+      "lat": 38.61976,
+      "source": "https://www.openstreetmap.org/way/440539814"
+    },
+    {
+      "name": "津島",
+      "kana": "つしま",
+      "lon": 132.52106,
+      "lat": 33.1395,
+      "source": "https://www.openstreetmap.org/way/440437750"
+    },
+    {
+      "name": "津田の松原",
+      "kana": "つだのまつばら",
+      "lon": 134.25316,
+      "lat": 34.28549,
+      "source": "https://www.openstreetmap.org/way/1429960578"
+    },
+    {
+      "name": "津軽白神・ビーチにしめや",
+      "kana": "つがるしらかみ・びーちにしめや",
+      "lon": 140.30025,
+      "lat": 40.57791,
+      "source": "https://www.openstreetmap.org/way/591511486"
+    },
+    {
+      "name": "流氷街道網走",
+      "kana": "りゅうひょうかいどうあばしり",
+      "lon": 144.27409,
+      "lat": 44.02199,
+      "source": "https://www.openstreetmap.org/way/561676051"
+    },
+    {
+      "name": "浜坂の郷",
+      "kana": "はまさかのさと",
+      "lon": 134.46973,
+      "lat": 35.61017,
+      "source": "https://www.openstreetmap.org/way/899675488"
+    },
+    {
+      "name": "海南サクアス",
+      "kana": "かいなんさくあす",
+      "lon": 135.17019,
+      "lat": 34.12821,
+      "source": "https://www.openstreetmap.org/way/1251041458"
+    },
+    {
+      "name": "海山",
+      "kana": "うみやま",
+      "lon": 136.2143,
+      "lat": 34.10236,
+      "source": "https://www.openstreetmap.org/way/215002461"
+    },
+    {
+      "name": "清和文楽邑",
+      "kana": "きよかずぶんらくむら",
+      "lon": 131.09159,
+      "lat": 32.69064,
+      "source": "https://www.openstreetmap.org/way/160867598"
+    },
+    {
+      "name": "清川",
+      "kana": "きよかわ",
+      "lon": 139.27689,
+      "lat": 35.48274,
+      "source": "https://www.openstreetmap.org/way/437012637"
+    },
+    {
+      "name": "清水の里・鳥海郷",
+      "kana": "しみずのさと・ちょうかいさと",
+      "lon": 140.2919,
+      "lat": 39.10933,
+      "source": "https://www.openstreetmap.org/way/1339040126"
+    },
+    {
+      "name": "清流の里ひじかわ",
+      "kana": "せいりゅうのさとひじかわ",
+      "lon": 132.67725,
+      "lat": 33.46087,
+      "source": "https://www.openstreetmap.org/way/1134744565"
+    },
+    {
+      "name": "清流の里・しろとり",
+      "kana": "せいりゅうのさと・しろとり",
+      "lon": 136.85462,
+      "lat": 35.88161,
+      "source": "https://www.openstreetmap.org/way/1254315521"
+    },
+    {
+      "name": "清流茶屋 かわはら",
+      "kana": "せいりゅうちゃや かわはら",
+      "lon": 134.20309,
+      "lat": 35.39358,
+      "source": "https://www.openstreetmap.org/way/391756128"
+    },
+    {
+      "name": "湘南ちがさき",
+      "kana": "しょうなんちがさき",
+      "lon": 139.37833,
+      "lat": 35.32027,
+      "source": "https://www.openstreetmap.org/way/1394925794"
+    },
+    {
+      "name": "湧水の郷しおや",
+      "kana": "ゆうすいのさとしおや",
+      "lon": 139.78077,
+      "lat": 36.76467,
+      "source": "https://www.openstreetmap.org/way/431373927"
+    },
+    {
+      "name": "湯の川",
+      "kana": "ゆのかわ",
+      "lon": 132.86939,
+      "lat": 35.39578,
+      "source": "https://www.openstreetmap.org/way/433751810"
+    },
+    {
+      "name": "湯布院",
+      "kana": "ゆふいん",
+      "lon": 131.32778,
+      "lat": 33.26066,
+      "source": "https://www.openstreetmap.org/way/436904499"
+    },
+    {
+      "name": "滝宮",
+      "kana": "たつのみや",
+      "lon": 133.91658,
+      "lat": 34.25047,
+      "source": "https://www.openstreetmap.org/way/158687294"
+    },
+    {
+      "name": "潮見坂",
+      "kana": "しおみさか",
+      "lon": 137.49831,
+      "lat": 34.67731,
+      "source": "https://www.openstreetmap.org/way/436809333"
+    },
+    {
+      "name": "瀞峡街道熊野川",
+      "kana": "どろきょうかいどうくまのがわ",
+      "lon": 135.89658,
+      "lat": 33.79048,
+      "source": "https://www.openstreetmap.org/way/310757767"
+    },
+    {
+      "name": "瀧之拝太郎",
+      "kana": "たきゆきはいたろう",
+      "lon": 135.76586,
+      "lat": 33.60161,
+      "source": "https://www.openstreetmap.org/way/712436951"
+    },
+    {
+      "name": "瀬戸しなの",
+      "kana": "せとしなの",
+      "lon": 137.11432,
+      "lat": 35.24191,
+      "source": "https://www.openstreetmap.org/way/705301228"
+    },
+    {
+      "name": "瀬戸町",
+      "kana": "せとちょう",
+      "lon": 132.25812,
+      "lat": 33.44754,
+      "source": "https://www.openstreetmap.org/way/437563632"
+    },
+    {
+      "name": "瀬替えの郷せんだ",
+      "kana": "せがええのさとせんだ",
+      "lon": 138.68604,
+      "lat": 37.19923,
+      "source": "https://www.openstreetmap.org/way/608672148"
+    },
+    {
+      "name": "熊野きのくに",
+      "kana": "くまのきのくに",
+      "lon": 136.10441,
+      "lat": 33.95988,
+      "source": "https://www.openstreetmap.org/way/1462324540"
+    },
+    {
+      "name": "熊野・板屋九郎兵衛の里",
+      "kana": "くまの・いたやくろべえのさと",
+      "lon": 135.9156,
+      "lat": 33.87644,
+      "source": "https://www.openstreetmap.org/way/1461782171"
+    },
+    {
+      "name": "熊野・花の窟",
+      "kana": "くまの・はなのくつ",
+      "lon": 136.09225,
+      "lat": 33.87894,
+      "source": "https://www.openstreetmap.org/way/712485888"
+    },
+    {
+      "name": "熊野古道中辺路",
+      "kana": "くまのこどうなかへち",
+      "lon": 135.59499,
+      "lat": 33.81222,
+      "source": "https://www.openstreetmap.org/way/998325442"
+    },
+    {
+      "name": "猪苗代",
+      "kana": "いなわしろ",
+      "lon": 140.10759,
+      "lat": 37.5376,
+      "source": "https://www.openstreetmap.org/way/437546984"
+    },
+    {
+      "name": "玉村宿",
+      "kana": "たまむらやど",
+      "lon": 139.09449,
+      "lat": 36.30821,
+      "source": "https://www.openstreetmap.org/way/439879243"
+    },
+    {
+      "name": "甘楽",
+      "kana": "かんら",
+      "lon": 138.91697,
+      "lat": 36.23383,
+      "source": "https://www.openstreetmap.org/way/439871787"
+    },
+    {
+      "name": "生月大橋",
+      "kana": "いきつきおおはし",
+      "lon": 129.43372,
+      "lat": 33.35526,
+      "source": "https://www.openstreetmap.org/way/434705041"
+    },
+    {
+      "name": "田切の里",
+      "kana": "たぎりのさと",
+      "lon": 137.94008,
+      "lat": 35.69046,
+      "source": "https://www.openstreetmap.org/way/668488336"
+    },
+    {
+      "name": "田原",
+      "kana": "たはら",
+      "lon": 137.2718,
+      "lat": 34.66137,
+      "source": "https://www.openstreetmap.org/way/441603740"
+    },
+    {
+      "name": "田園の里うりゅう",
+      "kana": "でんえんのさとうりゅう",
+      "lon": 141.89375,
+      "lat": 43.66246,
+      "source": "https://www.openstreetmap.org/way/603918154"
+    },
+    {
+      "name": "田沢",
+      "kana": "たざわ",
+      "lon": 139.98386,
+      "lat": 37.8774,
+      "source": "https://www.openstreetmap.org/way/442870014"
+    },
+    {
+      "name": "田野駅屋",
+      "kana": "たのえきや",
+      "lon": 134.00788,
+      "lat": 33.43007,
+      "source": "https://www.openstreetmap.org/way/437435819"
+    },
+    {
+      "name": "甲斐大和",
+      "kana": "かいやまと",
+      "lon": 138.79276,
+      "lat": 35.63586,
+      "source": "https://www.openstreetmap.org/way/168577565"
+    },
+    {
+      "name": "番屋",
+      "kana": "ばんや",
+      "lon": 139.61566,
+      "lat": 37.06891,
+      "source": "https://www.openstreetmap.org/way/505033003"
+    },
+    {
+      "name": "発酵の里こうざき",
+      "kana": "はっこうのさとこうざき",
+      "lon": 140.38008,
+      "lat": 35.90029,
+      "source": "https://www.openstreetmap.org/way/490923897"
+    },
+    {
+      "name": "白山文化の里長滝",
+      "kana": "はくさんぶんかのさとおさたき",
+      "lon": 136.83191,
+      "lat": 35.92309,
+      "source": "https://www.openstreetmap.org/way/712903958"
+    },
+    {
+      "name": "白崎海洋公園",
+      "kana": "しらさきかいようこうえん",
+      "lon": 135.07253,
+      "lat": 33.97677,
+      "source": "https://www.openstreetmap.org/way/442761649"
+    },
+    {
+      "name": "白川郷",
+      "kana": "しらかわごう",
+      "lon": 136.90195,
+      "lat": 36.27903,
+      "source": "https://www.openstreetmap.org/way/435718496"
+    },
+    {
+      "name": "白沢",
+      "kana": "しらさわ",
+      "lon": 139.12046,
+      "lat": 36.66189,
+      "source": "https://www.openstreetmap.org/way/436795910"
+    },
+    {
+      "name": "白間津花のパーキング",
+      "kana": "しらまづはなのぱーきんぐ",
+      "lon": 139.9357,
+      "lat": 34.91842,
+      "source": "https://www.openstreetmap.org/way/420490700"
+    },
+    {
+      "name": "白馬",
+      "kana": "はくば",
+      "lon": 137.84728,
+      "lat": 36.65369,
+      "source": "https://www.openstreetmap.org/way/421480149"
+    },
+    {
+      "name": "白鷹ヤナ公園",
+      "kana": "しらたかやなこうえん",
+      "lon": 140.09765,
+      "lat": 38.21764,
+      "source": "https://www.openstreetmap.org/way/627585679"
+    },
+    {
+      "name": "真狩フラワーセンター",
+      "kana": "まっかりふらわーせんたー",
+      "lon": 140.80782,
+      "lat": 42.76234,
+      "source": "https://www.openstreetmap.org/way/426715766"
+    },
+    {
+      "name": "知床らうす",
+      "kana": "しれとこらうす",
+      "lon": 145.19207,
+      "lat": 44.01725,
+      "source": "https://www.openstreetmap.org/way/561669229"
+    },
+    {
+      "name": "石狩「あいろーど厚田",
+      "kana": "いしかり「あいろーどあつた",
+      "lon": 141.43216,
+      "lat": 43.40394,
+      "source": "https://www.openstreetmap.org/way/606195973"
+    },
+    {
+      "name": "砺波",
+      "kana": "となみ",
+      "lon": 136.96002,
+      "lat": 36.64135,
+      "source": "https://www.openstreetmap.org/way/546751950"
+    },
+    {
+      "name": "硯上の里おがつ",
+      "kana": "すずりうえのさとおがつ",
+      "lon": 141.46835,
+      "lat": 38.52018,
+      "source": "https://www.openstreetmap.org/way/1015747166"
+    },
+    {
+      "name": "神林",
+      "kana": "かんばやし",
+      "lon": 139.46122,
+      "lat": 38.17249,
+      "source": "https://www.openstreetmap.org/way/438370057"
+    },
+    {
+      "name": "神話の里 白うさぎ",
+      "kana": "しんわのさと しろうさぎ",
+      "lon": 134.11498,
+      "lat": 35.52545,
+      "source": "https://www.openstreetmap.org/way/399912295"
+    },
+    {
+      "name": "神鍋高原",
+      "kana": "かんなべこうげん",
+      "lon": 134.67484,
+      "lat": 35.49915,
+      "source": "https://www.openstreetmap.org/way/715072006"
+    },
+    {
+      "name": "秋鹿なぎさ公園",
+      "kana": "あきしかなぎさこうえん",
+      "lon": 132.95067,
+      "lat": 35.47457,
+      "source": "https://www.openstreetmap.org/way/433755169"
+    },
+    {
+      "name": "竜王 かがみの里",
+      "kana": "りゅうおう かがみのさと",
+      "lon": 136.07902,
+      "lat": 35.0856,
+      "source": "https://www.openstreetmap.org/way/548714562"
+    },
+    {
+      "name": "童謡のふる里おおとね",
+      "kana": "どうようのふるさとおおとね",
+      "lon": 139.64461,
+      "lat": 36.17044,
+      "source": "https://www.openstreetmap.org/way/438555102"
+    },
+    {
+      "name": "竹田",
+      "kana": "たけだ",
+      "lon": 131.34072,
+      "lat": 32.98546,
+      "source": "https://www.openstreetmap.org/way/1167517544"
+    },
+    {
+      "name": "笠岡ベイファーム",
+      "kana": "かさおかべいふぁーむ",
+      "lon": 133.4993,
+      "lat": 34.47315,
+      "source": "https://www.openstreetmap.org/way/437037075"
+    },
+    {
+      "name": "第九の里",
+      "kana": "だいくのさと",
+      "lon": 134.49909,
+      "lat": 34.16378,
+      "source": "https://www.openstreetmap.org/way/437431960"
+    },
+    {
+      "name": "笹川流れ（ＪＲ駅に併設）",
+      "kana": "ささがわながれ（ＪＲえきにへいせつ）",
+      "lon": 139.45839,
+      "lat": 38.3751,
+      "source": "https://www.openstreetmap.org/way/438371597"
+    },
+    {
+      "name": "筆柿の里・幸田",
+      "kana": "ふでかきのさと・こうだ",
+      "lon": 137.13847,
+      "lat": 34.84824,
+      "source": "https://www.openstreetmap.org/way/795951187"
+    },
+    {
+      "name": "筑前みなみの里",
+      "kana": "ちくぜんみなみのさと",
+      "lon": 130.6238,
+      "lat": 33.46732,
+      "source": "https://www.openstreetmap.org/way/1002886642"
+    },
+    {
+      "name": "箱根峠",
+      "kana": "はこねとうげ",
+      "lon": 139.01565,
+      "lat": 35.18662,
+      "source": "https://www.openstreetmap.org/way/168586244"
+    },
+    {
+      "name": "米プラザ",
+      "kana": "こめぷらざ",
+      "lon": 135.92813,
+      "lat": 35.12437,
+      "source": "https://www.openstreetmap.org/way/768891942"
+    },
+    {
+      "name": "紀の川万葉の里",
+      "kana": "きのかわまんようのさと",
+      "lon": 135.46479,
+      "lat": 34.2846,
+      "source": "https://www.openstreetmap.org/way/712459065"
+    },
+    {
+      "name": "紀宝町ウミガメ公園",
+      "kana": "きほうまちうみがめこうえん",
+      "lon": 136.02878,
+      "lat": 33.77015,
+      "source": "https://www.openstreetmap.org/way/712438472"
+    },
+    {
+      "name": "紀州備長炭記念公園",
+      "kana": "きしゅうびんちょうすみきねんこうえん",
+      "lon": 135.42711,
+      "lat": 33.80329,
+      "source": "https://www.openstreetmap.org/way/712477500"
+    },
+    {
+      "name": "細入",
+      "kana": "ほそいり",
+      "lon": 137.23814,
+      "lat": 36.48832,
+      "source": "https://www.openstreetmap.org/way/490957094"
+    },
+    {
+      "name": "絵本の里けんぶち",
+      "kana": "えほんのさとけんぶち",
+      "lon": 142.39134,
+      "lat": 44.09418,
+      "source": "https://www.openstreetmap.org/way/562508900"
+    },
+    {
+      "name": "縄文ロマン南かやべ",
+      "kana": "じょうもんろまんみなみかやべ",
+      "lon": 140.94503,
+      "lat": 41.92766,
+      "source": "https://www.openstreetmap.org/way/458759376"
+    },
+    {
+      "name": "織姫の里なかのと",
+      "kana": "おりひめのさとなかのと",
+      "lon": 136.90452,
+      "lat": 36.97006,
+      "source": "https://www.openstreetmap.org/way/729926758"
+    },
+    {
+      "name": "織部の里・もとす",
+      "kana": "おりべのさと・もとす",
+      "lon": 136.66758,
+      "lat": 35.50017,
+      "source": "https://www.openstreetmap.org/way/585841470"
+    },
+    {
+      "name": "羊のまち 侍・しべつ",
+      "kana": "ひつじのまち さむらい・しべつ",
+      "lon": 142.3927,
+      "lat": 44.17634,
+      "source": "https://www.openstreetmap.org/way/939143215"
+    },
+    {
+      "name": "美ヶ原高原美術館",
+      "kana": "うつくしがはらこうげんびじゅつかん",
+      "lon": 138.14032,
+      "lat": 36.23071,
+      "source": "https://www.openstreetmap.org/way/117369484"
+    },
+    {
+      "name": "美並",
+      "kana": "みなみ",
+      "lon": 136.94307,
+      "lat": 35.6086,
+      "source": "https://www.openstreetmap.org/way/1548171625"
+    },
+    {
+      "name": "美山ふれあい広場",
+      "kana": "みやまふれあいひろば",
+      "lon": 135.58811,
+      "lat": 35.27705,
+      "source": "https://www.openstreetmap.org/way/429017251"
+    },
+    {
+      "name": "美濃にわか茶屋",
+      "kana": "みのにわかちゃや",
+      "lon": 136.91401,
+      "lat": 35.55444,
+      "source": "https://www.openstreetmap.org/way/1546888984"
+    },
+    {
+      "name": "美濃白川",
+      "kana": "みのしらかわ",
+      "lon": 137.17358,
+      "lat": 35.60373,
+      "source": "https://www.openstreetmap.org/relation/6750841"
+    },
+    {
+      "name": "美郷",
+      "kana": "みさと",
+      "lon": 140.56769,
+      "lat": 39.37949,
+      "source": "https://www.openstreetmap.org/way/439899412"
+    },
+    {
+      "name": "耶馬トピア",
+      "kana": "やばとぴあ",
+      "lon": 131.17482,
+      "lat": 33.48952,
+      "source": "https://www.openstreetmap.org/relation/16100527"
+    },
+    {
+      "name": "自然体感しむかっぷ",
+      "kana": "しぜんたいかんしむかっぷ",
+      "lon": 142.39778,
+      "lat": 42.97848,
+      "source": "https://www.openstreetmap.org/way/846599080"
+    },
+    {
+      "name": "舞ロードIC千代田",
+      "kana": "まいろーどICちよだ",
+      "lon": 132.54176,
+      "lat": 34.67432,
+      "source": "https://www.openstreetmap.org/way/442981223"
+    },
+    {
+      "name": "舞鶴港とれとれセンター",
+      "kana": "まいづるみなととれとれせんたー",
+      "lon": 135.31477,
+      "lat": 35.45018,
+      "source": "https://www.openstreetmap.org/way/1032050469"
+    },
+    {
+      "name": "舟屋の里伊根",
+      "kana": "ふねやのさといね",
+      "lon": 135.29146,
+      "lat": 35.67467,
+      "source": "https://www.openstreetmap.org/way/435212369"
+    },
+    {
+      "name": "芦北でこぽん",
+      "kana": "あしきたでこぽん",
+      "lon": 130.50814,
+      "lat": 32.30318,
+      "source": "https://www.openstreetmap.org/way/798280272"
+    },
+    {
+      "name": "花かげの郷まきおか",
+      "kana": "はなかげのさとまきおか",
+      "lon": 138.71842,
+      "lat": 35.75446,
+      "source": "https://www.openstreetmap.org/way/168585624"
+    },
+    {
+      "name": "花の三聖苑伊豆松崎",
+      "kana": "はなのさんひじりえんいずまつざき",
+      "lon": 138.82569,
+      "lat": 34.7574,
+      "source": "https://www.openstreetmap.org/way/441618920"
+    },
+    {
+      "name": "花の里いいじま",
+      "kana": "はなのさといいじま",
+      "lon": 137.91027,
+      "lat": 35.6617,
+      "source": "https://www.openstreetmap.org/way/263962012"
+    },
+    {
+      "name": "花の駅千曲川",
+      "kana": "はなのえきちくまがわ",
+      "lon": 138.38805,
+      "lat": 36.88173,
+      "source": "https://www.openstreetmap.org/way/240521077"
+    },
+    {
+      "name": "花街道付知",
+      "kana": "かがいみちつけち",
+      "lon": 137.44125,
+      "lat": 35.6433,
+      "source": "https://www.openstreetmap.org/way/707542049"
+    },
+    {
+      "name": "若桜 桜ん坊",
+      "kana": "わかさ さくらんぼう",
+      "lon": 134.40026,
+      "lat": 35.34401,
+      "source": "https://www.openstreetmap.org/way/439116893"
+    },
+    {
+      "name": "若狭おばま",
+      "kana": "わかさおばま",
+      "lon": 135.76264,
+      "lat": 35.49231,
+      "source": "https://www.openstreetmap.org/way/442988939"
+    },
+    {
+      "name": "若狭熊川宿",
+      "kana": "わかさくまかわやど",
+      "lon": 135.90634,
+      "lat": 35.44075,
+      "source": "https://www.openstreetmap.org/way/442989231"
+    },
+    {
+      "name": "若狭美浜はまびより",
+      "kana": "わかさみはまはまびより",
+      "lon": 135.93606,
+      "lat": 35.60433,
+      "source": "https://www.openstreetmap.org/way/1156494723"
+    },
+    {
+      "name": "草津",
+      "kana": "くさつ",
+      "lon": 135.93885,
+      "lat": 35.07018,
+      "source": "https://www.openstreetmap.org/way/1060347729"
+    },
+    {
+      "name": "蒜山高原",
+      "kana": "ひるぜんこうげん",
+      "lon": 133.66792,
+      "lat": 35.29467,
+      "source": "https://www.openstreetmap.org/relation/2166561"
+    },
+    {
+      "name": "藤岡 (ららん藤岡)",
+      "kana": "ふじおか (ららんふじおか)",
+      "lon": 139.07369,
+      "lat": 36.27238,
+      "source": "https://www.openstreetmap.org/way/245822335"
+    },
+    {
+      "name": "藤川宿",
+      "kana": "ふじかわやど",
+      "lon": 137.21712,
+      "lat": 34.91444,
+      "source": "https://www.openstreetmap.org/way/907039607"
+    },
+    {
+      "name": "虫喰岩",
+      "kana": "むしくいいわ",
+      "lon": 135.82644,
+      "lat": 33.53946,
+      "source": "https://www.openstreetmap.org/way/712435359"
+    },
+    {
+      "name": "虹の森公園まつの",
+      "kana": "にじのもりこうえんまつの",
+      "lon": 132.71006,
+      "lat": 33.22953,
+      "source": "https://www.openstreetmap.org/way/1014591545"
+    },
+    {
+      "name": "虹の湖",
+      "kana": "にじのみずうみ",
+      "lon": 140.68779,
+      "lat": 40.58188,
+      "source": "https://www.openstreetmap.org/way/439869314"
+    },
+    {
+      "name": "蛍街道西ノ市",
+      "kana": "ほたるかいどうにしのし",
+      "lon": 131.07697,
+      "lat": 34.19773,
+      "source": "https://www.openstreetmap.org/way/363137531"
+    },
+    {
+      "name": "裏磐梯",
+      "kana": "うらばんだい",
+      "lon": 140.04355,
+      "lat": 37.66488,
+      "source": "https://www.openstreetmap.org/way/440603170"
+    },
+    {
+      "name": "西いなば 気楽里",
+      "kana": "にしいなばきらり",
+      "lon": 134.05351,
+      "lat": 35.49746,
+      "source": "https://www.openstreetmap.org/way/689782537"
+    },
+    {
+      "name": "西条のん太の酒蔵",
+      "kana": "さいじょうのんたのしゅぞう",
+      "lon": 132.70286,
+      "lat": 34.43359,
+      "source": "https://www.openstreetmap.org/way/1104087374"
+    },
+    {
+      "name": "許田",
+      "kana": "きょだ",
+      "lon": 127.96928,
+      "lat": 26.55214,
+      "source": "https://www.openstreetmap.org/way/459571092"
+    },
+    {
+      "name": "豊前おこしかけ",
+      "kana": "ぶぜんおこしかけ",
+      "lon": 131.10091,
+      "lat": 33.614,
+      "source": "https://www.openstreetmap.org/way/675373069"
+    },
+    {
+      "name": "豊崎",
+      "kana": "とよさき",
+      "lon": 127.65555,
+      "lat": 26.15742,
+      "source": "https://www.openstreetmap.org/way/460205398"
+    },
+    {
+      "name": "豊栄",
+      "kana": "とよさか",
+      "lon": 139.2221,
+      "lat": 37.95723,
+      "source": "https://www.openstreetmap.org/way/248069219"
+    },
+    {
+      "name": "象潟",
+      "kana": "きさかた",
+      "lon": 139.90051,
+      "lat": 39.22021,
+      "source": "https://www.openstreetmap.org/way/435104755"
+    },
+    {
+      "name": "貞光ゆうゆう館",
+      "kana": "さだみつゆうゆうかん",
+      "lon": 134.05993,
+      "lat": 34.04263,
+      "source": "https://www.openstreetmap.org/way/314061833"
+    },
+    {
+      "name": "赤城の恵",
+      "kana": "あかぎのめぐみ",
+      "lon": 139.12868,
+      "lat": 36.42354,
+      "source": "https://www.openstreetmap.org/way/432830163"
+    },
+    {
+      "name": "赤来高原",
+      "kana": "あかぎこうげん",
+      "lon": 132.71388,
+      "lat": 34.99861,
+      "source": "https://www.openstreetmap.org/way/442982336"
+    },
+    {
+      "name": "越前",
+      "kana": "えちぜん",
+      "lon": 135.99699,
+      "lat": 35.91951,
+      "source": "https://www.openstreetmap.org/way/442990669"
+    },
+    {
+      "name": "越前たけふ",
+      "kana": "えちぜんたけふ",
+      "lon": 136.19793,
+      "lat": 35.89526,
+      "source": "https://www.openstreetmap.org/way/1155177092"
+    },
+    {
+      "name": "足柄・金太郎のふるさと",
+      "kana": "あしがら・きんたろうのふるさと",
+      "lon": 139.11862,
+      "lat": 35.32581,
+      "source": "https://www.openstreetmap.org/way/956256594"
+    },
+    {
+      "name": "輪島 ふらっと訪夢",
+      "kana": "わしま ふらっとほうゆめ",
+      "lon": 136.90639,
+      "lat": 37.38922,
+      "source": "https://www.openstreetmap.org/way/1451629191"
+    },
+    {
+      "name": "農匠の郷やくの",
+      "kana": "のうたくみのさとやくの",
+      "lon": 134.92982,
+      "lat": 35.33838,
+      "source": "https://www.openstreetmap.org/way/666436165"
+    },
+    {
+      "name": "近つ飛鳥の里・太子",
+      "kana": "きんつあすかのさと・たいし",
+      "lon": 135.65864,
+      "lat": 34.51657,
+      "source": "https://www.openstreetmap.org/way/41168890"
+    },
+    {
+      "name": "道路情報提供施設",
+      "kana": "どうろじょうほうていきょうしせつ",
+      "lon": 135.79723,
+      "lat": 34.57132,
+      "source": "https://www.openstreetmap.org/way/617768422"
+    },
+    {
+      "name": "遠軽 森のオホーツク",
+      "kana": "えんがる もりのおほーつく",
+      "lon": 143.49646,
+      "lat": 44.02202,
+      "source": "https://www.openstreetmap.org/relation/10518747"
+    },
+    {
+      "name": "遣唐使ふるさと館",
+      "kana": "けんとうしふるさとかん",
+      "lon": 128.69003,
+      "lat": 32.73836,
+      "source": "https://www.openstreetmap.org/way/460817783"
+    },
+    {
+      "name": "那須与一の郷",
+      "kana": "なすよいちのさと",
+      "lon": 140.08708,
+      "lat": 36.86259,
+      "source": "https://www.openstreetmap.org/way/412892905"
+    },
+    {
+      "name": "那須高原　友愛の森",
+      "kana": "なすこうげん　ゆうあいのもり",
+      "lon": 140.01359,
+      "lat": 37.04115,
+      "source": "https://www.openstreetmap.org/way/414890757"
+    },
+    {
+      "name": "都城NiQLL",
+      "kana": "とみしろNiQLL",
+      "lon": 131.09525,
+      "lat": 31.76881,
+      "source": "https://www.openstreetmap.org/way/736792345"
+    },
+    {
+      "name": "酒谷",
+      "kana": "さかや",
+      "lon": 131.26638,
+      "lat": 31.64187,
+      "source": "https://www.openstreetmap.org/way/436889356"
+    },
+    {
+      "name": "醍醐の里",
+      "kana": "だいごのさと",
+      "lon": 133.72546,
+      "lat": 34.99132,
+      "source": "https://www.openstreetmap.org/way/370568077"
+    },
+    {
+      "name": "野沢温泉",
+      "kana": "のざわおんせん",
+      "lon": 138.44788,
+      "lat": 36.95989,
+      "source": "https://www.openstreetmap.org/way/1056796507"
+    },
+    {
+      "name": "釜石仙人峠",
+      "kana": "かまいしせんにんとうげ",
+      "lon": 141.7823,
+      "lat": 39.25354,
+      "source": "https://www.openstreetmap.org/way/365981070"
+    },
+    {
+      "name": "針T・R・S",
+      "kana": "はりT・R・S",
+      "lon": 135.96311,
+      "lat": 34.61013,
+      "source": "https://www.openstreetmap.org/way/376782611"
+    },
+    {
+      "name": "錦",
+      "kana": "にしき",
+      "lon": 130.8449,
+      "lat": 32.20561,
+      "source": "https://www.openstreetmap.org/way/441560261"
+    },
+    {
+      "name": "錦秋湖",
+      "kana": "きんしゅうみずうみ",
+      "lon": 140.87586,
+      "lat": 39.30038,
+      "source": "https://www.openstreetmap.org/way/1321629761"
+    },
+    {
+      "name": "鐘のなるまち・ちっぷべつ",
+      "kana": "かねのなるまち・ちっぷべつ",
+      "lon": 141.96588,
+      "lat": 43.76519,
+      "source": "https://www.openstreetmap.org/way/562752278"
+    },
+    {
+      "name": "長島",
+      "kana": "ながしま",
+      "lon": 130.10927,
+      "lat": 32.16197,
+      "source": "https://www.openstreetmap.org/way/921305801"
+    },
+    {
+      "name": "長崎街道鈴田峠",
+      "kana": "ながさきかいどうすずたとうげ",
+      "lon": 130.00731,
+      "lat": 32.88526,
+      "source": "https://www.openstreetmap.org/way/1516229395"
+    },
+    {
+      "name": "長門峡",
+      "kana": "ながときょう",
+      "lon": 131.57646,
+      "lat": 34.30355,
+      "source": "https://www.openstreetmap.org/way/434743815"
+    },
+    {
+      "name": "開国下田みなと",
+      "kana": "かいこくしもだみなと",
+      "lon": 138.95101,
+      "lat": 34.67476,
+      "source": "https://www.openstreetmap.org/way/441617649"
+    },
+    {
+      "name": "関宿",
+      "kana": "せきやど",
+      "lon": 136.39301,
+      "lat": 34.84942,
+      "source": "https://www.openstreetmap.org/way/1160085870"
+    },
+    {
+      "name": "防府",
+      "kana": "ほうふ",
+      "lon": 131.59771,
+      "lat": 34.03822,
+      "source": "https://www.openstreetmap.org/way/442978965"
+    },
+    {
+      "name": "阿寒丹頂の里",
+      "kana": "あかんたんちょうのさと",
+      "lon": 144.14516,
+      "lat": 43.14446,
+      "source": "https://www.openstreetmap.org/way/561691067"
+    },
+    {
+      "name": "阿武町",
+      "kana": "あぶまち",
+      "lon": 131.46829,
+      "lat": 34.49795,
+      "source": "https://www.openstreetmap.org/way/442407753"
+    },
+    {
+      "name": "雨晴",
+      "kana": "あめせい",
+      "lon": 137.04173,
+      "lat": 36.81466,
+      "source": "https://www.openstreetmap.org/way/621669474"
+    },
+    {
+      "name": "雪のふるさと やすづか",
+      "kana": "ゆきのふるさと やすづか",
+      "lon": 138.47003,
+      "lat": 37.09561,
+      "source": "https://www.openstreetmap.org/way/608647952"
+    },
+    {
+      "name": "雷電くるみの里",
+      "kana": "らいでんくるみのさと",
+      "lon": 138.3747,
+      "lat": 36.35555,
+      "source": "https://www.openstreetmap.org/way/245623222"
+    },
+    {
+      "name": "霧の森",
+      "kana": "きりのもり",
+      "lon": 133.64087,
+      "lat": 33.92395,
+      "source": "https://www.openstreetmap.org/way/631660762"
+    },
+    {
+      "name": "霧島",
+      "kana": "きりしま",
+      "lon": 130.85213,
+      "lat": 31.86355,
+      "source": "https://www.openstreetmap.org/way/441554414"
+    },
+    {
+      "name": "青の国ふだい",
+      "kana": "あおのくにふだい",
+      "lon": 141.88551,
+      "lat": 40.00283,
+      "source": "https://www.openstreetmap.org/way/1010093532"
+    },
+    {
+      "name": "青洲の里",
+      "kana": "せいしゅうのさと",
+      "lon": 135.44198,
+      "lat": 34.28081,
+      "source": "https://www.openstreetmap.org/way/712453822"
+    },
+    {
+      "name": "青雲橋",
+      "kana": "せいうんはし",
+      "lon": 131.38841,
+      "lat": 32.66064,
+      "source": "https://www.openstreetmap.org/way/975311341"
+    },
+    {
+      "name": "頓原",
+      "kana": "とんばら",
+      "lon": 132.78566,
+      "lat": 35.08955,
+      "source": "https://www.openstreetmap.org/way/442983118"
+    },
+    {
+      "name": "願成就温泉",
+      "kana": "がんじょうしゅうおんせん",
+      "lon": 131.7699,
+      "lat": 34.43424,
+      "source": "https://www.openstreetmap.org/way/434746983"
+    },
+    {
+      "name": "風Wとままえ",
+      "kana": "かぜWとままえ",
+      "lon": 141.65643,
+      "lat": 44.31285,
+      "source": "https://www.openstreetmap.org/way/682797820"
+    },
+    {
+      "name": "風の家",
+      "kana": "かぜのいえ",
+      "lon": 133.62359,
+      "lat": 35.2768,
+      "source": "https://www.openstreetmap.org/way/499208812"
+    },
+    {
+      "name": "風穴の里",
+      "kana": "かざあなのさと",
+      "lon": 137.75171,
+      "lat": 36.1532,
+      "source": "https://www.openstreetmap.org/way/448938620"
+    },
+    {
+      "name": "飛騨白山",
+      "kana": "ひだはくさん",
+      "lon": 136.90159,
+      "lat": 36.17401,
+      "source": "https://www.openstreetmap.org/way/435717636"
+    },
+    {
+      "name": "香りの里たきのうえ",
+      "kana": "かおりのさとたきのうえ",
+      "lon": 143.09087,
+      "lat": 44.19687,
+      "source": "https://www.openstreetmap.org/way/562512589"
+    },
+    {
+      "name": "香南楽湯",
+      "kana": "こうなんらくゆ",
+      "lon": 134.00706,
+      "lat": 34.23962,
+      "source": "https://www.openstreetmap.org/way/44120885"
+    },
+    {
+      "name": "香春",
+      "kana": "こうしゅん",
+      "lon": 130.8603,
+      "lat": 33.67682,
+      "source": "https://www.openstreetmap.org/way/441581684"
+    },
+    {
+      "name": "高千穂",
+      "kana": "たかちほ",
+      "lon": 131.30084,
+      "lat": 32.70856,
+      "source": "https://www.openstreetmap.org/way/522251814"
+    },
+    {
+      "name": "高岡",
+      "kana": "たかおか",
+      "lon": 131.34063,
+      "lat": 31.94581,
+      "source": "https://www.openstreetmap.org/way/287038662"
+    },
+    {
+      "name": "鴨川オーシャンパーク",
+      "kana": "かもがわおーしゃんぱーく",
+      "lon": 140.07704,
+      "lat": 35.06415,
+      "source": "https://www.openstreetmap.org/way/170351725"
+    },
+    {
+      "name": "鷲の里",
+      "kana": "わしのさと",
+      "lon": 134.50175,
+      "lat": 33.86316,
+      "source": "https://www.openstreetmap.org/way/1469755574"
+    },
+    {
+      "name": "鷹ら島",
+      "kana": "たからしま",
+      "lon": 129.78242,
+      "lat": 33.43362,
+      "source": "https://www.openstreetmap.org/way/434704361"
+    },
+    {
+      "name": "鹿島",
+      "kana": "ましま",
+      "lon": 130.14528,
+      "lat": 33.07477,
+      "source": "https://www.openstreetmap.org/way/441600111"
+    },
+    {
+      "name": "黒之瀬戸だんだん市場",
+      "kana": "くろゆきせとだんだんしじょう",
+      "lon": 130.17038,
+      "lat": 32.10845,
+      "source": "https://www.openstreetmap.org/relation/12500068"
+    },
+    {
+      "name": "黒井山グリーンパーク",
+      "kana": "くろいやまぐりーんぱーく",
+      "lon": 134.20532,
+      "lat": 34.69136,
+      "source": "https://www.openstreetmap.org/way/507479770"
+    },
+    {
+      "name": "龍勢会館",
+      "kana": "りゅうせいかいかん",
+      "lon": 139.03999,
+      "lat": 36.04858,
+      "source": "https://www.openstreetmap.org/way/420809022"
+    },
+    {
+      "name": "﨑津",
+      "kana": "つ",
+      "lon": 130.02539,
+      "lat": 32.3168,
+      "source": "https://www.openstreetmap.org/way/924413803"
+    },
+    {
+      "name": "；桃山天下市",
+      "kana": "ももやまてんかし",
+      "lon": 129.87376,
+      "lat": 33.52832,
+      "source": "https://www.openstreetmap.org/way/407222687"
+    },
+    {
+      "name": "633美の里",
+      "kana": "633びのさと",
+      "lon": 133.3284,
+      "lat": 33.64351,
+      "source": "https://www.openstreetmap.org/node/4782034918"
+    },
+    {
+      "name": ":あさご",
+      "kana": ":あさご",
+      "lon": 134.80394,
+      "lat": 35.24703,
+      "source": "https://www.openstreetmap.org/node/2923572130"
+    },
+    {
+      "name": ":いながわ",
+      "kana": ":いながわ",
+      "lon": 135.35196,
+      "lat": 34.91915,
+      "source": "https://www.openstreetmap.org/node/2923572134"
+    },
+    {
+      "name": ":しんぐう",
+      "kana": ":しんぐう",
+      "lon": 134.53717,
+      "lat": 34.92229,
+      "source": "https://www.openstreetmap.org/node/2923572136"
+    },
+    {
+      "name": ":ちくさ",
+      "kana": ":ちくさ",
+      "lon": 134.44175,
+      "lat": 35.10798,
+      "source": "https://www.openstreetmap.org/node/2923572137"
+    },
+    {
+      "name": ":とうじょう",
+      "kana": ":とうじょう",
+      "lon": 135.07568,
+      "lat": 34.89418,
+      "source": "https://www.openstreetmap.org/node/2923572138"
+    },
+    {
+      "name": ":はが",
+      "kana": ":はが",
+      "lon": 134.52226,
+      "lat": 35.20172,
+      "source": "https://www.openstreetmap.org/node/2923572139"
+    },
+    {
+      "name": ":みつ",
+      "kana": ":みつ",
+      "lon": 134.52341,
+      "lat": 34.77987,
+      "source": "https://www.openstreetmap.org/node/2923572141"
+    },
+    {
+      "name": ":みなみ波賀",
+      "kana": ":みなみはが",
+      "lon": 134.53983,
+      "lat": 35.14831,
+      "source": "https://www.openstreetmap.org/node/2923572142"
+    },
+    {
+      "name": ":やぶ",
+      "kana": ":やぶ",
+      "lon": 134.81591,
+      "lat": 35.38227,
+      "source": "https://www.openstreetmap.org/node/2923572143"
+    },
+    {
+      "name": ":但馬楽座",
+      "kana": ":たじまらくざ",
+      "lon": 134.78392,
+      "lat": 35.3793,
+      "source": "https://www.openstreetmap.org/node/2923572149"
+    },
+    {
+      "name": ":北はりまエコミュージアム",
+      "kana": ":きたはりまえこみゅーじあむ",
+      "lon": 134.98717,
+      "lat": 35.00769,
+      "source": "https://www.openstreetmap.org/node/2923572150"
+    },
+    {
+      "name": ":村岡ファームガーデン",
+      "kana": ":むらおかふぁーむがーでん",
+      "lon": 134.60292,
+      "lat": 35.46182,
+      "source": "https://www.openstreetmap.org/node/2923572152"
+    },
+    {
+      "name": ":東浦ターミナルパーク",
+      "kana": ":ひがしうらたーみなるぱーく",
+      "lon": 134.9924,
+      "lat": 34.53744,
+      "source": "https://www.openstreetmap.org/node/2923572153"
+    },
+    {
+      "name": "YOUさろん東城",
+      "kana": "YOUさろんとうじょう",
+      "lon": 133.27578,
+      "lat": 34.88966,
+      "source": "https://www.openstreetmap.org/node/3846433676"
+    },
+    {
+      "name": "あいとうマーガレットステーション",
+      "kana": "あいとうまーがれっとすてーしょん",
+      "lon": 136.25871,
+      "lat": 35.10961,
+      "source": "https://www.openstreetmap.org/node/4279875824"
+    },
+    {
+      "name": "あそ望の郷くぎの",
+      "kana": "あそのぞのさとくぎの",
+      "lon": 131.04116,
+      "lat": 32.81846,
+      "source": "https://www.openstreetmap.org/node/3967472660"
+    },
+    {
+      "name": "あなみず",
+      "kana": "あなみず",
+      "lon": 136.90463,
+      "lat": 37.22824,
+      "source": "https://www.openstreetmap.org/node/4059783581"
+    },
+    {
+      "name": "あらぎの里",
+      "kana": "あらぎのさと",
+      "lon": 135.41279,
+      "lat": 34.09291,
+      "source": "https://www.openstreetmap.org/node/2279190018"
+    },
+    {
+      "name": "いずみ山愛の里",
+      "kana": "いずみやまあいのさと",
+      "lon": 135.483,
+      "lat": 34.42327,
+      "source": "https://www.openstreetmap.org/node/2276910891"
+    },
+    {
+      "name": "おおの",
+      "kana": "おおの",
+      "lon": 131.50285,
+      "lat": 33.03646,
+      "source": "https://www.openstreetmap.org/node/9752477017"
+    },
+    {
+      "name": "おがわまち",
+      "kana": "おがわまち",
+      "lon": 139.28091,
+      "lat": 36.05224,
+      "source": "https://www.openstreetmap.org/node/9081725545"
+    },
+    {
+      "name": "おながわ",
+      "kana": "おながわ",
+      "lon": 141.44666,
+      "lat": 38.44608,
+      "source": "https://www.openstreetmap.org/node/9406929937"
+    },
+    {
+      "name": "お茶の京都 みなみやましろ村",
+      "kana": "おちゃのきょうと みなみやましろむら",
+      "lon": 136.02451,
+      "lat": 34.76515,
+      "source": "https://www.openstreetmap.org/node/4596181289"
+    },
+    {
+      "name": "かつやま",
+      "kana": "かつやま",
+      "lon": 138.73445,
+      "lat": 35.50466,
+      "source": "https://www.openstreetmap.org/node/6269285565"
+    },
+    {
+      "name": "かもがわ円城",
+      "kana": "かもがわえんじょう",
+      "lon": 133.81394,
+      "lat": 34.89287,
+      "source": "https://www.openstreetmap.org/node/3846433677"
+    },
+    {
+      "name": "がいせん桜新庄宿",
+      "kana": "がいせんさくらしんじょうやど",
+      "lon": 133.57194,
+      "lat": 35.17574,
+      "source": "https://www.openstreetmap.org/node/3846434611"
+    },
+    {
+      "name": "きりら坂下",
+      "kana": "きりらさかした",
+      "lon": 137.53467,
+      "lat": 35.57108,
+      "source": "https://www.openstreetmap.org/node/12863724402"
+    },
+    {
+      "name": "くしがきの里　第二駐車場",
+      "kana": "くしがきのさと　だいにちゅうしゃじょう",
+      "lon": 135.4776,
+      "lat": 34.31875,
+      "source": "https://www.openstreetmap.org/node/9559335093"
+    },
+    {
+      "name": "くんま水車の里",
+      "kana": "くんますいしゃのさと",
+      "lon": 137.73313,
+      "lat": 34.96219,
+      "source": "https://www.openstreetmap.org/node/5196795321"
+    },
+    {
+      "name": "ことなみ",
+      "kana": "ことなみ",
+      "lon": 134.00799,
+      "lat": 34.09503,
+      "source": "https://www.openstreetmap.org/node/765636967"
+    },
+    {
+      "name": "さんわ182ステーション",
+      "kana": "さんわ182すてーしょん",
+      "lon": 133.29984,
+      "lat": 34.67439,
+      "source": "https://www.openstreetmap.org/node/3842375567"
+    },
+    {
+      "name": "しみず",
+      "kana": "しみず",
+      "lon": 135.4434,
+      "lat": 34.08796,
+      "source": "https://www.openstreetmap.org/node/12595857878"
+    },
+    {
+      "name": "しらたき",
+      "kana": "しらたき",
+      "lon": 143.07628,
+      "lat": 43.86977,
+      "source": "https://www.openstreetmap.org/node/5411468447"
+    },
+    {
+      "name": "しらとりの郷・羽曳野",
+      "kana": "しらとりのさと・はびきの",
+      "lon": 135.58776,
+      "lat": 34.53311,
+      "source": "https://www.openstreetmap.org/node/3097150689"
+    },
+    {
+      "name": "しらまの里",
+      "kana": "しらまのさと",
+      "lon": 135.33446,
+      "lat": 34.01504,
+      "source": "https://www.openstreetmap.org/node/12595857877"
+    },
+    {
+      "name": "すえよし",
+      "kana": "すえよし",
+      "lon": 130.97027,
+      "lat": 31.68835,
+      "source": "https://www.openstreetmap.org/node/2391094974"
+    },
+    {
+      "name": "せせらぎの里こうら",
+      "kana": "せせらぎのさとこうら",
+      "lon": 136.27548,
+      "lat": 35.20177,
+      "source": "https://www.openstreetmap.org/node/4279852880"
+    },
+    {
+      "name": "たかの",
+      "kana": "たかの",
+      "lon": 132.88095,
+      "lat": 35.02457,
+      "source": "https://www.openstreetmap.org/node/3846433679"
+    },
+    {
+      "name": "たがみ",
+      "kana": "たがみ",
+      "lon": 139.05878,
+      "lat": 37.69854,
+      "source": "https://www.openstreetmap.org/node/11882453211"
+    },
+    {
+      "name": "だて歴史の杜",
+      "kana": "だてれきしのもり",
+      "lon": 140.87516,
+      "lat": 42.47075,
+      "source": "https://www.openstreetmap.org/node/10023197883"
+    },
+    {
+      "name": "つくで手作り村",
+      "kana": "つくでてづくりむら",
+      "lon": 137.42056,
+      "lat": 34.96345,
+      "source": "https://www.openstreetmap.org/node/12865881503"
+    },
+    {
+      "name": "てんきてんき丹後",
+      "kana": "てんきてんきたんご",
+      "lon": 135.10529,
+      "lat": 35.73897,
+      "source": "https://www.openstreetmap.org/node/602410298"
+    },
+    {
+      "name": "どんぐりの里稲武",
+      "kana": "どんぐりのさといなぶ",
+      "lon": 137.50223,
+      "lat": 35.21362,
+      "source": "https://www.openstreetmap.org/node/12874394301"
+    },
+    {
+      "name": "ななもり清見",
+      "kana": "ななもりきよみ",
+      "lon": 137.16683,
+      "lat": 36.13392,
+      "source": "https://www.openstreetmap.org/node/409775434"
+    },
+    {
+      "name": "にちなん日野川の郷",
+      "kana": "にちなんひのかわのさと",
+      "lon": 133.3111,
+      "lat": 35.17056,
+      "source": "https://www.openstreetmap.org/node/5553634252"
+    },
+    {
+      "name": "のと千里浜",
+      "kana": "のとちりはま",
+      "lon": 136.76867,
+      "lat": 36.88607,
+      "source": "https://www.openstreetmap.org/node/5324793629"
+    },
+    {
+      "name": "のと里山空港",
+      "kana": "のとさとやまくうこう",
+      "lon": 136.95744,
+      "lat": 37.2954,
+      "source": "https://www.openstreetmap.org/node/2950856668"
+    },
+    {
+      "name": "はなまき西南",
+      "kana": "はなまきせいなん",
+      "lon": 141.05601,
+      "lat": 39.36598,
+      "source": "https://www.openstreetmap.org/node/8440933030"
+    },
+    {
+      "name": "ふかうら かそせいか焼き村",
+      "kana": "ふかうら かそせいかやきむら",
+      "lon": 140.00069,
+      "lat": 40.74392,
+      "source": "https://www.openstreetmap.org/node/9565951995"
+    },
+    {
+      "name": "ふたみ ふたみシーサイド公園",
+      "kana": "ふたみ ふたみしーさいどこうえん",
+      "lon": 132.6342,
+      "lat": 33.68533,
+      "source": "https://www.openstreetmap.org/node/5537507321"
+    },
+    {
+      "name": "みのぶ 富士川観光センター",
+      "kana": "みのぶ ふじがわかんこうせんたー",
+      "lon": 138.43708,
+      "lat": 35.4193,
+      "source": "https://www.openstreetmap.org/node/6281949776"
+    },
+    {
+      "name": "みはら神明の里",
+      "kana": "みはらじんめいのさと",
+      "lon": 133.10419,
+      "lat": 34.39709,
+      "source": "https://www.openstreetmap.org/node/3840526108"
+    },
+    {
+      "name": "むげ川",
+      "kana": "むげかわ",
+      "lon": 136.85418,
+      "lat": 35.51515,
+      "source": "https://www.openstreetmap.org/node/4901195798"
+    },
+    {
+      "name": "ゆのたに",
+      "kana": "ゆのたに",
+      "lon": 138.98259,
+      "lat": 37.22426,
+      "source": "https://www.openstreetmap.org/node/766774499"
+    },
+    {
+      "name": "よがんす白竜",
+      "kana": "よがんすはくりゅう",
+      "lon": 132.91388,
+      "lat": 34.50647,
+      "source": "https://www.openstreetmap.org/node/3842375568"
+    },
+    {
+      "name": "アグリの郷りっとう",
+      "kana": "あぐりのさとりっとう",
+      "lon": 136.00153,
+      "lat": 35.03861,
+      "source": "https://www.openstreetmap.org/node/4349951498"
+    },
+    {
+      "name": "アグリステーションなぐら",
+      "kana": "あぐりすてーしょんなぐら",
+      "lon": 137.53432,
+      "lat": 35.17324,
+      "source": "https://www.openstreetmap.org/node/2674522951"
+    },
+    {
+      "name": "インフォメーションセンターかわもと",
+      "kana": "いんふぉめーしょんせんたーかわもと",
+      "lon": 132.47269,
+      "lat": 34.96608,
+      "source": "https://www.openstreetmap.org/node/4163314896"
+    },
+    {
+      "name": "オアシスおぶせ",
+      "kana": "おあしすおぶせ",
+      "lon": 138.29479,
+      "lat": 36.68925,
+      "source": "https://www.openstreetmap.org/node/282501433"
+    },
+    {
+      "name": "キララ多伎",
+      "kana": "きららたき",
+      "lon": 132.6323,
+      "lat": 35.2906,
+      "source": "https://www.openstreetmap.org/node/4138195636"
+    },
+    {
+      "name": "シルクのまち かや",
+      "kana": "しるくのまち かや",
+      "lon": 135.09366,
+      "lat": 35.48154,
+      "source": "https://www.openstreetmap.org/node/980527275"
+    },
+    {
+      "name": "リストアステーション",
+      "kana": "りすとあすてーしょん",
+      "lon": 133.07118,
+      "lat": 34.78461,
+      "source": "https://www.openstreetmap.org/node/3842375794"
+    },
+    {
+      "name": "・松山",
+      "kana": "・まつやま",
+      "lon": 131.04242,
+      "lat": 31.58173,
+      "source": "https://www.openstreetmap.org/node/4143798875"
+    },
+    {
+      "name": "七城メロンドーム",
+      "kana": "しちじょうめろんどーむ",
+      "lon": 130.7702,
+      "lat": 32.98037,
+      "source": "https://www.openstreetmap.org/node/13131432440"
+    },
+    {
+      "name": "三野",
+      "kana": "みの",
+      "lon": 133.93236,
+      "lat": 34.0505,
+      "source": "https://www.openstreetmap.org/node/296943963"
+    },
+    {
+      "name": "上矢作 ラ·フォーレ福寿の里",
+      "kana": "かみやはぎ ら·ふぉーれふくじゅのさと",
+      "lon": 137.4719,
+      "lat": 35.32342,
+      "source": "https://www.openstreetmap.org/node/12876773001"
+    },
+    {
+      "name": "世羅",
+      "kana": "せら",
+      "lon": 133.08359,
+      "lat": 34.59585,
+      "source": "https://www.openstreetmap.org/node/3842375903"
+    },
+    {
+      "name": "丹波マーケス",
+      "kana": "たんばまーけす",
+      "lon": 135.42869,
+      "lat": 35.15471,
+      "source": "https://www.openstreetmap.org/node/523596144"
+    },
+    {
+      "name": "伊東マリンタウン",
+      "kana": "いとうまりんたうん",
+      "lon": 139.09433,
+      "lat": 34.98471,
+      "source": "https://www.openstreetmap.org/node/4201929092"
+    },
+    {
+      "name": "伊豆のへそ",
+      "kana": "いずのへそ",
+      "lon": 138.9414,
+      "lat": 35.0122,
+      "source": "https://www.openstreetmap.org/node/4202340649"
+    },
+    {
+      "name": "会津やないづ",
+      "kana": "あいづやないづ",
+      "lon": 139.7222,
+      "lat": 37.52804,
+      "source": "https://www.openstreetmap.org/node/1939156705"
+    },
+    {
+      "name": "信州平谷",
+      "kana": "しんしゅうひらたに",
+      "lon": 137.6319,
+      "lat": 35.32423,
+      "source": "https://www.openstreetmap.org/node/8703403885"
+    },
+    {
+      "name": "北信州やまのうち",
+      "kana": "ほくしんしゅうやまのうち",
+      "lon": 138.40502,
+      "lat": 36.74126,
+      "source": "https://www.openstreetmap.org/node/287958526"
+    },
+    {
+      "name": "南信州うるぎ",
+      "kana": "なんしんしゅううるぎ",
+      "lon": 137.70964,
+      "lat": 35.27373,
+      "source": "https://www.openstreetmap.org/node/12865880001"
+    },
+    {
+      "name": "南国 風良里",
+      "kana": "なんごく かぜりょうさと",
+      "lon": 133.64193,
+      "lat": 33.61116,
+      "source": "https://www.openstreetmap.org/node/262311995"
+    },
+    {
+      "name": "厳美渓　もちと湯の郷",
+      "kana": "げんびけい　もちとゆのさと",
+      "lon": 141.05291,
+      "lat": 38.94641,
+      "source": "https://www.openstreetmap.org/node/4586821206"
+    },
+    {
+      "name": "土佐和紙工芸村",
+      "kana": "とさわしこうげいむら",
+      "lon": 133.36605,
+      "lat": 33.57351,
+      "source": "https://www.openstreetmap.org/node/4782034642"
+    },
+    {
+      "name": "大和",
+      "kana": "やまと",
+      "lon": 130.25769,
+      "lat": 33.33928,
+      "source": "https://www.openstreetmap.org/node/5538286821"
+    },
+    {
+      "name": "大杉",
+      "kana": "おおすぎ",
+      "lon": 133.66332,
+      "lat": 33.75103,
+      "source": "https://www.openstreetmap.org/node/262309907"
+    },
+    {
+      "name": "大館能代空港",
+      "kana": "おおだてのしろくうこう",
+      "lon": 140.3736,
+      "lat": 40.19755,
+      "source": "https://www.openstreetmap.org/node/4524223081"
+    },
+    {
+      "name": "奈良井木曽の大橋",
+      "kana": "ならいきそのおおはし",
+      "lon": 137.8149,
+      "lat": 35.96745,
+      "source": "https://www.openstreetmap.org/node/6832556924"
+    },
+    {
+      "name": "奥飛騨温泉郷上宝",
+      "kana": "おくひだおんせんさとかみたから",
+      "lon": 137.49991,
+      "lat": 36.24905,
+      "source": "https://www.openstreetmap.org/node/448044696"
+    },
+    {
+      "name": "山中温泉ゆけむり健康村",
+      "kana": "さんちゅうおんせんゆけむりけんこうむら",
+      "lon": 136.36766,
+      "lat": 36.23808,
+      "source": "https://www.openstreetmap.org/node/5682346991"
+    },
+    {
+      "name": "山之口",
+      "kana": "やまのくち",
+      "lon": 131.20265,
+      "lat": 31.79439,
+      "source": "https://www.openstreetmap.org/node/4757562647"
+    },
+    {
+      "name": "川根温泉",
+      "kana": "かわねおんせん",
+      "lon": 138.09023,
+      "lat": 34.95965,
+      "source": "https://www.openstreetmap.org/node/5583492526"
+    },
+    {
+      "name": "川辺やすらぎかん",
+      "kana": "かわべやすらぎかん",
+      "lon": 130.4329,
+      "lat": 31.41275,
+      "source": "https://www.openstreetmap.org/node/11176056927"
+    },
+    {
+      "name": "布施ヶ坂",
+      "kana": "ふせゖさか",
+      "lon": 133.09989,
+      "lat": 33.42675,
+      "source": "https://www.openstreetmap.org/node/329980801"
+    },
+    {
+      "name": "彩菜茶屋",
+      "kana": "あやなちゃや",
+      "lon": 134.15091,
+      "lat": 35.01477,
+      "source": "https://www.openstreetmap.org/node/3651191868"
+    },
+    {
+      "name": "志野・織部",
+      "kana": "しの・おりべ",
+      "lon": 137.18797,
+      "lat": 35.3942,
+      "source": "https://www.openstreetmap.org/node/5166593504"
+    },
+    {
+      "name": "愛彩ランド",
+      "kana": "あいさいらんど",
+      "lon": 135.4261,
+      "lat": 34.42229,
+      "source": "https://www.openstreetmap.org/node/2276908303"
+    },
+    {
+      "name": "新庄エコロジーガーデン原蚕の杜",
+      "kana": "しんじょうえころじーがーでんはらかいこのもり",
+      "lon": 140.31209,
+      "lat": 38.78128,
+      "source": "https://www.openstreetmap.org/node/13800492596"
+    },
+    {
+      "name": "旭志",
+      "kana": "きょくし",
+      "lon": 130.8302,
+      "lat": 32.93118,
+      "source": "https://www.openstreetmap.org/node/8582801407"
+    },
+    {
+      "name": "木の香",
+      "kana": "きのかおり",
+      "lon": 133.30749,
+      "lat": 33.77942,
+      "source": "https://www.openstreetmap.org/node/412334544"
+    },
+    {
+      "name": "杉原紙の里・多可",
+      "kana": "すぎはらかみのさと・たか",
+      "lon": 134.93013,
+      "lat": 35.18892,
+      "source": "https://www.openstreetmap.org/node/2923572128"
+    },
+    {
+      "name": "桜島",
+      "kana": "さくらしま",
+      "lon": 130.59887,
+      "lat": 31.58935,
+      "source": "https://www.openstreetmap.org/node/4489003040"
+    },
+    {
+      "name": "池田",
+      "kana": "いけだ",
+      "lon": 137.88488,
+      "lat": 36.39699,
+      "source": "https://www.openstreetmap.org/node/6466368684"
+    },
+    {
+      "name": "泗水",
+      "kana": "しすい",
+      "lon": 130.77146,
+      "lat": 32.92505,
+      "source": "https://www.openstreetmap.org/node/13110059884"
+    },
+    {
+      "name": "津かわげ",
+      "kana": "つかわげ",
+      "lon": 136.5178,
+      "lat": 34.79656,
+      "source": "https://www.openstreetmap.org/node/4398307891"
+    },
+    {
+      "name": "津和野温泉 なごみの里;あさぎりの湯",
+      "kana": "つわのおんせん なごみのさと;あさぎりのゆ",
+      "lon": 131.76078,
+      "lat": 34.45018,
+      "source": "https://www.openstreetmap.org/node/14030134683"
+    },
+    {
+      "name": "浅井三姉妹の郷",
+      "kana": "あさいさんしまいのさと",
+      "lon": 136.30648,
+      "lat": 35.4298,
+      "source": "https://www.openstreetmap.org/node/4618266595"
+    },
+    {
+      "name": "海の京都 宮津",
+      "kana": "うみのきょうと みやづ",
+      "lon": 135.19426,
+      "lat": 35.5382,
+      "source": "https://www.openstreetmap.org/node/5302145652"
+    },
+    {
+      "name": "淡河",
+      "kana": "おうご",
+      "lon": 135.09712,
+      "lat": 34.81334,
+      "source": "https://www.openstreetmap.org/node/2700836584"
+    },
+    {
+      "name": "清流白川クオーレの里「ワクワク公園エリア",
+      "kana": "せいりゅうしらかわくおーれのさと「わくわくこうえんえりあ",
+      "lon": 137.2234,
+      "lat": 35.59813,
+      "source": "https://www.openstreetmap.org/node/4239115689"
+    },
+    {
+      "name": "湖畔の里福富",
+      "kana": "こはんのさとふくとみ",
+      "lon": 132.77548,
+      "lat": 34.53251,
+      "source": "https://www.openstreetmap.org/node/3840529904"
+    },
+    {
+      "name": "源平の里むれ",
+      "kana": "げんぺいのさとむれ",
+      "lon": 134.15705,
+      "lat": 34.33351,
+      "source": "https://www.openstreetmap.org/node/2006133535"
+    },
+    {
+      "name": "瀬戸大橋記念公園",
+      "kana": "せとおおはしきねんこうえん",
+      "lon": 133.82619,
+      "lat": 34.35262,
+      "source": "https://www.openstreetmap.org/node/4903751257"
+    },
+    {
+      "name": "犬挟",
+      "kana": "いぬきょう",
+      "lon": 133.75617,
+      "lat": 35.32928,
+      "source": "https://www.openstreetmap.org/node/4965285070"
+    },
+    {
+      "name": "玉露の里",
+      "kana": "ぎょくろのさと",
+      "lon": 138.25158,
+      "lat": 34.95093,
+      "source": "https://www.openstreetmap.org/node/5592098877"
+    },
+    {
+      "name": "田舎館",
+      "kana": "いなかだて",
+      "lon": 140.57818,
+      "lat": 40.63372,
+      "source": "https://www.openstreetmap.org/node/1108942666"
+    },
+    {
+      "name": "白浜野島崎",
+      "kana": "しらはまのじまさき",
+      "lon": 139.87737,
+      "lat": 34.90618,
+      "source": "https://www.openstreetmap.org/node/9874736584"
+    },
+    {
+      "name": "神戸フルーツ・フラワーパーク大沢",
+      "kana": "こうべふるーつ・ふらわーぱーくおおさわ",
+      "lon": 135.19105,
+      "lat": 34.84994,
+      "source": "https://www.openstreetmap.org/node/13157190248"
+    },
+    {
+      "name": "福光",
+      "kana": "ふくみつ",
+      "lon": 136.86194,
+      "lat": 36.56616,
+      "source": "https://www.openstreetmap.org/node/737153210"
+    },
+    {
+      "name": "福良",
+      "kana": "ふくら",
+      "lon": 134.71921,
+      "lat": 34.25556,
+      "source": "https://www.openstreetmap.org/node/2923572155"
+    },
+    {
+      "name": "空の夢もみの木パーク",
+      "kana": "そらのゆめもみのきぱーく",
+      "lon": 133.82198,
+      "lat": 34.15503,
+      "source": "https://www.openstreetmap.org/node/4903751259"
+    },
+    {
+      "name": "竜北",
+      "kana": "りゅうほく",
+      "lon": 130.69513,
+      "lat": 32.57718,
+      "source": "https://www.openstreetmap.org/node/12404284025"
+    },
+    {
+      "name": "美良布",
+      "kana": "みよしぬの",
+      "lon": 133.78285,
+      "lat": 33.6485,
+      "source": "https://www.openstreetmap.org/node/262319247"
+    },
+    {
+      "name": "能登食祭市場",
+      "kana": "のとしょくまつりしじょう",
+      "lon": 136.96874,
+      "lat": 37.04875,
+      "source": "https://www.openstreetmap.org/node/2279406035"
+    },
+    {
+      "name": "茶の里 東白川",
+      "kana": "ちゃのさと ひがししらかわ",
+      "lon": 137.35238,
+      "lat": 35.6679,
+      "source": "https://www.openstreetmap.org/node/14055440852"
+    },
+    {
+      "name": "草津運動茶屋公園",
+      "kana": "くさつうんどうちゃやこうえん",
+      "lon": 138.59018,
+      "lat": 36.61479,
+      "source": "https://www.openstreetmap.org/node/8866262926"
+    },
+    {
+      "name": "菰野",
+      "kana": "こもの",
+      "lon": 136.50315,
+      "lat": 35.01369,
+      "source": "https://www.openstreetmap.org/node/5626585199"
+    },
+    {
+      "name": "藤樹の里あどがわ",
+      "kana": "とうじゅのさとあどがわ",
+      "lon": 136.02956,
+      "lat": 35.32638,
+      "source": "https://www.openstreetmap.org/node/4607213932"
+    },
+    {
+      "name": "豊平どんぐり村",
+      "kana": "とよひらどんぐりむら",
+      "lon": 132.44293,
+      "lat": 34.64679,
+      "source": "https://www.openstreetmap.org/node/3846434450"
+    },
+    {
+      "name": "賤母",
+      "kana": "せんはは",
+      "lon": 137.55043,
+      "lat": 35.58608,
+      "source": "https://www.openstreetmap.org/node/12863813901"
+    },
+    {
+      "name": "近江母の郷",
+      "kana": "おうみははのさと",
+      "lon": 136.27741,
+      "lat": 35.34298,
+      "source": "https://www.openstreetmap.org/node/13860005401"
+    },
+    {
+      "name": "風早の郷",
+      "kana": "かざはやのさと",
+      "lon": 132.77198,
+      "lat": 33.99672,
+      "source": "https://www.openstreetmap.org/node/2210736689"
+    },
+    {
+      "name": "飛騨街道なぎさ",
+      "kana": "ひだかいどうなぎさ",
+      "lon": 137.29169,
+      "lat": 36.00672,
+      "source": "https://www.openstreetmap.org/node/294573856"
+    },
+    {
+      "name": "鯉が窪",
+      "kana": "こいがくぼ",
+      "lon": 133.33181,
+      "lat": 34.932,
+      "source": "https://www.openstreetmap.org/node/3846434453"
+    },
+    {
+      "name": "鷲敷",
+      "kana": "わじき",
+      "lon": 134.5546,
+      "lat": 33.86897,
+      "source": "https://www.openstreetmap.org/node/262327242"
+    }
+  ]
+}

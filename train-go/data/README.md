@@ -37,6 +37,8 @@ node --test train-go/tests/*.test.cjs
 
 ## 標高と地名
 
+道の駅はOpenStreetMapで休憩施設として位置情報がある982地点を収録する。`data/rest-stops.json` に位置・名称・出典を保存し、`tools/build-rest-stops.py` で表示用データを生成する。公式登録駅の全件網羅ではない。読みは登録値がある場合に優先し、それ以外は自動変換する。広域表示では省略し、拡大時に駅名や名所名と重ならない場所へ表示する。
+
 名所は既存の東京の4地点に、北海道から沖縄まで34地点を追加する。`data/landmarks.json` にOpenStreetMapの位置の出典・漢字名・読みを保存し、`tools/build-landmarks.py` で `landmark-data.js` を生成する。表示は駅名を優先する。東京湾は水面上に文字だけで表示する。
 
 表示の漢字・ひらがな切替は駅・路線・県・川・湖・ランドマーク・車両形式に適用する。駅の記録キーは変更しない。加志々の表示読みは[対馬市の運賃表](https://www.city.tsushima.nagasaki.jp/gyousei/soshiki/nakatsushima/chiikisinkou/tokaisen/849.html)の「かしし」を使用する。英語のみの一般施設名はひらがなモードで説明を訳す。

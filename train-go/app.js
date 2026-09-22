@@ -822,6 +822,8 @@
   let mapManualCenterWorldX = NaN;
   let mapManualCenterWorldY = NaN;
   let mapManualScale = NaN;
+  let mapUserLocation = null;
+  let mapLocationRequest = 0;
   const lastMapScene = {
     centerWorldX: NaN, centerWorldY: NaN, scale: NaN,
     screenCenterX: NaN, screenCenterY: NaN,
@@ -1593,6 +1595,9 @@
   }
 
   function goHome() {
+    mapLocationRequest++;
+    mapUserLocation=null;
+    btnMapLocation.disabled=false;mapLocationStatus.classList.add('hidden');
     saveTotalTravelDistance();
     saveTotalMoney();
     renderTotalTravelDistance();
@@ -3229,6 +3234,30 @@
   btnMapZoomOut.addEventListener("click", () => changeMapZoom(1 / 1.3));
   btnMapZoomIn.addEventListener("click", () => changeMapZoom(1.3));
   btnMapRecenter.addEventListener("click", resetMapCamera);
+  const btnMapLocation=document.getElementById('btn-map-location');
+  const mapLocationStatus=document.getElementById('map-location-status');
+  btnMapLocation.addEventListener('click',()=>{
+    if(btnMapLocation.disabled)return;
+    const request=++mapLocationRequest;
+    const requestedRoute=activeRoute;
+    btnMapLocation.disabled=true;
+    mapLocationStatus.classList.remove('hidden');mapLocationStatus.textContent='現在地をさがしているよ…';
+    window.TRAIN_GO_MAP_LOCATION.request(navigator.geolocation,location=>{
+      if(request!==mapLocationRequest)return;
+      btnMapLocation.disabled=false;
+      if(state==='select'||mapMode==='scenery'||activeRoute!==requestedRoute){mapLocationStatus.classList.add('hidden');return;}
+      mapUserLocation=location;
+      mapScrollAuto=false;mapZoomAuto=false;
+      mapManualCenterWorldX=mapWorldX(location.lon);mapManualCenterWorldY=mapWorldY(location.lat);
+      mapManualScale=clampMapScale(Math.min(W,H)/6000);
+      mapStaticCache=null;updateMapCameraControls();
+      mapLocationStatus.textContent=location.accuracy===null?'いまここへ移動したよ。':`いまここへ移動したよ（精度 約${Math.ceil(location.accuracy)}m）。`;
+    },message=>{
+      if(request!==mapLocationRequest)return;
+      btnMapLocation.disabled=false;mapLocationStatus.textContent=message;
+      if(state==='select'||mapMode==='scenery')mapLocationStatus.classList.add('hidden');
+    });
+  });
   onboardPanel.addEventListener("click", () => {
     setOnboardPanelExpanded(onboardPanel.getAttribute("aria-expanded") !== "true");
   });
@@ -4365,6 +4394,23 @@
     ctx.restore();
   }
 
+  function drawMapRestStops(scene,labelSize) {
+    if(scene.scale<.008)return;
+    ctx.save();ctx.textAlign='center';ctx.textBaseline='bottom';
+    const size=Math.max(10,labelSize*.75);ctx.font='bold '+size+'px sans-serif';
+    for(const [name,kana,lon,lat] of window.TRAIN_GO_REST_STOPS) {
+      const x=scene.screenCenterX+(mapWorldX(lon)-scene.centerWorldX)*scene.scale;
+      const y=scene.screenCenterY+(mapWorldY(lat)-scene.centerWorldY)*scene.scale;
+      if(!mapPointIsVisible(scene,x,y,30))continue;
+      const label=choices.state.nameMode==='kanji'?'道の駅 '+name:'みちのえき '+kana;
+      if(!claimMapLabelBox(x,y-size*.7,measureMapText(label).width+8,size+4))continue;
+      ctx.lineWidth=3;ctx.strokeStyle=timeOfDay==='night'?'#263f47':'#f4f8ed';ctx.strokeText(label,x,y-size*.7);
+      ctx.fillStyle=timeOfDay==='night'?'#c9e6ff':'#28689b';ctx.fillText(label,x,y-size*.7);
+      ctx.fillRect(x-4,y-3,8,6);
+    }
+    ctx.restore();
+  }
+
   function drawMapAirplaneShape(x, y, angle, size) {
     ctx.save();
     ctx.translate(x, y);
@@ -4631,6 +4677,7 @@
     profiled("map:geographicLabels",()=>drawGeographicLabels(scene,labelSize));
     profiled("map:relatedLabels", () => drawMapRelatedLineLabels(scene, labelSize));
     profiled("map:landmarks", () => drawYamanoteLandmarks(scene, labelSize));
+    profiled('map:restStops',()=>drawMapRestStops(scene,labelSize));
     if (isDebug) {
       canvas.dataset.mapLabelComparisons = String(mapLabelComparisonCount);
       canvas.dataset.mapLabelCount = String(mapLabelBoxCount);
@@ -4699,6 +4746,15 @@
       trainPoint = drawYamanoteOverviewMarker(scene, labelSize, position);
     }
     drawMapPowerStar(scene, position, labelSize);
+    if(mapUserLocation) {
+      const point=mapScenePoint(scene,mapWorldX(mapUserLocation.lon),mapWorldY(mapUserLocation.lat));
+      if(mapPointIsVisible(scene,point.x,point.y)) {
+        ctx.fillStyle='#1976d2';ctx.strokeStyle='#fff';ctx.lineWidth=3;
+        ctx.beginPath();ctx.arc(point.x,point.y,7,0,Math.PI*2);ctx.fill();ctx.stroke();
+        ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.textBaseline='bottom';
+        ctx.strokeText('いまここ',point.x,point.y-12);ctx.fillText('いまここ',point.x,point.y-12);
+      }
+    }
     ctx.restore();
 
     ctx.font = "bold " + (labelSize * 0.86) + "px sans-serif";
