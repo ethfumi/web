@@ -73,6 +73,7 @@ body:not(.map-view-active) #game-name-mode {
   align-items: center;
   gap: 2.2vmin;
 }
+.selection-toolbar { display: flex; justify-content: space-between; align-items: center; width: 100%; }
 
 #select-screen::-webkit-scrollbar { width: 12px; }
 #select-screen::-webkit-scrollbar-track { background: rgba(255,255,255,0.35); }
@@ -507,6 +508,9 @@ body.choosing-car #select-screen { z-index: 100; }
 #quick-add-options { display: flex; gap: .9vmin; overflow-x: auto; padding: 4px 4px 9px; touch-action: pan-x; scrollbar-width: thin; }
 #run-ui #btn-choose-car { grid-column: 1; grid-row: 2; justify-self: end; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #36516a; font-size: max(18px,3vmin); }
 #btn-choose-car small { font-size: max(11px,1.5vmin); font-weight: bold; }
+@media (orientation: landscape) {
+  #run-ui { left: auto; right: max(2vmin,env(safe-area-inset-right)); transform: none; width: min(89vmin,calc(100vw - 64vmin)); }
+}
 
 #btn-home {
   position: fixed;
@@ -1111,6 +1115,9 @@ body.map-view-active #btn-headlight {
   display: none !important;
 }
 
+@media (orientation: portrait) {
+  #play-controls { bottom: max(23vmin,calc(env(safe-area-inset-bottom) + 23vmin)); }
+}
 @media (orientation: portrait) and (max-width: 700px) {
   #map-camera-controls {
     top: 23vmin;
@@ -1133,7 +1140,7 @@ body.map-view-active #btn-headlight {
   }
   #run-ui .quick-train-art { width: 9vmin; }
   #run-ui .quick-plus { width: 4.2vmin; height: 4.2vmin; font-size: 3vmin; }
-  #play-controls { bottom: max(29vmin, calc(env(safe-area-inset-bottom) + 29vmin)); }
+  #play-controls { bottom: calc(env(safe-area-inset-bottom) + max(132px,36vmin)); }
   #play-controls button { width: 16vmin; height: 16vmin; font-size: 3vmin; }
   #play-controls button span:first-child { font-size: 6vmin; }
   #btn-station-doors,

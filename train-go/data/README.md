@@ -36,6 +36,8 @@ node --test train-go/tests/*.test.cjs
 
 ## 標高と地名
 
+表示の漢字・ひらがな切替は駅・路線・県・川・湖・ランドマーク・車両形式に適用する。駅の記録キーは変更しない。加志々の表示読みは[対馬市の運賃表](https://www.city.tsushima.nagasaki.jp/gyousei/soshiki/nakatsushima/chiikisinkou/tokaisen/849.html)の「かしし」を使用する。英語のみの一般施設名はひらがなモードで説明を訳す。
+
 `terrain-data.js` は[国土地理院の標高タイル（DEM10B）](https://maps.gsi.go.jp/development/demtile.html)を約2km間隔・50m刻みへ間引いた標高の色分け。山地と平地の目安を示し、細かな起伏や地点ごとの正確な標高は表さない。`tools/build-terrain.py` で生成し、描画画像はタイルごとに再利用する。
 
 `geographic-label-data.js` は島名324件と山頂名・標高1,059件を収録する。島名は同じ国土地理院ベクトルタイル、山頂は[日本の主な山岳標高（2026年3月31日版）](https://web2.gsi.go.jp/kihonjohochousa/kihonjohochousa41139.html)の1,003山の山頂レコードを使用する。原資料は `geographic-labels.json` と `mountains.json`、生成は `tools/build-geographic-labels.py`。駅名を優先して空いている場所へ表示し、漢字・ひらがな設定に合わせる。
