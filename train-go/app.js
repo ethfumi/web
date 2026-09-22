@@ -178,6 +178,14 @@
     }
     return new Set([...counts].filter(([, count]) => count >= 2).map(([name]) => name));
   })();
+  const MAP_ROUTES_BY_KIND = {rail:[], air:[], sea:[]};
+  for (const key of MAP_ROUTE_DRAW_ORDER) {
+    const kind=ROUTE_MAPS[key]?.kind;
+    MAP_ROUTES_BY_KIND[kind==='air'||kind==='sea' ? kind : 'rail'].push(key);
+  }
+  function visibleMapRouteKeys() {
+    return Object.keys(MAP_ROUTES_BY_KIND).flatMap(kind=>mapLayerVisibility[kind] ? MAP_ROUTES_BY_KIND[kind] : []);
+  }
   for (const items of Object.values(MAP_GEOGRAPHY)) {
     if (!Array.isArray(items)) continue;
     for (const item of items) {
@@ -3146,7 +3154,7 @@
     // うえからは最初からカメラを手動にする。列車を追い続けるより、指でスクロールして
     // 周りの路線や駅を眺めたいことが多い。「カメラ じどう」でいつでも追従に戻せる。
     mapScrollAuto = mapMode !== "follow";
-    mapZoomAuto = true;
+    mapZoomAuto = mapMode !== "follow";
     mapManualCenterWorldX = NaN;
     mapManualCenterWorldY = NaN;
     mapManualScale = NaN;
@@ -3544,6 +3552,7 @@
       scene.centerWorldX = mapManualCenterWorldX;
       scene.centerWorldY = mapManualCenterWorldY;
     }
+    if (!mapZoomAuto && !Number.isFinite(mapManualScale)) mapManualScale = scene.scale;
     if (!mapZoomAuto && Number.isFinite(mapManualScale)) scene.scale = mapManualScale;
     lastMapScene.centerWorldX = scene.centerWorldX;
     lastMapScene.centerWorldY = scene.centerWorldY;
@@ -3709,7 +3718,7 @@
     if (mapTownBlocksReady) return;
     mapTownBlocksReady = true;
     let routeNumber = 0;
-    for (const mapKey of MAP_ROUTE_DRAW_ORDER) {
+    for (const mapKey of MAP_ROUTES_BY_KIND.rail) {
       const map = ROUTE_MAPS[mapKey];
       // 空路・海路の沿線に街ブロックを置かない（太平洋全体図で重くなる原因になる）。
       if (map.kind === "air" || map.kind === "sea") continue;
@@ -3864,47 +3873,100 @@
       path[i ? "lineTo" : "moveTo"](mapWorldX(lon/precision),mapWorldY(lat/precision));
     }
   }
-  function drawMapWaterTiles(scene) {
-    for (const tile of MAP_WATER_TILES) {
-      if (!mapIntersectsScene(scene, tile, 0)) continue;
+  function drawMapWaterTiles(scene, landPass = false) {
+    if (!scene.waterTiles) {
+      const view=sceneWorldBounds(scene,0);
+      scene.waterTiles=MAP_WATER_TILES.filter(({worldBounds:b})=>b.maxX>=view.minX&&b.minX<=view.maxX&&b.maxY>=view.minY&&b.minY<=view.maxY);
+    }
+    ctx.save();
+    ctx.translate(scene.screenCenterX-scene.centerWorldX*scene.scale,scene.screenCenterY-scene.centerWorldY*scene.scale);
+    ctx.scale(scene.scale,scene.scale);
+    for (const tile of scene.waterTiles) {
       let paths = waterTilePaths.get(tile);
       if (!paths) {
         const landHoles = new Path2D();
-        const polygonPaths = tile.water.map(rings => {
-          const path = new Path2D();
-          for (const [index,ring] of rings.entries()) {
-            appendWaterPath(path, ring);
-            path.closePath();
-            if (index) { appendWaterPath(landHoles,ring); landHoles.closePath(); }
+        for (const ring of tile.islands || []) {appendWaterPath(landHoles,ring);landHoles.closePath();}
+        const water = new Path2D(), land = new Path2D();
+        for (const [path,polygons] of [[water,tile.water],[land,Array.isArray(tile.land)?tile.land:[]]]) {
+          for (const rings of polygons) for (const ring of rings) {
+            appendWaterPath(path,ring);path.closePath();
           }
-          return path;
-        });
+        }
         const rivers = new Path2D();
         for (const line of tile.rivers) appendWaterPath(rivers, line);
-        paths = {polygons:polygonPaths, rivers, landHoles};
+        paths = {water, land, rivers, landHoles};
         waterTilePaths.set(tile, paths);
       }
       const b = tile.worldBounds;
-      const left = scene.screenCenterX + (b.minX - scene.centerWorldX) * scene.scale;
-      const top = scene.screenCenterY + (b.minY - scene.centerWorldY) * scene.scale;
-      const width = (b.maxX-b.minX)*scene.scale, height = (b.maxY-b.minY)*scene.scale;
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(left,top,width,height);
-      ctx.clip();
-      ctx.fillStyle = timeOfDay === "night" ? "#263f47" : "#e4f0cf";
-      // Coarse water data does not cover the entire open ocean. Its missing area is not land.
-      if (tile.z >= 10) ctx.fillRect(left,top,width,height);
-      ctx.translate(scene.screenCenterX-scene.centerWorldX*scene.scale, scene.screenCenterY-scene.centerWorldY*scene.scale);
-      ctx.scale(scene.scale,scene.scale);
-      if (tile.z < 10) ctx.fill(paths.landHoles);
-      ctx.fillStyle = timeOfDay === "night" ? "#173b53" : "#80c8e2";
-      for (const path of paths.polygons) ctx.fill(path,"evenodd");
-      ctx.strokeStyle = timeOfDay === "night" ? "#4c829c" : "#72bfdc";
-      ctx.lineWidth = 1.4/scene.scale;
-      ctx.stroke(paths.rivers);
-      ctx.restore();
+      if (landPass) {
+        ctx.fillStyle=timeOfDay==="night"?"#263f47":"#e4f0cf";
+        if (tile.land===true) ctx.fillRect(b.minX,b.minY,b.maxX-b.minX,b.maxY-b.minY);
+        else ctx.fill(paths.land);
+        ctx.fill(paths.landHoles);
+      } else {
+        ctx.fillStyle=timeOfDay==="night"?"#173b53":"#80c8e2";
+        ctx.fill(paths.water);
+        ctx.strokeStyle=timeOfDay==="night"?"#4c829c":"#72bfdc";
+        ctx.lineWidth=1.4/scene.scale;ctx.lineJoin='round';ctx.lineCap='round';
+        ctx.stroke(paths.rivers);
+      }
     }
+    ctx.restore();
+  }
+
+  const terrainTiles=window.TRAIN_GO_TERRAIN_DATA?.tiles || [];
+  const terrainImages=new WeakMap();
+  function drawMapTerrain(scene) {
+    ctx.save();ctx.globalAlpha=timeOfDay==='night'?.16:.55;
+    for (const tile of terrainTiles) {
+      const [west,south,east,north]=tile.bounds;
+      const x=scene.screenCenterX+(mapWorldX(west)-scene.centerWorldX)*scene.scale;
+      const y=scene.screenCenterY+(mapWorldY(north)-scene.centerWorldY)*scene.scale;
+      const width=(mapWorldX(east)-mapWorldX(west))*scene.scale,height=(mapWorldY(south)-mapWorldY(north))*scene.scale;
+      if (x+width < -mapCachePadding || x>W+mapCachePadding || y+height < -mapCachePadding || y>H+mapCachePadding) continue;
+      let surface=terrainImages.get(tile);
+      if (!surface) {
+        const n=window.TRAIN_GO_TERRAIN_DATA.gridSize,values=atob(tile.heights);
+        surface=document.createElement('canvas');surface.width=surface.height=n;
+        const g=surface.getContext('2d'),pixels=g.createImageData(n,n);
+        for (let i=0;i<n*n;i++) {
+          const value=values.charCodeAt(i),elevation=(value-1)*50;
+          if (!value || elevation<100) continue;
+          const color=elevation<300?[183,209,155]:elevation<600?[146,186,129]:elevation<1000?[144,170,119]
+            :elevation<1500?[167,163,119]:elevation<2500?[173,146,111]:[207,197,175];
+          const next=values.charCodeAt(Math.min(n*n-1,i+1)),below=values.charCodeAt(Math.min(n*n-1,i+n));
+          const shade=Math.max(.82,Math.min(1.12,1+(next-below)*.015));
+          for (let c=0;c<3;c++)pixels.data[i*4+c]=Math.round(color[c]*shade);
+          pixels.data[i*4+3]=255;
+        }
+        g.putImageData(pixels,0,0);terrainImages.set(tile,surface);
+      }
+      ctx.drawImage(surface,x,y,width,height);
+    }
+    ctx.restore();
+  }
+
+  function drawGeographicLabels(scene,labelSize) {
+    ctx.save();ctx.textAlign='center';ctx.textBaseline='bottom';
+    for (const [name,kana,lon,lat,kind,elevation] of window.TRAIN_GO_GEOGRAPHIC_LABELS || []) {
+      const x=scene.screenCenterX+(mapWorldX(lon)-scene.centerWorldX)*scene.scale;
+      const y=scene.screenCenterY+(mapWorldY(lat)-scene.centerWorldY)*scene.scale;
+      if (!mapPointIsVisible(scene,x,y)) continue;
+      const size=Math.max(10,labelSize*(kind==='island'?.95:.78));
+      const title=(choices.state.nameMode==='kanji'?name:kana)+(elevation==null?'':' '+elevation+'m');
+      ctx.font='bold '+size+'px sans-serif';
+      const width=measureMapText(title).width+6;
+      const baseline=y-size*.6;
+      if (!claimMapLabelBox(x,baseline,width,size+3)) continue;
+      ctx.lineWidth=3;ctx.strokeStyle=timeOfDay==='night'?'#263f47':'rgba(245,249,233,.9)';
+      ctx.strokeText(title,x,baseline);
+      ctx.fillStyle=timeOfDay==='night'?'#e3e6d8':kind==='island'?'#3d6675':'#59634b';
+      ctx.fillText(title,x,baseline);
+      if (kind==='mountain') {
+        ctx.beginPath();ctx.moveTo(x,y-3);ctx.lineTo(x-3,y+3);ctx.lineTo(x+3,y+3);ctx.closePath();ctx.fill();
+      }
+    }
+    ctx.restore();
   }
 
   function drawYamanoteMapBackground(scene) {
@@ -3930,6 +3992,8 @@
         ctx.stroke();
       }
     }
+    drawMapWaterTiles(scene,true);
+    drawMapTerrain(scene);
     drawMapWaterTiles(scene);
 
     // 県境はどの縮尺でも描く（キャッシュ済みなので毎フレームの負荷にならない）。
@@ -4050,7 +4114,7 @@
     // 足切りすると、画面を横切っている長い路線が丸ごと消えてしまう。
     const viewMargin = Math.max(400, (W / Math.max(scene.scale, 1e-6)) * 0.2);
     const candidates = [];
-    for (const mapKey of MAP_ROUTE_DRAW_ORDER) {
+    for (const mapKey of visibleMapRouteKeys()) {
       if (mapKey === currentKey) continue;
       const map = ROUTE_MAPS[mapKey];
       if (!map || !mapLayerVisible(map) || !mapIntersectsScene(scene, map, viewMargin)) continue;
@@ -4179,8 +4243,12 @@
           const below = y + fontSize * 1.4;
           const labelY = claimMapLabelBox(x, above, width, fontSize) ? above
             : claimMapLabelBox(x, below, width, fontSize) ? below : null;
-          if (labelY === null) continue;
+          if (labelY === null) {
+            deferStationLabel(label,x,y,width,fontSize);
+            continue;
+          }
           ctx.fillText(label, x, labelY);
+          mapDrawnStationNames.add(label);
           placedNames.add(point.name);
           drawn++;
         }
@@ -4327,8 +4395,12 @@
         const below = position.screenY + labelSize * 1.45;
         const labelY = claimMapLabelBox(position.screenX, above, labelWidth, labelSize) ? above
           : claimMapLabelBox(position.screenX, below, labelWidth, labelSize) ? below : null;
-        if (labelY === null) continue;
+        if (labelY === null) {
+          deferStationLabel(label,position.screenX,position.screenY,labelWidth,labelSize);
+          continue;
+        }
         ctx.fillText(label, position.screenX, labelY);
+        mapDrawnStationNames.add(label);
       }
     }
     ctx.restore();
@@ -4339,6 +4411,7 @@
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     for (const landmark of YAMANOTE_MAP_LANDMARKS) {
+      if (window.TRAIN_GO_GEOGRAPHIC_LABELS && ['🗻','⛰️'].includes(landmark.icon)) continue;
       const x = scene.screenCenterX + (mapWorldX(landmark.lon) - scene.centerWorldX) * scene.scale;
       const y = scene.screenCenterY + (mapWorldY(landmark.lat) - scene.centerWorldY) * scene.scale;
       if (!mapPointIsVisible(scene, x, y, 50)) continue;
@@ -4353,6 +4426,7 @@
       ctx.fillText(landmark.name, x, nameY);
     }
     for (const landmark of MAP_GEOGRAPHY.landmarks) {
+      if (window.TRAIN_GO_GEOGRAPHIC_LABELS && ['🗻','⛰️'].includes(landmark.icon)) continue;
       const x = scene.screenCenterX + (mapWorldX(landmark.lon) - scene.centerWorldX) * scene.scale;
       const y = scene.screenCenterY + (mapWorldY(landmark.lat) - scene.centerWorldY) * scene.scale;
       if (!mapPointIsVisible(scene, x, y, 60)) continue;
@@ -4582,6 +4656,28 @@
 
   let mapCachePadding = 0;
   let mapStaticCache = null;
+  const mapDeferredStationLabels = new Map();
+  const mapDrawnStationNames = new Set();
+  function deferStationLabel(text,x,y,width,height) {
+    if (!mapDeferredStationLabels.has(text)) mapDeferredStationLabels.set(text,{text,x,y,width,height,font:ctx.font,color:ctx.fillStyle});
+  }
+  function drawDeferredStationLabels() {
+    ctx.save();ctx.textAlign='center';ctx.textBaseline='bottom';
+    for (const label of mapDeferredStationLabels.values()) {
+      if (mapDrawnStationNames.has(label.text)) continue;
+      const {x,y,width,height}=label;
+      const offset=width/2+height*.7;
+      for (const [cx,cy] of [[x+offset,y+height*.4],[x-offset,y+height*.4],[x,y-height*1.65],[x,y+height*2.55]]) {
+        if (cx-width/2 < -mapCachePadding || cx+width/2 > W+mapCachePadding
+          || cy-height < -mapCachePadding || cy > H+mapCachePadding) continue;
+        if (!claimMapLabelBox(cx,cy,width,height)) continue;
+        ctx.font=label.font;ctx.fillStyle=label.color;ctx.fillText(label.text,cx,cy);
+        mapDrawnStationNames.add(label.text);
+        break;
+      }
+    }
+    ctx.restore();
+  }
   const mapTextMetrics = new Map();
   function measureMapText(text) {
     const key = `${ctx.font}\n${text}`;
@@ -4600,17 +4696,22 @@
 
   function drawMapStaticLayer(scene, labelSize) {
     resetMapLabelBoxes();
+    mapDeferredStationLabels.clear();
+    mapDrawnStationNames.clear();
     ctx.save();
     profiled("map:background", () => drawYamanoteMapBackground(scene));
     profiled("map:townscape", () => drawMapTownscape(scene));
     profiled("map:relatedLines", () => drawYamanoteRelatedLines(scene, labelSize));
     if (mapLayerVisible(activeRouteMap())) profiled("map:route", () => drawYamanoteRoute(scene, labelSize));
     profiled("map:relatedStationLabels", () => drawRelatedStationLabels(scene, labelSize));
+    profiled("map:extraStationLabels", drawDeferredStationLabels);
+    profiled("map:geographicLabels",()=>drawGeographicLabels(scene,labelSize));
     profiled("map:relatedLabels", () => drawMapRelatedLineLabels(scene, labelSize));
     profiled("map:landmarks", () => drawYamanoteLandmarks(scene, labelSize));
     if (isDebug) {
       canvas.dataset.mapLabelComparisons = String(mapLabelComparisonCount);
       canvas.dataset.mapLabelCount = String(mapLabelBoxCount);
+      canvas.dataset.mapStationLabelCount = String(mapDrawnStationNames.size);
     }
     ctx.restore();
   }

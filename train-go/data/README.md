@@ -5,8 +5,9 @@
 `map-water-data.js` は[国土地理院最適化ベクトルタイル](https://github.com/gsi-cyberjapan/optimal_bvmap)（2026年7月1日時点）を加工したもの。
 [国土地理院コンテンツ利用規約](https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html)に基づき、出典と加工を明示して使用する。
 全国の収録駅・空港・港があるタイルとその周囲をzoom 8/10で収録し、海・湖・主要河川を描く。鉄道のない離島にも水域を補い、北海道から沖縄・小笠原まで同じ基準を使う。
-沿線の詳細水域は約200m相当の幾何簡略化を施し、港・空港の周辺500mでは約50m相当の形状を残す。これは元データの測量精度を保証する値ではない。
-小さな独立水域（0.1平方km未満）は省略し、海岸・川がタイル境界で切れないよう境界に接する水域は残す。詳細タイルの下に隠れる広域形状は配布データから除く。
+海岸は約200m相当の幾何簡略化を施し、港・空港の周辺500mでは約50m相当の形状を残す。川は流れをたどれる簡略線を主体にし、幅の広い川・湖は面で描く。これは元データの測量精度や川幅を保証する表示ではない。
+小さな独立水域（0.01平方km未満）は省略し、海岸・川がタイル境界で切れないよう境界に接する水域は残す。詳細タイルの下に隠れる広域形状は配布データから除く。
+海上の空タイルや詳細タイルを切り抜いた穴が四角い陸地にならないよう、Natural Earth 1:10mの陸域を簡略化した `land-mask.json` で陸の描画範囲を制限する。実際の海岸線は国土地理院の水域で描く。
 データは緯度経度を整数差分で格納し、表示範囲だけをPath2Dへ変換・再利用する。ゲーム中に地図サーバーへ接続しない。
 
 再取得には `pmtiles`、`mapbox-vector-tile`、`shapely` が必要。全体アーカイブをダウンロードせずHTTP Rangeで必要な部分だけ読む。
@@ -21,7 +22,7 @@ python train-go/tools/build-runtime.py --optimize
 `runtime-sources.json` に列挙した読みやすいソースを `tools/build-runtime.py` で `runtime.js.gz` にまとめる。
 `loader.js` がブラウザ内で展開して実行するため、GitHub Pages側の圧縮設定に依存しない。
 DecompressionStream非対応環境は同梱のfflate 0.8.2（MIT、`vendor/fflate.LICENSE`）を使用する。
-共有用のOGP画像はオフライン保存対象に含めない。配布ファイルの更新時は必ず再生成し、`--check` でソースとの一致と起動用ファイル合計2,000,000バイト以下を検査する。
+共有用のOGP画像はオフライン保存対象に含めない。配布ファイルの更新時は必ず再生成し、`--check` でソースとの一致と起動用ファイル合計2,500,000バイト以下を検査する。容量は上限として扱い、残容量を埋めるために精度や収録量を増やさない。
 
 ```sh
 python train-go/tools/build-runtime.py
@@ -30,6 +31,12 @@ node --test train-go/tests/*.test.cjs
 ```
 
 地図・航路を増やした版は `python train-go/tools/build-runtime.py --optimize` でビルド時だけzopfliを使うと、ブラウザ側のコードやデータ精度を変えずに同じgzip形式を小さくできる。`--check` は実際の配布ファイルの容量と展開内容を検査する。
+
+## 標高と地名
+
+`terrain-data.js` は[国土地理院の標高タイル（DEM10B）](https://maps.gsi.go.jp/development/demtile.html)を約2km間隔・50m刻みへ間引いた標高の色分け。山地と平地の目安を示し、細かな起伏や地点ごとの正確な標高は表さない。`tools/build-terrain.py` で生成し、描画画像はタイルごとに再利用する。
+
+`geographic-label-data.js` は島名324件と山頂名・標高1,059件を収録する。島名は同じ国土地理院ベクトルタイル、山頂は[日本の主な山岳標高（2026年3月31日版）](https://web2.gsi.go.jp/kihonjohochousa/kihonjohochousa41139.html)の1,003山の山頂レコードを使用する。原資料は `geographic-labels.json` と `mountains.json`、生成は `tools/build-geographic-labels.py`。駅名を優先して空いている場所へ表示し、漢字・ひらがな設定に合わせる。
 
 ## 収録範囲
 

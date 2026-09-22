@@ -15,8 +15,11 @@ def distance(a,b):
     rad=math.pi/180
     return 12742*math.asin(min(1,math.sqrt(math.sin((a[1]-b[1])*rad/2)**2+math.cos(a[1]*rad)*math.cos(b[1]*rad)*math.sin((a[0]-b[0])*rad/2)**2)))
 def name(tags):
-    value=tags.get('name:ja',tags.get('name',tags.get('seamark:name','')))
-    return '' if re.fullmatch(r'[\d\s-]+',value) else value
+    for field in ('name:ja','name','seamark:name'):
+        value=tags.get(field,'')
+        if value and not re.search(r'[\u0400-\u052f\uac00-\ud7af]',value) and not re.fullmatch(r'[\d\s-]+',value):
+            return value
+    return ''
 def coord(p):return tuple(round(x,6) for x in p)
 def clean(text):
     text=re.sub(r'\s+',' ',text.replace('name=','')).strip()

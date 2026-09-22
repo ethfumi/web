@@ -11,6 +11,8 @@
   "fare-data.js",
   "map-data.js",
   "map-water-data.js",
+  "terrain-data.js",
+  "geographic-label-data.js",
   "trip-options.js",
   "app.js"
 ]
