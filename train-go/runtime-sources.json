@@ -10,9 +10,11 @@
   "all-ferry-route-data.js",
   "fare-data.js",
   "map-data.js",
+  "regional-land-data.js",
   "map-water-data.js",
   "terrain-data.js",
   "geographic-label-data.js",
   "trip-options.js",
+  "map-cache.js",
   "app.js"
 ]

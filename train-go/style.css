@@ -33,6 +33,7 @@ body.loading #select-screen { visibility: hidden; }
   top: 0;
   left: 0;
   pointer-events: none;
+  transform-origin: 0 0;
 }
 
 #map-layer-controls { display: flex; gap: 5px; }

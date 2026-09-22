@@ -47,7 +47,7 @@ test('disabled transport categories never enter the route candidate list',()=>{
   const s=vm.createContext({MAP_ROUTE_DRAW_ORDER:['rail','air','sea','ref'],
     ROUTE_MAPS:{rail:{},air:{kind:'air'},sea:{kind:'sea'},ref:{kind:'sea'}},
     mapLayerVisibility:{rail:true,air:false,sea:false}});
-  vm.runInContext(between('  const MAP_ROUTES_BY_KIND =','  for (const items of Object.values(MAP_GEOGRAPHY))'),s);
+  vm.runInContext(between('  const MAP_ROUTES_BY_KIND =','  const MAP_WATER_TILES ='),s);
   assert.deepEqual(Array.from(s.visibleMapRouteKeys()),['rail']);
   s.mapLayerVisibility.sea=true;
   assert.deepEqual(Array.from(s.visibleMapRouteKeys()),['rail','sea','ref']);

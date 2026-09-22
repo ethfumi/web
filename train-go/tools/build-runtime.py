@@ -1,4 +1,4 @@
-"""Pack the readable JavaScript sources for static hosting and enforce the 2 MB startup budget."""
+"""Pack the readable JavaScript sources for static hosting and enforce the startup size limit."""
 import argparse
 import gzip
 import json
