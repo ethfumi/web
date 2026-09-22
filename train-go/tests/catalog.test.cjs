@@ -40,3 +40,19 @@ test('custom coupling choices survive reload and discard removed or invalid vehi
   assert.deepEqual(Array.from(prefs.state.coupling),['other','original']);prefs.save();
   assert.deepEqual(Array.from(s.window.TRAIN_GO_TRIP_OPTIONS.createPreferences(storage,{},trains).state.coupling),['other','original']);
 });
+
+test('closing the coupling picker resumes running audio without resetting the trip or sounding at a stop',()=>{
+  const app=fs.readFileSync(path.join(__dirname,'../app.js'),'utf8');
+  const code=app.slice(app.indexOf('  function closeCouplingPicker() {'),app.indexOf("  document.getElementById('btn-choose-car').addEventListener"));
+  for(const state of ['running','stopped']){
+    const calls=[],other={inert:true};
+    const scope=vm.createContext({state,couplingPickerOpen:true,pickerInertElements:[other],speed:1200,distance:35000,
+      selectScreen:{classList:{add(){}},removeAttribute(){}},
+      document:{body:{classList:{remove(){}}},getElementById:()=>({replaceChildren(){},focus(){calls.push('focus');}})},
+      startRunningSound:()=>calls.push('start'),updateRunningSound:()=>calls.push('update')});
+    vm.runInContext(code+'\ncloseCouplingPicker();',scope);
+    assert.deepEqual(calls,state==='running'?['start','update','focus']:['update','focus']);
+    assert.equal(scope.couplingPickerOpen,false);assert.equal(other.inert,false);
+    assert.equal(scope.speed,1200);assert.equal(scope.distance,35000);
+  }
+});

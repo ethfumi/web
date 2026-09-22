@@ -2759,6 +2759,7 @@
     for(const element of pickerInertElements)element.inert=false;
     pickerInertElements=[];
     for(const id of ['recommended-trains','recent-trains','all-trains'])document.getElementById(id).replaceChildren();
+    if(state==='running')startRunningSound();
     updateRunningSound();document.getElementById('btn-choose-car').focus();
   }
   document.getElementById('btn-choose-car').addEventListener('click',()=>{
