@@ -36,6 +36,15 @@ test('Tokyo Bay and Hokkaido lakes are water, station locations are land',()=>{
   assert.equal(isWater(131.30,25.947),false,'Kitadaito land');
   assert.equal(isWater(131.264,25.95),true,'sea beside Kitadaito');
 });
+
+test('the palace moats retain water surfaces without filling palace grounds or Tokyo station',()=>{
+  for(const [lon,lat] of [[139.74691,35.6806],[139.74781,35.69195],[139.75895,35.68975],[139.75673,35.67705],[139.76102,35.68045]]) {
+    assert.equal(isWater(lon,lat),true,`moat ${lon},${lat}`);
+  }
+  assert.equal(isWater(139.7528,35.6852),false,'palace grounds');
+  assert.equal(isWater(139.7671,35.6812),false,'Tokyo station');
+  assert.equal(isWater(139.86,35.50),true,'the Tokyo Bay text is placed on water');
+});
 test('spatial label index exactly preserves collision decisions and avoids global scans',()=>{
   const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
   const code=app.slice(app.indexOf('  const mapLabelBoxes ='),app.indexOf('  function mapSegmentIsVisible('));
