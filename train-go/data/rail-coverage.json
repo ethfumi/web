@@ -1,0 +1,5015 @@
+{
+  "version": "v20260831",
+  "source": "https://github.com/Seo-4d696b75/station_database",
+  "activeSourceLines": 602,
+  "includedSourceLines": 598,
+  "aliasSourceLines": 4,
+  "supplementalRoutes": 18,
+  "routes": 642,
+  "lines": [
+    {
+      "code": 1002,
+      "name": "東海道新幹線",
+      "status": "included",
+      "routes": [
+        "tokaido"
+      ]
+    },
+    {
+      "code": 1003,
+      "name": "山陽新幹線",
+      "status": "included",
+      "routes": [
+        "sanyo"
+      ]
+    },
+    {
+      "code": 1004,
+      "name": "東北新幹線",
+      "status": "included",
+      "routes": [
+        "tohoku"
+      ]
+    },
+    {
+      "code": 1005,
+      "name": "上越新幹線",
+      "status": "included",
+      "routes": [
+        "joetsu"
+      ]
+    },
+    {
+      "code": 1006,
+      "name": "上越新幹線(上越線)",
+      "status": "included",
+      "routes": [
+        "railLine1006"
+      ]
+    },
+    {
+      "code": 1009,
+      "name": "北陸新幹線",
+      "status": "included",
+      "routes": [
+        "hokuriku"
+      ]
+    },
+    {
+      "code": 1010,
+      "name": "九州新幹線",
+      "status": "included",
+      "routes": [
+        "kyushu"
+      ]
+    },
+    {
+      "code": 1011,
+      "name": "北海道新幹線",
+      "status": "included",
+      "routes": [
+        "hokkaido"
+      ]
+    },
+    {
+      "code": 1012,
+      "name": "西九州新幹線",
+      "status": "included",
+      "routes": [
+        "nishiKyushu"
+      ]
+    },
+    {
+      "code": 11101,
+      "name": "JR函館本線(函館～長万部)",
+      "status": "included",
+      "routes": [
+        "railLine11101",
+        "railLine11101Branch1"
+      ]
+    },
+    {
+      "code": 11102,
+      "name": "JR函館本線(長万部～小樽)",
+      "status": "included",
+      "routes": [
+        "railLine11102"
+      ]
+    },
+    {
+      "code": 11103,
+      "name": "JR函館本線(小樽～旭川)",
+      "status": "included",
+      "routes": [
+        "railLine11103"
+      ]
+    },
+    {
+      "code": 11104,
+      "name": "JR室蘭本線(長万部・室蘭～苫小牧)",
+      "status": "included",
+      "routes": [
+        "railLine11104",
+        "railLine11104Branch1"
+      ]
+    },
+    {
+      "code": 11105,
+      "name": "JR室蘭本線(苫小牧～岩見沢)",
+      "status": "included",
+      "routes": [
+        "railLine11105"
+      ]
+    },
+    {
+      "code": 11106,
+      "name": "JR根室本線(滝川～富良野)",
+      "status": "included",
+      "routes": [
+        "railLine11106"
+      ]
+    },
+    {
+      "code": 11107,
+      "name": "JR根室本線(新得～釧路)",
+      "status": "included",
+      "routes": [
+        "railLine11107"
+      ]
+    },
+    {
+      "code": 11108,
+      "name": "JR根室本線(花咲線)(釧路～根室)",
+      "status": "included",
+      "routes": [
+        "railLine11108"
+      ]
+    },
+    {
+      "code": 11109,
+      "name": "JR千歳線",
+      "status": "included",
+      "routes": [
+        "railLine11109",
+        "railLine11109Branch1"
+      ]
+    },
+    {
+      "code": 11110,
+      "name": "JR石勝線",
+      "status": "included",
+      "routes": [
+        "railLine11110"
+      ]
+    },
+    {
+      "code": 11111,
+      "name": "JR日高本線",
+      "status": "included",
+      "routes": [
+        "railLine11111"
+      ]
+    },
+    {
+      "code": 11112,
+      "name": "JR札沼線",
+      "status": "included",
+      "routes": [
+        "railLine11112"
+      ]
+    },
+    {
+      "code": 11113,
+      "name": "JR留萌本線",
+      "status": "closed"
+    },
+    {
+      "code": 11114,
+      "name": "JR富良野線",
+      "status": "included",
+      "routes": [
+        "railLine11114"
+      ]
+    },
+    {
+      "code": 11115,
+      "name": "JR宗谷本線",
+      "status": "included",
+      "routes": [
+        "railLine11115"
+      ]
+    },
+    {
+      "code": 11116,
+      "name": "JR石北本線",
+      "status": "included",
+      "routes": [
+        "railLine11116"
+      ]
+    },
+    {
+      "code": 11117,
+      "name": "JR釧網本線",
+      "status": "included",
+      "routes": [
+        "railLine11117"
+      ]
+    },
+    {
+      "code": 11118,
+      "name": "JR海峡線",
+      "status": "closed"
+    },
+    {
+      "code": 11119,
+      "name": "JR江差線",
+      "status": "closed"
+    },
+    {
+      "code": 11201,
+      "name": "JR東北本線(八戸～青森)",
+      "status": "closed"
+    },
+    {
+      "code": 11202,
+      "name": "JR奥羽本線(新庄～青森)",
+      "status": "included",
+      "routes": [
+        "railLine11202"
+      ]
+    },
+    {
+      "code": 11231,
+      "name": "JR東北本線(黒磯～利府・盛岡)",
+      "status": "included",
+      "routes": [
+        "kantoLine11231",
+        "kantoLine11231Branch1"
+      ]
+    },
+    {
+      "code": 11203,
+      "name": "JR大湊線(はまなすベイライン大湊線)",
+      "status": "included",
+      "routes": [
+        "railLine11203"
+      ]
+    },
+    {
+      "code": 11204,
+      "name": "JR五能線",
+      "status": "included",
+      "routes": [
+        "railLine11204"
+      ]
+    },
+    {
+      "code": 11205,
+      "name": "JR津軽線",
+      "status": "included",
+      "routes": [
+        "railLine11205"
+      ]
+    },
+    {
+      "code": 11206,
+      "name": "JR八戸線",
+      "status": "included",
+      "routes": [
+        "railLine11206"
+      ]
+    },
+    {
+      "code": 11207,
+      "name": "JR岩泉線",
+      "status": "closed"
+    },
+    {
+      "code": 11208,
+      "name": "JR大船渡線(ドラゴンレール大船渡線)",
+      "status": "included",
+      "routes": [
+        "railLine11208"
+      ]
+    },
+    {
+      "code": 11209,
+      "name": "JR釜石線(銀河ドリームライン釜石線)",
+      "status": "included",
+      "routes": [
+        "railLine11209"
+      ]
+    },
+    {
+      "code": 11210,
+      "name": "JR北上線",
+      "status": "included",
+      "routes": [
+        "railLine11210"
+      ]
+    },
+    {
+      "code": 11211,
+      "name": "JR田沢湖線",
+      "status": "included",
+      "routes": [
+        "railLine11211"
+      ]
+    },
+    {
+      "code": 11212,
+      "name": "JR花輪線(十和田八幡平四季彩ライン)",
+      "status": "included",
+      "routes": [
+        "railLine11212"
+      ]
+    },
+    {
+      "code": 11213,
+      "name": "JR山田線",
+      "status": "included",
+      "routes": [
+        "railLine11213"
+      ]
+    },
+    {
+      "code": 11214,
+      "name": "JR羽越本線",
+      "status": "included",
+      "routes": [
+        "railLine11214"
+      ]
+    },
+    {
+      "code": 11215,
+      "name": "JR男鹿線",
+      "status": "included",
+      "routes": [
+        "railLine11215"
+      ]
+    },
+    {
+      "code": 11216,
+      "name": "JR奥羽本線(山形線)(福島～新庄)",
+      "status": "included",
+      "routes": [
+        "railLine11216"
+      ]
+    },
+    {
+      "code": 11217,
+      "name": "JR仙山線",
+      "status": "included",
+      "routes": [
+        "railLine11217"
+      ]
+    },
+    {
+      "code": 11218,
+      "name": "JR左沢線(フルーツライン左沢線)",
+      "status": "included",
+      "routes": [
+        "railLine11218"
+      ]
+    },
+    {
+      "code": 11219,
+      "name": "JR米坂線",
+      "status": "included",
+      "routes": [
+        "railLine11219"
+      ]
+    },
+    {
+      "code": 11220,
+      "name": "JR陸羽西線(奥の細道最上川ライン)",
+      "status": "included",
+      "routes": [
+        "railLine11220"
+      ]
+    },
+    {
+      "code": 11221,
+      "name": "JR陸羽東線(奥の細道湯けむりライン)",
+      "status": "included",
+      "routes": [
+        "railLine11221"
+      ]
+    },
+    {
+      "code": 11222,
+      "name": "JR仙石線",
+      "status": "included",
+      "routes": [
+        "railLine11222"
+      ]
+    },
+    {
+      "code": 11223,
+      "name": "JR石巻線",
+      "status": "included",
+      "routes": [
+        "railLine11223"
+      ]
+    },
+    {
+      "code": 11224,
+      "name": "JR気仙沼線",
+      "status": "included",
+      "routes": [
+        "railLine11224"
+      ]
+    },
+    {
+      "code": 11225,
+      "name": "JR磐越西線(郡山～会津若松)",
+      "status": "included",
+      "routes": [
+        "railLine11225"
+      ]
+    },
+    {
+      "code": 11226,
+      "name": "JR磐越西線(森と水とロマンの鉄道)",
+      "status": "included",
+      "routes": [
+        "railLine11226"
+      ]
+    },
+    {
+      "code": 11227,
+      "name": "JR只見線",
+      "status": "included",
+      "routes": [
+        "railLine11227"
+      ]
+    },
+    {
+      "code": 11228,
+      "name": "JR磐越東線(ゆうゆうあぶくまライン)",
+      "status": "included",
+      "routes": [
+        "railLine11228"
+      ]
+    },
+    {
+      "code": 11229,
+      "name": "JR常磐線(取手～いわき)",
+      "status": "included",
+      "routes": [
+        "kantoLine11229"
+      ]
+    },
+    {
+      "code": 11230,
+      "name": "JR常磐線(いわき～仙台)",
+      "status": "included",
+      "routes": [
+        "railLine11230"
+      ]
+    },
+    {
+      "code": 11301,
+      "name": "JR東海道本線(東京～熱海)",
+      "status": "included",
+      "routes": [
+        "tokaidoLocal"
+      ]
+    },
+    {
+      "code": 11302,
+      "name": "JR山手線",
+      "status": "included",
+      "routes": [
+        "yamanote"
+      ]
+    },
+    {
+      "code": 11303,
+      "name": "JR南武線",
+      "status": "included",
+      "routes": [
+        "nambu",
+        "nambuBranch1"
+      ]
+    },
+    {
+      "code": 11304,
+      "name": "JR鶴見線",
+      "status": "included",
+      "routes": [
+        "tsurumi",
+        "tsurumiBranch1",
+        "tsurumiBranch2"
+      ]
+    },
+    {
+      "code": 11305,
+      "name": "JR武蔵野線",
+      "status": "included",
+      "routes": [
+        "musashino"
+      ]
+    },
+    {
+      "code": 11306,
+      "name": "JR横浜線",
+      "status": "included",
+      "routes": [
+        "yokohama"
+      ]
+    },
+    {
+      "code": 11307,
+      "name": "JR根岸線",
+      "status": "included",
+      "routes": [
+        "negishi"
+      ]
+    },
+    {
+      "code": 11308,
+      "name": "JR横須賀線",
+      "status": "included",
+      "routes": [
+        "yokosuka"
+      ]
+    },
+    {
+      "code": 11309,
+      "name": "JR相模線",
+      "status": "included",
+      "routes": [
+        "sagami"
+      ]
+    },
+    {
+      "code": 11311,
+      "name": "JR中央本線(東京～塩尻)",
+      "status": "included",
+      "routes": [
+        "chuoMain",
+        "chuoMainBranch1"
+      ]
+    },
+    {
+      "code": 11312,
+      "name": "JR中央線(快速)",
+      "status": "included",
+      "routes": [
+        "chuo"
+      ]
+    },
+    {
+      "code": 11313,
+      "name": "JR中央・総武線",
+      "status": "included",
+      "routes": [
+        "sobu"
+      ]
+    },
+    {
+      "code": 11314,
+      "name": "JR総武本線",
+      "status": "included",
+      "routes": [
+        "sobuMain"
+      ]
+    },
+    {
+      "code": 11315,
+      "name": "JR青梅線",
+      "status": "included",
+      "routes": [
+        "ome"
+      ]
+    },
+    {
+      "code": 11316,
+      "name": "JR五日市線",
+      "status": "included",
+      "routes": [
+        "itsukaichi"
+      ]
+    },
+    {
+      "code": 11317,
+      "name": "JR八高線(八王子～高麗川)",
+      "status": "included",
+      "routes": [
+        "hachikoSouth"
+      ]
+    },
+    {
+      "code": 11318,
+      "name": "JR八高線(高麗川～高崎)",
+      "status": "included",
+      "routes": [
+        "hachikoNorth"
+      ]
+    },
+    {
+      "code": 11319,
+      "name": "JR東北本線(宇都宮線)",
+      "status": "included",
+      "routes": [
+        "utsunomiya"
+      ]
+    },
+    {
+      "code": 11320,
+      "name": "JR常磐線(上野～取手)",
+      "status": "included",
+      "routes": [
+        "joban"
+      ]
+    },
+    {
+      "code": 11321,
+      "name": "JR埼京線",
+      "status": "included",
+      "routes": [
+        "saikyo"
+      ]
+    },
+    {
+      "code": 11322,
+      "name": "JR川越線",
+      "status": "included",
+      "routes": [
+        "kawagoe"
+      ]
+    },
+    {
+      "code": 11323,
+      "name": "JR高崎線",
+      "status": "included",
+      "routes": [
+        "takasaki"
+      ]
+    },
+    {
+      "code": 11324,
+      "name": "JR外房線",
+      "status": "included",
+      "routes": [
+        "sotobo"
+      ]
+    },
+    {
+      "code": 11325,
+      "name": "JR内房線",
+      "status": "included",
+      "routes": [
+        "uchibo"
+      ]
+    },
+    {
+      "code": 11326,
+      "name": "JR京葉線",
+      "status": "included",
+      "routes": [
+        "keiyo"
+      ]
+    },
+    {
+      "code": 11327,
+      "name": "JR成田線",
+      "status": "included",
+      "routes": [
+        "narita",
+        "naritaBranch1",
+        "naritaBranch2"
+      ]
+    },
+    {
+      "code": 11328,
+      "name": "JR成田エクスプレス",
+      "status": "included",
+      "routes": [
+        "railLine11328"
+      ]
+    },
+    {
+      "code": 11329,
+      "name": "JR鹿島線",
+      "status": "included",
+      "routes": [
+        "kashima"
+      ]
+    },
+    {
+      "code": 11330,
+      "name": "JR久留里線",
+      "status": "included",
+      "routes": [
+        "kururi"
+      ]
+    },
+    {
+      "code": 11331,
+      "name": "JR東金線",
+      "status": "included",
+      "routes": [
+        "togane"
+      ]
+    },
+    {
+      "code": 11332,
+      "name": "JR京浜東北線",
+      "status": "included",
+      "routes": [
+        "keihinTohoku"
+      ]
+    },
+    {
+      "code": 11333,
+      "name": "JR湘南新宿ライン",
+      "status": "included",
+      "routes": [
+        "shonanShinjuku"
+      ]
+    },
+    {
+      "code": 11343,
+      "name": "JR上野東京ライン",
+      "status": "included",
+      "routes": [
+        "uenoTokyo"
+      ]
+    },
+    {
+      "code": 11334,
+      "name": "JR烏山線",
+      "status": "included",
+      "routes": [
+        "karasuyama"
+      ]
+    },
+    {
+      "code": 11335,
+      "name": "JR吾妻線",
+      "status": "included",
+      "routes": [
+        "agatsuma"
+      ]
+    },
+    {
+      "code": 11337,
+      "name": "JR信越本線",
+      "status": "included",
+      "routes": [
+        "shinetsu"
+      ]
+    },
+    {
+      "code": 11338,
+      "name": "JR水郡線",
+      "status": "included",
+      "routes": [
+        "suigun",
+        "suigunBranch1"
+      ]
+    },
+    {
+      "code": 11339,
+      "name": "JR水戸線",
+      "status": "included",
+      "routes": [
+        "mito"
+      ]
+    },
+    {
+      "code": 11340,
+      "name": "JR日光線",
+      "status": "included",
+      "routes": [
+        "nikko"
+      ]
+    },
+    {
+      "code": 11341,
+      "name": "JR両毛線",
+      "status": "included",
+      "routes": [
+        "ryomo"
+      ]
+    },
+    {
+      "code": 11342,
+      "name": "JR上越線",
+      "status": "included",
+      "routes": [
+        "joetsuLocal"
+      ]
+    },
+    {
+      "code": 11401,
+      "name": "JR小海線(八ヶ岳高原線)",
+      "status": "included",
+      "routes": [
+        "railLine11401"
+      ]
+    },
+    {
+      "code": 11402,
+      "name": "JR身延線",
+      "status": "included",
+      "routes": [
+        "railLine11402"
+      ]
+    },
+    {
+      "code": 11403,
+      "name": "JR信越本線(篠ノ井～長野)",
+      "status": "included",
+      "routes": [
+        "railLine11403"
+      ]
+    },
+    {
+      "code": 11404,
+      "name": "JR信越本線(直江津～新潟)",
+      "status": "included",
+      "routes": [
+        "railLine11404"
+      ]
+    },
+    {
+      "code": 11405,
+      "name": "JR北陸本線(富山～直江津)",
+      "status": "closed"
+    },
+    {
+      "code": 11406,
+      "name": "JR白新線",
+      "status": "included",
+      "routes": [
+        "railLine11406"
+      ]
+    },
+    {
+      "code": 11407,
+      "name": "JR飯山線",
+      "status": "included",
+      "routes": [
+        "railLine11407"
+      ]
+    },
+    {
+      "code": 11408,
+      "name": "JR越後線",
+      "status": "included",
+      "routes": [
+        "railLine11408"
+      ]
+    },
+    {
+      "code": 11409,
+      "name": "JR大糸線",
+      "status": "included",
+      "routes": [
+        "railLine11409"
+      ]
+    },
+    {
+      "code": 11410,
+      "name": "JR弥彦線",
+      "status": "included",
+      "routes": [
+        "railLine11410"
+      ]
+    },
+    {
+      "code": 11411,
+      "name": "JR中央本線(名古屋～塩尻)",
+      "status": "included",
+      "routes": [
+        "railLine11411"
+      ]
+    },
+    {
+      "code": 11412,
+      "name": "JR篠ノ井線",
+      "status": "included",
+      "routes": [
+        "railLine11412"
+      ]
+    },
+    {
+      "code": 11413,
+      "name": "JR飯田線(豊橋～天竜峡)",
+      "status": "included",
+      "routes": [
+        "railLine11413"
+      ]
+    },
+    {
+      "code": 11414,
+      "name": "JR飯田線(天竜峡～辰野)",
+      "status": "included",
+      "routes": [
+        "railLine11414"
+      ]
+    },
+    {
+      "code": 11415,
+      "name": "JR北陸本線(米原～敦賀)",
+      "status": "included",
+      "routes": [
+        "railLine11415"
+      ]
+    },
+    {
+      "code": 11416,
+      "name": "JR高山本線",
+      "status": "included",
+      "routes": [
+        "railLine11416"
+      ]
+    },
+    {
+      "code": 11417,
+      "name": "JR城端線",
+      "status": "included",
+      "routes": [
+        "railLine11417"
+      ]
+    },
+    {
+      "code": 11418,
+      "name": "JR氷見線",
+      "status": "included",
+      "routes": [
+        "railLine11418"
+      ]
+    },
+    {
+      "code": 11419,
+      "name": "JR七尾線",
+      "status": "included",
+      "routes": [
+        "railLine11419"
+      ]
+    },
+    {
+      "code": 11421,
+      "name": "JR越美北線(九頭竜線)",
+      "status": "included",
+      "routes": [
+        "railLine11421"
+      ]
+    },
+    {
+      "code": 11422,
+      "name": "JR小浜線",
+      "status": "included",
+      "routes": [
+        "railLine11422"
+      ]
+    },
+    {
+      "code": 11501,
+      "name": "JR東海道本線(熱海～浜松)",
+      "status": "included",
+      "routes": [
+        "railLine11501"
+      ]
+    },
+    {
+      "code": 11502,
+      "name": "JR東海道本線(浜松～岐阜)",
+      "status": "included",
+      "routes": [
+        "railLine11502"
+      ]
+    },
+    {
+      "code": 11503,
+      "name": "JR東海道本線(岐阜～美濃赤坂・米原)",
+      "status": "included",
+      "routes": [
+        "railLine11503",
+        "railLine11503Branch1"
+      ]
+    },
+    {
+      "code": 11504,
+      "name": "JR伊東線",
+      "status": "included",
+      "routes": [
+        "railLine11504"
+      ]
+    },
+    {
+      "code": 11505,
+      "name": "JR御殿場線",
+      "status": "included",
+      "routes": [
+        "gotemba"
+      ]
+    },
+    {
+      "code": 11506,
+      "name": "JR武豊線",
+      "status": "included",
+      "routes": [
+        "railLine11506"
+      ]
+    },
+    {
+      "code": 11507,
+      "name": "JR太多線",
+      "status": "included",
+      "routes": [
+        "railLine11507"
+      ]
+    },
+    {
+      "code": 11508,
+      "name": "JR関西本線(名古屋～亀山)",
+      "status": "included",
+      "routes": [
+        "railLine11508"
+      ]
+    },
+    {
+      "code": 11509,
+      "name": "JR関西本線(亀山～加茂)",
+      "status": "included",
+      "routes": [
+        "railLine11509"
+      ]
+    },
+    {
+      "code": 11510,
+      "name": "JR紀勢本線",
+      "status": "included",
+      "routes": [
+        "railLine11510"
+      ]
+    },
+    {
+      "code": 11511,
+      "name": "JR草津線",
+      "status": "included",
+      "routes": [
+        "railLine11511"
+      ]
+    },
+    {
+      "code": 11512,
+      "name": "JR参宮線",
+      "status": "included",
+      "routes": [
+        "railLine11512"
+      ]
+    },
+    {
+      "code": 11513,
+      "name": "JR名松線",
+      "status": "included",
+      "routes": [
+        "railLine11513"
+      ]
+    },
+    {
+      "code": 11601,
+      "name": "JR東海道本線(琵琶湖線)(米原～京都)",
+      "status": "included",
+      "routes": [
+        "railLine11601"
+      ]
+    },
+    {
+      "code": 11602,
+      "name": "JR東海道本線(京都線)(京都～大阪)",
+      "status": "included",
+      "routes": [
+        "railLine11602"
+      ]
+    },
+    {
+      "code": 11603,
+      "name": "JR東海道本線(神戸線)(大阪～神戸)",
+      "status": "included",
+      "routes": [
+        "railLine11603"
+      ]
+    },
+    {
+      "code": 11605,
+      "name": "JR湖西線",
+      "status": "included",
+      "routes": [
+        "railLine11605"
+      ]
+    },
+    {
+      "code": 11607,
+      "name": "JR関西本線(大和路線)(加茂～ＪＲ難波)",
+      "status": "included",
+      "routes": [
+        "railLine11607"
+      ]
+    },
+    {
+      "code": 11608,
+      "name": "JR山陽本線(神戸線)(神戸～姫路)",
+      "status": "included",
+      "routes": [
+        "railLine11608"
+      ]
+    },
+    {
+      "code": 11609,
+      "name": "JR山陽本線(姫路～岡山)",
+      "status": "included",
+      "routes": [
+        "railLine11609"
+      ]
+    },
+    {
+      "code": 11610,
+      "name": "JR山陽本線(岡山～三原)",
+      "status": "included",
+      "routes": [
+        "railLine11610"
+      ]
+    },
+    {
+      "code": 11611,
+      "name": "JR山陽本線(三原～岩国)",
+      "status": "included",
+      "routes": [
+        "railLine11611"
+      ]
+    },
+    {
+      "code": 11612,
+      "name": "JR山陽本線(岩国～門司)",
+      "status": "included",
+      "routes": [
+        "railLine11612"
+      ]
+    },
+    {
+      "code": 11613,
+      "name": "JR山陽本線(兵庫～和田岬)",
+      "status": "included",
+      "routes": [
+        "railLine11613"
+      ]
+    },
+    {
+      "code": 11614,
+      "name": "JR山陰本線(嵯峨野線)(京都～園部)",
+      "status": "included",
+      "routes": [
+        "railLine11614"
+      ]
+    },
+    {
+      "code": 11615,
+      "name": "JR山陰本線(園部～豊岡)",
+      "status": "included",
+      "routes": [
+        "railLine11615"
+      ]
+    },
+    {
+      "code": 11616,
+      "name": "JR山陰本線(豊岡～米子)",
+      "status": "included",
+      "routes": [
+        "railLine11616"
+      ]
+    },
+    {
+      "code": 11617,
+      "name": "JR片町線(学研都市線)",
+      "status": "included",
+      "routes": [
+        "railLine11617"
+      ]
+    },
+    {
+      "code": 11618,
+      "name": "JR奈良線",
+      "status": "included",
+      "routes": [
+        "railLine11618"
+      ]
+    },
+    {
+      "code": 11622,
+      "name": "JR舞鶴線",
+      "status": "included",
+      "routes": [
+        "railLine11622"
+      ]
+    },
+    {
+      "code": 11623,
+      "name": "JR大阪環状線",
+      "status": "included",
+      "routes": [
+        "osakaLoop"
+      ]
+    },
+    {
+      "code": 11624,
+      "name": "JR桜島線(ゆめ咲線)",
+      "status": "included",
+      "routes": [
+        "railLine11624"
+      ]
+    },
+    {
+      "code": 11625,
+      "name": "JR東西線",
+      "status": "included",
+      "routes": [
+        "railLine11625"
+      ]
+    },
+    {
+      "code": 11626,
+      "name": "JR阪和線(天王寺～和歌山)",
+      "status": "included",
+      "routes": [
+        "railLine11626"
+      ]
+    },
+    {
+      "code": 11627,
+      "name": "JR阪和線(鳳～東羽衣)",
+      "status": "included",
+      "routes": [
+        "railLine11627"
+      ]
+    },
+    {
+      "code": 11628,
+      "name": "JR関西空港線",
+      "status": "included",
+      "routes": [
+        "railLine11628"
+      ]
+    },
+    {
+      "code": 11629,
+      "name": "JR福知山線(宝塚線)(大阪～篠山口)",
+      "status": "included",
+      "routes": [
+        "railLine11629"
+      ]
+    },
+    {
+      "code": 11630,
+      "name": "JR福知山線(篠山口～福知山)",
+      "status": "included",
+      "routes": [
+        "railLine11630"
+      ]
+    },
+    {
+      "code": 11631,
+      "name": "JR赤穂線",
+      "status": "included",
+      "routes": [
+        "railLine11631"
+      ]
+    },
+    {
+      "code": 11632,
+      "name": "JR加古川線",
+      "status": "included",
+      "routes": [
+        "railLine11632"
+      ]
+    },
+    {
+      "code": 11633,
+      "name": "JR姫新線(姫路～佐用)",
+      "status": "included",
+      "routes": [
+        "railLine11633"
+      ]
+    },
+    {
+      "code": 11634,
+      "name": "JR姫新線(佐用～新見)",
+      "status": "included",
+      "routes": [
+        "railLine11634"
+      ]
+    },
+    {
+      "code": 11635,
+      "name": "JR播但線",
+      "status": "included",
+      "routes": [
+        "railLine11635"
+      ]
+    },
+    {
+      "code": 11636,
+      "name": "JR和歌山線",
+      "status": "included",
+      "routes": [
+        "railLine11636"
+      ]
+    },
+    {
+      "code": 11637,
+      "name": "JR桜井線",
+      "status": "included",
+      "routes": [
+        "railLine11637"
+      ]
+    },
+    {
+      "code": 11639,
+      "name": "JR紀勢本線(きのくに線)(新宮～和歌山)",
+      "status": "included",
+      "routes": [
+        "railLine11639"
+      ]
+    },
+    {
+      "code": 11640,
+      "name": "JR紀勢本線(和歌山～和歌山市)",
+      "status": "included",
+      "routes": [
+        "railLine11640"
+      ]
+    },
+    {
+      "code": 11641,
+      "name": "JRおおさか東線",
+      "status": "included",
+      "routes": [
+        "railLine11641"
+      ]
+    },
+    {
+      "code": 11701,
+      "name": "JR山陰本線(米子～益田)",
+      "status": "included",
+      "routes": [
+        "railLine11701"
+      ]
+    },
+    {
+      "code": 11702,
+      "name": "JR山陰本線(益田・仙崎～下関)",
+      "status": "included",
+      "routes": [
+        "railLine11702",
+        "railLine11702Branch1"
+      ]
+    },
+    {
+      "code": 11703,
+      "name": "JR伯備線",
+      "status": "included",
+      "routes": [
+        "railLine11703"
+      ]
+    },
+    {
+      "code": 11704,
+      "name": "JR因美線",
+      "status": "included",
+      "routes": [
+        "railLine11704"
+      ]
+    },
+    {
+      "code": 11705,
+      "name": "JR境線",
+      "status": "included",
+      "routes": [
+        "railLine11705"
+      ]
+    },
+    {
+      "code": 11706,
+      "name": "JR木次線",
+      "status": "included",
+      "routes": [
+        "railLine11706"
+      ]
+    },
+    {
+      "code": 11707,
+      "name": "JR三江線",
+      "status": "closed"
+    },
+    {
+      "code": 11708,
+      "name": "JR山口線",
+      "status": "included",
+      "routes": [
+        "railLine11708"
+      ]
+    },
+    {
+      "code": 11709,
+      "name": "JR宇野線",
+      "status": "included",
+      "routes": [
+        "railLine11709"
+      ]
+    },
+    {
+      "code": 11710,
+      "name": "JR本四備讃線(瀬戸大橋線)",
+      "status": "included",
+      "routes": [
+        "railLine11710"
+      ]
+    },
+    {
+      "code": 11713,
+      "name": "JR吉備線",
+      "status": "included",
+      "routes": [
+        "railLine11713"
+      ]
+    },
+    {
+      "code": 11714,
+      "name": "JR芸備線",
+      "status": "included",
+      "routes": [
+        "railLine11714"
+      ]
+    },
+    {
+      "code": 11715,
+      "name": "JR津山線",
+      "status": "included",
+      "routes": [
+        "railLine11715"
+      ]
+    },
+    {
+      "code": 11716,
+      "name": "JR呉線",
+      "status": "included",
+      "routes": [
+        "railLine11716"
+      ]
+    },
+    {
+      "code": 11717,
+      "name": "JR可部線",
+      "status": "included",
+      "routes": [
+        "railLine11717"
+      ]
+    },
+    {
+      "code": 11720,
+      "name": "JR福塩線",
+      "status": "included",
+      "routes": [
+        "railLine11720"
+      ]
+    },
+    {
+      "code": 11721,
+      "name": "JR宇部線",
+      "status": "included",
+      "routes": [
+        "railLine11721"
+      ]
+    },
+    {
+      "code": 11722,
+      "name": "JR美祢線",
+      "status": "included",
+      "routes": [
+        "railLine11722"
+      ]
+    },
+    {
+      "code": 11723,
+      "name": "JR小野田線",
+      "status": "included",
+      "routes": [
+        "railLine11723",
+        "railLine11723Branch1"
+      ]
+    },
+    {
+      "code": 11724,
+      "name": "JR岩徳線",
+      "status": "included",
+      "routes": [
+        "railLine11724"
+      ]
+    },
+    {
+      "code": 11801,
+      "name": "JR土讃線",
+      "status": "included",
+      "routes": [
+        "railLine11801"
+      ]
+    },
+    {
+      "code": 11802,
+      "name": "JR高徳線",
+      "status": "included",
+      "routes": [
+        "railLine11802"
+      ]
+    },
+    {
+      "code": 11803,
+      "name": "JR徳島線(よしの川ブルーライン)",
+      "status": "included",
+      "routes": [
+        "railLine11803"
+      ]
+    },
+    {
+      "code": 11804,
+      "name": "JR牟岐線",
+      "status": "included",
+      "routes": [
+        "railLine11804"
+      ]
+    },
+    {
+      "code": 11805,
+      "name": "JR鳴門線",
+      "status": "included",
+      "routes": [
+        "railLine11805"
+      ]
+    },
+    {
+      "code": 11806,
+      "name": "JR予讃線",
+      "status": "included",
+      "routes": [
+        "railLine11806"
+      ]
+    },
+    {
+      "code": 11807,
+      "name": "JR予讃・内子線",
+      "status": "included",
+      "routes": [
+        "railLine11807",
+        "railLine11807Branch1"
+      ]
+    },
+    {
+      "code": 11808,
+      "name": "JR予土線(しまんとグリーンライン)",
+      "status": "included",
+      "routes": [
+        "railLine11808"
+      ]
+    },
+    {
+      "code": 11901,
+      "name": "JR博多南線",
+      "status": "included",
+      "routes": [
+        "railLine11901"
+      ]
+    },
+    {
+      "code": 11902,
+      "name": "JR鹿児島本線(下関・門司港～博多)",
+      "status": "included",
+      "routes": [
+        "railLine11902",
+        "railLine11902Branch1"
+      ]
+    },
+    {
+      "code": 11903,
+      "name": "JR鹿児島本線(博多～八代)",
+      "status": "included",
+      "routes": [
+        "railLine11903"
+      ]
+    },
+    {
+      "code": 11904,
+      "name": "JR鹿児島本線(川内～鹿児島)",
+      "status": "included",
+      "routes": [
+        "railLine11904"
+      ]
+    },
+    {
+      "code": 11905,
+      "name": "JR長崎本線(鳥栖～長崎)",
+      "status": "included",
+      "routes": [
+        "railLine11905",
+        "railLine11905Branch1"
+      ]
+    },
+    {
+      "code": 11906,
+      "name": "JR日豊本線(門司港～佐伯)",
+      "status": "included",
+      "routes": [
+        "railLine11906"
+      ]
+    },
+    {
+      "code": 11907,
+      "name": "JR日豊本線(佐伯～鹿児島中央)",
+      "status": "included",
+      "routes": [
+        "railLine11907"
+      ]
+    },
+    {
+      "code": 11908,
+      "name": "JR篠栗線(福北ゆたか線)",
+      "status": "included",
+      "routes": [
+        "railLine11908"
+      ]
+    },
+    {
+      "code": 11909,
+      "name": "JR筑肥線(姪浜～西唐津)",
+      "status": "included",
+      "routes": [
+        "railLine11909"
+      ]
+    },
+    {
+      "code": 11910,
+      "name": "JR筑豊本線(若松線)(若松～折尾)",
+      "status": "included",
+      "routes": [
+        "railLine11910"
+      ]
+    },
+    {
+      "code": 11911,
+      "name": "JR筑豊本線(福北ゆたか線)(折尾～桂川)",
+      "status": "included",
+      "routes": [
+        "railLine11911"
+      ]
+    },
+    {
+      "code": 11912,
+      "name": "JR筑豊本線(原田線)(桂川～原田)",
+      "status": "included",
+      "routes": [
+        "railLine11912"
+      ]
+    },
+    {
+      "code": 11913,
+      "name": "JR久大本線(ゆふ高原線)",
+      "status": "included",
+      "routes": [
+        "railLine11913"
+      ]
+    },
+    {
+      "code": 11914,
+      "name": "JR日田彦山線",
+      "status": "included",
+      "routes": [
+        "railLine11914"
+      ]
+    },
+    {
+      "code": 11915,
+      "name": "JR後藤寺線",
+      "status": "included",
+      "routes": [
+        "railLine11915"
+      ]
+    },
+    {
+      "code": 11916,
+      "name": "JR香椎線(海の中道線)(西戸崎～香椎)",
+      "status": "included",
+      "routes": [
+        "railLine11916"
+      ]
+    },
+    {
+      "code": 11917,
+      "name": "JR香椎線(香椎～宇美)",
+      "status": "included",
+      "routes": [
+        "railLine11917"
+      ]
+    },
+    {
+      "code": 11918,
+      "name": "JR佐世保線",
+      "status": "included",
+      "routes": [
+        "railLine11918"
+      ]
+    },
+    {
+      "code": 11920,
+      "name": "JR筑肥線(西唐津～伊万里)",
+      "status": "included",
+      "routes": [
+        "railLine11920"
+      ]
+    },
+    {
+      "code": 11921,
+      "name": "JR唐津線",
+      "status": "included",
+      "routes": [
+        "railLine11921"
+      ]
+    },
+    {
+      "code": 11922,
+      "name": "JR大村線",
+      "status": "included",
+      "routes": [
+        "railLine11922"
+      ]
+    },
+    {
+      "code": 11923,
+      "name": "JR豊肥本線(阿蘇高原線)",
+      "status": "included",
+      "routes": [
+        "railLine11923"
+      ]
+    },
+    {
+      "code": 11924,
+      "name": "JR三角線",
+      "status": "included",
+      "routes": [
+        "railLine11924"
+      ]
+    },
+    {
+      "code": 11925,
+      "name": "JR肥薩線(えびの高原線)(八代～吉松)",
+      "status": "included",
+      "routes": [
+        "railLine11925"
+      ]
+    },
+    {
+      "code": 11926,
+      "name": "JR肥薩線(吉松～隼人)",
+      "status": "included",
+      "routes": [
+        "railLine11926"
+      ]
+    },
+    {
+      "code": 11927,
+      "name": "JR宮崎空港線",
+      "status": "included",
+      "routes": [
+        "railLine11927"
+      ]
+    },
+    {
+      "code": 11928,
+      "name": "JR日南線",
+      "status": "included",
+      "routes": [
+        "railLine11928"
+      ]
+    },
+    {
+      "code": 11929,
+      "name": "JR吉都線(えびの高原線)",
+      "status": "included",
+      "routes": [
+        "railLine11929"
+      ]
+    },
+    {
+      "code": 11930,
+      "name": "JR指宿枕崎線",
+      "status": "included",
+      "routes": [
+        "railLine11930"
+      ]
+    },
+    {
+      "code": 21001,
+      "name": "東武東上線",
+      "status": "included",
+      "routes": [
+        "tobuTojo"
+      ]
+    },
+    {
+      "code": 21002,
+      "name": "東武伊勢崎線",
+      "status": "included",
+      "routes": [
+        "tobuIsesaki",
+        "tobuIsesakiBranch1"
+      ]
+    },
+    {
+      "code": 21003,
+      "name": "東武日光線",
+      "status": "included",
+      "routes": [
+        "tobuNikko"
+      ]
+    },
+    {
+      "code": 21004,
+      "name": "東武野田線",
+      "status": "included",
+      "routes": [
+        "tobuNoda"
+      ]
+    },
+    {
+      "code": 21005,
+      "name": "東武亀戸線",
+      "status": "included",
+      "routes": [
+        "tobuKameido"
+      ]
+    },
+    {
+      "code": 21006,
+      "name": "東武大師線",
+      "status": "included",
+      "routes": [
+        "tobuDaishi"
+      ]
+    },
+    {
+      "code": 21007,
+      "name": "東武越生線",
+      "status": "included",
+      "routes": [
+        "tobuOgose"
+      ]
+    },
+    {
+      "code": 21008,
+      "name": "東武宇都宮線",
+      "status": "included",
+      "routes": [
+        "tobuUtsunomiya"
+      ]
+    },
+    {
+      "code": 21009,
+      "name": "東武鬼怒川線",
+      "status": "included",
+      "routes": [
+        "tobuKinugawa"
+      ]
+    },
+    {
+      "code": 21010,
+      "name": "東武佐野線",
+      "status": "included",
+      "routes": [
+        "tobuSano"
+      ]
+    },
+    {
+      "code": 21011,
+      "name": "東武桐生線",
+      "status": "included",
+      "routes": [
+        "tobuKiryu"
+      ]
+    },
+    {
+      "code": 21012,
+      "name": "東武小泉線",
+      "status": "included",
+      "routes": [
+        "tobuKoizumi",
+        "tobuKoizumiBranch1"
+      ]
+    },
+    {
+      "code": 22001,
+      "name": "西武池袋線",
+      "status": "included",
+      "routes": [
+        "seibuIkebukuro"
+      ]
+    },
+    {
+      "code": 22002,
+      "name": "西武秩父線",
+      "status": "included",
+      "routes": [
+        "seibuChichibu"
+      ]
+    },
+    {
+      "code": 22003,
+      "name": "西武有楽町線",
+      "status": "included",
+      "routes": [
+        "seibuYurakucho"
+      ]
+    },
+    {
+      "code": 22004,
+      "name": "西武豊島線",
+      "status": "included",
+      "routes": [
+        "seibuToshima"
+      ]
+    },
+    {
+      "code": 22005,
+      "name": "西武狭山線",
+      "status": "included",
+      "routes": [
+        "seibuSayama"
+      ]
+    },
+    {
+      "code": 22006,
+      "name": "西武山口線",
+      "status": "included",
+      "routes": [
+        "seibuYamaguchi"
+      ]
+    },
+    {
+      "code": 22007,
+      "name": "西武新宿線",
+      "status": "included",
+      "routes": [
+        "seibuShinjuku"
+      ]
+    },
+    {
+      "code": 22008,
+      "name": "西武拝島線",
+      "status": "included",
+      "routes": [
+        "seibuHaijima"
+      ]
+    },
+    {
+      "code": 22009,
+      "name": "西武西武園線",
+      "status": "included",
+      "routes": [
+        "seibuSeibu-en"
+      ]
+    },
+    {
+      "code": 22010,
+      "name": "西武国分寺線",
+      "status": "included",
+      "routes": [
+        "seibuKokubunji"
+      ]
+    },
+    {
+      "code": 22011,
+      "name": "西武多摩湖線",
+      "status": "included",
+      "routes": [
+        "seibuTama-ko"
+      ]
+    },
+    {
+      "code": 22012,
+      "name": "西武多摩川線",
+      "status": "included",
+      "routes": [
+        "seibuTamagawa"
+      ]
+    },
+    {
+      "code": 23001,
+      "name": "京成本線",
+      "status": "included",
+      "routes": [
+        "keiseiMain"
+      ]
+    },
+    {
+      "code": 23002,
+      "name": "京成押上線",
+      "status": "included",
+      "routes": [
+        "keiseiOshiage"
+      ]
+    },
+    {
+      "code": 23003,
+      "name": "京成金町線",
+      "status": "included",
+      "routes": [
+        "keiseiKanamachi"
+      ]
+    },
+    {
+      "code": 23004,
+      "name": "京成千葉線",
+      "status": "included",
+      "routes": [
+        "keiseiChiba"
+      ]
+    },
+    {
+      "code": 23005,
+      "name": "京成千原線",
+      "status": "included",
+      "routes": [
+        "keiseiChihara"
+      ]
+    },
+    {
+      "code": 23006,
+      "name": "京成成田空港線(成田スカイアクセス)",
+      "status": "included",
+      "routes": [
+        "keiseiSkyAccess"
+      ]
+    },
+    {
+      "code": 23007,
+      "name": "京成松戸線",
+      "status": "included",
+      "routes": [
+        "keiseiMatsudo"
+      ]
+    },
+    {
+      "code": 24001,
+      "name": "京王京王線",
+      "status": "included",
+      "routes": [
+        "keio",
+        "keioBranch1"
+      ]
+    },
+    {
+      "code": 24002,
+      "name": "京王相模原線",
+      "status": "included",
+      "routes": [
+        "keioSagamihara"
+      ]
+    },
+    {
+      "code": 24003,
+      "name": "京王高尾線",
+      "status": "included",
+      "routes": [
+        "keioTakao"
+      ]
+    },
+    {
+      "code": 24004,
+      "name": "京王競馬場線",
+      "status": "included",
+      "routes": [
+        "keioKeibajo"
+      ]
+    },
+    {
+      "code": 24005,
+      "name": "京王動物園線",
+      "status": "included",
+      "routes": [
+        "keioDobutsuen"
+      ]
+    },
+    {
+      "code": 24006,
+      "name": "京王井の頭線",
+      "status": "included",
+      "routes": [
+        "inokashira"
+      ]
+    },
+    {
+      "code": 25001,
+      "name": "小田急小田原線",
+      "status": "included",
+      "routes": [
+        "odakyu"
+      ]
+    },
+    {
+      "code": 25002,
+      "name": "小田急江ノ島線",
+      "status": "included",
+      "routes": [
+        "odakyuEnoshima"
+      ]
+    },
+    {
+      "code": 25003,
+      "name": "小田急多摩線",
+      "status": "included",
+      "routes": [
+        "odakyuTama"
+      ]
+    },
+    {
+      "code": 26001,
+      "name": "東急東横線",
+      "status": "included",
+      "routes": [
+        "toyoko"
+      ]
+    },
+    {
+      "code": 26002,
+      "name": "東急目黒線",
+      "status": "included",
+      "routes": [
+        "tokyuMeguro"
+      ]
+    },
+    {
+      "code": 26003,
+      "name": "東急田園都市線",
+      "status": "included",
+      "routes": [
+        "tokyuDenentoshi"
+      ]
+    },
+    {
+      "code": 26004,
+      "name": "東急大井町線",
+      "status": "included",
+      "routes": [
+        "tokyuOimachi"
+      ]
+    },
+    {
+      "code": 26005,
+      "name": "東急池上線",
+      "status": "included",
+      "routes": [
+        "tokyuIkegami"
+      ]
+    },
+    {
+      "code": 26006,
+      "name": "東急多摩川線",
+      "status": "included",
+      "routes": [
+        "tokyuTamagawa"
+      ]
+    },
+    {
+      "code": 26007,
+      "name": "東急世田谷線",
+      "status": "included",
+      "routes": [
+        "tokyuSetagaya"
+      ]
+    },
+    {
+      "code": 26008,
+      "name": "東急こどもの国線",
+      "status": "included",
+      "routes": [
+        "tokyuKodomonokuni"
+      ]
+    },
+    {
+      "code": 26009,
+      "name": "東急新横浜線",
+      "status": "included",
+      "routes": [
+        "tokyuShin-yokohama"
+      ]
+    },
+    {
+      "code": 27001,
+      "name": "京急本線",
+      "status": "included",
+      "routes": [
+        "keikyu"
+      ]
+    },
+    {
+      "code": 27002,
+      "name": "京急空港線",
+      "status": "included",
+      "routes": [
+        "keikyuAirport"
+      ]
+    },
+    {
+      "code": 27003,
+      "name": "京急大師線",
+      "status": "included",
+      "routes": [
+        "keikyuDaishi"
+      ]
+    },
+    {
+      "code": 27004,
+      "name": "京急逗子線",
+      "status": "included",
+      "routes": [
+        "keikyuZushi"
+      ]
+    },
+    {
+      "code": 27005,
+      "name": "京急久里浜線",
+      "status": "included",
+      "routes": [
+        "keikyuKurihama"
+      ]
+    },
+    {
+      "code": 28001,
+      "name": "東京メトロ銀座線",
+      "status": "included",
+      "routes": [
+        "ginza"
+      ]
+    },
+    {
+      "code": 28002,
+      "name": "東京メトロ丸ノ内線",
+      "status": "included",
+      "routes": [
+        "marunouchi",
+        "marunouchiBranch1"
+      ]
+    },
+    {
+      "code": 28003,
+      "name": "東京メトロ日比谷線",
+      "status": "included",
+      "routes": [
+        "hibiya"
+      ]
+    },
+    {
+      "code": 28004,
+      "name": "東京メトロ東西線",
+      "status": "included",
+      "routes": [
+        "tozai"
+      ]
+    },
+    {
+      "code": 28005,
+      "name": "東京メトロ千代田線",
+      "status": "included",
+      "routes": [
+        "chiyoda"
+      ]
+    },
+    {
+      "code": 28006,
+      "name": "東京メトロ有楽町線",
+      "status": "included",
+      "routes": [
+        "yurakucho"
+      ]
+    },
+    {
+      "code": 28008,
+      "name": "東京メトロ半蔵門線",
+      "status": "included",
+      "routes": [
+        "hanzomon"
+      ]
+    },
+    {
+      "code": 28009,
+      "name": "東京メトロ南北線",
+      "status": "included",
+      "routes": [
+        "namboku"
+      ]
+    },
+    {
+      "code": 28010,
+      "name": "東京メトロ副都心線",
+      "status": "included",
+      "routes": [
+        "fukutoshin"
+      ]
+    },
+    {
+      "code": 29001,
+      "name": "相鉄本線",
+      "status": "included",
+      "routes": [
+        "sotetsuMain"
+      ]
+    },
+    {
+      "code": 29002,
+      "name": "相鉄いずみ野線",
+      "status": "included",
+      "routes": [
+        "sotetsuIzumino"
+      ]
+    },
+    {
+      "code": 29003,
+      "name": "相鉄新横浜線",
+      "status": "included",
+      "routes": [
+        "sotetsuShin-yokohama"
+      ]
+    },
+    {
+      "code": 30001,
+      "name": "名鉄名古屋本線",
+      "status": "included",
+      "routes": [
+        "railLine30001"
+      ]
+    },
+    {
+      "code": 30002,
+      "name": "名鉄豊川線",
+      "status": "included",
+      "routes": [
+        "railLine30002"
+      ]
+    },
+    {
+      "code": 30003,
+      "name": "名鉄西尾線",
+      "status": "included",
+      "routes": [
+        "railLine30003"
+      ]
+    },
+    {
+      "code": 30004,
+      "name": "名鉄蒲郡線",
+      "status": "included",
+      "routes": [
+        "railLine30004"
+      ]
+    },
+    {
+      "code": 30005,
+      "name": "名鉄三河線",
+      "status": "included",
+      "routes": [
+        "railLine30005",
+        "railLine30005Branch1"
+      ]
+    },
+    {
+      "code": 30006,
+      "name": "名鉄豊田線",
+      "status": "included",
+      "routes": [
+        "railLine30006"
+      ]
+    },
+    {
+      "code": 30007,
+      "name": "名鉄空港線",
+      "status": "included",
+      "routes": [
+        "railLine30007"
+      ]
+    },
+    {
+      "code": 30008,
+      "name": "名鉄常滑線",
+      "status": "included",
+      "routes": [
+        "railLine30008"
+      ]
+    },
+    {
+      "code": 30009,
+      "name": "名鉄河和線",
+      "status": "included",
+      "routes": [
+        "railLine30009"
+      ]
+    },
+    {
+      "code": 30010,
+      "name": "名鉄知多新線",
+      "status": "included",
+      "routes": [
+        "railLine30010"
+      ]
+    },
+    {
+      "code": 30011,
+      "name": "名鉄築港線",
+      "status": "included",
+      "routes": [
+        "railLine30011"
+      ]
+    },
+    {
+      "code": 30012,
+      "name": "名鉄瀬戸線",
+      "status": "included",
+      "routes": [
+        "railLine30012"
+      ]
+    },
+    {
+      "code": 30013,
+      "name": "名鉄津島線",
+      "status": "included",
+      "routes": [
+        "railLine30013"
+      ]
+    },
+    {
+      "code": 30014,
+      "name": "名鉄尾西線",
+      "status": "included",
+      "routes": [
+        "railLine30014"
+      ]
+    },
+    {
+      "code": 30015,
+      "name": "名鉄犬山線",
+      "status": "included",
+      "routes": [
+        "railLine30015"
+      ]
+    },
+    {
+      "code": 30016,
+      "name": "名鉄各務原線",
+      "status": "included",
+      "routes": [
+        "railLine30016"
+      ]
+    },
+    {
+      "code": 30017,
+      "name": "名鉄広見線",
+      "status": "included",
+      "routes": [
+        "railLine30017"
+      ]
+    },
+    {
+      "code": 30018,
+      "name": "名鉄小牧線",
+      "status": "included",
+      "routes": [
+        "railLine30018"
+      ]
+    },
+    {
+      "code": 30020,
+      "name": "名鉄竹鼻線",
+      "status": "included",
+      "routes": [
+        "railLine30020"
+      ]
+    },
+    {
+      "code": 30021,
+      "name": "名鉄羽島線",
+      "status": "included",
+      "routes": [
+        "railLine30021"
+      ]
+    },
+    {
+      "code": 31001,
+      "name": "近鉄難波線",
+      "status": "included",
+      "routes": [
+        "railLine31001"
+      ]
+    },
+    {
+      "code": 31002,
+      "name": "近鉄橿原線",
+      "status": "included",
+      "routes": [
+        "railLine31002"
+      ]
+    },
+    {
+      "code": 31003,
+      "name": "近鉄南大阪線",
+      "status": "included",
+      "routes": [
+        "railLine31003"
+      ]
+    },
+    {
+      "code": 31005,
+      "name": "近鉄大阪線",
+      "status": "included",
+      "routes": [
+        "railLine31005"
+      ]
+    },
+    {
+      "code": 31007,
+      "name": "近鉄吉野線",
+      "status": "included",
+      "routes": [
+        "railLine31007"
+      ]
+    },
+    {
+      "code": 31008,
+      "name": "近鉄湯の山線",
+      "status": "included",
+      "routes": [
+        "railLine31008"
+      ]
+    },
+    {
+      "code": 31009,
+      "name": "近鉄山田線",
+      "status": "included",
+      "routes": [
+        "railLine31009"
+      ]
+    },
+    {
+      "code": 31010,
+      "name": "近鉄鳥羽線",
+      "status": "included",
+      "routes": [
+        "railLine31010"
+      ]
+    },
+    {
+      "code": 31011,
+      "name": "近鉄天理線",
+      "status": "included",
+      "routes": [
+        "railLine31011"
+      ]
+    },
+    {
+      "code": 31012,
+      "name": "近鉄道明寺線",
+      "status": "included",
+      "routes": [
+        "railLine31012"
+      ]
+    },
+    {
+      "code": 31013,
+      "name": "四日市あすなろう鉄道内部線",
+      "status": "included",
+      "routes": [
+        "railLine31013"
+      ]
+    },
+    {
+      "code": 31014,
+      "name": "四日市あすなろう鉄道八王子線",
+      "status": "included",
+      "routes": [
+        "railLine31014"
+      ]
+    },
+    {
+      "code": 31015,
+      "name": "近鉄志摩線",
+      "status": "included",
+      "routes": [
+        "railLine31015"
+      ]
+    },
+    {
+      "code": 31016,
+      "name": "近鉄生駒線",
+      "status": "included",
+      "routes": [
+        "railLine31016"
+      ]
+    },
+    {
+      "code": 31017,
+      "name": "近鉄田原本線",
+      "status": "included",
+      "routes": [
+        "railLine31017"
+      ]
+    },
+    {
+      "code": 31018,
+      "name": "近鉄御所線",
+      "status": "included",
+      "routes": [
+        "railLine31018"
+      ]
+    },
+    {
+      "code": 31019,
+      "name": "近鉄鈴鹿線",
+      "status": "included",
+      "routes": [
+        "railLine31019"
+      ]
+    },
+    {
+      "code": 31020,
+      "name": "近鉄奈良線",
+      "status": "included",
+      "routes": [
+        "railLine31020"
+      ]
+    },
+    {
+      "code": 31021,
+      "name": "近鉄信貴線",
+      "status": "included",
+      "routes": [
+        "railLine31021"
+      ]
+    },
+    {
+      "code": 31022,
+      "name": "近鉄長野線",
+      "status": "included",
+      "routes": [
+        "railLine31022"
+      ]
+    },
+    {
+      "code": 31023,
+      "name": "近鉄けいはんな線",
+      "status": "included",
+      "routes": [
+        "railLine31023"
+      ]
+    },
+    {
+      "code": 31024,
+      "name": "近鉄西信貴ケーブル",
+      "status": "included",
+      "routes": [
+        "railLine31024"
+      ]
+    },
+    {
+      "code": 31025,
+      "name": "近鉄京都線",
+      "status": "included",
+      "routes": [
+        "railLine31025"
+      ]
+    },
+    {
+      "code": 31026,
+      "name": "近鉄生駒ケーブル",
+      "status": "included",
+      "routes": [
+        "railLine31026",
+        "railLine31026Branch1"
+      ]
+    },
+    {
+      "code": 31027,
+      "name": "近鉄名古屋線",
+      "status": "included",
+      "routes": [
+        "railLine31027"
+      ]
+    },
+    {
+      "code": 32001,
+      "name": "南海本線",
+      "status": "included",
+      "routes": [
+        "railLine32001"
+      ]
+    },
+    {
+      "code": 32002,
+      "name": "南海空港線",
+      "status": "included",
+      "routes": [
+        "railLine32002"
+      ]
+    },
+    {
+      "code": 32003,
+      "name": "南海和歌山港線",
+      "status": "included",
+      "routes": [
+        "railLine32003"
+      ]
+    },
+    {
+      "code": 32004,
+      "name": "南海高師浜線",
+      "status": "included",
+      "routes": [
+        "railLine32004"
+      ]
+    },
+    {
+      "code": 32005,
+      "name": "南海加太線",
+      "status": "included",
+      "routes": [
+        "railLine32005"
+      ]
+    },
+    {
+      "code": 32006,
+      "name": "南海多奈川線",
+      "status": "included",
+      "routes": [
+        "railLine32006"
+      ]
+    },
+    {
+      "code": 32007,
+      "name": "南海高野線(りんかんサンライン)",
+      "status": "included",
+      "routes": [
+        "railLine32007"
+      ]
+    },
+    {
+      "code": 32008,
+      "name": "南海高野山ケーブル",
+      "status": "included",
+      "routes": [
+        "railLine32008"
+      ]
+    },
+    {
+      "code": 32009,
+      "name": "南海汐見橋線",
+      "status": "included",
+      "routes": [
+        "railLine32009"
+      ]
+    },
+    {
+      "code": 32010,
+      "name": "南海泉北線",
+      "status": "included",
+      "routes": [
+        "railLine32010"
+      ]
+    },
+    {
+      "code": 33001,
+      "name": "京阪本線",
+      "status": "included",
+      "routes": [
+        "railLine33001"
+      ]
+    },
+    {
+      "code": 33002,
+      "name": "京阪宇治線",
+      "status": "included",
+      "routes": [
+        "railLine33002"
+      ]
+    },
+    {
+      "code": 33003,
+      "name": "京阪交野線",
+      "status": "included",
+      "routes": [
+        "railLine33003"
+      ]
+    },
+    {
+      "code": 33004,
+      "name": "京阪鴨東線",
+      "status": "included",
+      "routes": [
+        "railLine33004"
+      ]
+    },
+    {
+      "code": 33005,
+      "name": "京阪石清水八幡宮参道ケーブル",
+      "status": "included",
+      "routes": [
+        "railLine33005"
+      ]
+    },
+    {
+      "code": 33006,
+      "name": "京阪石山坂本線",
+      "status": "included",
+      "routes": [
+        "railLine33006"
+      ]
+    },
+    {
+      "code": 33007,
+      "name": "京阪京津線",
+      "status": "included",
+      "routes": [
+        "railLine33007"
+      ]
+    },
+    {
+      "code": 33008,
+      "name": "京阪中之島線",
+      "status": "included",
+      "routes": [
+        "railLine33008"
+      ]
+    },
+    {
+      "code": 34001,
+      "name": "阪急神戸本線",
+      "status": "included",
+      "routes": [
+        "railLine34001"
+      ]
+    },
+    {
+      "code": 34002,
+      "name": "阪急宝塚本線",
+      "status": "included",
+      "routes": [
+        "hankyuTakarazuka"
+      ]
+    },
+    {
+      "code": 34003,
+      "name": "阪急京都本線",
+      "status": "included",
+      "routes": [
+        "railLine34003"
+      ]
+    },
+    {
+      "code": 34004,
+      "name": "阪急今津線",
+      "status": "included",
+      "routes": [
+        "railLine34004",
+        "railLine34004Branch1"
+      ]
+    },
+    {
+      "code": 34005,
+      "name": "阪急甲陽線",
+      "status": "included",
+      "routes": [
+        "railLine34005"
+      ]
+    },
+    {
+      "code": 34006,
+      "name": "阪急伊丹線",
+      "status": "included",
+      "routes": [
+        "railLine34006"
+      ]
+    },
+    {
+      "code": 34007,
+      "name": "阪急箕面線",
+      "status": "included",
+      "routes": [
+        "railLine34007"
+      ]
+    },
+    {
+      "code": 34008,
+      "name": "阪急千里線",
+      "status": "included",
+      "routes": [
+        "railLine34008"
+      ]
+    },
+    {
+      "code": 34009,
+      "name": "阪急嵐山線",
+      "status": "included",
+      "routes": [
+        "railLine34009"
+      ]
+    },
+    {
+      "code": 35001,
+      "name": "阪神本線",
+      "status": "included",
+      "routes": [
+        "railLine35001"
+      ]
+    },
+    {
+      "code": 35002,
+      "name": "阪神なんば線",
+      "status": "included",
+      "routes": [
+        "railLine35002"
+      ]
+    },
+    {
+      "code": 35003,
+      "name": "阪神武庫川線",
+      "status": "included",
+      "routes": [
+        "railLine35003"
+      ]
+    },
+    {
+      "code": 36001,
+      "name": "西鉄天神大牟田線",
+      "status": "included",
+      "routes": [
+        "railLine36001"
+      ]
+    },
+    {
+      "code": 36002,
+      "name": "西鉄太宰府線",
+      "status": "included",
+      "routes": [
+        "railLine36002"
+      ]
+    },
+    {
+      "code": 36003,
+      "name": "西鉄甘木線",
+      "status": "included",
+      "routes": [
+        "railLine36003"
+      ]
+    },
+    {
+      "code": 36004,
+      "name": "西鉄貝塚線",
+      "status": "included",
+      "routes": [
+        "railLine36004"
+      ]
+    },
+    {
+      "code": 99101,
+      "name": "札幌市営地下鉄東西線",
+      "status": "included",
+      "routes": [
+        "railLine99101"
+      ]
+    },
+    {
+      "code": 99102,
+      "name": "札幌市営地下鉄南北線",
+      "status": "included",
+      "routes": [
+        "railLine99102"
+      ]
+    },
+    {
+      "code": 99103,
+      "name": "札幌市営地下鉄東豊線",
+      "status": "included",
+      "routes": [
+        "railLine99103"
+      ]
+    },
+    {
+      "code": 99104,
+      "name": "札幌市電山鼻線",
+      "status": "included",
+      "routes": [
+        "railLine99104"
+      ]
+    },
+    {
+      "code": 99105,
+      "name": "函館市電２系統",
+      "status": "included",
+      "routes": [
+        "railLine99105"
+      ]
+    },
+    {
+      "code": 99106,
+      "name": "函館市電５系統",
+      "status": "included",
+      "routes": [
+        "railLine99106"
+      ]
+    },
+    {
+      "code": 99108,
+      "name": "道南いさりび鉄道線",
+      "status": "included",
+      "routes": [
+        "railLine99108"
+      ]
+    },
+    {
+      "code": 99201,
+      "name": "津軽鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99201"
+      ]
+    },
+    {
+      "code": 99202,
+      "name": "弘南鉄道弘南線",
+      "status": "included",
+      "routes": [
+        "railLine99202"
+      ]
+    },
+    {
+      "code": 99203,
+      "name": "弘南鉄道大鰐線",
+      "status": "included",
+      "routes": [
+        "railLine99203"
+      ]
+    },
+    {
+      "code": 99204,
+      "name": "十和田観光電鉄",
+      "status": "closed"
+    },
+    {
+      "code": 99205,
+      "name": "いわて銀河鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99205"
+      ]
+    },
+    {
+      "code": 99206,
+      "name": "青い森鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99206"
+      ]
+    },
+    {
+      "code": 99207,
+      "name": "三陸鉄道北リアス線",
+      "status": "closed"
+    },
+    {
+      "code": 99208,
+      "name": "三陸鉄道リアス線",
+      "status": "included",
+      "routes": [
+        "railLine99208"
+      ]
+    },
+    {
+      "code": 99209,
+      "name": "秋田内陸縦貫鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99209"
+      ]
+    },
+    {
+      "code": 99210,
+      "name": "由利高原鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99210"
+      ]
+    },
+    {
+      "code": 99211,
+      "name": "山形鉄道フラワー長井線",
+      "status": "included",
+      "routes": [
+        "railLine99211"
+      ]
+    },
+    {
+      "code": 99213,
+      "name": "阿武隈急行",
+      "status": "included",
+      "routes": [
+        "railLine99213"
+      ]
+    },
+    {
+      "code": 99214,
+      "name": "仙台市営地下鉄南北線",
+      "status": "included",
+      "routes": [
+        "railLine99214"
+      ]
+    },
+    {
+      "code": 99218,
+      "name": "仙台市営地下鉄東西線",
+      "status": "included",
+      "routes": [
+        "railLine99218"
+      ]
+    },
+    {
+      "code": 99215,
+      "name": "福島交通飯坂線",
+      "status": "included",
+      "routes": [
+        "railLine99215"
+      ]
+    },
+    {
+      "code": 99216,
+      "name": "会津鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99216"
+      ]
+    },
+    {
+      "code": 99217,
+      "name": "仙台空港線",
+      "status": "included",
+      "routes": [
+        "railLine99217"
+      ]
+    },
+    {
+      "code": 99301,
+      "name": "都営大江戸線",
+      "status": "included",
+      "routes": [
+        "oedo"
+      ]
+    },
+    {
+      "code": 99302,
+      "name": "都営浅草線",
+      "status": "included",
+      "routes": [
+        "asakusa"
+      ]
+    },
+    {
+      "code": 99303,
+      "name": "都営三田線",
+      "status": "included",
+      "routes": [
+        "mita"
+      ]
+    },
+    {
+      "code": 99304,
+      "name": "都営新宿線",
+      "status": "included",
+      "routes": [
+        "shinjukuSubway"
+      ]
+    },
+    {
+      "code": 99305,
+      "name": "都営都電荒川線",
+      "status": "included",
+      "routes": [
+        "todenArakawa"
+      ]
+    },
+    {
+      "code": 99342,
+      "name": "日暮里・舎人ライナー",
+      "status": "included",
+      "routes": [
+        "nipporiToneri"
+      ]
+    },
+    {
+      "code": 99306,
+      "name": "秩父鉄道",
+      "status": "included",
+      "routes": [
+        "chichibu"
+      ]
+    },
+    {
+      "code": 99307,
+      "name": "埼玉高速鉄道",
+      "status": "included",
+      "routes": [
+        "saitamaRail"
+      ]
+    },
+    {
+      "code": 99308,
+      "name": "いすみ鉄道",
+      "status": "included",
+      "routes": [
+        "isumi"
+      ]
+    },
+    {
+      "code": 99309,
+      "name": "つくばエクスプレス",
+      "status": "included",
+      "routes": [
+        "tsukubaExpress"
+      ]
+    },
+    {
+      "code": 99310,
+      "name": "みなとみらい線",
+      "status": "included",
+      "routes": [
+        "minatomirai"
+      ]
+    },
+    {
+      "code": 99311,
+      "name": "ゆりかもめ",
+      "status": "included",
+      "routes": [
+        "yurikamome"
+      ]
+    },
+    {
+      "code": 99312,
+      "name": "わたらせ渓谷鐵道",
+      "status": "included",
+      "routes": [
+        "watetsu"
+      ]
+    },
+    {
+      "code": 99313,
+      "name": "ユーカリが丘線",
+      "status": "included",
+      "routes": [
+        "yukarigaoka"
+      ]
+    },
+    {
+      "code": 99314,
+      "name": "伊豆箱根鉄道大雄山線",
+      "status": "included",
+      "routes": [
+        "daiyuzan"
+      ]
+    },
+    {
+      "code": 99315,
+      "name": "ひたちなか海浜鉄道湊線",
+      "status": "included",
+      "routes": [
+        "hitachinaka"
+      ]
+    },
+    {
+      "code": 99316,
+      "name": "横浜市営地下鉄ブルーライン",
+      "status": "included",
+      "routes": [
+        "yokohamaBlue"
+      ]
+    },
+    {
+      "code": 99343,
+      "name": "横浜市営地下鉄グリーンライン",
+      "status": "included",
+      "routes": [
+        "yokohamaGreen"
+      ]
+    },
+    {
+      "code": 99317,
+      "name": "金沢シーサイドライン",
+      "status": "included",
+      "routes": [
+        "seaside"
+      ]
+    },
+    {
+      "code": 99318,
+      "name": "関東鉄道常総線",
+      "status": "included",
+      "routes": [
+        "joso"
+      ]
+    },
+    {
+      "code": 99319,
+      "name": "関東鉄道竜ヶ崎線",
+      "status": "included",
+      "routes": [
+        "ryugasaki"
+      ]
+    },
+    {
+      "code": 99320,
+      "name": "江ノ島電鉄線",
+      "status": "included",
+      "routes": [
+        "enoden"
+      ]
+    },
+    {
+      "code": 99321,
+      "name": "埼玉新都市交通伊奈線",
+      "status": "included",
+      "routes": [
+        "newShuttle"
+      ]
+    },
+    {
+      "code": 99323,
+      "name": "鹿島臨海鉄道大洗鹿島線",
+      "status": "included",
+      "routes": [
+        "kashimaRinkai"
+      ]
+    },
+    {
+      "code": 99324,
+      "name": "芝山鉄道",
+      "status": "included",
+      "routes": [
+        "shibayama"
+      ]
+    },
+    {
+      "code": 99325,
+      "name": "小湊鉄道",
+      "status": "included",
+      "routes": [
+        "kominato"
+      ]
+    },
+    {
+      "code": 99326,
+      "name": "湘南モノレール",
+      "status": "included",
+      "routes": [
+        "shonanMonorail"
+      ]
+    },
+    {
+      "code": 99327,
+      "name": "上信電鉄",
+      "status": "included",
+      "routes": [
+        "joshin"
+      ]
+    },
+    {
+      "code": 99328,
+      "name": "上毛電気鉄道",
+      "status": "included",
+      "routes": [
+        "jomo"
+      ]
+    },
+    {
+      "code": 99330,
+      "name": "真岡鐵道",
+      "status": "included",
+      "routes": [
+        "moka"
+      ]
+    },
+    {
+      "code": 99331,
+      "name": "千葉都市モノレール１号線",
+      "status": "included",
+      "routes": [
+        "chibaMonorail1"
+      ]
+    },
+    {
+      "code": 99332,
+      "name": "千葉都市モノレール２号線",
+      "status": "included",
+      "routes": [
+        "chibaMonorail2"
+      ]
+    },
+    {
+      "code": 99333,
+      "name": "流鉄流山線",
+      "status": "included",
+      "routes": [
+        "ryutetsu"
+      ]
+    },
+    {
+      "code": 99334,
+      "name": "多摩モノレール",
+      "status": "included",
+      "routes": [
+        "tamaMonorail"
+      ]
+    },
+    {
+      "code": 99335,
+      "name": "銚子電鉄線",
+      "status": "included",
+      "routes": [
+        "choshi"
+      ]
+    },
+    {
+      "code": 99336,
+      "name": "東京モノレール",
+      "status": "included",
+      "routes": [
+        "tokyoMonorail"
+      ]
+    },
+    {
+      "code": 99337,
+      "name": "東京臨海高速鉄道",
+      "status": "included",
+      "routes": [
+        "rinkai"
+      ]
+    },
+    {
+      "code": 99338,
+      "name": "東葉高速鉄道",
+      "status": "included",
+      "routes": [
+        "toyoRapid"
+      ]
+    },
+    {
+      "code": 99339,
+      "name": "箱根登山鉄道",
+      "status": "included",
+      "routes": [
+        "hakoneTozan"
+      ]
+    },
+    {
+      "code": 99340,
+      "name": "北総鉄道",
+      "status": "included",
+      "routes": [
+        "hokuso"
+      ]
+    },
+    {
+      "code": 99341,
+      "name": "野岩鉄道会津鬼怒川線",
+      "status": "included",
+      "routes": [
+        "yagan"
+      ]
+    },
+    {
+      "code": 99401,
+      "name": "富士急行",
+      "status": "included",
+      "routes": [
+        "railLine99401"
+      ]
+    },
+    {
+      "code": 99402,
+      "name": "北越急行ほくほく線",
+      "status": "included",
+      "routes": [
+        "railLine99402"
+      ]
+    },
+    {
+      "code": 99403,
+      "name": "しなの鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99403"
+      ]
+    },
+    {
+      "code": 99427,
+      "name": "北しなの線",
+      "status": "included",
+      "routes": [
+        "railLine99427"
+      ]
+    },
+    {
+      "code": 99404,
+      "name": "上田電鉄別所線",
+      "status": "included",
+      "routes": [
+        "railLine99404"
+      ]
+    },
+    {
+      "code": 99405,
+      "name": "長野電鉄長野線",
+      "status": "included",
+      "routes": [
+        "railLine99405"
+      ]
+    },
+    {
+      "code": 99406,
+      "name": "長野電鉄屋代線",
+      "status": "closed"
+    },
+    {
+      "code": 99407,
+      "name": "アルピコ交通上高地線",
+      "status": "included",
+      "routes": [
+        "railLine99407"
+      ]
+    },
+    {
+      "code": 99408,
+      "name": "富山地鉄本線",
+      "status": "included",
+      "routes": [
+        "railLine99408"
+      ]
+    },
+    {
+      "code": 99409,
+      "name": "富山地鉄立山線",
+      "status": "included",
+      "routes": [
+        "railLine99409"
+      ]
+    },
+    {
+      "code": 99410,
+      "name": "富山地鉄不二越・上滝線",
+      "status": "included",
+      "routes": [
+        "railLine99410"
+      ]
+    },
+    {
+      "code": 99412,
+      "name": "黒部峡谷鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99412"
+      ]
+    },
+    {
+      "code": 99413,
+      "name": "富山地鉄市内線",
+      "status": "included",
+      "routes": [
+        "railLine99413"
+      ]
+    },
+    {
+      "code": 99422,
+      "name": "富山地鉄富山都心線",
+      "status": "included",
+      "routes": [
+        "railLine99422"
+      ]
+    },
+    {
+      "code": 99414,
+      "name": "万葉線",
+      "status": "included",
+      "routes": [
+        "railLine99414"
+      ]
+    },
+    {
+      "code": 99415,
+      "name": "富山地鉄富山港線",
+      "status": "included",
+      "routes": [
+        "railLine99415"
+      ]
+    },
+    {
+      "code": 99416,
+      "name": "北陸鉄道石川線",
+      "status": "included",
+      "routes": [
+        "railLine99416"
+      ]
+    },
+    {
+      "code": 99417,
+      "name": "北陸鉄道浅野川線",
+      "status": "included",
+      "routes": [
+        "railLine99417"
+      ]
+    },
+    {
+      "code": 99423,
+      "name": "日本海ひすいライン",
+      "status": "included",
+      "routes": [
+        "railLine99423"
+      ]
+    },
+    {
+      "code": 99424,
+      "name": "妙高はねうまライン",
+      "status": "included",
+      "routes": [
+        "railLine99424"
+      ]
+    },
+    {
+      "code": 99425,
+      "name": "あいの風とやま鉄道線",
+      "status": "included",
+      "routes": [
+        "railLine99425"
+      ]
+    },
+    {
+      "code": 99426,
+      "name": "IRいしかわ鉄道線",
+      "status": "included",
+      "routes": [
+        "railLine99426"
+      ]
+    },
+    {
+      "code": 99455,
+      "name": "ハピラインふくい線",
+      "status": "included",
+      "routes": [
+        "railLine99455"
+      ]
+    },
+    {
+      "code": 99418,
+      "name": "のと鉄道七尾線",
+      "status": "included",
+      "routes": [
+        "railLine99418"
+      ]
+    },
+    {
+      "code": 99419,
+      "name": "えちぜん鉄道勝山永平寺線",
+      "status": "included",
+      "routes": [
+        "railLine99419"
+      ]
+    },
+    {
+      "code": 99420,
+      "name": "えちぜん鉄道三国芦原線",
+      "status": "included",
+      "routes": [
+        "railLine99420"
+      ]
+    },
+    {
+      "code": 99421,
+      "name": "福井鉄道福武線",
+      "status": "included",
+      "routes": [
+        "railLine99421"
+      ]
+    },
+    {
+      "code": 99501,
+      "name": "伊豆急行",
+      "status": "included",
+      "routes": [
+        "railLine99501"
+      ]
+    },
+    {
+      "code": 99502,
+      "name": "伊豆箱根鉄道駿豆線",
+      "status": "included",
+      "routes": [
+        "railLine99502"
+      ]
+    },
+    {
+      "code": 99503,
+      "name": "岳南線",
+      "status": "included",
+      "routes": [
+        "railLine99503"
+      ]
+    },
+    {
+      "code": 99504,
+      "name": "静岡鉄道静岡清水線",
+      "status": "included",
+      "routes": [
+        "railLine99504"
+      ]
+    },
+    {
+      "code": 99505,
+      "name": "天竜浜名湖鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99505"
+      ]
+    },
+    {
+      "code": 99506,
+      "name": "遠州鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99506"
+      ]
+    },
+    {
+      "code": 99507,
+      "name": "大井川鐵道大井川本線",
+      "status": "included",
+      "routes": [
+        "railLine99507"
+      ]
+    },
+    {
+      "code": 99508,
+      "name": "大井川鐵道井川線",
+      "status": "included",
+      "routes": [
+        "railLine99508"
+      ]
+    },
+    {
+      "code": 99509,
+      "name": "西名古屋港線(あおなみ線)",
+      "status": "included",
+      "routes": [
+        "railLine99509"
+      ]
+    },
+    {
+      "code": 99510,
+      "name": "JR東海交通事業城北線",
+      "status": "included",
+      "routes": [
+        "railLine99510"
+      ]
+    },
+    {
+      "code": 99511,
+      "name": "愛知環状鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99511"
+      ]
+    },
+    {
+      "code": 99512,
+      "name": "東部丘陵線(リニモ)",
+      "status": "included",
+      "routes": [
+        "railLine99512"
+      ]
+    },
+    {
+      "code": 99513,
+      "name": "名古屋市営地下鉄東山線",
+      "status": "included",
+      "routes": [
+        "railLine99513"
+      ]
+    },
+    {
+      "code": 99514,
+      "name": "名古屋市営地下鉄名城線",
+      "status": "included",
+      "routes": [
+        "railLine99514"
+      ]
+    },
+    {
+      "code": 99515,
+      "name": "名古屋市営地下鉄名港線",
+      "status": "included",
+      "routes": [
+        "railLine99515"
+      ]
+    },
+    {
+      "code": 99516,
+      "name": "名古屋市営地下鉄鶴舞線",
+      "status": "included",
+      "routes": [
+        "railLine99516"
+      ]
+    },
+    {
+      "code": 99517,
+      "name": "名古屋市営地下鉄桜通線",
+      "status": "included",
+      "routes": [
+        "railLine99517"
+      ]
+    },
+    {
+      "code": 99518,
+      "name": "名古屋市営地下鉄上飯田線",
+      "status": "included",
+      "routes": [
+        "railLine99518"
+      ]
+    },
+    {
+      "code": 99520,
+      "name": "豊橋鉄道渥美線",
+      "status": "included",
+      "routes": [
+        "railLine99520"
+      ]
+    },
+    {
+      "code": 99521,
+      "name": "豊橋鉄道東田本線",
+      "status": "included",
+      "routes": [
+        "railLine99521"
+      ]
+    },
+    {
+      "code": 99522,
+      "name": "豊橋鉄道運動公園前線",
+      "status": "included",
+      "routes": [
+        "railLine99522"
+      ]
+    },
+    {
+      "code": 99523,
+      "name": "ゆとりーとライン",
+      "status": "included",
+      "routes": [
+        "railLine99523"
+      ]
+    },
+    {
+      "code": 99524,
+      "name": "明知鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99524"
+      ]
+    },
+    {
+      "code": 99525,
+      "name": "長良川鉄道越美南線",
+      "status": "included",
+      "routes": [
+        "railLine99525"
+      ]
+    },
+    {
+      "code": 99526,
+      "name": "樽見鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99526"
+      ]
+    },
+    {
+      "code": 99528,
+      "name": "三岐鉄道三岐線",
+      "status": "included",
+      "routes": [
+        "railLine99528"
+      ]
+    },
+    {
+      "code": 99529,
+      "name": "三岐鉄道北勢線",
+      "status": "included",
+      "routes": [
+        "railLine99529"
+      ]
+    },
+    {
+      "code": 99530,
+      "name": "伊勢鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99530"
+      ]
+    },
+    {
+      "code": 99531,
+      "name": "伊賀鉄道伊賀線",
+      "status": "included",
+      "routes": [
+        "railLine99531"
+      ]
+    },
+    {
+      "code": 99532,
+      "name": "養老鉄道養老線",
+      "status": "included",
+      "routes": [
+        "railLine99532"
+      ]
+    },
+    {
+      "code": 99601,
+      "name": "近江鉄道本線",
+      "status": "included",
+      "routes": [
+        "railLine99601"
+      ]
+    },
+    {
+      "code": 99602,
+      "name": "近江鉄道多賀線",
+      "status": "included",
+      "routes": [
+        "railLine99602"
+      ]
+    },
+    {
+      "code": 99603,
+      "name": "近江鉄道八日市線",
+      "status": "included",
+      "routes": [
+        "railLine99603"
+      ]
+    },
+    {
+      "code": 99604,
+      "name": "信楽高原鐵道",
+      "status": "included",
+      "routes": [
+        "railLine99604"
+      ]
+    },
+    {
+      "code": 99605,
+      "name": "嵯峨野観光鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99605"
+      ]
+    },
+    {
+      "code": 99606,
+      "name": "叡山電鉄叡山本線",
+      "status": "included",
+      "routes": [
+        "railLine99606"
+      ]
+    },
+    {
+      "code": 99607,
+      "name": "叡山電鉄鞍馬線",
+      "status": "included",
+      "routes": [
+        "railLine99607"
+      ]
+    },
+    {
+      "code": 99608,
+      "name": "京都丹後鉄道宮福線",
+      "status": "included",
+      "routes": [
+        "railLine99608"
+      ]
+    },
+    {
+      "code": 99609,
+      "name": "京都丹後鉄道宮豊線",
+      "status": "included",
+      "routes": [
+        "railLine99609"
+      ]
+    },
+    {
+      "code": 99653,
+      "name": "京都丹後鉄道宮舞線",
+      "status": "included",
+      "routes": [
+        "railLine99653"
+      ]
+    },
+    {
+      "code": 99610,
+      "name": "京都市営地下鉄烏丸線",
+      "status": "included",
+      "routes": [
+        "railLine99610"
+      ]
+    },
+    {
+      "code": 99611,
+      "name": "京都市営地下鉄東西線",
+      "status": "included",
+      "routes": [
+        "railLine99611"
+      ]
+    },
+    {
+      "code": 99612,
+      "name": "京福電鉄嵐山本線",
+      "status": "included",
+      "routes": [
+        "railLine99612"
+      ]
+    },
+    {
+      "code": 99613,
+      "name": "京福電鉄北野線",
+      "status": "included",
+      "routes": [
+        "railLine99613"
+      ]
+    },
+    {
+      "code": 99614,
+      "name": "北大阪急行線",
+      "status": "included",
+      "routes": [
+        "railLine99614"
+      ]
+    },
+    {
+      "code": 99617,
+      "name": "水間鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99617"
+      ]
+    },
+    {
+      "code": 99618,
+      "name": "OsakaMetro御堂筋線",
+      "status": "included",
+      "routes": [
+        "railLine99618"
+      ]
+    },
+    {
+      "code": 99619,
+      "name": "OsakaMetro谷町線",
+      "status": "included",
+      "routes": [
+        "railLine99619"
+      ]
+    },
+    {
+      "code": 99620,
+      "name": "OsakaMetro四つ橋線",
+      "status": "included",
+      "routes": [
+        "railLine99620"
+      ]
+    },
+    {
+      "code": 99621,
+      "name": "OsakaMetro中央線",
+      "status": "included",
+      "routes": [
+        "osakaChuo"
+      ]
+    },
+    {
+      "code": 99622,
+      "name": "OsakaMetro千日前線",
+      "status": "included",
+      "routes": [
+        "railLine99622"
+      ]
+    },
+    {
+      "code": 99623,
+      "name": "OsakaMetro堺筋線",
+      "status": "included",
+      "routes": [
+        "railLine99623"
+      ]
+    },
+    {
+      "code": 99624,
+      "name": "OsakaMetro長堀鶴見緑地線",
+      "status": "included",
+      "routes": [
+        "railLine99624"
+      ]
+    },
+    {
+      "code": 99652,
+      "name": "OsakaMetro今里筋線",
+      "status": "included",
+      "routes": [
+        "railLine99652"
+      ]
+    },
+    {
+      "code": 99625,
+      "name": "OsakaMetro南港ポートタウン線",
+      "status": "included",
+      "routes": [
+        "railLine99625"
+      ]
+    },
+    {
+      "code": 99626,
+      "name": "大阪モノレール線",
+      "status": "included",
+      "routes": [
+        "railLine99626"
+      ]
+    },
+    {
+      "code": 99627,
+      "name": "大阪モノレール彩都線",
+      "status": "included",
+      "routes": [
+        "railLine99627"
+      ]
+    },
+    {
+      "code": 99628,
+      "name": "阪堺電軌上町線",
+      "status": "included",
+      "routes": [
+        "railLine99628"
+      ]
+    },
+    {
+      "code": 99629,
+      "name": "阪堺電軌阪堺線",
+      "status": "included",
+      "routes": [
+        "railLine99629"
+      ]
+    },
+    {
+      "code": 99630,
+      "name": "神戸高速東西線",
+      "status": "included",
+      "routes": [
+        "railLine99630",
+        "railLine99630Branch1"
+      ]
+    },
+    {
+      "code": 99631,
+      "name": "神戸高速南北線",
+      "status": "included",
+      "routes": [
+        "railLine99631"
+      ]
+    },
+    {
+      "code": 99632,
+      "name": "神鉄有馬線",
+      "status": "included",
+      "routes": [
+        "railLine99632"
+      ]
+    },
+    {
+      "code": 99633,
+      "name": "神鉄三田線",
+      "status": "included",
+      "routes": [
+        "railLine99633"
+      ]
+    },
+    {
+      "code": 99634,
+      "name": "神鉄公園都市線",
+      "status": "included",
+      "routes": [
+        "railLine99634"
+      ]
+    },
+    {
+      "code": 99635,
+      "name": "神鉄粟生線",
+      "status": "included",
+      "routes": [
+        "railLine99635"
+      ]
+    },
+    {
+      "code": 99636,
+      "name": "神戸市営地下鉄北神線",
+      "status": "included",
+      "routes": [
+        "railLine99636"
+      ]
+    },
+    {
+      "code": 99637,
+      "name": "山陽電鉄本線",
+      "status": "included",
+      "routes": [
+        "railLine99637"
+      ]
+    },
+    {
+      "code": 99638,
+      "name": "山陽電鉄網干線",
+      "status": "included",
+      "routes": [
+        "railLine99638"
+      ]
+    },
+    {
+      "code": 99615,
+      "name": "能勢電鉄妙見線",
+      "status": "included",
+      "routes": [
+        "railLine99615"
+      ]
+    },
+    {
+      "code": 99640,
+      "name": "能勢電鉄日生線",
+      "status": "included",
+      "routes": [
+        "railLine99640"
+      ]
+    },
+    {
+      "code": 99642,
+      "name": "三木線",
+      "status": "closed"
+    },
+    {
+      "code": 99643,
+      "name": "北条鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99643"
+      ]
+    },
+    {
+      "code": 99644,
+      "name": "智頭急行",
+      "status": "included",
+      "routes": [
+        "railLine99644"
+      ]
+    },
+    {
+      "code": 99645,
+      "name": "神戸市営地下鉄西神線",
+      "status": "included",
+      "routes": [
+        "railLine99645"
+      ]
+    },
+    {
+      "code": 99646,
+      "name": "神戸市営地下鉄山手線",
+      "status": "included",
+      "routes": [
+        "railLine99646"
+      ]
+    },
+    {
+      "code": 99647,
+      "name": "神戸市営地下鉄海岸線(夢かもめ)",
+      "status": "included",
+      "routes": [
+        "railLine99647"
+      ]
+    },
+    {
+      "code": 99648,
+      "name": "神戸新交通ポートアイランド線",
+      "status": "included",
+      "routes": [
+        "railLine99648",
+        "railLine99648Branch1"
+      ]
+    },
+    {
+      "code": 99649,
+      "name": "神戸新交通六甲アイランド線",
+      "status": "included",
+      "routes": [
+        "railLine99649"
+      ]
+    },
+    {
+      "code": 99650,
+      "name": "紀州鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99650"
+      ]
+    },
+    {
+      "code": 99651,
+      "name": "わかやま電鉄貴志川線",
+      "status": "included",
+      "routes": [
+        "railLine99651"
+      ]
+    },
+    {
+      "code": 99701,
+      "name": "若桜鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99701"
+      ]
+    },
+    {
+      "code": 99702,
+      "name": "一畑電車北松江線",
+      "status": "included",
+      "routes": [
+        "railLine99702"
+      ]
+    },
+    {
+      "code": 99703,
+      "name": "一畑電車大社線",
+      "status": "included",
+      "routes": [
+        "railLine99703"
+      ]
+    },
+    {
+      "code": 99704,
+      "name": "水島臨海鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99704"
+      ]
+    },
+    {
+      "code": 99705,
+      "name": "井原鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99705"
+      ]
+    },
+    {
+      "code": 99706,
+      "name": "岡山電軌東山本線",
+      "status": "included",
+      "routes": [
+        "railLine99706"
+      ]
+    },
+    {
+      "code": 99707,
+      "name": "岡山電軌清輝橋線",
+      "status": "included",
+      "routes": [
+        "railLine99707"
+      ]
+    },
+    {
+      "code": 99708,
+      "name": "スカイレールサービス",
+      "status": "closed"
+    },
+    {
+      "code": 99709,
+      "name": "アストラムライン",
+      "status": "included",
+      "routes": [
+        "railLine99709"
+      ]
+    },
+    {
+      "code": 99710,
+      "name": "広電１系統(宇品線)",
+      "status": "included",
+      "routes": [
+        "railLine99710"
+      ]
+    },
+    {
+      "code": 99711,
+      "name": "広電２系統(宮島線)",
+      "status": "included",
+      "routes": [
+        "railLine99711"
+      ]
+    },
+    {
+      "code": 99712,
+      "name": "広電３系統(己斐線)",
+      "status": "included",
+      "routes": [
+        "railLine99712"
+      ]
+    },
+    {
+      "code": 99713,
+      "name": "広電５系統(比治山線)",
+      "status": "included",
+      "routes": [
+        "railLine99713"
+      ]
+    },
+    {
+      "code": 99714,
+      "name": "広電６系統(江波線)",
+      "status": "included",
+      "routes": [
+        "railLine99714"
+      ]
+    },
+    {
+      "code": 99715,
+      "name": "広電７系統(都心線)",
+      "status": "included",
+      "routes": [
+        "railLine99715"
+      ]
+    },
+    {
+      "code": 99716,
+      "name": "広電８系統(横川線)",
+      "status": "included",
+      "routes": [
+        "railLine99716"
+      ]
+    },
+    {
+      "code": 99717,
+      "name": "広電９系統(白島線)",
+      "status": "included",
+      "routes": [
+        "railLine99717"
+      ]
+    },
+    {
+      "code": 99730,
+      "name": "旧広電１系統(宇品線)",
+      "status": "closed"
+    },
+    {
+      "code": 99731,
+      "name": "旧広電２系統(宮島線)",
+      "status": "closed"
+    },
+    {
+      "code": 99732,
+      "name": "旧広電５系統(比治山線)",
+      "status": "closed"
+    },
+    {
+      "code": 99733,
+      "name": "旧広電６系統(江波線)",
+      "status": "closed"
+    },
+    {
+      "code": 99734,
+      "name": "広電Ｌ系統(循環線)",
+      "status": "included",
+      "routes": [
+        "railLine99734"
+      ]
+    },
+    {
+      "code": 99718,
+      "name": "錦川鉄道錦川清流線",
+      "status": "included",
+      "routes": [
+        "railLine99718"
+      ]
+    },
+    {
+      "code": 99801,
+      "name": "阿佐海岸鉄道阿佐東線",
+      "status": "included",
+      "routes": [
+        "railLine99801"
+      ]
+    },
+    {
+      "code": 99802,
+      "name": "琴電琴平線",
+      "status": "included",
+      "routes": [
+        "railLine99802"
+      ]
+    },
+    {
+      "code": 99803,
+      "name": "琴電長尾線",
+      "status": "included",
+      "routes": [
+        "railLine99803"
+      ]
+    },
+    {
+      "code": 99804,
+      "name": "琴電志度線",
+      "status": "included",
+      "routes": [
+        "railLine99804"
+      ]
+    },
+    {
+      "code": 99805,
+      "name": "伊予鉄道郡中線",
+      "status": "included",
+      "routes": [
+        "railLine99805"
+      ]
+    },
+    {
+      "code": 99806,
+      "name": "伊予鉄道高浜線",
+      "status": "included",
+      "routes": [
+        "railLine99806"
+      ]
+    },
+    {
+      "code": 99807,
+      "name": "伊予鉄道横河原線",
+      "status": "included",
+      "routes": [
+        "railLine99807"
+      ]
+    },
+    {
+      "code": 99808,
+      "name": "伊予鉄道１系統(環状線)",
+      "status": "included",
+      "routes": [
+        "railLine99808"
+      ]
+    },
+    {
+      "code": 99809,
+      "name": "伊予鉄道２系統(環状線)",
+      "status": "included",
+      "routes": [
+        "railLine99809"
+      ]
+    },
+    {
+      "code": 99810,
+      "name": "伊予鉄道３系統(市駅線)",
+      "status": "included",
+      "routes": [
+        "railLine99810"
+      ]
+    },
+    {
+      "code": 99811,
+      "name": "伊予鉄道５系統(松山駅前線)",
+      "status": "included",
+      "routes": [
+        "railLine99811"
+      ]
+    },
+    {
+      "code": 99812,
+      "name": "伊予鉄道６系統(本町線)",
+      "status": "included",
+      "routes": [
+        "railLine99812"
+      ]
+    },
+    {
+      "code": 99814,
+      "name": "土佐くろしお鉄道中村線",
+      "status": "included",
+      "routes": [
+        "railLine99814"
+      ]
+    },
+    {
+      "code": 99815,
+      "name": "土佐くろしお鉄道宿毛線",
+      "status": "included",
+      "routes": [
+        "railLine99815"
+      ]
+    },
+    {
+      "code": 99816,
+      "name": "土佐くろしお鉄道ごめん・なはり線",
+      "status": "included",
+      "routes": [
+        "railLine99816"
+      ]
+    },
+    {
+      "code": 99817,
+      "name": "とさでん交通後免線",
+      "status": "included",
+      "routes": [
+        "railLine99817"
+      ]
+    },
+    {
+      "code": 99818,
+      "name": "とさでん交通伊野線",
+      "status": "included",
+      "routes": [
+        "railLine99818"
+      ]
+    },
+    {
+      "code": 99819,
+      "name": "とさでん交通桟橋線",
+      "status": "included",
+      "routes": [
+        "railLine99819"
+      ]
+    },
+    {
+      "code": 99901,
+      "name": "甘木鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99901"
+      ]
+    },
+    {
+      "code": 99902,
+      "name": "平成筑豊鉄道伊田線",
+      "status": "included",
+      "routes": [
+        "railLine99902"
+      ]
+    },
+    {
+      "code": 99903,
+      "name": "平成筑豊鉄道糸田線",
+      "status": "included",
+      "routes": [
+        "railLine99903"
+      ]
+    },
+    {
+      "code": 99904,
+      "name": "平成筑豊鉄道田川線",
+      "status": "included",
+      "routes": [
+        "railLine99904"
+      ]
+    },
+    {
+      "code": 99928,
+      "name": "平成筑豊鉄道門司港レトロ観光線",
+      "status": "included",
+      "routes": [
+        "railLine99928"
+      ]
+    },
+    {
+      "code": 99905,
+      "name": "福岡市営地下鉄空港線",
+      "status": "included",
+      "routes": [
+        "railLine99905"
+      ]
+    },
+    {
+      "code": 99906,
+      "name": "福岡市営地下鉄箱崎線",
+      "status": "included",
+      "routes": [
+        "railLine99906"
+      ]
+    },
+    {
+      "code": 99907,
+      "name": "福岡市営地下鉄七隈線",
+      "status": "included",
+      "routes": [
+        "railLine99907"
+      ]
+    },
+    {
+      "code": 99908,
+      "name": "北九州高速鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99908"
+      ]
+    },
+    {
+      "code": 99909,
+      "name": "筑豊電気鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99909"
+      ]
+    },
+    {
+      "code": 99910,
+      "name": "松浦鉄道西九州線(有田～伊万里)",
+      "status": "included",
+      "routes": [
+        "railLine99910"
+      ]
+    },
+    {
+      "code": 99911,
+      "name": "松浦鉄道西九州線(伊万里～佐世保)",
+      "status": "included",
+      "routes": [
+        "railLine99911"
+      ]
+    },
+    {
+      "code": 99912,
+      "name": "島原鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99912"
+      ]
+    },
+    {
+      "code": 99913,
+      "name": "長崎電軌１系統",
+      "status": "included",
+      "routes": [
+        "railLine99913"
+      ]
+    },
+    {
+      "code": 99914,
+      "name": "長崎電軌３系統",
+      "status": "included",
+      "routes": [
+        "railLine99914"
+      ]
+    },
+    {
+      "code": 99915,
+      "name": "長崎電軌４系統",
+      "status": "included",
+      "routes": [
+        "railLine99915"
+      ]
+    },
+    {
+      "code": 99916,
+      "name": "長崎電軌５系統",
+      "status": "included",
+      "routes": [
+        "railLine99916"
+      ]
+    },
+    {
+      "code": 99917,
+      "name": "熊本電鉄本線",
+      "status": "included",
+      "routes": [
+        "railLine99917"
+      ]
+    },
+    {
+      "code": 99918,
+      "name": "熊本電鉄上熊本線",
+      "status": "included",
+      "routes": [
+        "railLine99918"
+      ]
+    },
+    {
+      "code": 99919,
+      "name": "南阿蘇鉄道高森線",
+      "status": "included",
+      "routes": [
+        "railLine99919"
+      ]
+    },
+    {
+      "code": 99920,
+      "name": "くま川鉄道湯前線",
+      "status": "included",
+      "routes": [
+        "railLine99920"
+      ]
+    },
+    {
+      "code": 99921,
+      "name": "肥薩おれんじ鉄道",
+      "status": "included",
+      "routes": [
+        "railLine99921"
+      ]
+    },
+    {
+      "code": 99922,
+      "name": "熊本市電Ａ系統",
+      "status": "included",
+      "routes": [
+        "railLine99922"
+      ]
+    },
+    {
+      "code": 99923,
+      "name": "熊本市電Ｂ系統",
+      "status": "included",
+      "routes": [
+        "railLine99923"
+      ]
+    },
+    {
+      "code": 99925,
+      "name": "鹿児島市電１系統",
+      "status": "included",
+      "routes": [
+        "railLine99925"
+      ]
+    },
+    {
+      "code": 99926,
+      "name": "鹿児島市電２系統",
+      "status": "included",
+      "routes": [
+        "railLine99926"
+      ]
+    },
+    {
+      "code": 99927,
+      "name": "ゆいレール",
+      "status": "included",
+      "routes": [
+        "yuiRail"
+      ]
+    },
+    {
+      "code": 99220,
+      "name": "南部縦貫鉄道線",
+      "status": "closed"
+    },
+    {
+      "code": 99221,
+      "name": "横荘線",
+      "status": "closed"
+    },
+    {
+      "code": 99222,
+      "name": "雄勝線",
+      "status": "closed"
+    },
+    {
+      "code": 99347,
+      "name": "鹿島臨海鉄道鹿島臨港線",
+      "status": "closed"
+    },
+    {
+      "code": 99348,
+      "name": "京王御陵線",
+      "status": "closed"
+    },
+    {
+      "code": 99349,
+      "name": "鉄道院中央本線",
+      "status": "closed"
+    },
+    {
+      "code": 99350,
+      "name": "湘南軌道",
+      "status": "closed"
+    },
+    {
+      "code": 99428,
+      "name": "福井鉄道鯖浦線",
+      "status": "closed"
+    },
+    {
+      "code": 99656,
+      "name": "北丹鉄道",
+      "status": "closed"
+    },
+    {
+      "code": 10701,
+      "name": "倉吉線",
+      "status": "closed"
+    },
+    {
+      "code": 99719,
+      "name": "下津井電鉄",
+      "status": "closed"
+    },
+    {
+      "code": 10801,
+      "name": "鍛冶屋原線",
+      "status": "closed"
+    },
+    {
+      "code": 99813,
+      "name": "伊予鉄道森松線",
+      "status": "closed"
+    },
+    {
+      "code": 10901,
+      "name": "勝田線",
+      "status": "closed"
+    },
+    {
+      "code": 10902,
+      "name": "宮之城線",
+      "status": "closed"
+    },
+    {
+      "code": 99929,
+      "name": "嘉手納線",
+      "status": "closed"
+    },
+    {
+      "code": 99345,
+      "name": "ディズニーリゾートライン線",
+      "status": "included",
+      "routes": [
+        "disneyResort"
+      ]
+    },
+    {
+      "code": 31028,
+      "name": "近鉄内部線",
+      "status": "alias",
+      "canonical": 31013
+    },
+    {
+      "code": 31029,
+      "name": "近鉄八王子線",
+      "status": "alias",
+      "canonical": 31014
+    },
+    {
+      "code": 99654,
+      "name": "北近畿タンゴ鉄道宮津線",
+      "status": "alias",
+      "canonical": 99609
+    },
+    {
+      "code": 99655,
+      "name": "北近畿タンゴ鉄道宮福線",
+      "status": "alias",
+      "canonical": 99608
+    },
+    {
+      "code": 99346,
+      "name": "上野懸垂線(上野動物園モノレール)",
+      "status": "closed"
+    },
+    {
+      "code": 99344,
+      "name": "宇都宮芳賀ライトレール線",
+      "status": "included",
+      "routes": [
+        "utsunomiyaLightRail"
+      ]
+    },
+    {
+      "code": 11232,
+      "name": "JR仙石東北ライン",
+      "status": "included",
+      "routes": [
+        "railLine11232"
+      ]
+    },
+    {
+      "code": 99219,
+      "name": "三陸鉄道南リアス線",
+      "status": "closed"
+    }
+  ]
+}

@@ -1099,6 +1099,8 @@
 
   let lastDriveUiUpdate = -Infinity;
   function updateDriveUi(force = true, now = performance.now()) {
+    // Route selection changes activeRoute before startGame resets the previous station index.
+    if (state === "select") return;
     if (!force && now - lastDriveUiUpdate < 100) return;
     lastDriveUiUpdate = now;
     const terminal = routeTerminalStation();
@@ -2274,6 +2276,15 @@
     newtransit: {lengthRatio:0.62, heightRatio:0.72, cabRatio:0.26, doors:1,
       face:"round", cab:"compact", band:"low", roof:"flat", pantographEvery:0,
       wheels:"tire", windowTop:0.18, windowHeight:0.26, bobAmp:0.45},
+    monorail: {lengthRatio:0.72, heightRatio:0.78, cabRatio:0.26, doors:1,
+      face:"round", cab:"compact", band:"low", roof:"flat", pantographEvery:0,
+      wheels:"tire", windowTop:0.18, windowHeight:0.26, bobAmp:0.45},
+    tram: {lengthRatio:0.65, heightRatio:0.85, cabRatio:0.23, doors:1,
+      face:"round", cab:"compact", band:"waist", roof:"flat", pantographEvery:1,
+      wheels:"rail", windowTop:0.16, windowHeight:0.32, bobAmp:0.8},
+    cable: {lengthRatio:0.6, heightRatio:0.8, cabRatio:0.2, doors:1,
+      face:"flat", cab:"compact", band:"low", roof:"flat", pantographEvery:0,
+      wheels:"rail", windowTop:0.16, windowHeight:0.3, bobAmp:0.35},
   };
 
   // 新幹線の先頭形状。車種ごとに実車の顔つきへ寄せる。
@@ -2415,9 +2426,8 @@
     return createRailPreview(type);
   }
 
-  // 並び: しんかんせん → でんしゃ → ひこうき → ふね。
-  // でんしゃ内は 関東(JR → ちかてつ → 私鉄 → 新交通・臨海) → 関西 → 沖縄 の順で、近い路線を隣に置く。
-  const ROUTE_SELECTION_ORDER = [
+  // Familiar courses stay first; the nationwide catalogue follows before air and sea.
+  const ROUTE_SELECTION_ORDER = [...new Set([
     "tokaido", "sanyo", "kyushu", "nishiKyushu", "tohoku", "hokkaido",
     "akita", "yamagata", "joetsu", "hokuriku",
     "yamanote", "keihinTohoku", "chuo", "sobu", "tsukubaExpress",
@@ -2429,15 +2439,70 @@
     "asakusa", "mita", "shinjukuSubway", "oedo",
     "keio", "inokashira", "odakyu", "toyoko", "keikyu", "tobuSkytree",
     "yurikamome", "rinkai", "newShuttle",
-    ...(window.TRAIN_GO_ROUTE_DATA?.kantoRouteKeys || []),
     "osakaLoop", "osakaChuo", "hankyuTakarazuka",
     "yuiRail",
+    ...(window.TRAIN_GO_ROUTE_DATA?.allRailRouteKeys || []),
     "airOsaka", "airHokkaido", "airOkinawa", "airFukuoka", "airKomatsu",
     "airHachijo", "airIshigaki", "airMiyako", "airYakushima", "airAmami",
     "airHonolulu", "airGuam",
     "ferryMiyajima", "ferrySakurajima", "ferrySeikan", "ferryTokyoBay",
     "ferryOgasawara", "ferryTaiheiyo", "ferryShinnihonkai",
-  ];
+  ])];
+
+  const routeCatalog = window.TRAIN_GO_ROUTE_DATA.routeCatalog || {};
+  const routeSearch = document.getElementById("route-search");
+  const routeResultCount = document.getElementById("route-result-count");
+  let routeRegion = "all";
+  const normalizeRouteSearch = (text) => text.normalize("NFKC").toLowerCase()
+    .replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60));
+
+  function filterRouteChoices() {
+    const terms = normalizeRouteSearch(routeSearch.value.trim()).split(/\s+/).filter(Boolean);
+    let count = 0;
+    document.querySelectorAll(".route-btn").forEach((button) => {
+      const key = button.dataset.route;
+      const entry = routeCatalog[key];
+      const kind = ROUTES[key].kind;
+      const matchesRegion = routeRegion === "all"
+        || (routeRegion === "air" ? kind === "air"
+        : routeRegion === "sea" ? kind === "sea"
+        : routeRegion === "shinkansen" ? entry?.kind === "shinkansen"
+        : entry?.regions.includes(routeRegion));
+      const searchText = button.dataset.search;
+      const visible = matchesRegion && terms.every(term => searchText.includes(term));
+      button.classList.toggle("hidden", !visible);
+      if (visible) count++;
+    });
+    routeResultCount.textContent = count ? `${count} コース` : "みつからないよ。ことばや ちいきを かえてみてね";
+    document.getElementById("route-search-clear").disabled = !routeSearch.value;
+  }
+
+  function buildRouteFilters() {
+    const filters = document.getElementById("route-region-filters");
+    for (const {key, name} of [
+      {key:"all", name:"🌏 ぜんぶ"}, {key:"shinkansen", name:"🚄 しんかんせん"},
+      ...window.TRAIN_GO_ROUTE_DATA.railRegions,
+      {key:"air", name:"✈️ ひこうき"}, {key:"sea", name:"⛴️ ふね"},
+    ]) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = name;
+      button.dataset.region = key;
+      button.setAttribute("aria-pressed", String(key === routeRegion));
+      button.addEventListener("click", () => {
+        routeRegion = key;
+        filters.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b === button)));
+        filterRouteChoices();
+      });
+      filters.appendChild(button);
+    }
+    routeSearch.addEventListener("input", filterRouteChoices);
+    document.getElementById("route-search-clear").addEventListener("click", () => {
+      routeSearch.value = "";
+      filterRouteChoices();
+      routeSearch.focus();
+    });
+  }
 
   function buildExtraSelectionChoices() {
     const routeButtons = document.querySelector(".route-buttons");
@@ -2490,6 +2555,13 @@
   // 車両ボタンも並び順どおりに作る。絵は走行画面と同じ描画関数から生成する。
   function buildTrainChoices() {
     const trainButtons = document.querySelector(".train-buttons");
+    // Hundreds of DPR-scaled canvases would exhaust tablet memory. Only retain visible previews.
+    const observer = typeof IntersectionObserver === "function" ? new IntersectionObserver(entries => {
+      for (const {target, isIntersecting} of entries) {
+        if (isIntersecting && !target.firstChild) target.appendChild(createVehiclePreview(TRAINS[target.dataset.train]));
+        if (!isIntersecting) target.replaceChildren();
+      }
+    }, {root:selectScreen, rootMargin:"240px"}) : null;
     for (const key of TRAIN_SELECTION_ORDER) {
       const type = TRAINS[key];
       const group = document.createElement("div");
@@ -2498,7 +2570,8 @@
       trainButton.className = "train-btn";
       trainButton.dataset.train = key;
       trainButton.setAttribute("aria-label", type.callName || type.name);
-      trainButton.appendChild(createVehiclePreview(type));
+      if (observer) observer.observe(trainButton);
+      else trainButton.appendChild(createVehiclePreview(type));
       group.appendChild(trainButton);
       trainButtons.appendChild(group);
     }
@@ -2543,10 +2616,25 @@
 
   buildExtraSelectionChoices();
   buildTrainChoices();
+  buildRouteFilters();
   document.querySelectorAll(".route-btn").forEach((button, fallbackIndex) => {
     const routeOrder = ROUTE_SELECTION_ORDER.indexOf(button.dataset.route);
     button.style.order = String(routeOrder >= 0 ? routeOrder : 100 + fallbackIndex);
+    const entry = routeCatalog[button.dataset.route];
+    button.dataset.search = normalizeRouteSearch(`${button.textContent} ${entry?.search || ""}`);
+    if (entry) {
+      const label = document.createElement("span");
+      label.className = "route-choice-label";
+      const name = document.createElement("span");
+      name.textContent = ROUTES[button.dataset.route].name;
+      const endpoints = document.createElement("small");
+      endpoints.textContent = entry.endpoints;
+      label.append(name, endpoints);
+      button.replaceChildren(button.firstElementChild, label);
+      button.title = `${entry.title}（${entry.endpoints}）`;
+    }
   });
+  filterRouteChoices();
   btnBackToRoutes.addEventListener("click", showRouteSelection);
 
   // ---- 入力 ----

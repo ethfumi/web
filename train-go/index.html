@@ -25,7 +25,7 @@
 <title>つなげて！でんしゃ！</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="stylesheet" href="style.css?v=120">
+<link rel="stylesheet" href="style.css?v=121">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -46,6 +46,14 @@
       <small id="session-money-value">きょう ＋0 えん</small>
     </div>
   </div>
+  <div class="route-browser">
+    <div id="route-region-filters" role="group" aria-label="ちいきをえらぶ"></div>
+    <div class="route-search-row">
+      <input id="route-search" type="search" placeholder="ろせん・えきで さがす" aria-label="路線名や駅名で探す" autocomplete="off">
+      <button id="route-search-clear" type="button">けす</button>
+    </div>
+    <p id="route-result-count" role="status" aria-live="polite"></p>
+  </div>
   <div class="route-buttons" role="group" aria-label="はしるろせん">
     <button class="route-btn selected" data-route="tokaido" aria-pressed="true"><span>🗻</span>とうかいどうしんかんせん</button>
     <button class="route-btn" data-route="tohoku" aria-pressed="false"><span>🌲</span>とうほくしんかんせん</button>
@@ -64,14 +72,18 @@
   </div>
   </section>
   <div id="release-info">
+    <small class="data-credits">路線データ：<a href="https://github.com/Seo-4d696b75/station_database">station_database / Seo-4d696b75</a>（<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>・加工して使用）<br>
+    地図・補完座標：<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors / ODbL</a> · Natural Earth<br>
+    <a href="https://github.com/ethfumi/web/blob/master/train-go/data/README.md">収録範囲・出典</a></small>
     <!-- 更新時は sw.js の CACHE バージョンと揃える -->
-    <div id="app-version" aria-label="つなげて！でんしゃ！、バージョン120、2026年9月12日更新">
+    <div id="app-version" aria-label="つなげて！でんしゃ！、バージョン121、2026年9月22日更新">
       <span class="version-title">つなげて！でんしゃ！</span>
-      <strong>v120</strong><span>2026.09.12 更新</span>
+      <strong>v121</strong><span>2026.09.22 更新</span>
     </div>
     <details id="update-history">
       <summary>🆕 こうしん</summary>
       <div class="update-history-list" aria-label="こうしんりれき">
+        <span><time datetime="2026-09-22">9/22</time> ぜんこくの ろせんをついか！ ちいきや えきで さがせるよ</span>
         <span><time datetime="2026-09-12">9/12</time> うえからは さいしょから カメラを ゆびで うごかせる</span>
         <span><time datetime="2026-09-12">9/12</time> えきめいは かさならなければ できるだけ だす</span>
         <span><time datetime="2026-09-12">9/12</time> まわりのろせんの えきめいも だす（よると ぜんぶ、ひくと のりかええきだけ）</span>
@@ -255,14 +267,15 @@
   <span>🔦</span><span id="headlight-label">ライトをつける</span>
 </button>
 
-<script src="train-route-data.js?v=120"></script>
-<script src="national-rail-route-data.js?v=120"></script>
-<script src="kanto-rail-route-data.js?v=120"></script>
-<script src="air-route-data.js?v=120"></script>
-<script src="sea-route-data.js?v=120"></script>
-<script src="fare-data.js?v=120"></script>
-<script src="map-data.js?v=120"></script>
-<script src="app.js?v=120"></script>
+<script src="train-route-data.js?v=121"></script>
+<script src="national-rail-route-data.js?v=121"></script>
+<script src="kanto-rail-route-data.js?v=121"></script>
+<script src="all-rail-route-data.js?v=121"></script>
+<script src="air-route-data.js?v=121"></script>
+<script src="sea-route-data.js?v=121"></script>
+<script src="fare-data.js?v=121"></script>
+<script src="map-data.js?v=121"></script>
+<script src="app.js?v=121"></script>
 <!-- Cloudflare Web Analytics: Cookieを使用せず、個人を識別しないアクセス集計 -->
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"ca5e1fbb318447b3ac9409f3da1cad2a"}'></script>
 </body>
