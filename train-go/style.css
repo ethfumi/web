@@ -315,6 +315,16 @@ body:not(.map-view-active) #game-name-mode {
 .name-mode-toggle { align-self: flex-end; min-height: 44px; padding: 8px 18px; border: 0; border-radius: 22px; background: #fff; color: #36516a; font: inherit; font-weight: bold; }
 .trip-settings { width: min(92vw,780px); padding: 14px; border-radius: 18px; background: rgba(255,255,255,.8); color: #36516a; }
 .trip-settings label { display: block; font-weight: bold; margin-bottom: 8px; }
+.trip-settings summary { cursor: pointer; min-height: 30px; font-weight: bold; }
+.trip-settings[open] summary { margin-bottom: 12px; }
+#recommended-trains { grid-template-columns: minmax(0,320px); justify-content: center; }
+.catalog-more { min-height: 48px; padding: 10px 28px; border: 2px solid #a6c6df; border-radius: 22px; background: #fff; color: #36516a; font: inherit; font-weight: bold; cursor: pointer; }
+#train-browser { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; color: #36516a; }
+#train-browser label,#train-result-count { grid-column: 1 / -1; text-align: center; }
+#train-search,#train-filter { min-width: 0; min-height: 44px; padding: 10px; border: 2px solid #a6c6df; border-radius: 12px; font: inherit; font-size: 16px; color: #36516a; background: #fff; }
+#train-search { -webkit-user-select: text; user-select: text; }
+#route-region-filters { gap: 5px; }
+#route-region-filters button { font-size: clamp(12px,1.8vmin,16px); padding: 6px 10px; }
 #trip-course { width: 100%; min-height: 44px; font: inherit; font-size: 16px; border-radius: 10px; border: 1px solid #9cb7cc; background: #fff; color: #36516a; padding: 8px; }
 #trip-course:disabled { opacity: 1; }
 #trip-direction { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; margin-top: 12px; }
@@ -451,22 +461,27 @@ body:not(.map-view-active) #game-name-mode {
 #select-screen:not(.hidden) ~ .debug-control {
   display: none;
 }
+body.choosing-car #select-screen { z-index: 100; }
+#btn-back-to-routes { min-height: 44px; min-width: 92px; }
 
 /* --- 走行画面 UI --- */
 #run-ui {
+  --car-button: max(44px,8vmin);
   position: fixed;
   left: 50%;
   bottom: max(2vmin, env(safe-area-inset-bottom));
   transform: translateX(-50%);
   display: grid;
-  grid-template-columns: repeat(10, 8vmin);
+  width: min(92vw,89vmin);
+  grid-template-columns: minmax(0,1fr) var(--car-button);
   gap: 0.9vmin;
   z-index: 5;
 }
 
 #run-ui button {
-  width: 8vmin;
-  height: 8vmin;
+  width: var(--car-button);
+  height: var(--car-button);
+  flex: 0 0 auto;
   border: none;
   border-radius: 50%;
   font-size: 4vmin;
@@ -480,13 +495,18 @@ body:not(.map-view-active) #game-name-mode {
 }
 
 #btn-couple {
+  grid-column: 2;
+  grid-row: 1;
   outline: 0.45vmin solid rgba(239, 108, 50, 0.7);
 }
 
 #btn-remove {
-  grid-column: 10;
+  grid-column: 2;
   grid-row: 2;
 }
+#quick-add-options { display: flex; gap: .9vmin; overflow-x: auto; padding: 4px 4px 9px; touch-action: pan-x; scrollbar-width: thin; }
+#run-ui #btn-choose-car { grid-column: 1; grid-row: 2; justify-self: end; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #36516a; font-size: max(18px,3vmin); }
+#btn-choose-car small { font-size: max(11px,1.5vmin); font-weight: bold; }
 
 #btn-home {
   position: fixed;
@@ -1107,14 +1127,12 @@ body.map-view-active #btn-headlight {
     min-height: 9vmin;
   }
   #run-ui {
+    --car-button: max(44px,12vmin);
     bottom: max(2vmin, env(safe-area-inset-bottom));
-    grid-template-columns: repeat(6, 12vmin);
     gap: 1.2vmin;
   }
-  #run-ui button { width: 12vmin; height: 12vmin; }
   #run-ui .quick-train-art { width: 9vmin; }
   #run-ui .quick-plus { width: 4.2vmin; height: 4.2vmin; font-size: 3vmin; }
-  #btn-remove { grid-column: 6; grid-row: 2; }
   #play-controls { bottom: max(29vmin, calc(env(safe-area-inset-bottom) + 29vmin)); }
   #play-controls button { width: 16vmin; height: 16vmin; font-size: 3vmin; }
   #play-controls button span:first-child { font-size: 6vmin; }
