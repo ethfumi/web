@@ -18,6 +18,7 @@
   "landmark-data.js",
   "rest-stop-data.js",
   "trip-options.js",
+  "prefecture-data.js",
   "train-announcements.js",
   "catalog.js",
   "map-cache.js",

@@ -53,6 +53,8 @@ node --test train-go/tests/*.test.cjs
 
 ## 収録範囲
 
+都道府県の絞り込みは鉄道駅・空港・港の所在地を基準にする。県境をまたぐ路線・直通コースは複数県へ登録し、空路・航路は発着地の県で探せる。鉄道駅の県番号はstation_databaseを優先し、それ以外はNatural Earth 1:10mの都道府県境界（public domain）で生成時に判定する。小島の補完範囲は生成スクリプトに明記。境界データは出典付きで `prefecture-boundaries.json` に保存し、ゲームには `prefecture-data.js` の県番号と表示名だけを含める。再生成は `node` と `shapely` を用意して `python train-go/tools/build-prefectures.py`。
+
 日本全国の旅客鉄道を対象とする。JR・私鉄・地下鉄・路面電車・モノレール・新交通・鋼索鉄道を含む。
 季節営業、災害等による運休中の存続路線もゲーム上では走行できる。
 貨物専用線、廃止路線、ロープウェイなどの索道、鉄道事業に当たらない園内遊具は対象外。
