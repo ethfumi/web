@@ -15,6 +15,7 @@
   "terrain-data.js",
   "geographic-label-data.js",
   "trip-options.js",
+  "catalog.js",
   "map-cache.js",
   "app.js"
 ]

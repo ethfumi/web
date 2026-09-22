@@ -1898,8 +1898,8 @@
   }
 
   function populateQuickAddButtons() {
-    // 9枠固定。新幹線を先に並べるので、新幹線は常に枠内に収まる。
-    const otherKeys = quickAddTrainKeys(trainKey);
+    // 選んだ候補を左側へ並べ、出発時の車両は右端の独立したボタンに固定する。
+    const otherKeys = catalog.couplingKeys(trainKey,choices.state.coupling,quickAddTrainKeys(trainKey),TRAINS).slice(0,-1);
     btnCouple.setAttribute("aria-label", `${TRAINS[trainKey].callName}を連結`);
     btnCouple.querySelector(".quick-train-art").replaceChildren(createTrainPreview(trainKey));
     document.querySelectorAll(".btn-quick-add:not(#btn-couple)").forEach((btn, index) => {
@@ -2502,82 +2502,68 @@
     ...(window.TRAIN_GO_ROUTE_DATA?.ferryNetwork?.keys || []),
   ])];
 
-  const routeCatalog = window.TRAIN_GO_ROUTE_DATA.routeCatalog || {};
-  const routeSearch = document.getElementById("route-search");
-  const routeResultCount = document.getElementById("route-result-count");
-  let routeRegion = "all";
-  const normalizeRouteSearch = (text) => text.normalize("NFKC").toLowerCase()
-    .replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60));
 
-  function filterRouteChoices() {
-    const terms = normalizeRouteSearch(routeSearch.value.trim()).split(/\s+/).filter(Boolean);
-    let count = 0;
-    document.querySelectorAll(".route-btn").forEach((button) => {
-      const key = button.dataset.route;
-      const entry = routeCatalog[key];
-      const kind = ROUTES[key].kind;
-      const matchesRegion = routeRegion === "all"
-        || (routeRegion === "air" ? kind === "air"
-        : routeRegion === "sea" ? kind === "sea"
-        : routeRegion === "shinkansen" ? entry?.kind === "shinkansen"
-        : routeRegion === "through" ? entry?.through
-        : entry?.regions.includes(routeRegion));
-      const searchText = button.dataset.search;
-      const visible = matchesRegion && terms.every(term => searchText.includes(term));
-      button.classList.toggle("hidden", !visible);
-      if (visible) count++;
+  const routeCatalog = window.TRAIN_GO_ROUTE_DATA.routeCatalog || {};
+  const catalog = window.TRAIN_GO_CATALOG;
+  const routeSearch = document.getElementById('route-search');
+  const routeResultCount = document.getElementById('route-result-count');
+  const routeMetadata = new Map(window.TRAIN_GO_ROUTE_DATA.metadata.map(m=>[m.key,m]));
+  const catalogRouteKeys = [...new Set([...ROUTE_SELECTION_ORDER,...Object.keys(ROUTES)])].filter(key=>ROUTES[key]);
+  const routeSearchTexts = new Map(catalogRouteKeys.map(key=>[key,catalog.normalize(
+    [ROUTES[key].name,routeCatalog[key]?.title,routeCatalog[key]?.search,
+      ROUTES[key].start,...ROUTES[key].stations.map(s=>s.name)].join(' '))]));
+  let routeRegion='all', routeLimit=24, trainLimit=18, couplingPickerOpen=false;
+  let pickerInertElements=[];
+
+  function makeRouteButton(key) {
+    const button=document.createElement('button');
+    button.className='route-btn';button.dataset.route=key;
+    button.setAttribute('aria-pressed',String(key===selectedRouteKey));
+    button.classList.toggle('selected',key===selectedRouteKey);
+    const marker=document.createElement('span');
+    marker.textContent=routeMetadata.get(key)?.icon || ({tokaido:'🗻',tohoku:'🌲',yamanote:'🟩',chuo:'🟧',sobu:'🟨'}[key]) || '🚆';
+    const label=document.createElement('span');label.className='route-choice-label';
+    const name=document.createElement('span');name.textContent=routeLabel(key);
+    const ends=document.createElement('small');ends.textContent=routeEndpoints(key,choices.state.reverse[key]);
+    label.append(name,ends);button.append(marker,label);
+    return button;
+  }
+
+  function filterRouteChoices(reset=true) {
+    if(reset)routeLimit=24;
+    const keys=catalogRouteKeys.filter(key=>{
+      const entry=routeCatalog[key],kind=ROUTES[key].kind;
+      const region=routeRegion==='all' || (routeRegion==='air'?kind==='air'
+        :routeRegion==='sea'?kind==='sea':routeRegion==='shinkansen'?entry?.kind==='shinkansen'
+        :routeRegion==='through'?entry?.through:entry?.regions.includes(routeRegion));
+      return region&&catalog.matches(routeSearchTexts.get(key),routeSearch.value);
     });
-    routeResultCount.textContent = count ? `${count} コース` : "みつからないよ。ことばや ちいきを かえてみてね";
-    document.getElementById("route-search-clear").disabled = !routeSearch.value;
-    const hasRecent = [...document.querySelectorAll("#recent-routes .route-btn")].some(b => !b.classList.contains("hidden"));
-    document.getElementById("recent-route-section").classList.toggle("hidden", !hasRecent);
+    const group=catalog.groups(keys,choices.state.routes,null,routeLimit);
+    document.getElementById('recent-routes').replaceChildren(...group.recent.map(makeRouteButton));
+    document.getElementById('all-routes').replaceChildren(...group.items.map(makeRouteButton));
+    document.getElementById('recent-route-section').classList.toggle('hidden',!group.recent.length);
+    document.getElementById('route-more').classList.toggle('hidden',!group.hasMore);
+    routeResultCount.textContent=keys.length?`${keys.length} コース・${group.items.length+group.recent.length} ひょうじ`:'みつからないよ。ことばや ちいきを かえてみてね';
+    document.getElementById('route-search-clear').disabled=!routeSearch.value;
   }
 
   function buildRouteFilters() {
-    const filters = document.getElementById("route-region-filters");
-    for (const {key, name} of [
-      {key:"all", name:"🌏 ぜんぶ"}, {key:"shinkansen", name:"🚄 しんかんせん"}, {key:"through",name:"🔗 ちょくつう"},
-      ...window.TRAIN_GO_ROUTE_DATA.railRegions,
-      {key:"air", name:"✈️ ひこうき"}, {key:"sea", name:"⛴️ ふね"},
-    ]) {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.textContent = name;
-      button.dataset.region = key;
-      button.setAttribute("aria-pressed", String(key === routeRegion));
-      button.addEventListener("click", () => {
-        routeRegion = key;
-        filters.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b === button)));
+    const filters=document.getElementById('route-region-filters');
+    for(const {key,name} of [{key:'all',name:'🌏 ぜんぶ'},{key:'shinkansen',name:'🚄 しんかんせん'},
+      {key:'through',name:'🔗 ちょくつう'},...window.TRAIN_GO_ROUTE_DATA.railRegions,
+      {key:'air',name:'✈️ ひこうき'},{key:'sea',name:'⛴️ ふね'}]) {
+      const button=document.createElement('button');button.type='button';button.textContent=name;
+      button.dataset.region=key;button.setAttribute('aria-pressed',String(key===routeRegion));
+      button.addEventListener('click',()=>{
+        routeRegion=key;filters.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
         filterRouteChoices();
-      });
-      filters.appendChild(button);
+      });filters.appendChild(button);
     }
-    routeSearch.addEventListener("input", filterRouteChoices);
-    document.getElementById("route-search-clear").addEventListener("click", () => {
-      routeSearch.value = "";
-      filterRouteChoices();
-      routeSearch.focus();
-    });
+    routeSearch.addEventListener('input',()=>filterRouteChoices());
+    document.getElementById('route-search-clear').addEventListener('click',()=>{routeSearch.value='';filterRouteChoices();routeSearch.focus();});
+    document.getElementById('route-more').addEventListener('click',()=>{routeLimit+=24;filterRouteChoices(false);});
   }
 
-  function buildExtraSelectionChoices() {
-    const routeButtons = document.getElementById("all-routes");
-    for (const {key,name,color,icon} of window.TRAIN_GO_ROUTE_DATA?.metadata || []) {
-      const routeButton = document.createElement("button");
-      routeButton.className = "route-btn";
-      routeButton.dataset.route = key;
-      routeButton.setAttribute("aria-pressed", "false");
-      const marker = document.createElement("span");
-      if (icon) {
-        marker.textContent = icon;
-      } else {
-        marker.className = "route-color-marker";
-        marker.style.background = color;
-      }
-      routeButton.append(marker, name);
-      routeButtons.appendChild(routeButton);
-    }
-  }
 
   // その路線で最初にすすめる車両。路線キーと車両キーが同じものが多く、
   // 新幹線だけ路線名と車両名が違うので個別に対応づける。
@@ -2608,36 +2594,61 @@
     return order;
   })();
 
-  // 車両ボタンも並び順どおりに作る。絵は走行画面と同じ描画関数から生成する。
-  function buildTrainChoices() {
-    const trainButtons = document.getElementById("all-trains");
-    // Hundreds of DPR-scaled canvases would exhaust tablet memory. Only retain visible previews.
-    const observer = typeof IntersectionObserver === "function" ? new IntersectionObserver(entries => {
-      for (const {target, isIntersecting} of entries) {
-        const preview = target.querySelector(".train-preview");
-        if (isIntersecting && !preview.firstChild) preview.appendChild(createVehiclePreview(TRAINS[target.dataset.train]));
-        if (!isIntersecting) preview.replaceChildren();
-      }
-    }, {root:selectScreen, rootMargin:"240px"}) : null;
-    for (const key of TRAIN_SELECTION_ORDER) {
-      const type = TRAINS[key];
-      const group = document.createElement("div");
-      group.className = "train-choice-group";
-      const trainButton = document.createElement("button");
-      trainButton.className = "train-btn";
-      trainButton.dataset.train = key;
-      trainButton.setAttribute("aria-label", type.callName || type.name);
-      const preview = document.createElement("span");
-      preview.className = "train-preview";
-      const caption = document.createElement("span");
-      caption.className = "train-caption";
-      trainButton.append(preview,caption);
-      if (observer) observer.observe(trainButton);
-      else preview.appendChild(createVehiclePreview(type));
-      group.appendChild(trainButton);
-      trainButtons.appendChild(group);
-    }
+
+  const trainMetadata = new Map();
+  for(const meta of window.TRAIN_GO_ROUTE_DATA.metadata) {
+    const key=meta.trainKey || meta.key;
+    if(!trainMetadata.has(key))trainMetadata.set(key,[]);
+    trainMetadata.get(key).push(meta);
   }
+  const trainSearch=document.getElementById('train-search');
+  const trainFilter=document.getElementById('train-filter');
+  for(const {key,name} of [{key:'all',name:'🌏 ぜんぶ'},{key:'shinkansen',name:'🚄 しんかんせん'},...window.TRAIN_GO_ROUTE_DATA.railRegions]) {
+    const option=document.createElement('option');option.value=key;option.textContent=name;trainFilter.appendChild(option);
+  }
+  function trainCaption(key) {
+    const type=TRAINS[key],model=tripOptions.MODEL_LABELS[key];
+    const meta=trainMetadata.get(key)?.[0];
+    const routeKey=routeCatalog[key]?key:meta?.key;
+    const description=model?type.name.replace(/の?しんかんせん$/,'').replace('きいろいけんさしゃ','けんさしゃ')
+      :routeKey?routeLabel(routeKey):type.name;
+    return model?`${model}\n${description}`:description.replace(/のでんしゃ$/,'');
+  }
+  const trainSearchTexts=new Map(TRAIN_SELECTION_ORDER.map(key=>[key,catalog.normalize(
+    [TRAINS[key].name,TRAINS[key].callName,tripOptions.MODEL_LABELS[key],routeCatalog[key]?.title,ROUTES[key]?.name,
+      ...(trainMetadata.get(key)||[]).flatMap(m=>[routeCatalog[m.key]?.title,ROUTES[m.key]?.name])].join(' '))]));
+  function makeTrainButton(key,recommended=false) {
+    const button=document.createElement('button');button.className='train-btn';button.dataset.train=key;
+    button.classList.toggle('recommended',recommended);
+    const preview=document.createElement('span');preview.className='train-preview';preview.appendChild(createVehiclePreview(TRAINS[key]));
+    const caption=document.createElement('span');caption.className='train-caption';caption.textContent=trainCaption(key);
+    button.append(preview,caption);button.title=caption.textContent.replace('\n','・');
+    button.setAttribute('aria-label',button.title+(couplingPickerOpen?'を連結':''));
+    return button;
+  }
+  function renderTrainChoices(reset=true) {
+    if(reset)trainLimit=18;
+    const keys=TRAIN_SELECTION_ORDER.filter(key=>{
+      const kind=TRAINS[key].kind;
+      const allowed=couplingPickerOpen?isCoupleableTrainKey(key):isAirRoute()?kind==='airplane':isSeaRoute()?kind==='ferry':isCoupleableTrainKey(key);
+      const category=trainFilter.value;
+      const region=category==='all'||(category==='shinkansen'?isShinkansenTrainKey(key)
+        :(trainMetadata.get(key)||[{key}]).some(m=>routeCatalog[m.key]?.regions.includes(category)));
+      return allowed&&region&&catalog.matches(trainSearchTexts.get(key),trainSearch.value);
+    });
+    const group=catalog.groups(keys,choices.state.trains,routeTrainKey(selectedRouteKey),trainLimit);
+    document.getElementById('recommended-trains').replaceChildren(...group.recommended.map(key=>makeTrainButton(key,true)));
+    document.getElementById('recommended-train-section').classList.toggle('hidden',!group.recommended.length);
+    document.getElementById('recent-trains').replaceChildren(...group.recent.map(key=>makeTrainButton(key)));
+    document.getElementById('recent-train-section').classList.toggle('hidden',!group.recent.length);
+    document.getElementById('all-trains').replaceChildren(...group.items.map(key=>makeTrainButton(key)));
+    document.getElementById('train-more').classList.toggle('hidden',!group.hasMore);
+    document.getElementById('train-result-count').textContent=keys.length?`${keys.length} しゅるい・${group.recommended.length+group.recent.length+group.items.length} ひょうじ`:'みつからないよ。ことばや ちいきを かえてみてね';
+  }
+  trainSearch.addEventListener('input',()=>renderTrainChoices());
+  trainFilter.addEventListener('change',()=>renderTrainChoices());
+  document.getElementById('train-more').addEventListener('click',()=>{trainLimit+=18;renderTrainChoices(false);});
+
 
   const routeSelectPage = document.getElementById("route-select-page");
   const trainSelectPage = document.getElementById("train-select-page");
@@ -2679,65 +2690,17 @@
     document.getElementById("trip-summary").textContent = `${routeLabel()}　${stationNamesForRoute(route).length}${stopUnit}・${(route.loopKm || terminal.km-route.startKm).toFixed(1)}km`;
   }
 
-  function arrangeRecentRoutes() {
-    const recent = document.getElementById("recent-routes");
-    const all = document.getElementById("all-routes");
-    for (const button of document.querySelectorAll(".route-btn")) {
-      const index = choices.state.routes.indexOf(button.dataset.route);
-      (index >= 0 ? recent : all).appendChild(button);
-      button.style.order = String(index >= 0 ? index : ROUTE_SELECTION_ORDER.indexOf(button.dataset.route));
-    }
-    for (const key of choices.state.routes) {
-      const button = recent.querySelector(`[data-route="${key}"]`);
-      if (button) recent.appendChild(button);
-    }
-    filterRouteChoices();
-  }
-
-  function arrangeRecentTrains() {
-    const recent = document.getElementById("recent-trains");
-    const all = document.getElementById("all-trains");
-    for (const button of document.querySelectorAll(".train-btn")) {
-      const index = choices.state.trains.indexOf(button.dataset.train);
-      (index >= 0 ? recent : all).appendChild(button.parentElement);
-      if (index >= 0) button.style.order = String(index);
-    }
-    for (const key of choices.state.trains) {
-      const button = recent.querySelector(`[data-train="${key}"]`);
-      if (button) recent.appendChild(button.parentElement);
-    }
-    const visible = [...recent.querySelectorAll(".train-btn")].some(b => !b.classList.contains("hidden"));
-    document.getElementById("recent-train-section").classList.toggle("hidden", !visible);
-  }
 
   function updateChoiceNames() {
-    for (const button of document.querySelectorAll(".route-btn")) {
-      const key = button.dataset.route;
-      const label = button.querySelector(".route-choice-label");
-      if (label) {
-        label.querySelector("span").textContent = routeLabel(key);
-        label.querySelector("small").textContent = routeEndpoints(key, choices.state.reverse[key]);
-      }
-    }
-    for (const button of document.querySelectorAll(".train-btn")) {
-      const key = button.dataset.train, type = TRAINS[key];
-      const model = tripOptions.MODEL_LABELS[key];
-      const meta = window.TRAIN_GO_ROUTE_DATA.metadata.find(m => m.trainKey === key);
-      const routeKey = ['airplane','ferry'].includes(type.kind) ? null
-        : routeCatalog[key] ? key : meta && routeCatalog[meta.key] ? meta.key : null;
-      const description = model ? type.name.replace(/の?しんかんせん$/, "").replace("きいろいけんさしゃ", "けんさしゃ")
-        : routeKey ? routeLabel(routeKey) : type.name;
-      const label = model ? `${model}\n${description}` : description.replace(/のでんしゃ$/, "");
-      button.querySelector(".train-caption").textContent = label;
-      button.title = label.replace("\n", "・");
-      button.setAttribute("aria-label", `${model ? model + "、" : ""}${type.callName || type.name}`);
-    }
-    const target = choices.state.nameMode === "kana" ? "漢字" : "ひらがな";
-    document.getElementById("select-name-mode").textContent = target;
-    document.querySelector("#game-name-mode span:first-child").textContent = target === "漢字" ? "漢" : "あ";
-    document.querySelector("#game-name-mode span:last-child").textContent = target;
-    for (const id of ["select-name-mode", "game-name-mode"]) document.getElementById(id).setAttribute("aria-label", `${target}表示に切り替える`);
+    if(!routeSelectPage.classList.contains('hidden'))filterRouteChoices(false);
+    if(!trainSelectPage.classList.contains('hidden'))renderTrainChoices(false);
+    const target=choices.state.nameMode==='kana'?'漢字':'ひらがな';
+    document.getElementById('select-name-mode').textContent=target;
+    document.querySelector('#game-name-mode span:first-child').textContent=target==='漢字'?'漢':'あ';
+    document.querySelector('#game-name-mode span:last-child').textContent=target;
+    for(const id of ['select-name-mode','game-name-mode'])document.getElementById(id).setAttribute('aria-label',`${target}表示に切り替える`);
   }
+
 
   function switchNameMode() {
     choices.state.nameMode = choices.state.nameMode === "kana" ? "kanji" : "kana";
@@ -2765,96 +2728,66 @@
   document.getElementById("select-name-mode").addEventListener("click", switchNameMode);
   document.getElementById("game-name-mode").addEventListener("click", switchNameMode);
 
+
   function showRouteSelection() {
-    renderTotalTravelDistance();
-    renderTotalMoney();
-    routeSelectPage.classList.remove("hidden");
-    trainSelectPage.classList.add("hidden");
-    selectScreen.classList.remove("selecting-train");
-    selectScreen.scrollTop = 0;
-    arrangeRecentRoutes();
-    updateChoiceNames();
+    renderTotalTravelDistance();renderTotalMoney();
+    routeSelectPage.classList.remove('hidden');trainSelectPage.classList.add('hidden');
+    selectScreen.classList.remove('selecting-train');selectScreen.scrollTop=0;
+    for(const id of ['recommended-trains','recent-trains','all-trains'])document.getElementById(id).replaceChildren();
+    filterRouteChoices();updateChoiceNames();
   }
-
-  function showTrainSelection(routeKey, keepGroup = false) {
-    if (!keepGroup) routeChoiceGroupKey = routeKey;
-    document.querySelectorAll(".route-btn").forEach(button => {
-      const selected = button.dataset.route === routeKey;
-      button.classList.toggle("selected", selected);
-      button.setAttribute("aria-pressed", String(selected));
-    });
-    routeSelectPage.classList.add("hidden");
-    trainSelectPage.classList.remove("hidden");
-    selectScreen.classList.add("selecting-train");
-    const recommendedKey = routeTrainKey(routeKey);
-    vehicleSelectTitle.textContent = isAirRoute()
-      ? "どの そらの のりものに のる？"
-      : isSeaRoute()
-      ? "どの ふねに のる？"
-      : "どの でんしゃに のる？";
-    document.querySelectorAll(".train-btn").forEach((button) => {
-      const airChoice = TRAINS[button.dataset.train]?.kind === "airplane";
-      const seaChoice = button.dataset.train === "ferry";
-      const nonRailChoice = isAirRoute() ? airChoice : isSeaRoute() ? seaChoice : (!airChoice && !seaChoice);
-      button.classList.toggle("hidden", isNonRailRoute() ? !nonRailChoice : (airChoice || seaChoice));
-      const recommended = button.dataset.train === recommendedKey;
-      const routeOrder = TRAIN_SELECTION_ORDER.indexOf(button.dataset.train);
-      button.classList.toggle("recommended", recommended);
-      button.style.order = String(recommended ? 0 : (routeOrder >= 0 ? routeOrder + 1 : 999));
-    });
-    arrangeRecentTrains();
-    updateTripSettings();
-    selectScreen.scrollTop = 0;
+  function showTrainSelection(routeKey,keepGroup=false) {
+    if(!keepGroup)routeChoiceGroupKey=routeKey;
+    routeSelectPage.classList.add('hidden');trainSelectPage.classList.remove('hidden');selectScreen.classList.add('selecting-train');
+    document.getElementById('all-routes').replaceChildren();document.getElementById('recent-routes').replaceChildren();
+    vehicleSelectTitle.textContent=couplingPickerOpen?'つなげる でんしゃを えらぼう'
+      :isAirRoute()?'どの そらの のりものに のる？':isSeaRoute()?'どの ふねに のる？':'どの でんしゃに のる？';
+    trainSearch.value='';trainFilter.value='all';
+    document.querySelector('.trip-settings').classList.toggle('hidden',couplingPickerOpen);
+    btnBackToRoutes.textContent=couplingPickerOpen?'✓ とじる':'← もどる';
+    btnBackToRoutes.setAttribute('aria-label',couplingPickerOpen?'車両選びを閉じる':'ろせんえらびにもどる');
+    renderTrainChoices();updateTripSettings();selectScreen.scrollTop=0;
   }
-
-  buildExtraSelectionChoices();
-  buildTrainChoices();
-  buildRouteFilters();
-  document.querySelectorAll(".route-btn").forEach((button, fallbackIndex) => {
-    const routeOrder = ROUTE_SELECTION_ORDER.indexOf(button.dataset.route);
-    button.style.order = String(routeOrder >= 0 ? routeOrder : 100 + fallbackIndex);
-    const entry = routeCatalog[button.dataset.route];
-    button.dataset.search = normalizeRouteSearch(`${button.textContent} ${entry?.search || ""}`);
-    if (entry) {
-      const label = document.createElement("span");
-      label.className = "route-choice-label";
-      const name = document.createElement("span");
-      name.textContent = ROUTES[button.dataset.route].name;
-      const endpoints = document.createElement("small");
-      endpoints.textContent = entry.endpoints;
-      label.append(name, endpoints);
-      button.replaceChildren(button.firstElementChild, label);
-      button.title = `${entry.title}（${entry.endpoints}）`;
+  function closeCouplingPicker() {
+    couplingPickerOpen=false;selectScreen.classList.add('hidden');
+    document.body.classList.remove('choosing-car');
+    selectScreen.removeAttribute('role');selectScreen.removeAttribute('aria-modal');
+    for(const element of pickerInertElements)element.inert=false;
+    pickerInertElements=[];
+    for(const id of ['recommended-trains','recent-trains','all-trains'])document.getElementById(id).replaceChildren();
+    updateRunningSound();document.getElementById('btn-choose-car').focus();
+  }
+  document.getElementById('btn-choose-car').addEventListener('click',()=>{
+    couplingPickerOpen=true;stopRunningSound();selectScreen.classList.remove('hidden');
+    document.body.classList.add('choosing-car');
+    selectScreen.setAttribute('role','dialog');selectScreen.setAttribute('aria-modal','true');
+    pickerInertElements=[...document.body.children].filter(el=>el!==selectScreen&&!el.inert);
+    for(const element of pickerInertElements)element.inert=true;
+    showTrainSelection(selectedRouteKey,true);btnBackToRoutes.focus();
+  });
+  btnBackToRoutes.addEventListener('click',()=>couplingPickerOpen?closeCouplingPicker():showRouteSelection());
+  selectScreen.addEventListener('keydown',event=>{
+    if(couplingPickerOpen&&event.key==='Escape'){event.preventDefault();closeCouplingPicker();}
+  });
+  routeSelectPage.addEventListener('click',event=>{
+    const button=event.target.closest('.route-btn');if(!button)return;
+    ensureAudio();selectedRouteKey=button.dataset.route;activeRoute=ROUTES[selectedRouteKey];
+    choices.remember('routes',selectedRouteKey);say(`${activeRoute.name}！`);showTrainSelection(selectedRouteKey);
+  });
+  trainSelectPage.addEventListener('click',event=>{
+    const button=event.target.closest('.train-btn');if(!button)return;
+    ensureAudio();const key=button.dataset.train;
+    if(couplingPickerOpen) {
+      addCar(key);
+      choices.state.coupling=[key,...choices.state.coupling.filter(k=>k!==key)].slice(0,9);
+      choices.remember('trains',key);populateQuickAddButtons();closeCouplingPicker();
+    } else {
+      startGame(key);
+      for(const id of ['recommended-trains','recent-trains','all-trains'])document.getElementById(id).replaceChildren();
     }
   });
-  filterRouteChoices();
-  arrangeRecentRoutes();
-  updateChoiceNames();
-  btnBackToRoutes.addEventListener("click", showRouteSelection);
+  buildRouteFilters();filterRouteChoices();updateChoiceNames();
 
-  // ---- 入力 ----
-  document.querySelectorAll(".route-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      ensureAudio();
-      selectedRouteKey = btn.dataset.route;
-      activeRoute = ROUTES[selectedRouteKey];
-      choices.remember("routes", selectedRouteKey);
-      document.querySelectorAll(".route-btn").forEach((routeButton) => {
-        const selected = routeButton === btn;
-        routeButton.classList.toggle("selected", selected);
-        routeButton.setAttribute("aria-pressed", String(selected));
-      });
-      say(`${activeRoute.name}！`);
-      showTrainSelection(selectedRouteKey);
-    });
-  });
-
-  document.querySelectorAll(".train-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      ensureAudio();
-      startGame(btn.dataset.train);
-    });
-  });
 
   function currentTapBoostKmh() {
     const passengerBonus = deliveredPassengers * PASSENGER_TAP_BONUS_KMH;
@@ -6529,6 +6462,7 @@ function drawAirports() {
     const rawDt = Math.max(0, (now - lastT) / 1000);
     const dt = Math.min(rawDt, 0.05);
     lastT = now;
+    if(state==='select'||couplingPickerOpen){scheduleFrame();return;}
     if (state !== "select" && !document.hidden) {
       playElapsedSeconds += Math.min(rawDt, 1);
       updatePlayTimer();

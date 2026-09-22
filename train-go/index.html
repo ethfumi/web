@@ -11,7 +11,7 @@
 <meta property="og:title" content="つなげて！でんしゃ！">
 <meta property="og:description" content="好きな電車をつなげて、実際の駅や景色を走ろう。小さな子どもから遊べる、でんしゃ連結ゲーム。">
 <meta property="og:url" content="https://ethfumi.github.io/web/train-go/">
-<meta property="og:image" content="https://ethfumi.github.io/web/train-go/og.png?v=126">
+<meta property="og:image" content="https://ethfumi.github.io/web/train-go/og.png?v=127">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -20,12 +20,12 @@
 <meta name="twitter:creator" content="@fumilin">
 <meta name="twitter:title" content="つなげて！でんしゃ！">
 <meta name="twitter:description" content="好きな電車をつなげて、実際の駅や景色を走ろう。小さな子どもから遊べる、でんしゃ連結ゲーム。">
-<meta name="twitter:image" content="https://ethfumi.github.io/web/train-go/og.png?v=126">
+<meta name="twitter:image" content="https://ethfumi.github.io/web/train-go/og.png?v=127">
 <meta name="twitter:image:alt" content="上下の線路を長い新幹線と、いろいろな車両をつないだ電車が走るゲーム画面">
 <title>つなげて！でんしゃ！</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="stylesheet" href="style.css?v=126">
+<link rel="stylesheet" href="style.css?v=127">
 </head>
 <body class="loading">
 <canvas id="game"></canvas>
@@ -70,10 +70,17 @@
     <button class="route-btn" data-route="keio" aria-pressed="false"><span>🟥</span>けいおうせん</button>
     <button class="route-btn" data-route="inokashira" aria-pressed="false"><span>🌈</span>いのかしらせん</button>
   </div>
+  <button id="route-more" class="catalog-more" type="button">もっと みる</button>
   </section>
   <section id="train-select-page" class="select-page hidden">
   <button id="btn-back-to-routes" type="button" aria-label="ろせんえらびにもどる">← もどる</button>
-  <div class="trip-settings">
+  <div id="vehicle-select-title" class="train-select-title">どの でんしゃに のる？</div>
+  <section id="recommended-train-section" class="recent-choices" aria-label="おすすめののりもの">
+    <h2>⭐ この ろせんの おすすめ</h2>
+    <div id="recommended-trains" class="train-buttons"></div>
+  </section>
+  <details class="trip-settings">
+    <summary>いきさき・はしるむきを えらぶ</summary>
     <label for="trip-course">はしる コース</label>
     <select id="trip-course"></select>
     <div id="trip-direction" role="group" aria-label="はしるむき">
@@ -81,14 +88,20 @@
       <button id="trip-reverse" type="button" aria-pressed="false"></button>
     </div>
     <p id="trip-summary"></p>
+  </details>
+  <div id="train-browser" class="route-browser">
+    <label for="train-filter">ほかの のりものを さがす</label>
+    <select id="train-filter" aria-label="車両の種類や地域で絞る"></select>
+    <input id="train-search" type="search" placeholder="ろせん・しゃりょうで さがす" aria-label="車両を名前で探す" autocomplete="off">
+    <p id="train-result-count" role="status" aria-live="polite"></p>
   </div>
-  <div id="vehicle-select-title" class="train-select-title">どの でんしゃに のる？</div>
   <section id="recent-train-section" class="recent-choices hidden" aria-label="さいきんののりもの">
     <h2>さいきんの のりもの</h2>
     <div id="recent-trains" class="train-buttons"></div>
   </section>
   <div id="all-trains" class="train-buttons">
   </div>
+  <button id="train-more" class="catalog-more" type="button">もっと みる</button>
   </section>
   <div id="release-info">
     <small class="data-credits">うんちんは ゲームようの めやすです。<br>ふねの うすいあおのせんは さんこうひょうじです。</small>
@@ -97,13 +110,14 @@
     港名補完：<a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-S10a-2016.html">国土数値情報（2016年・加工）</a><br>
     <a href="https://github.com/ethfumi/web/blob/master/train-go/data/README.md">収録範囲・出典・未確認箇所</a></small>
     <!-- 更新時は sw.js の CACHE バージョンと揃える -->
-    <div id="app-version" aria-label="つなげて！でんしゃ！、バージョン126、2026年9月23日更新">
+    <div id="app-version" aria-label="つなげて！でんしゃ！、バージョン127、2026年9月23日更新">
       <span class="version-title">つなげて！でんしゃ！</span>
-      <strong>v126</strong><span>2026.09.23 更新</span>
+      <strong>v127</strong><span>2026.09.23 更新</span>
     </div>
     <details id="update-history">
       <summary>🆕 こうしん</summary>
       <div class="update-history-list" aria-label="こうしんりれき">
+        <span><time datetime="2026-09-23">9/23</time> おすすめが いちばんうえ。でんしゃを さがしてつなげよう</span>
         <span><time datetime="2026-09-23">9/23</time> ちずを かるくした。となりのくにの りくちもつながった</span>
         <span><time datetime="2026-09-23">9/23</time> もじ・ズームそうさをかいぜん。ちずに しま・やま・たかさをついか</span>
         <span><time datetime="2026-09-23">9/23</time> かわの ながれと うみをしゅうせい。えきめいも さらにみやすく</span>
@@ -188,6 +202,8 @@
 
 <!-- 走行画面の操作ボタン -->
 <div id="run-ui" class="hidden">
+  <button id="btn-choose-car" type="button" aria-label="連結する車両を選ぶ"><span>🚃</span><small>えらぶ</small></button>
+  <div id="quick-add-options">
   <button class="btn-quick-add" data-slot="0"><span class="quick-train-art"></span><span class="quick-plus">＋</span></button>
   <button class="btn-quick-add" data-slot="1"><span class="quick-train-art"></span><span class="quick-plus">＋</span></button>
   <button class="btn-quick-add" data-slot="2"><span class="quick-train-art"></span><span class="quick-plus">＋</span></button>
@@ -197,6 +213,7 @@
   <button class="btn-quick-add" data-slot="6"><span class="quick-train-art"></span><span class="quick-plus">＋</span></button>
   <button class="btn-quick-add" data-slot="7"><span class="quick-train-art"></span><span class="quick-plus">＋</span></button>
   <button class="btn-quick-add" data-slot="8"><span class="quick-train-art"></span><span class="quick-plus">＋</span></button>
+  </div>
   <button id="btn-couple" class="btn-quick-add" aria-label="いまの車両を連結"><span class="quick-train-art"></span><span class="quick-plus">＋</span></button>
   <button id="btn-remove" aria-label="きりはなす">🚃−</button>
 </div>
@@ -304,7 +321,7 @@
   <span>🔦</span><span id="headlight-label">ライトをつける</span>
 </button>
 
-<script src="loader.js?v=126"></script>
+<script src="loader.js?v=127"></script>
 <!-- Cloudflare Web Analytics: Cookieを使用せず、個人を識別しないアクセス集計 -->
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"ca5e1fbb318447b3ac9409f3da1cad2a"}'></script>
 </body>
