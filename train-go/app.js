@@ -2507,28 +2507,8 @@
   const routeSearchTexts = new Map(catalogRouteKeys.map(key=>[key,catalog.normalize(
     [ROUTES[key].name,routeCatalog[key]?.title,routeCatalog[key]?.search,
       ROUTES[key].start,...ROUTES[key].stations.map(s=>s.name)].join(' '))]));
-  let routeRegion='all', routeLimit=24, trainLimit=18, couplingPickerOpen=false;
+  let routeRegion='all', couplingPickerOpen=false;
   let pickerInertElements=[];
-  let catalogFillFrame=0;
-  function queueCatalogFill() {
-    if(catalogFillFrame)return;
-    catalogFillFrame=requestAnimationFrame(()=>{
-      catalogFillFrame=0;
-      if(selectScreen.classList.contains('hidden'))return;
-      const bottom=selectScreen.getBoundingClientRect().bottom+240;
-      for(const [pageId,endId,load] of [
-        ['route-select-page','route-end',()=>{routeLimit+=24;filterRouteChoices(false,true);}],
-        ['train-select-page','train-end',()=>{trainLimit+=18;renderTrainChoices(false,true);}],
-      ]) {
-        const end=document.getElementById(endId);
-        if(!document.getElementById(pageId).classList.contains('hidden')
-          && !end.classList.contains('hidden') && end.getBoundingClientRect().top<=bottom)load();
-      }
-    });
-  }
-  selectScreen.addEventListener('scroll',queueCatalogFill,{passive:true});
-  window.addEventListener('resize',queueCatalogFill);
-
   function makeRouteButton(key) {
     const button=document.createElement('button');
     button.className='route-btn';button.dataset.route=key;
@@ -2543,8 +2523,7 @@
     return button;
   }
 
-  function filterRouteChoices(reset=true,append=false) {
-    if(reset)routeLimit=24;
+  function filterRouteChoices() {
     const keys=catalogRouteKeys.filter(key=>{
       const entry=routeCatalog[key],kind=ROUTES[key].kind;
       const region=routeRegion==='all' || (routeRegion==='air'?kind==='air'
@@ -2552,16 +2531,13 @@
         :routeRegion==='through'?entry?.through:entry?.regions.includes(routeRegion));
       return region&&catalog.matches(routeSearchTexts.get(key),routeSearch.value);
     });
-    const group=catalog.groups(keys,choices.state.routes,null,routeLimit);
-    if(!append)document.getElementById('recent-routes').replaceChildren(...group.recent.map(makeRouteButton));
+    const group=catalog.groups(keys,choices.state.routes,null);
+    document.getElementById('recent-routes').replaceChildren(...group.recent.map(makeRouteButton));
     const all=document.getElementById('all-routes');
-    if(append)all.append(...group.items.slice(all.children.length).map(makeRouteButton));
-    else all.replaceChildren(...group.items.map(makeRouteButton));
+    all.replaceChildren(...group.items.map(makeRouteButton));
     document.getElementById('recent-route-section').classList.toggle('hidden',!group.recent.length);
-    document.getElementById('route-end').classList.toggle('hidden',!group.hasMore);
-    routeResultCount.textContent=keys.length?`${keys.length} コース・${group.items.length+group.recent.length} ひょうじ`:'みつからないよ。ことばや ちいきを かえてみてね';
+    routeResultCount.textContent=keys.length?`${keys.length} コース`:'みつからないよ。ことばや ちいきを かえてみてね';
     document.getElementById('route-search-clear').disabled=!routeSearch.value;
-    queueCatalogFill();
   }
 
   function buildRouteFilters() {
@@ -2632,19 +2608,29 @@
     return model?`${nameResolver.model(model,choices.state.nameMode)}\n${display}`:display.replace(/のでんしゃ$/,'');
   }
   const trainSearchTexts=new Map(TRAIN_SELECTION_ORDER.map(key=>[key,catalog.normalize(
-    [TRAINS[key].name,TRAINS[key].callName,tripOptions.MODEL_LABELS[key],routeCatalog[key]?.title,ROUTES[key]?.name,
+    [TRAINS[key].name,TRAINS[key].callName,tripOptions.MODEL_LABELS[key],catalog.TRAIN_SEARCH_ALIASES[key],routeCatalog[key]?.title,ROUTES[key]?.name,
       ...(trainMetadata.get(key)||[]).flatMap(m=>[routeCatalog[m.key]?.title,ROUTES[m.key]?.name])].join(' '))]));
+  const trainPreviewObserver=typeof IntersectionObserver==='function'?new IntersectionObserver(entries=>{
+    for(const {target,isIntersecting} of entries) {
+      if(!target.isConnected)continue;
+      const preview=target.querySelector('.train-preview');
+      if(isIntersecting&&!preview.firstChild)preview.appendChild(createVehiclePreview(TRAINS[target.dataset.train]));
+      else if(!isIntersecting)preview.replaceChildren();
+    }
+  },{root:selectScreen,rootMargin:'240px'}):null;
   function makeTrainButton(key,recommended=false) {
     const button=document.createElement('button');button.className='train-btn';button.dataset.train=key;
     button.classList.toggle('recommended',recommended);
-    const preview=document.createElement('span');preview.className='train-preview';preview.appendChild(createVehiclePreview(TRAINS[key]));
+    const preview=document.createElement('span');preview.className='train-preview';
+    if(trainPreviewObserver)trainPreviewObserver.observe(button);
+    else preview.appendChild(createVehiclePreview(TRAINS[key]));
     const caption=document.createElement('span');caption.className='train-caption';caption.textContent=trainCaption(key);
     button.append(preview,caption);button.title=caption.textContent.replace('\n','・');
     button.setAttribute('aria-label',button.title+(couplingPickerOpen?'を連結':''));
     return button;
   }
-  function renderTrainChoices(reset=true,append=false) {
-    if(reset)trainLimit=18;
+  function renderTrainChoices() {
+    trainPreviewObserver?.disconnect();
     const keys=TRAIN_SELECTION_ORDER.filter(key=>{
       const kind=TRAINS[key].kind;
       const allowed=couplingPickerOpen?isCoupleableTrainKey(key):isAirRoute()?kind==='airplane':isSeaRoute()?kind==='ferry':isCoupleableTrainKey(key);
@@ -2653,17 +2639,14 @@
         :(trainMetadata.get(key)||[{key}]).some(m=>routeCatalog[m.key]?.regions.includes(category)));
       return allowed&&region&&catalog.matches(trainSearchTexts.get(key),trainSearch.value);
     });
-    const group=catalog.groups(keys,choices.state.trains,routeTrainKey(selectedRouteKey),trainLimit);
-    if(!append)document.getElementById('recommended-trains').replaceChildren(...group.recommended.map(key=>makeTrainButton(key,true)));
+    const group=catalog.groups(keys,choices.state.trains,routeTrainKey(selectedRouteKey));
+    document.getElementById('recommended-trains').replaceChildren(...group.recommended.map(key=>makeTrainButton(key,true)));
     document.getElementById('recommended-train-section').classList.toggle('hidden',!group.recommended.length);
-    if(!append)document.getElementById('recent-trains').replaceChildren(...group.recent.map(key=>makeTrainButton(key)));
+    document.getElementById('recent-trains').replaceChildren(...group.recent.map(key=>makeTrainButton(key)));
     document.getElementById('recent-train-section').classList.toggle('hidden',!group.recent.length);
     const all=document.getElementById('all-trains');
-    if(append)all.append(...group.items.slice(all.children.length).map(key=>makeTrainButton(key)));
-    else all.replaceChildren(...group.items.map(key=>makeTrainButton(key)));
-    document.getElementById('train-end').classList.toggle('hidden',!group.hasMore);
-    document.getElementById('train-result-count').textContent=keys.length?`${keys.length} しゅるい・${group.recommended.length+group.recent.length+group.items.length} ひょうじ`:'みつからないよ。ことばや ちいきを かえてみてね';
-    queueCatalogFill();
+    all.replaceChildren(...group.items.map(key=>makeTrainButton(key)));
+    document.getElementById('train-result-count').textContent=keys.length?`${keys.length} しゅるい`:'みつからないよ。ことばや ちいきを かえてみてね';
   }
   trainSearch.addEventListener('input',()=>renderTrainChoices());
   trainFilter.addEventListener('change',()=>renderTrainChoices());
@@ -2711,8 +2694,8 @@
 
 
   function updateChoiceNames() {
-    if(!routeSelectPage.classList.contains('hidden'))filterRouteChoices(false);
-    if(!trainSelectPage.classList.contains('hidden'))renderTrainChoices(false);
+    if(!routeSelectPage.classList.contains('hidden'))filterRouteChoices();
+    if(!trainSelectPage.classList.contains('hidden'))renderTrainChoices();
     const target=choices.state.nameMode==='kana'?'漢字':'ひらがな';
     document.getElementById('select-name-mode').textContent=target;
     document.querySelector('#game-name-mode span:first-child').textContent=target==='漢字'?'漢':'あ';
@@ -2754,8 +2737,9 @@
     renderTotalTravelDistance();renderTotalMoney();
     routeSelectPage.classList.remove('hidden');trainSelectPage.classList.add('hidden');
     selectScreen.classList.remove('selecting-train');selectScreen.scrollTop=0;
+    trainPreviewObserver?.disconnect();
     for(const id of ['recommended-trains','recent-trains','all-trains'])document.getElementById(id).replaceChildren();
-    filterRouteChoices();updateChoiceNames();
+    updateChoiceNames();
   }
   function showTrainSelection(routeKey,keepGroup=false) {
     if(!keepGroup)routeChoiceGroupKey=routeKey;
@@ -2775,6 +2759,7 @@
     selectScreen.removeAttribute('role');selectScreen.removeAttribute('aria-modal');
     for(const element of pickerInertElements)element.inert=false;
     pickerInertElements=[];
+    trainPreviewObserver?.disconnect();
     for(const id of ['recommended-trains','recent-trains','all-trains'])document.getElementById(id).replaceChildren();
     if(state==='running')startRunningSound();
     updateRunningSound();document.getElementById('btn-choose-car').focus();
@@ -2805,10 +2790,11 @@
       choices.remember('trains',key);populateQuickAddButtons();closeCouplingPicker();
     } else {
       startGame(key);
+      trainPreviewObserver?.disconnect();
       for(const id of ['recommended-trains','recent-trains','all-trains'])document.getElementById(id).replaceChildren();
     }
   });
-  buildRouteFilters();filterRouteChoices();updateChoiceNames();
+  buildRouteFilters();updateChoiceNames();
 
 
   function currentTapBoostKmh() {
