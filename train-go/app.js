@@ -33,6 +33,7 @@
   const nameResolver = tripOptions.createNameResolver(window.TRAIN_GO_ROUTE_DATA);
   function stationLabel(name, key = activeRouteMapKey()) { return nameResolver.station(name, key, choices.state.nameMode); }
   function routeLabel(key = selectedRouteKey) { return nameResolver.route(key, choices.state.nameMode); }
+  function placeLabel(name) { return nameResolver.place(name,choices.state.nameMode); }
 
   function isAirRoute(route = activeRoute) {
     return route?.kind === "air";
@@ -2612,7 +2613,8 @@
     const routeKey=routeCatalog[key]?key:meta?.key;
     const description=model?type.name.replace(/の?しんかんせん$/,'').replace('きいろいけんさしゃ','けんさしゃ')
       :routeKey?routeLabel(routeKey):type.name;
-    return model?`${model}\n${description}`:description.replace(/のでんしゃ$/,'');
+    const display=choices.state.nameMode==='kana'?nameResolver.kana(description):description;
+    return model?`${nameResolver.model(model,choices.state.nameMode)}\n${display}`:display.replace(/のでんしゃ$/,'');
   }
   const trainSearchTexts=new Map(TRAIN_SELECTION_ORDER.map(key=>[key,catalog.normalize(
     [TRAINS[key].name,TRAINS[key].callName,tripOptions.MODEL_LABELS[key],routeCatalog[key]?.title,ROUTES[key]?.name,
@@ -2698,7 +2700,8 @@
     document.getElementById('select-name-mode').textContent=target;
     document.querySelector('#game-name-mode span:first-child').textContent=target==='漢字'?'漢':'あ';
     document.querySelector('#game-name-mode span:last-child').textContent=target;
-    for(const id of ['select-name-mode','game-name-mode'])document.getElementById(id).setAttribute('aria-label',`${target}表示に切り替える`);
+    document.getElementById('train-name-mode').textContent=target;
+    for(const id of ['select-name-mode','train-name-mode','game-name-mode'])document.getElementById(id).setAttribute('aria-label',`${target}表示に切り替える`);
   }
 
 
@@ -2726,6 +2729,7 @@
     updateChoiceNames();
   });
   document.getElementById("select-name-mode").addEventListener("click", switchNameMode);
+  document.getElementById('train-name-mode').addEventListener('click',switchNameMode);
   document.getElementById("game-name-mode").addEventListener("click", switchNameMode);
 
 
@@ -3788,7 +3792,7 @@
     for (const prefecture of MAP_GEOGRAPHY.prefectures) {
       const x = scene.screenCenterX + (mapWorldX(prefecture.lon) - scene.centerWorldX) * scene.scale;
       const y = scene.screenCenterY + (mapWorldY(prefecture.lat) - scene.centerWorldY) * scene.scale;
-      if (mapPointIsVisible(scene, x, y, 30)) ctx.fillText(prefecture.name, x, y);
+      if (mapPointIsVisible(scene, x, y, 30)) ctx.fillText(placeLabel(prefecture.name), x, y);
     }
     ctx.restore();
   }
@@ -3904,7 +3908,7 @@
       const y=scene.screenCenterY+(mapWorldY(lat)-scene.centerWorldY)*scene.scale;
       if (!mapPointIsVisible(scene,x,y)) continue;
       const size=Math.max(10,labelSize*(kind==='island'?.95:.78));
-      const title=(choices.state.nameMode==='kanji'?name:kana)+(elevation==null?'':' '+elevation+'m');
+      const title=(choices.state.nameMode==='kanji'?name:nameResolver.kana(kana))+(elevation==null?'':' '+elevation+'m');
       ctx.font='bold '+size+'px sans-serif';
       const width=measureMapText(title).width+6;
       const baseline=y-size*.6;
@@ -3931,19 +3935,7 @@
     const drawBorders = true;
     const drawWaterNames = true;
 
-    if (window.TRAIN_GO_REGIONAL_LAND) drawRegionalLand(scene);
-    else {
-      ctx.fillStyle = timeOfDay === "night" ? "#263f47" : "#e4f0cf";
-      ctx.strokeStyle = timeOfDay === "night" ? "rgba(139,180,185,0.72)" : "rgba(81,130,139,0.66)";
-      ctx.lineWidth = Math.max(1.2, Math.min(W, H) * 0.0023);
-      for (const coastline of MAP_GEOGRAPHY.coastlines) {
-        if (!geoLonLatPathIntersectsScene(scene, coastline)) continue;
-        drawMapGeoPath(scene, coastline);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-      }
-    }
+    drawRegionalLand(scene);
     drawMapWaterTiles(scene,true);
     drawMapTerrain(scene);
     drawMapWaterTiles(scene);
@@ -4019,20 +4011,20 @@
         const point = lake.points[Math.floor(lake.points.length / 2)];
         const x = scene.screenCenterX + (mapWorldX(point[0]) - scene.centerWorldX) * scene.scale;
         const y = scene.screenCenterY + (mapWorldY(point[1]) - scene.centerWorldY) * scene.scale;
-        if (mapPointIsVisible(scene, x, y, 20)) ctx.fillText(lake.name, x, y - 3);
+        if (mapPointIsVisible(scene, x, y, 20)) ctx.fillText(placeLabel(lake.name), x, y - 3);
       }
       for (const river of MAP_GEOGRAPHY.rivers) {
         const point = river.points[Math.floor(river.points.length / 2)];
         const x = scene.screenCenterX + (mapWorldX(point[0]) - scene.centerWorldX) * scene.scale;
         const y = scene.screenCenterY + (mapWorldY(point[1]) - scene.centerWorldY) * scene.scale;
-        if (mapPointIsVisible(scene, x, y, 20)) ctx.fillText(river.name, x, y - 3);
+        if (mapPointIsVisible(scene, x, y, 20)) ctx.fillText(placeLabel(river.name), x, y - 3);
       }
       {
         for (const moat of MAP_GEOGRAPHY.moats) {
           const point = moat.points[1];
           const x = scene.screenCenterX + (mapWorldX(point[0]) - scene.centerWorldX) * scene.scale;
           const y = scene.screenCenterY + (mapWorldY(point[1]) - scene.centerWorldY) * scene.scale;
-          if (mapPointIsVisible(scene, x, y, 30)) ctx.fillText(moat.name, x, y - 4);
+          if (mapPointIsVisible(scene, x, y, 30)) ctx.fillText(placeLabel(moat.name), x, y - 4);
         }
       }
     }
@@ -4373,9 +4365,9 @@
       const nameSize = Math.max(8, labelSize * 0.68);
       const nameY = y + labelSize * 0.95;
       ctx.font = "bold " + nameSize + "px sans-serif";
-      if (!claimMapLabelBox(x, nameY + nameSize / 2, measureMapText(landmark.name).width + nameSize * 0.4, nameSize)) continue;
+      if (!claimMapLabelBox(x, nameY + nameSize / 2, measureMapText(placeLabel(landmark.name)).width + nameSize * 0.4, nameSize)) continue;
       ctx.fillStyle = timeOfDay === "night" ? "#e9eef6" : "#51606f";
-      ctx.fillText(landmark.name, x, nameY);
+      ctx.fillText(placeLabel(landmark.name), x, nameY);
     }
     for (const landmark of MAP_GEOGRAPHY.landmarks) {
       if (window.TRAIN_GO_GEOGRAPHIC_LABELS && ['🗻','⛰️'].includes(landmark.icon)) continue;
@@ -4387,9 +4379,9 @@
       const nameSize = Math.max(9, labelSize * 0.72);
       const nameY = y + labelSize * 1.15;
       ctx.font = "bold " + nameSize + "px sans-serif";
-      if (!claimMapLabelBox(x, nameY + nameSize / 2, measureMapText(landmark.name).width + nameSize * 0.4, nameSize)) continue;
+      if (!claimMapLabelBox(x, nameY + nameSize / 2, measureMapText(placeLabel(landmark.name)).width + nameSize * 0.4, nameSize)) continue;
       ctx.fillStyle = timeOfDay === "night" ? "#eef5ff" : "#526578";
-      ctx.fillText(landmark.name, x, nameY);
+      ctx.fillText(placeLabel(landmark.name), x, nameY);
     }
     ctx.restore();
   }
