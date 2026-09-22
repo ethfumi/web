@@ -17,12 +17,27 @@ html, body {
   touch-action: manipulation;
 }
 
+body.loading #select-screen { visibility: hidden; }
+#load-status { position: fixed; inset: 40% 5% auto; text-align: center; font-size: 20px; color: #36516a; z-index: 50; }
+#load-status button { display: block; margin: 12px auto; padding: 12px 24px; }
+
 #game {
   position: fixed;
   inset: 0;
   width: 100%;
   height: 100%;
 }
+
+#map-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+#map-layer-controls { display: flex; gap: 5px; }
+#map-layer-controls button { padding: 8px; font-size: clamp(11px,1.7vmin,16px); min-height: 40px; border: 0; border-radius: 18px; background: #fff; color: #36516a; opacity: 0.65; }
+#map-layer-controls button[aria-pressed="true"] { background: #3674a9; color: #fff; opacity: 1; }
 
 .hidden {
   display: none !important;
@@ -235,7 +250,7 @@ html, body {
 
 .train-buttons {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.2vmin;
   width: min(92vw, 960px);
 }
@@ -247,7 +262,12 @@ html, body {
 
 .train-btn {
   display: flex;
-  aspect-ratio: 20 / 9;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  flex-direction: column;
+  min-height: 96px;
+  gap: 4px;
   align-items: center;
   justify-content: center;
   padding: 1.7vmin 3vmin;
@@ -271,10 +291,28 @@ html, body {
 
 .train-btn svg,
 .train-btn canvas {
-  width: 68%;
+  width: 100%;
   height: auto;
   flex-shrink: 0;
 }
+
+.train-preview { display: block; width: 84%; aspect-ratio: 20 / 7; }
+.train-caption {
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  overflow: hidden; white-space: pre-line; min-height: 2.4em; width: 100%;
+  line-height: 1.2; font-size: clamp(12px,1.8vmin,17px); font-weight: bold; color: #36516a;
+}
+.recent-choices { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.recent-choices h2 { font-size: clamp(14px,2.3vmin,21px); color: #36516a; }
+.name-mode-toggle { align-self: flex-end; min-height: 44px; padding: 8px 18px; border: 0; border-radius: 22px; background: #fff; color: #36516a; font: inherit; font-weight: bold; }
+.trip-settings { width: min(92vw,780px); padding: 14px; border-radius: 18px; background: rgba(255,255,255,.8); color: #36516a; }
+.trip-settings label { display: block; font-weight: bold; margin-bottom: 8px; }
+#trip-course { width: 100%; min-height: 44px; font: inherit; font-size: 16px; border-radius: 10px; border: 1px solid #9cb7cc; background: #fff; color: #36516a; padding: 8px; }
+#trip-course:disabled { opacity: 1; }
+#trip-direction { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; margin-top: 12px; }
+#trip-direction button { padding: 10px; min-height: 48px; font: inherit; font-weight: bold; font-size: clamp(13px,2vmin,18px); border: 2px solid #90aec7; border-radius: 12px; background: #fff; color: #36516a; overflow-wrap: anywhere; }
+#trip-direction button[aria-pressed="true"] { background: #2761a3; border-color: #2761a3; color: #fff; }
+#trip-summary { margin-top: 10px; font-size: 13px; text-align: center; }
 
 
 #release-info {

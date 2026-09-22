@@ -80,7 +80,7 @@ def build():
             row = {'key':key, 'sourceCode':line['code'], 'name':name,
                    'title':line['name'], 'color':line.get('color', '#3478c4'),
                    **style_for(line, config), 'regions':regions_for(prefs),
-                   'stationNames':[s[0] for s in stations], 'stationCodes':ids, 'p':points}
+                   'stationNames':[s[0] for s in stations], 'p':points}
             if key in preserve:
                 row['preserve'] = True
             if spec.get('loop'):

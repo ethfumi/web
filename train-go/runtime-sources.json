@@ -1,0 +1,14 @@
+[
+  "train-route-data.js",
+  "national-rail-route-data.js",
+  "kanto-rail-route-data.js",
+  "all-rail-route-data.js",
+  "through-route-data.js",
+  "air-route-data.js",
+  "sea-route-data.js",
+  "fare-data.js",
+  "map-data.js",
+  "map-water-data.js",
+  "trip-options.js",
+  "app.js"
+]
