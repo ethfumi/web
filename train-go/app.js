@@ -127,6 +127,7 @@
   Object.assign(ROUTE_COLORS, Object.fromEntries(
     (window.TRAIN_GO_ROUTE_DATA?.metadata || []).map(({key,color}) => [key,color]),
   ));
+  Object.assign(ROUTE_COLORS,Object.fromEntries(Object.entries(window.TRAIN_GO_MAP_DATA.maps).map(([key,map])=>[key,map.color])));
   const {
     maps: ROUTE_MAPS,
     drawOrder: MAP_ROUTE_DRAW_ORDER,
@@ -135,13 +136,6 @@
   } = window.TRAIN_GO_MAP_DATA;
   // 地図投影の基準は首都圏。路線・地形の座標本体は map-data.js に置く。
   const YAMANOTE_MAP_BOUNDS = { minLon: 139.689, maxLon: 139.791, minLat: 35.609, maxLat: 35.748 };
-  const YAMANOTE_MAP_LANDMARKS = [
-    { icon: "🏯", name: "こうきょ", lon: 139.7528, lat: 35.6852 },
-    { icon: "🌳", name: "うえのこうえん", lon: 139.7730, lat: 35.7167 },
-    { icon: "🌲", name: "めいじじんぐう", lon: 139.6993, lat: 35.6764 },
-    { icon: "🗼", name: "とうきょうタワー", lon: 139.7454, lat: 35.6586 },
-    { icon: "🌊", name: "とうきょうわん", lon: 139.7780, lat: 35.6310 },
-  ];
   const MAP_METERS_PER_LATITUDE = 111320;
   const MAP_REFERENCE_LATITUDE = (YAMANOTE_MAP_BOUNDS.minLat + YAMANOTE_MAP_BOUNDS.maxLat) / 2;
   const MAP_METERS_PER_LONGITUDE = MAP_METERS_PER_LATITUDE * Math.cos(MAP_REFERENCE_LATITUDE * Math.PI / 180);
@@ -4055,20 +4049,6 @@
 
     drawMapPrefectureLabels(scene);
 
-    if (scene.mode === "follow") {
-      const palaceX = scene.screenCenterX + (mapWorldX(139.7528) - scene.centerWorldX) * scene.scale;
-      const palaceY = scene.screenCenterY + (mapWorldY(35.6852) - scene.centerWorldY) * scene.scale;
-      if (mapPointIsVisible(scene, palaceX, palaceY, 50)) {
-        ctx.fillStyle = timeOfDay === "night" ? "#315842" : "#a7d58b";
-        ctx.beginPath();
-        ctx.ellipse(
-          palaceX, palaceY,
-          Math.min(58, 480 * scene.scale), Math.min(44, 360 * scene.scale),
-          -0.15, 0, Math.PI * 2,
-        );
-        ctx.fill();
-      }
-    }
   }
 
   function drawYamanoteRelatedLines(scene, labelSize) {
@@ -4112,9 +4092,9 @@
       strokeGroups.get(key).lines.push(candidate);
     }
     ctx.stroke();
-    ctx.globalAlpha = 0.76;
     ctx.lineWidth = routeWidth;
     for (const group of strokeGroups.values()) {
+      ctx.globalAlpha = group.dashed ? .76 : 1;
       ctx.strokeStyle = group.color;
       ctx.setLineDash(group.dashed ? [routeWidth * 3, routeWidth * 2] : []);
       ctx.beginPath();
@@ -4374,38 +4354,27 @@
     ctx.restore();
   }
 
-  function drawYamanoteLandmarks(scene, labelSize) {
-    ctx.save();
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    for (const landmark of YAMANOTE_MAP_LANDMARKS) {
-      if (window.TRAIN_GO_GEOGRAPHIC_LABELS && ['🗻','⛰️'].includes(landmark.icon)) continue;
-      const x = scene.screenCenterX + (mapWorldX(landmark.lon) - scene.centerWorldX) * scene.scale;
-      const y = scene.screenCenterY + (mapWorldY(landmark.lat) - scene.centerWorldY) * scene.scale;
-      if (!mapPointIsVisible(scene, x, y, 50)) continue;
-      ctx.font = (labelSize * 1.25) + "px sans-serif";
-      ctx.fillText(landmark.icon, x, y - labelSize * 0.3);
-      // 名前が駅名とぶつかる時はアイコンだけ残す。駅名は先に場所を取っている。
-      const nameSize = Math.max(8, labelSize * 0.68);
-      const nameY = y + labelSize * 0.95;
-      ctx.font = "bold " + nameSize + "px sans-serif";
-      if (!claimMapLabelBox(x, nameY + nameSize / 2, measureMapText(placeLabel(landmark.name)).width + nameSize * 0.4, nameSize)) continue;
-      ctx.fillStyle = timeOfDay === "night" ? "#e9eef6" : "#51606f";
-      ctx.fillText(placeLabel(landmark.name), x, nameY);
-    }
-    for (const landmark of MAP_GEOGRAPHY.landmarks) {
-      if (window.TRAIN_GO_GEOGRAPHIC_LABELS && ['🗻','⛰️'].includes(landmark.icon)) continue;
-      const x = scene.screenCenterX + (mapWorldX(landmark.lon) - scene.centerWorldX) * scene.scale;
-      const y = scene.screenCenterY + (mapWorldY(landmark.lat) - scene.centerWorldY) * scene.scale;
-      if (!mapPointIsVisible(scene, x, y, 60)) continue;
-      ctx.font = Math.max(18, labelSize * 1.7) + "px sans-serif";
-      ctx.fillText(landmark.icon, x, y - labelSize * 0.3);
-      const nameSize = Math.max(9, labelSize * 0.72);
-      const nameY = y + labelSize * 1.15;
-      ctx.font = "bold " + nameSize + "px sans-serif";
-      if (!claimMapLabelBox(x, nameY + nameSize / 2, measureMapText(placeLabel(landmark.name)).width + nameSize * 0.4, nameSize)) continue;
-      ctx.fillStyle = timeOfDay === "night" ? "#eef5ff" : "#526578";
-      ctx.fillText(placeLabel(landmark.name), x, nameY);
+  function drawYamanoteLandmarks(scene,labelSize) {
+    ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';
+    for(const landmark of window.TRAIN_GO_LANDMARKS) {
+      const x=scene.screenCenterX+(mapWorldX(landmark.lon)-scene.centerWorldX)*scene.scale;
+      const y=scene.screenCenterY+(mapWorldY(landmark.lat)-scene.centerWorldY)*scene.scale;
+      if(!mapPointIsVisible(scene,x,y,50))continue;
+      const name=choices.state.nameMode==='kanji'?landmark.name:landmark.kana;
+      const size=Math.max(10,labelSize*(landmark.icon ? .72 : .85));
+      if(landmark.icon) {
+        ctx.font=(labelSize*1.25)+'px sans-serif';ctx.fillText(landmark.icon,x,y-labelSize*.3);
+      }
+      ctx.font='bold '+size+'px sans-serif';
+      const width=measureMapText(name).width+6;
+      const positions=landmark.icon?[[x,y+labelSize*.95],[x,y-labelSize*1.3],[x+width/2+labelSize,y],[x-width/2-labelSize,y]]:[[x,y]];
+      const position=positions.find(([px,py])=>claimMapLabelBox(px,py+size/2,width,size));
+      if(!position)continue;
+      const [nameX,nameY]=position;
+      ctx.lineWidth=3;ctx.strokeStyle=timeOfDay==='night'?'#263f47':'rgba(245,249,233,.9)';
+      ctx.strokeText(name,nameX,nameY);
+      ctx.fillStyle=timeOfDay==='night'?'#e9eef6':landmark.icon?'#51606f':'#327798';
+      ctx.fillText(name,nameX,nameY);
     }
     ctx.restore();
   }

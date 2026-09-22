@@ -6,6 +6,7 @@
 [国土地理院コンテンツ利用規約](https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html)に基づき、出典と加工を明示して使用する。
 全国の収録駅・空港・港があるタイルとその周囲をzoom 8/10で収録し、海・湖・主要河川を描く。鉄道のない離島にも水域を補い、北海道から沖縄・小笠原まで同じ基準を使う。
 海岸は約200m相当の幾何簡略化を施し、港・空港の周辺500mでは約50m相当の形状を残す。川は流れをたどれる簡略線を主体にし、幅の広い川・湖は面で描く。これは元データの測量精度や川幅を保証する表示ではない。
+皇居と外堀周辺（東経139.72〜139.772度・北緯35.67〜35.708度）は、細い堀を線へ変換せず、水面を約10〜15m相当の簡略化で残す。精細化する範囲を限定し、全国の川には既存の簡略表示を使う。
 小さな独立水域（0.01平方km未満）は省略し、海岸・川がタイル境界で切れないよう境界に接する水域は残す。詳細タイルの下に隠れる広域形状は配布データから除く。
 海上の空タイルや詳細タイルを切り抜いた穴が四角い陸地にならないよう、Natural Earth 1:10mの陸域を簡略化した `land-mask.json` で陸の描画範囲を制限する。実際の海岸線は国土地理院の水域で描く。
 データは緯度経度を整数差分で格納し、表示範囲だけをPath2Dへ変換・再利用する。ゲーム中に地図サーバーへ接続しない。
@@ -36,11 +37,17 @@ node --test train-go/tests/*.test.cjs
 
 ## 標高と地名
 
+名所は既存の東京の4地点に、北海道から沖縄まで34地点を追加する。`data/landmarks.json` にOpenStreetMapの位置の出典・漢字名・読みを保存し、`tools/build-landmarks.py` で `landmark-data.js` を生成する。表示は駅名を優先する。東京湾は水面上に文字だけで表示する。
+
 表示の漢字・ひらがな切替は駅・路線・県・川・湖・ランドマーク・車両形式に適用する。駅の記録キーは変更しない。加志々の表示読みは[対馬市の運賃表](https://www.city.tsushima.nagasaki.jp/gyousei/soshiki/nakatsushima/chiikisinkou/tokaisen/849.html)の「かしし」を使用する。英語のみの一般施設名はひらがなモードで説明を訳す。
 
 `terrain-data.js` は[国土地理院の標高タイル（DEM10B）](https://maps.gsi.go.jp/development/demtile.html)を約2km間隔・50m刻みへ間引いた標高の色分け。山地と平地の目安を示し、細かな起伏や地点ごとの正確な標高は表さない。`tools/build-terrain.py` で生成し、描画画像はタイルごとに再利用する。
 
 `geographic-label-data.js` は島名324件と山頂名・標高1,059件を収録する。島名は同じ国土地理院ベクトルタイル、山頂は[日本の主な山岳標高（2026年3月31日版）](https://web2.gsi.go.jp/kihonjohochousa/kihonjohochousa41139.html)の1,003山の山頂レコードを使用する。原資料は `geographic-labels.json` と `mountains.json`、生成は `tools/build-geographic-labels.py`。駅名を優先して空いている場所へ表示し、漢字・ひらがな設定に合わせる。
+
+## 路線色
+
+地図の線色はstation_databaseの路線色を元に、同じ路線コードのコース・支線で統一する。東京メトロは[公式の路線記号基本カラー（9ページ）](https://www.tokyometro.jp/support/trademark/pdf/guideline.pdf)、三田線は[東京都交通局の案内](https://www.kotsu.metro.tokyo.jp/subway/mita/)を参照した画面用RGB近似色で補正する。印刷用DIC値そのものの再現ではない。設定は `line-color-overrides.json`、生成は `tools/build-line-colors.py`。色のある427路線コードに適用し、色未収録の路線は既存表示を保つ。鉄道線は背景に混ぜず不透明で描く。
 
 ## 収録範囲
 

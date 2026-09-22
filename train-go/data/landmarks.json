@@ -1,0 +1,311 @@
+{
+  "source": "OpenStreetMap contributors / ODbL 1.0",
+  "entries": [
+    {
+      "name": "札幌市時計台",
+      "kana": "さっぽろしとけいだい",
+      "icon": "🕰️",
+      "region": "hokkaido",
+      "lon": 141.35365,
+      "lat": 43.06256,
+      "source": "https://www.openstreetmap.org/way/64747104"
+    },
+    {
+      "name": "五稜郭",
+      "kana": "ごりょうかく",
+      "icon": "🏯",
+      "region": "hokkaido",
+      "lon": 140.75697,
+      "lat": 41.7968,
+      "source": "https://www.openstreetmap.org/way/180806137"
+    },
+    {
+      "name": "弘前城",
+      "kana": "ひろさきじょう",
+      "icon": "🏯",
+      "region": "tohoku",
+      "lon": 140.46366,
+      "lat": 40.60794,
+      "source": "https://www.openstreetmap.org/way/757850283"
+    },
+    {
+      "name": "中尊寺",
+      "kana": "ちゅうそんじ",
+      "icon": "⛩️",
+      "region": "tohoku",
+      "lon": 141.1036,
+      "lat": 39.00097,
+      "source": "https://www.openstreetmap.org/way/1023510974"
+    },
+    {
+      "name": "瑞鳳殿",
+      "kana": "ずいほうでん",
+      "icon": "⛩️",
+      "region": "tohoku",
+      "lon": 140.86671,
+      "lat": 38.25047,
+      "source": "https://www.openstreetmap.org/way/1088998700"
+    },
+    {
+      "name": "鶴ヶ城",
+      "kana": "つるがじょう",
+      "icon": "🏯",
+      "region": "tohoku",
+      "lon": 139.92976,
+      "lat": 37.48771,
+      "source": "https://www.openstreetmap.org/way/24270507"
+    },
+    {
+      "name": "日光東照宮",
+      "kana": "にっこうとうしょうぐう",
+      "icon": "⛩️",
+      "region": "kanto",
+      "lon": 139.59909,
+      "lat": 36.75771,
+      "source": "https://www.openstreetmap.org/way/388017091"
+    },
+    {
+      "name": "偕楽園",
+      "kana": "かいらくえん",
+      "icon": "🌳",
+      "region": "kanto",
+      "lon": 140.45324,
+      "lat": 36.37492,
+      "source": "https://www.openstreetmap.org/way/476016290"
+    },
+    {
+      "name": "東京スカイツリー",
+      "kana": "とうきょうすかいつりー",
+      "icon": "🗼",
+      "region": "kanto",
+      "lon": 139.81071,
+      "lat": 35.71005,
+      "source": "https://www.openstreetmap.org/way/288269147"
+    },
+    {
+      "name": "横浜マリンタワー",
+      "kana": "よこはままりんたわー",
+      "icon": "🗼",
+      "region": "kanto",
+      "lon": 139.6509,
+      "lat": 35.44393,
+      "source": "https://www.openstreetmap.org/way/319050351"
+    },
+    {
+      "name": "鶴岡八幡宮",
+      "kana": "つるがおかはちまんぐう",
+      "icon": "⛩️",
+      "region": "kanto",
+      "lon": 139.55639,
+      "lat": 35.32605,
+      "source": "https://www.openstreetmap.org/node/12176453331"
+    },
+    {
+      "name": "善光寺",
+      "kana": "ぜんこうじ",
+      "icon": "⛩️",
+      "region": "chubu",
+      "lon": 138.18785,
+      "lat": 36.66139,
+      "source": "https://www.openstreetmap.org/way/220401982"
+    },
+    {
+      "name": "松本城",
+      "kana": "まつもとじょう",
+      "icon": "🏯",
+      "region": "chubu",
+      "lon": 137.96893,
+      "lat": 36.23866,
+      "source": "https://www.openstreetmap.org/way/300077872"
+    },
+    {
+      "name": "金沢城",
+      "kana": "かなざわじょう",
+      "icon": "🏯",
+      "region": "chubu",
+      "lon": 136.65957,
+      "lat": 36.56563,
+      "source": "https://www.openstreetmap.org/way/197980651"
+    },
+    {
+      "name": "兼六園",
+      "kana": "けんろくえん",
+      "icon": "🌳",
+      "region": "chubu",
+      "lon": 136.66243,
+      "lat": 36.56242,
+      "source": "https://www.openstreetmap.org/way/50288147"
+    },
+    {
+      "name": "名古屋城",
+      "kana": "なごやじょう",
+      "icon": "🏯",
+      "region": "chubu",
+      "lon": 136.90025,
+      "lat": 35.18459,
+      "source": "https://www.openstreetmap.org/relation/19100633"
+    },
+    {
+      "name": "熱田神宮",
+      "kana": "あつたじんぐう",
+      "icon": "⛩️",
+      "region": "chubu",
+      "lon": 136.90916,
+      "lat": 35.12552,
+      "source": "https://www.openstreetmap.org/relation/8453890"
+    },
+    {
+      "name": "彦根城",
+      "kana": "ひこねじょう",
+      "icon": "🏯",
+      "region": "kinki",
+      "lon": 136.25192,
+      "lat": 35.27648,
+      "source": "https://www.openstreetmap.org/way/363244224"
+    },
+    {
+      "name": "清水寺",
+      "kana": "きよみずでら",
+      "icon": "⛩️",
+      "region": "kinki",
+      "lon": 135.78448,
+      "lat": 34.99442,
+      "source": "https://www.openstreetmap.org/way/336641107"
+    },
+    {
+      "name": "金閣寺",
+      "kana": "きんかくじ",
+      "icon": "⛩️",
+      "region": "kinki",
+      "lon": 135.72951,
+      "lat": 35.03959,
+      "source": "https://www.openstreetmap.org/way/98115917"
+    },
+    {
+      "name": "東大寺",
+      "kana": "とうだいじ",
+      "icon": "⛩️",
+      "region": "kinki",
+      "lon": 135.84016,
+      "lat": 34.68823,
+      "source": "https://www.openstreetmap.org/way/1134669589"
+    },
+    {
+      "name": "大阪城",
+      "kana": "おおさかじょう",
+      "icon": "🏯",
+      "region": "kinki",
+      "lon": 135.52567,
+      "lat": 34.68695,
+      "source": "https://www.openstreetmap.org/way/1550234049"
+    },
+    {
+      "name": "通天閣",
+      "kana": "つうてんかく",
+      "icon": "🗼",
+      "region": "kinki",
+      "lon": 135.50631,
+      "lat": 34.65254,
+      "source": "https://www.openstreetmap.org/way/254319878"
+    },
+    {
+      "name": "姫路城",
+      "kana": "ひめじじょう",
+      "icon": "🏯",
+      "region": "kinki",
+      "lon": 134.69402,
+      "lat": 34.83933,
+      "source": "https://www.openstreetmap.org/way/23707900"
+    },
+    {
+      "name": "原爆ドーム",
+      "kana": "げんばくどーむ",
+      "icon": "🏛️",
+      "region": "chugoku",
+      "lon": 132.45358,
+      "lat": 34.39547,
+      "source": "https://www.openstreetmap.org/relation/1506282"
+    },
+    {
+      "name": "厳島神社",
+      "kana": "いつくしまじんじゃ",
+      "icon": "⛩️",
+      "region": "chugoku",
+      "lon": 132.3193,
+      "lat": 34.29654,
+      "source": "https://www.openstreetmap.org/way/1306168429"
+    },
+    {
+      "name": "松江城",
+      "kana": "まつえじょう",
+      "icon": "🏯",
+      "region": "chugoku",
+      "lon": 133.05076,
+      "lat": 35.4751,
+      "source": "https://www.openstreetmap.org/way/299654325"
+    },
+    {
+      "name": "高松城",
+      "kana": "たかまつじょう",
+      "icon": "🏯",
+      "region": "shikoku",
+      "lon": 134.05039,
+      "lat": 34.35003,
+      "source": "https://www.openstreetmap.org/node/2381052708"
+    },
+    {
+      "name": "松山城",
+      "kana": "まつやまじょう",
+      "icon": "🏯",
+      "region": "shikoku",
+      "lon": 132.76594,
+      "lat": 33.8456,
+      "source": "https://www.openstreetmap.org/node/1423739161"
+    },
+    {
+      "name": "高知城",
+      "kana": "こうちじょう",
+      "icon": "🏯",
+      "region": "shikoku",
+      "lon": 133.53144,
+      "lat": 33.56069,
+      "source": "https://www.openstreetmap.org/way/126495756"
+    },
+    {
+      "name": "太宰府天満宮",
+      "kana": "だざいふてんまんぐう",
+      "icon": "⛩️",
+      "region": "kyushu",
+      "lon": 130.53694,
+      "lat": 33.52125,
+      "source": "https://www.openstreetmap.org/way/1353165321"
+    },
+    {
+      "name": "熊本城",
+      "kana": "くまもとじょう",
+      "icon": "🏯",
+      "region": "kyushu",
+      "lon": 130.70549,
+      "lat": 32.80536,
+      "source": "https://www.openstreetmap.org/way/375062710"
+    },
+    {
+      "name": "出島",
+      "kana": "でじま",
+      "icon": "🏛️",
+      "region": "kyushu",
+      "lon": 129.87296,
+      "lat": 32.74342,
+      "source": "https://www.openstreetmap.org/node/8146238469"
+    },
+    {
+      "name": "首里城",
+      "kana": "しゅりじょう",
+      "icon": "🏯",
+      "region": "okinawa",
+      "lon": 127.71937,
+      "lat": 26.217,
+      "source": "https://www.openstreetmap.org/node/4828423125"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "source": "https://www.tokyometro.jp/support/trademark/pdf/guideline.pdf",
+  "note": "東京メトロの路線記号基本カラーに合わせた画面用RGB近似色。その他はstation_databaseの路線色を使用する。",
+  "colors": {
+    "28001": "#ff9500",
+    "28002": "#f62e36",
+    "28003": "#b5b5ac",
+    "28004": "#009bbf",
+    "28005": "#00bb85",
+    "28006": "#c1a470",
+    "28008": "#8f76d6",
+    "28009": "#00ac9b",
+    "28010": "#9c5e31",
+    "99303": "#0079c2"
+  },
+  "additionalSources": ["https://www.kotsu.metro.tokyo.jp/subway/mita/"]
+}

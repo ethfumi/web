@@ -169,6 +169,11 @@ def build(cache):
                 if isinstance(coords[0], (int,float)):
                     return lonlat(x+coords[0]/extent, y+coords[1]/extent, z)
                 return [transform_coords(c) for c in coords]
+            # Preserve the Imperial Palace and outer moat water surfaces in this small area.
+            def local_point(lon,lat):
+                return (((lon+180)/360*2**z-x)*extent,
+                        ((1-math.asinh(math.tan(math.radians(lat)))/math.pi)/2*2**z-y)*extent)
+            detail_box=box(*local_point(139.72,35.708),*local_point(139.772,35.67))
             for feature in layer['features']:
                 code=feature['properties'].get('vt_code')
                 if layer_name=='RvrCL' and code in (5302,5322):continue
@@ -182,20 +187,22 @@ def build(cache):
                 for part in parts:
                     if part.geom_type == ('Polygon' if layer_name == 'WA' else 'LineString'):
                         if layer_name=='WA':
-                            if z>=10 and part.area*meters_per_unit**2<10000 and not part.intersects(clip.boundary):continue
+                            local_detail=z==10 and code!=5101 and part.intersects(detail_box)
+                            minimum_area=100 if local_detail else 10000
+                            if z>=10 and part.area*meters_per_unit**2<minimum_area and not part.intersects(clip.boundary):continue
                             if z==10 and code!=5101:
                                 area=part.area*meters_per_unit**2
                                 width=2*part.area/max(part.length,1)*meters_per_unit
                                 compactness=4*math.pi*part.area/max(part.length**2,1)
-                                if width<300 and compactness<.15:
+                                if not local_detail and width<300 and compactness<.15:
                                     # Trace narrow water areas instead of filling their simplified banks.
                                     line=LineString(part.exterior.coords).simplify(18,preserve_topology=False)
                                     rivers.append(encode_path(transform_coords(list(line.coords))))
                                     continue
-                                part=part.simplify(12,preserve_topology=True)
+                                part=part.simplify(1.5 if local_detail else 12,preserve_topology=True)
                             else:
                                 part=simplify_near_terminals(part,local_ports,500/meters_per_unit) if z==10 else part.simplify(3,preserve_topology=True)
-                            if z>=10 and part.area*meters_per_unit**2<10000 and not part.intersects(clip.boundary):continue
+                            if z>=10 and part.area*meters_per_unit**2<minimum_area and not part.intersects(clip.boundary):continue
                             part=orient(part,sign=1)
                             if code==5101:islands.extend(encode_path(transform_coords(list(ring.coords))) for ring in part.interiors)
                         else:part=part.simplify(24,preserve_topology=False)
