@@ -11,6 +11,7 @@ from pathlib import Path
 import mapbox_vector_tile
 from pmtiles.reader import Reader
 from shapely.geometry import box, shape, mapping, Polygon, LineString
+from shapely.geometry.polygon import orient
 from shapely.ops import unary_union
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,7 +29,7 @@ def lonlat(x, y, z):
 def encode_path(points):
     result, previous = [], [0,0]
     for point in points:
-        current = [round(point[0]*100000), round(point[1]*100000)]
+        current = [round(point[0]*10000), round(point[1]*10000)]
         result.extend([current[0]-previous[0], current[1]-previous[1]])
         previous = current
     return result
@@ -77,7 +78,7 @@ def deduplicate_tiles(tiles):
     def decode(values):
         x=y=0; result=[]
         for i in range(0,len(values),2):
-            x+=values[i]; y+=values[i+1]; result.append([x/100000,y/100000])
+            x+=values[i]; y+=values[i+1]; result.append([x/10000,y/10000])
         return result
     for tile in tiles:
         if tile['z'] != 8:
@@ -117,6 +118,7 @@ def build(cache):
     reader = Reader(read_range)
     reader.header()
     stations = json.loads((ROOT/'data/station-database.json').read_text('utf8'))['stations']
+    land_mask=shape(json.loads((ROOT/'data/land-mask.json').read_text('utf8'))['geometry'])
     rail_tiles = {tile_xy(s[2], s[3], 8) for s in stations.values() if not s[5]}
     requested = {(8, x+dx, y+dy) for x, y in rail_tiles for dx in [-1,0,1] for dy in [-1,0,1]}
     # GSI omits river geometry below z10. Apply the same detail to railway areas nationwide.
@@ -150,9 +152,9 @@ def build(cache):
         if raw[:2] == b'\x1f\x8b':
             raw = gzip.decompress(raw)
         layers = mapbox_vector_tile.decode(raw, default_options={'y_coord_down':True})
-        water, rivers = [], []
+        water, rivers, islands, labels = [], [], [], []
         # Water areas include the sea, lakes and wide rivers. Tiny drainage channels are omitted.
-        for layer_name, target in [('WA', water)]:
+        for layer_name, target in [('WA', water),('RvrCL',rivers)]:
             layer = layers.get(layer_name)
             if not layer:
                 continue
@@ -168,6 +170,8 @@ def build(cache):
                     return lonlat(x+coords[0]/extent, y+coords[1]/extent, z)
                 return [transform_coords(c) for c in coords]
             for feature in layer['features']:
+                code=feature['properties'].get('vt_code')
+                if layer_name=='RvrCL' and code in (5302,5322):continue
                 geom = shape(feature['geometry'])
                 if not geom.is_valid:
                     geom = geom.buffer(0)
@@ -177,19 +181,57 @@ def build(cache):
                 parts = list(geom.geoms) if geom.geom_type.startswith('Multi') or geom.geom_type == 'GeometryCollection' else [geom]
                 for part in parts:
                     if part.geom_type == ('Polygon' if layer_name == 'WA' else 'LineString'):
-                        part=simplify_near_terminals(part,local_ports,500/meters_per_unit) if z==10 else part.simplify(3,preserve_topology=True)
-                        if z >= 10 and part.area*meters_per_unit**2 < 100000 and not part.intersects(clip.boundary):
-                            continue
+                        if layer_name=='WA':
+                            if z>=10 and part.area*meters_per_unit**2<10000 and not part.intersects(clip.boundary):continue
+                            if z==10 and code!=5101:
+                                area=part.area*meters_per_unit**2
+                                width=2*part.area/max(part.length,1)*meters_per_unit
+                                compactness=4*math.pi*part.area/max(part.length**2,1)
+                                if width<300 and compactness<.15:
+                                    # Trace narrow water areas instead of filling their simplified banks.
+                                    line=LineString(part.exterior.coords).simplify(18,preserve_topology=False)
+                                    rivers.append(encode_path(transform_coords(list(line.coords))))
+                                    continue
+                                part=part.simplify(12,preserve_topology=True)
+                            else:
+                                part=simplify_near_terminals(part,local_ports,500/meters_per_unit) if z==10 else part.simplify(3,preserve_topology=True)
+                            if z>=10 and part.area*meters_per_unit**2<10000 and not part.intersects(clip.boundary):continue
+                            part=orient(part,sign=1)
+                            if code==5101:islands.extend(encode_path(transform_coords(list(ring.coords))) for ring in part.interiors)
+                        else:part=part.simplify(24,preserve_topology=False)
                         coords = transform_coords(mapping(part)['coordinates'])
                         target.append([encode_path(ring) for ring in coords] if layer_name == 'WA' else encode_path(coords))
+        anno=layers.get('Anno')
+        if anno:
+            for feature in anno['features']:
+                props=feature['properties'];code=props.get('vt_code')
+                if code not in (314,315,316,351,352,353) or feature['geometry']['type']!='Point':continue
+                ax,ay=feature['geometry']['coordinates']
+                if 0<=ax<anno['extent'] and 0<=ay<anno['extent']:
+                    labels.append([props['vt_text'],*lonlat(x+ax/anno['extent'],y+ay/anno['extent'],z),'island' if code>=351 else 'mountain'])
         if not water and not rivers:
             return None
-        return {'z':z, 'bounds':[*lonlat(x,y+1,z), *lonlat(x+1,y,z)], 'water':water, 'rivers':rivers}
+        bounds=[*lonlat(x,y+1,z), *lonlat(x+1,y,z)]
+        rect=box(*bounds)
+        if land_mask.covers(rect):land=True
+        else:
+            land=[]
+            clipped=land_mask.intersection(rect)
+            parts=list(clipped.geoms) if hasattr(clipped,'geoms') else [clipped]
+            for part in parts:
+                if part.geom_type=='Polygon' and not part.is_empty:
+                    land.append([encode_path(r) for r in mapping(orient(part,sign=1))['coordinates']])
+        return {'z':z, 'bounds':bounds, 'water':water, 'rivers':rivers,'land':land,'islands':islands,'labels':labels}
 
     tiles = sorted(requested)
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
         result = [t for t in pool.map(extract, tiles) if t]
-    return {'source':URL, 'sourceDate':'2026-07-01', 'retrieved':'2026-09-22', 'precision':100000, 'tiles':deduplicate_tiles(result)}
+    labels={}
+    for tile in result:
+        for label in tile.pop('labels'):
+            labels.setdefault((label[0],round(label[1],2),round(label[2],2)),label)
+    (ROOT/'data/geographic-labels.json').write_text(json.dumps(list(labels.values()),ensure_ascii=False,indent=2)+'\n',encoding='utf8',newline='\n')
+    return {'source':URL, 'sourceDate':'2026-07-01', 'retrieved':'2026-09-22', 'precision':10000, 'tiles':deduplicate_tiles(result)}
 
 
 if __name__ == '__main__':

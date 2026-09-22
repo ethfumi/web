@@ -129,7 +129,7 @@ test('offline cache includes the complete catalogue and uses the same asset vers
   assert.equal(packed, scriptNames.map(read).join('\n;\n')+'\n;window.TRAIN_GO_READY = true;\n');
   const assets = [...sw.matchAll(/^  "([^"]+)",/gm)].map(m=>m[1].split('?')[0]).filter(x=>x!=='.');
   assert.ok(!assets.includes('og.png'), 'sharing image must not be downloaded for offline play');
-  assert.ok(assets.reduce((sum,name)=>sum+fs.statSync(path.join(root,name)).size,0)<=2_000_000);
+  assert.ok(assets.reduce((sum,name)=>sum+fs.statSync(path.join(root,name)).size,0)<=2_500_000);
   assert.ok(html.includes(`v${version}</strong>`));
   assert.equal(new Set([...html.matchAll(/\?v=(\d+)/g)].map(m=>m[1]).filter(v=>v!=='55')).size,1);
 });

@@ -43,6 +43,13 @@ body.loading #select-screen { visibility: hidden; }
   display: none !important;
 }
 
+body:not(.map-view-active) #game-name-mode {
+  display: none;
+}
+
+.terrain-legend { width: 160px; padding: 6px 9px; border-radius: 12px; background: rgba(255,255,255,.86); color: #40515e; font-size: 11px; text-align: center; pointer-events: none; }
+.terrain-legend i { display: block; height: 6px; margin: 3px 0; border-radius: 3px; background: linear-gradient(to right,#b7d19b,#92ba81,#a7a377,#ad926f,#cfc5af); }
+
 /* --- 車両えらび --- */
 #select-screen {
   position: fixed;

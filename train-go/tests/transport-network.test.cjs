@@ -9,6 +9,22 @@ const scope=vm.createContext({window:{}});
 for (const file of JSON.parse(read('runtime-sources.json')).filter(f=>f!=='app.js')) vm.runInContext(read(file),scope);
 const data=scope.window.TRAIN_GO_ROUTE_DATA;
 
+test('islands and official mountain summits have readable labels and terrain is a small valid grid',()=>{
+  const labels=scope.window.TRAIN_GO_GEOGRAPHIC_LABELS;
+  assert.ok(labels.some(p=>p[0]==='青ヶ島'&&p[1]==='あおがしま'&&p[4]==='island'));
+  assert.ok(labels.some(p=>p[0].startsWith('富士山')&&p[5]===3776));
+  assert.ok(labels.some(p=>p[0]==='高尾山'&&p[5]===599));
+  assert.ok(labels.filter(p=>p[4]==='mountain').length>=1000);
+  const terrain=scope.window.TRAIN_GO_TERRAIN_DATA;
+  let maximum=0;
+  for(const tile of terrain.tiles){
+    const grid=Buffer.from(tile.heights,'base64');
+    assert.equal(grid.length,terrain.gridSize**2);
+    for(const value of grid)maximum=Math.max(maximum,value);
+  }
+  assert.ok((maximum-1)*terrain.stepMeters>=2500);
+});
+
 test('all 272 domestic passenger pairs have one playable route, including five helicopter pairs',()=>{
   const source=JSON.parse(read('data/air-network.json'));
   assert.equal(source.airports.length,87);
@@ -40,6 +56,12 @@ test('new ships use sea estimates and retain established fixed fares',()=>{
     assert.ok(Number.isInteger(current) && current>=previous);
     previous=current;
   }
+});
+
+test('invalid foreign text in a Japanese-name field falls back to the actual Japanese port name',()=>{
+  const names=data.ferryNetwork.ports.map(p=>p[0]).join(' ');
+  assert.ok(names.includes('清水マリンターミナル'));
+  assert.doesNotMatch(names,/[А-Яа-яЁё]/);
 });
 
 test('ferry courses have named endpoints, ordered geometry and auditable source ways',()=>{
