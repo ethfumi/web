@@ -41,3 +41,38 @@ test('new ships use sea estimates and retain established fixed fares',()=>{
     previous=current;
   }
 });
+
+test('ferry courses have named endpoints, ordered geometry and auditable source ways',()=>{
+  const source=JSON.parse(read('data/ferry-source.json'));
+  const coverage=JSON.parse(read('data/ferry-coverage.json'));
+  const network=JSON.parse(read('data/ferry-network.json'));
+  assert.equal(coverage.courses,network.routes.length);
+  assert.equal(new Set(data.ferryNetwork.keys).size,data.ferryNetwork.keys.length);
+  for (const item of coverage.provenance) {
+    assert.ok(item.ways.length>0);
+    for (const id of item.ways) assert.ok(source.ways[id],id);
+  }
+  for (const key of data.ferryNetwork.keys) {
+    const route=data.routes[key],map=data.maps[key];
+    assert.equal(route.kind,'sea');
+    assert.ok(route.start && route.stations[0].name);
+    assert.notEqual(route.start,route.stations[0].name,key);
+    assert.equal(map.points[0].name,route.start,key);
+    assert.equal(map.points.at(-1).name,route.stations[0].name,key);
+    assert.equal(map.points[0].km,0,key);
+    let previous=-1;
+    for (const p of map.points) {
+      assert.ok(Number.isFinite(p.lon)&&Number.isFinite(p.lat)&&p.km>=previous,key);
+      previous=p.km;
+    }
+    assert.ok(Math.abs(previous-route.stations[0].km)<1e-6,key);
+  }
+  const text=data.ferryNetwork.keys.map(k=>data.routeCatalog[k].search).join(' ');
+  for (const island of ['母島','青ヶ島','北大東','天売','焼尻','口之島','悪石','与論','与那国','礼文','大神島']) assert.ok(text.includes(island),island);
+  const references=Object.entries(data.maps).filter(([,m])=>m.reference);
+  assert.equal(references.length,coverage.referenceSegments);
+  for (const [key] of references) {
+    assert.equal(data.routes[key],undefined,'unnamed reference geometry must not invent a playable port');
+    assert.ok(scope.window.TRAIN_GO_MAP_DATA.drawOrder.includes(key),'reference geometry must be drawn');
+  }
+});

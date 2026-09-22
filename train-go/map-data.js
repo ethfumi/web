@@ -108,7 +108,8 @@
   window.TRAIN_GO_MAP_DATA = {
     maps,
     drawOrder:["tokaido","tohoku","chuo","sobu","tozai","keio","keioSagamihara","inokashira","yamanote",
-      ...(window.TRAIN_GO_ROUTE_DATA?.metadata || []).map(({key}) => key)],
+      ...(window.TRAIN_GO_ROUTE_DATA?.metadata || []).map(({key}) => key),
+      ...Object.keys(maps).filter(key => maps[key].reference)],
     laneOffsets:{tokaido:1.5,tohoku:1.5,chuo:-5,sobu:5,tozai:2.5,keio:0,keioSagamihara:0,inokashira:2,yamanote:0},
     geography:{
       // 県境: Natural Earth Admin 1 (public domain) を沿線周辺だけ簡略化。

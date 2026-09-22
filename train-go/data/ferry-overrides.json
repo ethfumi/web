@@ -1,0 +1,307 @@
+{
+  "portAliases": {
+    "新門司(北九州)": "新門司港",
+    "オーシャン東九フェリー 新門司ターミナル": "新門司港",
+    "サンタマリア海遊館西はとば乗り場": "海遊館西はとば"
+  },
+  "exclude": {
+    "r11513590": "Irabu bridge replaced the Hirara-Nagayama service",
+    "r11513621": "Hirara-Sarahama closed in 2015",
+    "w640903691": "Miyako-Muroran suspended in 2020",
+    "w925450690": "Hachinohe-Muroran suspended in 2022"
+  },
+  "excludeSources": [
+    "https://www.city.miyakojima.lg.jp/soshiki/shityo/kensetsu/toshikeikaku/oshirase/files/shukushouban.pdf",
+    "https://www.kawakin.co.jp/news/detail/5dfc1bce-6fec-4237-bca7-51510a013c84",
+    "https://www.aomori-ferry.or.jp/public-corporation/"
+  ],
+  "ports": [
+    {
+      "id": "curated:muku",
+      "tags": {
+        "name": "地無垢島"
+      },
+      "p": [
+        131.976635,
+        33.160062
+      ],
+      "terminal": true,
+      "source": "https://www.openstreetmap.org/relation/8369420"
+    },
+    {
+      "id": "curated:hozu",
+      "tags": {
+        "name": "保津川下り下船場"
+      },
+      "p": [
+        135.671444,
+        35.013467
+      ],
+      "terminal": true,
+      "source": "https://www.openstreetmap.org/node/6405737005"
+    },
+    {
+      "id": "curated:tomogashima",
+      "tags": {
+        "name": "野奈浦（友ヶ島）"
+      },
+      "p": [
+        135.008882,
+        34.283845
+      ],
+      "terminal": true,
+      "source": "https://www.openstreetmap.org/node/4515290599"
+    },
+    {
+      "id": "curated:kuroshima-setouchi",
+      "tags": {
+        "name": "黒島（のりば）"
+      },
+      "p": [
+        134.159399,
+        34.599967
+      ],
+      "terminal": true,
+      "source": "https://www.openstreetmap.org/relation/6940906"
+    },
+    {
+      "id": "curated:kishima-setouchi",
+      "tags": {
+        "name": "黄島（のりば）"
+      },
+      "p": [
+        134.19602,
+        34.600138
+      ],
+      "terminal": true,
+      "source": "https://www.openstreetmap.org/way/131164744"
+    },
+    {
+      "id": "curated:aoshima-setouchi",
+      "tags": {
+        "name": "青島（のりば）"
+      },
+      "p": [
+        134.205484,
+        34.610651
+      ],
+      "terminal": true,
+      "source": "https://www.openstreetmap.org/way/131164305"
+    },
+    {
+      "id": "curated:kuroshima-iwakuni",
+      "tags": {
+        "name": "黒島（のりば）"
+      },
+      "p": [
+        132.334657,
+        33.997341
+      ],
+      "terminal": true,
+      "source": "https://www.openstreetmap.org/relation/5249859"
+    },
+    {
+      "id": "curated:aijima",
+      "tags": {
+        "name": "安居島（のりば）"
+      },
+      "p": [
+        132.705302,
+        34.06819
+      ],
+      "terminal": true,
+      "source": "https://www.openstreetmap.org/way/131079952"
+    },
+    {
+      "id": "curated:maejima-suo",
+      "tags": {
+        "name": "前島（のりば）"
+      },
+      "p": [
+        132.265495,
+        33.998738
+      ],
+      "terminal": true,
+      "source": "https://www.openstreetmap.org/relation/5249830"
+    },
+    {
+      "id": "curated:hashirijima",
+      "tags": {
+        "name": "走島（のりば）"
+      },
+      "p": [
+        133.43351,
+        34.348764
+      ],
+      "terminal": true,
+      "source": "https://www.openstreetmap.org/node/7165143174"
+    },
+    {
+      "id": "curated:yakatashima",
+      "tags": {
+        "name": "屋形島（のりば）"
+      },
+      "p": [
+        131.917487,
+        32.776225
+      ],
+      "terminal": true,
+      "source": "https://www.openstreetmap.org/relation/8369525"
+    },
+    {
+      "id": "curated:jinoshima",
+      "tags": {
+        "name": "地ノ島（のりば）"
+      },
+      "p": [
+        135.102732,
+        34.11327
+      ],
+      "terminal": true,
+      "source": "https://www.openstreetmap.org/relation/11605148"
+    },
+    {
+      "id": "curated:kanawajima",
+      "tags": {
+        "name": "金輪島（のりば）"
+      },
+      "p": [
+        132.484099,
+        34.341744
+      ],
+      "terminal": true,
+      "source": "https://www.openstreetmap.org/way/131161992"
+    },
+    {
+      "id": "curated:noshima",
+      "tags": {
+        "name": "納島（のりば）"
+      },
+      "p": [
+        129.067305,
+        33.218049
+      ],
+      "terminal": true,
+      "source": "https://www.openstreetmap.org/relation/6663263"
+    },
+    {
+      "id": "curated:ogami",
+      "tags": {
+        "name": "大神島（のりば）"
+      },
+      "p": [
+        125.307387,
+        24.913135
+      ],
+      "terminal": true,
+      "source": "https://www.openstreetmap.org/relation/4858177"
+    },
+    {
+      "id": "curated:futaoi",
+      "tags": {
+        "name": "蓋井島（のりば）"
+      },
+      "p": [
+        130.788298,
+        34.09977
+      ],
+      "terminal": true,
+      "source": "https://www.openstreetmap.org/relation/5737898"
+    },
+    {
+      "id": "curated:akune-oshima",
+      "tags": {
+        "name": "阿久根大島（のりば）"
+      },
+      "p": [
+        130.169808,
+        32.026913
+      ],
+      "terminal": true,
+      "source": "https://www.openstreetmap.org/node/3578116525"
+    },
+    {
+      "id": "curated:enoshima",
+      "tags": {
+        "name": "江島（のりば）"
+      },
+      "p": [
+        141.593373,
+        38.400531
+      ],
+      "terminal": true,
+      "source": "https://www.openstreetmap.org/relation/6856332"
+    },
+    {
+      "id": "curated:hojima",
+      "tags": {
+        "name": "朴島（のりば）"
+      },
+      "p": [
+        141.124215,
+        38.348622
+      ],
+      "terminal": true,
+      "source": "https://www.openstreetmap.org/way/131255116"
+    },
+    {
+      "id": "curated:matsushima-karatsu",
+      "tags": {
+        "name": "松島（のりば）"
+      },
+      "p": [
+        129.840396,
+        33.585048
+      ],
+      "terminal": true,
+      "source": "https://www.openstreetmap.org/way/476290351"
+    },
+    {
+      "id": "curated:madara",
+      "tags": {
+        "name": "馬渡島（のりば）"
+      },
+      "p": [
+        129.765299,
+        33.566952
+      ],
+      "terminal": true,
+      "source": "https://www.openstreetmap.org/way/973418095"
+    },
+    {
+      "id": "curated:chigogafuchi",
+      "tags": {
+        "name": "稚児ヶ淵（江の島）"
+      },
+      "p": [
+        139.474596,
+        35.299945
+      ],
+      "terminal": true,
+      "source": "https://www.openstreetmap.org/node/5467414222"
+    }
+  ],
+  "readings": {
+    "土庄港フェリーターミナル": "とのしょうこうフェリーターミナル",
+    "土庄港": "とのしょうこう",
+    "三宝港": "さんぽうこう",
+    "底土港": "そこどこう",
+    "鴛泊港": "おしどまりこう",
+    "沓形港": "くつがたこう",
+    "香深港": "かふかこう",
+    "渡名喜港": "となきこう",
+    "渡嘉敷港": "とかしきこう",
+    "粟国港": "あぐにこう",
+    "保戸島港": "ほとじまこう",
+    "保戸島漁港": "ほとじまぎょこう",
+    "野奈浦（友ヶ島）": "のなうら（ともがしま）",
+    "黄島（のりば）": "きじま（のりば）",
+    "地無垢島": "じむくしま",
+    "大神島（のりば）": "おおがみじま（のりば）",
+    "蓋井島（のりば）": "ふたおいじま（のりば）",
+    "朴島（のりば）": "ほおじま（のりば）",
+    "馬渡島（のりば）": "まだらしま（のりば）",
+    "納島（のりば）": "のうしま（のりば）",
+    "安居島（のりば）": "あいじま（のりば）"
+  }
+}

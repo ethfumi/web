@@ -31,6 +31,10 @@ test('Tokyo Bay and Hokkaido lakes are water, station locations are land',()=>{
   assert.equal(isWater(140.1135,35.6129),false,'Chiba station');
   assert.equal(isWater(141.35,42.77),true,'Lake Shikotsu');
   assert.equal(isWater(142.358,43.763),false,'Asahikawa station');
+  assert.equal(isWater(139.762,32.458),false,'Aogashima land');
+  assert.equal(isWater(139.72,32.48),true,'sea beside Aogashima');
+  assert.equal(isWater(131.30,25.947),false,'Kitadaito land');
+  assert.equal(isWater(131.264,25.95),true,'sea beside Kitadaito');
 });
 test('spatial label index exactly preserves collision decisions and avoids global scans',()=>{
   const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
