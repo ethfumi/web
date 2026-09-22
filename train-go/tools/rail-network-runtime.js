@@ -1,4 +1,5 @@
   data.routeCatalog = {};
+  data.stationLabelsByRoute = {};
   data.allRailRouteKeys = [];
   for (const item of sources) {
     const oldRoute = data.routes[item.key];
@@ -39,6 +40,13 @@
         kind:"rail", icon:"🚆", cars:10, speedKmh:90});
     }
     const points = data.maps[item.key]?.points || item.p;
+    const labels = Object.fromEntries(item.p.map((p,i) => [p[0],item.stationNames[i].replace(/[（(].*?[)）]/g, "")]));
+    for (const p of points) {
+      if (labels[p[0]]) continue;
+      const index = item.p.findIndex(q => Math.hypot((p[2]-q[2])*90,(p[3]-q[3])*111)<0.6);
+      if (index >= 0) labels[p[0]] = item.stationNames[index].replace(/[（(].*?[)）]/g, "");
+    }
+    data.stationLabelsByRoute[item.key] = labels;
     const stationNames = item.preserve ? item.stationNames.filter((_, i) => points.some(p =>
       p[0] === item.p[i][0] || Math.hypot((p[2]-item.p[i][2])*90, (p[3]-item.p[i][3])*111) < 0.6
     )) : item.stationNames;

@@ -7,7 +7,7 @@ const root = path.resolve(__dirname, '..');
 const read = name => fs.readFileSync(path.join(root, name), 'utf8');
 const context = vm.createContext({window:{}});
 const html = read('index.html');
-const scriptNames = [...html.matchAll(/<script src="([^?]+)\?v=\d+"><\/script>/g)].map(m => m[1]);
+const scriptNames = JSON.parse(read('runtime-sources.json'));
 for (const file of scriptNames.filter(f => f !== 'app.js')) vm.runInContext(read(file), context, {filename:file});
 const data = context.window.TRAIN_GO_ROUTE_DATA;
 const maps = context.window.TRAIN_GO_MAP_DATA.maps;
@@ -123,8 +123,13 @@ test('handcrafted courses and all pre-existing route keys survive the extension'
 test('offline cache includes the complete catalogue and uses the same asset version', () => {
   const sw = read('sw.js');
   const version = sw.match(/train-go-v(\d+)/)[1];
-  for (const name of scriptNames) assert.ok(sw.includes(`"${name}?v=${version}"`), name);
-  assert.ok(html.includes(`all-rail-route-data.js?v=${version}`));
+  assert.ok(sw.includes(`"runtime.js.gz?v=${version}"`));
+  assert.ok(html.includes(`loader.js?v=${version}`));
+  const packed = require('node:zlib').gunzipSync(fs.readFileSync(path.join(root, 'runtime.js.gz'))).toString();
+  assert.equal(packed, scriptNames.map(read).join('\n;\n')+'\n;window.TRAIN_GO_READY = true;\n');
+  const assets = [...sw.matchAll(/^  "([^"]+)",/gm)].map(m=>m[1].split('?')[0]).filter(x=>x!=='.');
+  assert.ok(!assets.includes('og.png'), 'sharing image must not be downloaded for offline play');
+  assert.ok(assets.reduce((sum,name)=>sum+fs.statSync(path.join(root,name)).size,0)<=2_000_000);
   assert.ok(html.includes(`v${version}</strong>`));
   assert.equal(new Set([...html.matchAll(/\?v=(\d+)/g)].map(m=>m[1]).filter(v=>v!=='55')).size,1);
 });

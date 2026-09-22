@@ -1,27 +1,21 @@
 // オンラインでは常に最新版を取得し、通信できない時だけ保存済みデータを使う。
-const CACHE = "train-go-v121";
+const CACHE = "train-go-v122";
 const ASSETS = [
   ".",
   "index.html",
-  "style.css?v=121",
-  "train-route-data.js?v=121",
-  "national-rail-route-data.js?v=121",
-  "kanto-rail-route-data.js?v=121",
-  "all-rail-route-data.js?v=121",
-  "air-route-data.js?v=121",
-  "sea-route-data.js?v=121",
-  "fare-data.js?v=121",
-  "map-data.js?v=121",
-  "app.js?v=121",
+  "style.css?v=122",
+  "loader.js?v=122",
+  "runtime.js.gz?v=122",
+  "vendor/fflate.min.js?v=122",
   "manifest.webmanifest",
   "icons/icon-180.png",
   "icons/icon-512.png",
-  "og.png?v=55",
 ];
 
 async function precacheFreshAssets() {
   const cache = await caches.open(CACHE);
   await Promise.all(ASSETS.map(async (asset) => {
+    if (asset.startsWith("runtime.js.gz") && await cache.match(asset)) return;
     const request = new Request(asset, { cache: "reload" });
     const response = await fetch(request);
     if (!response.ok) throw new Error(`Failed to precache ${asset}: ${response.status}`);

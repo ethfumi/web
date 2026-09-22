@@ -1,5 +1,34 @@
 # 全国鉄道路線データ
 
+## 水域データ
+
+`map-water-data.js` は[国土地理院最適化ベクトルタイル](https://github.com/gsi-cyberjapan/optimal_bvmap)（2026年7月1日時点）を加工したもの。
+[国土地理院コンテンツ利用規約](https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html)に基づき、出典と加工を明示して使用する。
+全国の収録駅があるタイルとその周囲をzoom 8/10で収録し、海・湖・主要河川を描く。特定の地域に限定せず、北海道から沖縄まで同じ基準を使う。
+沿線の詳細水域は約200m相当の幾何簡略化を施すが、これは元データの測量精度を保証する値ではない。
+小さな独立水域（0.1平方km未満）は省略し、海岸・川がタイル境界で切れないよう境界に接する水域は残す。詳細タイルの下に隠れる広域形状は配布データから除く。
+データは緯度経度を整数差分で格納し、表示範囲だけをPath2Dへ変換・再利用する。ゲーム中に地図サーバーへ接続しない。
+
+再取得には `pmtiles`、`mapbox-vector-tile`、`shapely` が必要。全体アーカイブをダウンロードせずHTTP Rangeで必要な部分だけ読む。
+
+```sh
+python train-go/tools/build-water-map.py --cache <作業用キャッシュディレクトリ>
+python train-go/tools/build-runtime.py
+```
+
+## 圧縮配布
+
+`runtime-sources.json` に列挙した読みやすいソースを `tools/build-runtime.py` で `runtime.js.gz` にまとめる。
+`loader.js` がブラウザ内で展開して実行するため、GitHub Pages側の圧縮設定に依存しない。
+DecompressionStream非対応環境は同梱のfflate 0.8.2（MIT、`vendor/fflate.LICENSE`）を使用する。
+共有用のOGP画像はオフライン保存対象に含めない。配布ファイルの更新時は必ず再生成し、`--check` でソースとの一致と起動用ファイル合計2,000,000バイト以下を検査する。
+
+```sh
+python train-go/tools/build-runtime.py
+python train-go/tools/build-runtime.py --check
+node --test train-go/tests/*.test.cjs
+```
+
 ## 収録範囲
 
 日本全国の旅客鉄道を対象とする。JR・私鉄・地下鉄・路面電車・モノレール・新交通・鋼索鉄道を含む。
@@ -8,7 +37,7 @@
 
 基準は `station_database` v20260831 の現役扱い602レコード。旧社名の4レコードを現在の運営路線へ対応づけ、598レコードを収録する。
 データ元が運転区間・系統単位で分けている路線は、その区分を引き継ぐ。さらに元データ未収録のケーブルカー18路線を補完する。
-支線、環状運転、既存の直通コースを含めたゲーム内の選択肢は鉄道646コース、空路12コース、海路7コース。
+支線、環状運転、新たな長距離直通9コースを含めたゲーム内の選択肢は鉄道655コース、空路12コース、海路7コース。
 現実の法的な路線数とは数え方が異なる。すべての臨時列車・愛称列車・直通パターンを個別に収録するものではない。
 
 ## 出典・権利表示
