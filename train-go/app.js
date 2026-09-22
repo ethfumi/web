@@ -2515,6 +2515,25 @@
       ROUTES[key].start,...ROUTES[key].stations.map(s=>s.name)].join(' '))]));
   let routeRegion='all', routeLimit=24, trainLimit=18, couplingPickerOpen=false;
   let pickerInertElements=[];
+  let catalogFillFrame=0;
+  function queueCatalogFill() {
+    if(catalogFillFrame)return;
+    catalogFillFrame=requestAnimationFrame(()=>{
+      catalogFillFrame=0;
+      if(selectScreen.classList.contains('hidden'))return;
+      const bottom=selectScreen.getBoundingClientRect().bottom+240;
+      for(const [pageId,endId,load] of [
+        ['route-select-page','route-end',()=>{routeLimit+=24;filterRouteChoices(false,true);}],
+        ['train-select-page','train-end',()=>{trainLimit+=18;renderTrainChoices(false,true);}],
+      ]) {
+        const end=document.getElementById(endId);
+        if(!document.getElementById(pageId).classList.contains('hidden')
+          && !end.classList.contains('hidden') && end.getBoundingClientRect().top<=bottom)load();
+      }
+    });
+  }
+  selectScreen.addEventListener('scroll',queueCatalogFill,{passive:true});
+  window.addEventListener('resize',queueCatalogFill);
 
   function makeRouteButton(key) {
     const button=document.createElement('button');
@@ -2530,7 +2549,7 @@
     return button;
   }
 
-  function filterRouteChoices(reset=true) {
+  function filterRouteChoices(reset=true,append=false) {
     if(reset)routeLimit=24;
     const keys=catalogRouteKeys.filter(key=>{
       const entry=routeCatalog[key],kind=ROUTES[key].kind;
@@ -2540,12 +2559,15 @@
       return region&&catalog.matches(routeSearchTexts.get(key),routeSearch.value);
     });
     const group=catalog.groups(keys,choices.state.routes,null,routeLimit);
-    document.getElementById('recent-routes').replaceChildren(...group.recent.map(makeRouteButton));
-    document.getElementById('all-routes').replaceChildren(...group.items.map(makeRouteButton));
+    if(!append)document.getElementById('recent-routes').replaceChildren(...group.recent.map(makeRouteButton));
+    const all=document.getElementById('all-routes');
+    if(append)all.append(...group.items.slice(all.children.length).map(makeRouteButton));
+    else all.replaceChildren(...group.items.map(makeRouteButton));
     document.getElementById('recent-route-section').classList.toggle('hidden',!group.recent.length);
-    document.getElementById('route-more').classList.toggle('hidden',!group.hasMore);
+    document.getElementById('route-end').classList.toggle('hidden',!group.hasMore);
     routeResultCount.textContent=keys.length?`${keys.length} コース・${group.items.length+group.recent.length} ひょうじ`:'みつからないよ。ことばや ちいきを かえてみてね';
     document.getElementById('route-search-clear').disabled=!routeSearch.value;
+    queueCatalogFill();
   }
 
   function buildRouteFilters() {
@@ -2562,7 +2584,6 @@
     }
     routeSearch.addEventListener('input',()=>filterRouteChoices());
     document.getElementById('route-search-clear').addEventListener('click',()=>{routeSearch.value='';filterRouteChoices();routeSearch.focus();});
-    document.getElementById('route-more').addEventListener('click',()=>{routeLimit+=24;filterRouteChoices(false);});
   }
 
 
@@ -2628,7 +2649,7 @@
     button.setAttribute('aria-label',button.title+(couplingPickerOpen?'を連結':''));
     return button;
   }
-  function renderTrainChoices(reset=true) {
+  function renderTrainChoices(reset=true,append=false) {
     if(reset)trainLimit=18;
     const keys=TRAIN_SELECTION_ORDER.filter(key=>{
       const kind=TRAINS[key].kind;
@@ -2639,17 +2660,19 @@
       return allowed&&region&&catalog.matches(trainSearchTexts.get(key),trainSearch.value);
     });
     const group=catalog.groups(keys,choices.state.trains,routeTrainKey(selectedRouteKey),trainLimit);
-    document.getElementById('recommended-trains').replaceChildren(...group.recommended.map(key=>makeTrainButton(key,true)));
+    if(!append)document.getElementById('recommended-trains').replaceChildren(...group.recommended.map(key=>makeTrainButton(key,true)));
     document.getElementById('recommended-train-section').classList.toggle('hidden',!group.recommended.length);
-    document.getElementById('recent-trains').replaceChildren(...group.recent.map(key=>makeTrainButton(key)));
+    if(!append)document.getElementById('recent-trains').replaceChildren(...group.recent.map(key=>makeTrainButton(key)));
     document.getElementById('recent-train-section').classList.toggle('hidden',!group.recent.length);
-    document.getElementById('all-trains').replaceChildren(...group.items.map(key=>makeTrainButton(key)));
-    document.getElementById('train-more').classList.toggle('hidden',!group.hasMore);
+    const all=document.getElementById('all-trains');
+    if(append)all.append(...group.items.slice(all.children.length).map(key=>makeTrainButton(key)));
+    else all.replaceChildren(...group.items.map(key=>makeTrainButton(key)));
+    document.getElementById('train-end').classList.toggle('hidden',!group.hasMore);
     document.getElementById('train-result-count').textContent=keys.length?`${keys.length} しゅるい・${group.recommended.length+group.recent.length+group.items.length} ひょうじ`:'みつからないよ。ことばや ちいきを かえてみてね';
+    queueCatalogFill();
   }
   trainSearch.addEventListener('input',()=>renderTrainChoices());
   trainFilter.addEventListener('change',()=>renderTrainChoices());
-  document.getElementById('train-more').addEventListener('click',()=>{trainLimit+=18;renderTrainChoices(false);});
 
 
   const routeSelectPage = document.getElementById("route-select-page");
