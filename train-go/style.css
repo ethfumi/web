@@ -49,6 +49,8 @@ body:not(.map-view-active) #game-name-mode {
 }
 
 .terrain-legend { width: 160px; padding: 6px 9px; border-radius: 12px; background: rgba(255,255,255,.86); color: #40515e; font-size: 11px; text-align: center; pointer-events: none; }
+#map-location-status { max-width: 180px; padding: 5px 8px; border-radius: 8px; background: rgba(255,255,255,.94); color: #36516a; font-size: 12px; line-height: 1.4; }
+#btn-map-location:disabled { opacity: .65; }
 .terrain-legend i { display: block; height: 6px; margin: 3px 0; border-radius: 3px; background: linear-gradient(to right,#b7d19b,#92ba81,#a7a377,#ad926f,#cfc5af); }
 
 /* --- 車両えらび --- */
@@ -1053,6 +1055,7 @@ body.choosing-car #select-screen { z-index: 100; }
   pointer-events: auto;
 }
 #map-camera-controls > button,
+.map-location-actions > button,
 #map-zoom-buttons button {
   min-width: 13vmin;
   min-height: 6.5vmin;
@@ -1071,6 +1074,7 @@ body.choosing-car #select-screen { z-index: 100; }
   background: #568ec5;
 }
 #map-camera-controls > button span:first-child { margin-right: 0.5vmin; }
+.map-location-actions { display: flex; gap: .8vmin; }
 #map-zoom-buttons { display: flex; gap: 0.8vmin; }
 #map-zoom-buttons button {
   min-width: 6.5vmin;
@@ -1123,7 +1127,7 @@ body.map-view-active #btn-headlight {
     top: 23vmin;
     right: 2vmin;
   }
-  #map-camera-controls > button {
+  #map-camera-controls > button, .map-location-actions > button {
     min-width: 24vmin;
     min-height: max(8vmin, 44px);
     font-size: 2.8vmin;
