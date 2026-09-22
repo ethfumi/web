@@ -159,7 +159,6 @@
         point.segmentAngle = Math.atan2(point.worldY - previous.worldY, point.worldX - previous.worldX);
       }
     }
-    projectMapPath(map.coords);
     map.worldBounds = {minX: mapWorldX(map.minLon), maxX: mapWorldX(map.maxLon),
       minY: mapWorldY(map.maxLat), maxY: mapWorldY(map.minLat)};
     // 駅間の平均距離 (m)。縮尺を掛けると画面上の駅間隔になり、駅の点や名前の間引きに使う。
@@ -185,13 +184,6 @@
   }
   function visibleMapRouteKeys() {
     return Object.keys(MAP_ROUTES_BY_KIND).flatMap(kind=>mapLayerVisibility[kind] ? MAP_ROUTES_BY_KIND[kind] : []);
-  }
-  for (const items of Object.values(MAP_GEOGRAPHY)) {
-    if (!Array.isArray(items)) continue;
-    for (const item of items) {
-      const points = Array.isArray(item) ? item : item.points;
-      if (points?.length) projectMapPath(points);
-    }
   }
   const MAP_WATER_TILES = window.TRAIN_GO_WATER_DATA?.tiles || [];
   for (const tile of MAP_WATER_TILES) {
@@ -3748,6 +3740,11 @@
   }
 
   function drawMapTownscape(scene) {
+    // At regional scale these decorative 20–70 m buildings are subpixel; station names remain visible.
+    if (scene.scale < .003) {
+      if (isDebug) canvas.dataset.mapTownBlocks = '0';
+      return;
+    }
     ensureMapTownBlocks();
     const view = sceneWorldBounds(scene, 120);
     let drawn = 0;
@@ -3864,6 +3861,27 @@
   }
 
   const waterTilePaths = new WeakMap();
+  const regionalLandPaths = new WeakMap();
+  function drawRegionalLand(scene) {
+    const view=sceneWorldBounds(scene,0);
+    ctx.save();
+    ctx.translate(scene.screenCenterX-scene.centerWorldX*scene.scale,scene.screenCenterY-scene.centerWorldY*scene.scale);
+    ctx.scale(scene.scale,scene.scale);
+    ctx.fillStyle=timeOfDay==='night'?'#263f47':'#e4f0cf';
+    for (const polygon of window.TRAIN_GO_REGIONAL_LAND.polygons) {
+      const [west,south,east,north]=polygon.bounds;
+      if (mapWorldX(east)<view.minX || mapWorldX(west)>view.maxX
+        || mapWorldY(south)<view.minY || mapWorldY(north)>view.maxY) continue;
+      let path=regionalLandPaths.get(polygon);
+      if (!path) {
+        path=new Path2D();
+        for (const ring of polygon.rings) {appendWaterPath(path,ring);path.closePath();}
+        regionalLandPaths.set(polygon,path);
+      }
+      ctx.fill(path);
+    }
+    ctx.restore();
+  }
   function appendWaterPath(path, coordinates) {
     let lon = 0, lat = 0;
     const precision = window.TRAIN_GO_WATER_DATA.precision;
@@ -3980,7 +3998,8 @@
     const drawBorders = true;
     const drawWaterNames = true;
 
-    {
+    if (window.TRAIN_GO_REGIONAL_LAND) drawRegionalLand(scene);
+    else {
       ctx.fillStyle = timeOfDay === "night" ? "#263f47" : "#e4f0cf";
       ctx.strokeStyle = timeOfDay === "night" ? "rgba(139,180,185,0.72)" : "rgba(81,130,139,0.66)";
       ctx.lineWidth = Math.max(1.2, Math.min(W, H) * 0.0023);
@@ -4718,14 +4737,12 @@
 
   function drawCachedMap(scene, labelSize) {
     const key = [activeRouteMapKey(), activeRoute.variant, currentStationName, nextStationName,
-      scene.mode, scene.scale, timeOfDay, W, H, DPR, scene.screenCenterX, scene.screenCenterY].join("|");
+      scene.mode, timeOfDay, W, H, DPR, scene.screenCenterX, scene.screenCenterY].join("|");
     let cache = mapStaticCache;
-    let dx = cache ? (cache.centerX - scene.centerWorldX) * scene.scale : 0;
-    let dy = cache ? (cache.centerY - scene.centerWorldY) * scene.scale : 0;
-    if (!cache || cache.key !== key || Math.abs(dx) > cache.padding * 0.75
-      || Math.abs(dy) > cache.padding * 0.75) {
+    let placement = window.TRAIN_GO_MAP_CACHE.placement(cache,scene,W,H);
+    if (!placement || cache.key !== key) {
       profiled("map:cache-rebuild", () => {
-        const padding = scene.mode === "follow" ? Math.ceil(Math.min(W, H) * 0.25) : 0;
+        const padding = Math.ceil(Math.min(W,H)*.25);
         const width = Math.ceil((W + padding * 2) * DPR);
         const height = Math.ceil((H + padding * 2) * DPR);
         const surface = mapBackground;
@@ -4744,7 +4761,7 @@
           ctx = displayContext;
           mapCachePadding = 0;
         }
-        cache = mapStaticCache = {key, surface, padding,
+        cache = mapStaticCache = {key, surface, padding, scale:scene.scale,
           centerX: scene.centerWorldX, centerY: scene.centerWorldY};
         if (isDebug) {
           canvas.dataset.mapCacheRebuilds = String(Number(canvas.dataset.mapCacheRebuilds || 0) + 1);
@@ -4754,10 +4771,10 @@
           canvas.dataset.mapCacheBackend = "separate-canvas";
         }
       });
-      dx = dy = 0;
+      placement = {x:-cache.padding,y:-cache.padding,ratio:1};
     }
     // Leave the large background bitmap with the compositor; only the train overlay repaints each frame.
-    const transform = `translate(${dx-cache.padding}px, ${dy-cache.padding}px)`;
+    const transform = `matrix(${placement.ratio},0,0,${placement.ratio},${placement.x},${placement.y})`;
     if (mapBackground.style.transform !== transform) mapBackground.style.transform = transform;
   }
 
