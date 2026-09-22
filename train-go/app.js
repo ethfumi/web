@@ -147,7 +147,9 @@
   const MAP_REFERENCE_LONGITUDE = (YAMANOTE_MAP_BOUNDS.minLon + YAMANOTE_MAP_BOUNDS.maxLon) / 2;
   // 地図データは不変なので、投影と各区間の向きを読込時に一度だけ計算しておく。
   const mapProjectedPaths = new WeakMap();
-  for (const map of Object.values(ROUTE_MAPS)) {
+  for (const [key,map] of Object.entries(ROUTE_MAPS)) {
+    const route=ROUTES[key];
+    map.stopNames=route ? new Set([route.start,...route.stations.map(s=>s.name)]) : null;
     for (let i = 0; i < map.points.length; i++) {
       const point = map.points[i];
       point.worldX = mapWorldX(point.lon);
@@ -2441,7 +2443,28 @@
     return el;
   }
 
+  function drawHelicopterOn(g, x, y, size, type, topView = false) {
+    g.save(); g.translate(x,y); g.scale(size/180,size/180);
+    g.fillStyle=type.body; g.strokeStyle=type.edge; g.lineWidth=2;
+    g.beginPath(); g.moveTo(-16,-7); g.lineTo(-79,-13); g.lineTo(-75,4); g.lineTo(-16,7); g.closePath(); g.fill(); g.stroke();
+    g.beginPath(); g.ellipse(12,0,38,topView?13:20,0,0,Math.PI*2); g.fill(); g.stroke();
+    g.fillStyle=type.stripe; g.fillRect(-13,5,45,5);
+    g.fillStyle='#456984'; g.beginPath(); g.ellipse(28,-6,16,9,0,0,Math.PI*2); g.fill();
+    g.strokeStyle='#52606b'; g.lineWidth=3;
+    g.beginPath(); g.moveTo(-18,24); g.lineTo(44,24); g.moveTo(-7,13); g.lineTo(-7,24); g.moveTo(31,13); g.lineTo(31,24); g.stroke();
+    g.beginPath(); g.moveTo(5,-10); g.lineTo(5,-25); g.moveTo(-59,-26); g.lineTo(72,-26); g.stroke();
+    if (topView) {
+      g.beginPath(); g.moveTo(7,-45); g.lineTo(7,45); g.moveTo(-42,0); g.lineTo(55,0); g.stroke();
+    }
+    g.restore();
+  }
+
   function createAirplanePreview(type) {
+    if (type.helicopter) {
+      const canvas=document.createElement('canvas'); canvas.width=200; canvas.height=70;
+      drawHelicopterOn(canvas.getContext('2d'),100,36,180,type);
+      return canvas;
+    }
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("viewBox", "0 0 200 70");
     svg.innerHTML = `<path d="M12 38 Q22 24 55 24 H169 Q188 24 194 34 Q188 44 169 44 H55 Q22 44 12 38Z" fill="${type.body}" stroke="${type.edge}" stroke-width="2"/><path d="M78 30 L122 5 H143 L119 31 M78 39 L122 65 H143 L119 39" fill="${type.body}" stroke="${type.edge}" stroke-width="2" stroke-linejoin="round"/><path d="M34 33 H178" stroke="${type.stripe}" stroke-width="5"/><path d="M160 25 L176 10 H187 L180 29" fill="${type.body}" stroke="${type.edge}" stroke-width="2"/><circle cx="55" cy="31" r="2.5" fill="#34495e"/><circle cx="68" cy="31" r="2.5" fill="#34495e"/><circle cx="81" cy="31" r="2.5" fill="#34495e"/>`;
@@ -2472,6 +2495,7 @@
     ...(window.TRAIN_GO_ROUTE_DATA?.allRailRouteKeys || []),
     "airOsaka", "airHokkaido", "airOkinawa", "airFukuoka", "airKomatsu",
     "airHachijo", "airIshigaki", "airMiyako", "airYakushima", "airAmami",
+    ...(window.TRAIN_GO_ROUTE_DATA?.airNetwork?.keys || []),
     "airHonolulu", "airGuam",
     "ferryMiyajima", "ferrySakurajima", "ferrySeikan", "ferryTokyoBay",
     "ferryOgasawara", "ferryTaiheiyo", "ferryShinnihonkai",
@@ -2697,7 +2721,8 @@
       const key = button.dataset.train, type = TRAINS[key];
       const model = tripOptions.MODEL_LABELS[key];
       const meta = window.TRAIN_GO_ROUTE_DATA.metadata.find(m => m.trainKey === key);
-      const routeKey = routeCatalog[key] ? key : meta && routeCatalog[meta.key] ? meta.key : null;
+      const routeKey = ['airplane','ferry'].includes(type.kind) ? null
+        : routeCatalog[key] ? key : meta && routeCatalog[meta.key] ? meta.key : null;
       const description = model ? type.name.replace(/の?しんかんせん$/, "").replace("きいろいけんさしゃ", "けんさしゃ")
         : routeKey ? routeLabel(routeKey) : type.name;
       const label = model ? `${model}\n${description}` : description.replace(/のでんしゃ$/, "");
@@ -2761,12 +2786,12 @@
     selectScreen.classList.add("selecting-train");
     const recommendedKey = routeTrainKey(routeKey);
     vehicleSelectTitle.textContent = isAirRoute()
-      ? "どの ひこうきに のる？"
+      ? "どの そらの のりものに のる？"
       : isSeaRoute()
       ? "どの ふねに のる？"
       : "どの でんしゃに のる？";
     document.querySelectorAll(".train-btn").forEach((button) => {
-      const airChoice = button.dataset.train === "airplane";
+      const airChoice = TRAINS[button.dataset.train]?.kind === "airplane";
       const seaChoice = button.dataset.train === "ferry";
       const nonRailChoice = isAirRoute() ? airChoice : isSeaRoute() ? seaChoice : (!airChoice && !seaChoice);
       button.classList.toggle("hidden", isNonRailRoute() ? !nonRailChoice : (airChoice || seaChoice));
@@ -4089,14 +4114,15 @@
     ctx.lineWidth = Math.max(1, dotRadius * 0.45);
     let drawn = 0;
     for (const {map} of candidates) {
-      if (map.kind === "air" || map.kind === "sea") continue;
+      const nonRail = map.kind === "air" || map.kind === "sea";
       const spacingPx = map.meanStationSpanMeters * scene.scale;
-      if (spacingPx < dotRadius * 1.5) continue;
-      const onlyInterchange = spacingPx < dotRadius * 4;
+      if (!nonRail && spacingPx < dotRadius * 1.5) continue;
+      const onlyInterchange = !nonRail && spacingPx < dotRadius * 4;
       ctx.strokeStyle = map.color;
       ctx.beginPath();
       let any = false;
       for (const point of map.points) {
+        if (nonRail && !map.stopNames?.has(point.name)) continue;
         if (onlyInterchange && !MAP_INTERCHANGE_STATIONS.has(point.name)) continue;
         const x = scene.screenCenterX + (point.worldX - scene.centerWorldX) * scene.scale;
         const y = scene.screenCenterY + (point.worldY - scene.centerWorldY) * scene.scale;
@@ -4119,7 +4145,8 @@
   function drawRelatedStationLabels(scene, labelSize) {
     if (!relatedRouteCandidates.length) return;
     const fontSize = Math.max(9, labelSize * 0.8);
-    const ownNames = new Set([activeRoute.start, ...activeRoute.stations.map((station) => station.name)]);
+    const ownNames = mapLayerVisible(activeRouteMap())
+      ? new Set([activeRoute.start, ...activeRoute.stations.map((station) => station.name)]) : new Set();
     const placedNames = new Set();
     ctx.save();
     ctx.font = "bold " + fontSize + "px sans-serif";
@@ -4130,8 +4157,9 @@
     // 乗換駅を先に全路線ぶん置いてから、それ以外を置く。
     for (let pass = 0; pass < 2; pass++) {
       for (const {mapKey,map} of relatedRouteCandidates) {
-        if (map.kind === "air" || map.kind === "sea") continue;
+        const nonRail = map.kind === "air" || map.kind === "sea";
         for (const point of map.points) {
+          if (nonRail && !map.stopNames?.has(point.name)) continue;
           const interchange = MAP_INTERCHANGE_STATIONS.has(point.name);
           if ((pass === 0) !== interchange) continue;
           if (ownNames.has(point.name) || placedNames.has(point.name)) continue;
@@ -4337,6 +4365,10 @@
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(angle + (routeDirection < 0 ? Math.PI : 0));
+    if (train.helicopter) {
+      drawHelicopterOn(ctx,0,0,size*1.3,train,true);
+      ctx.restore(); return;
+    }
     ctx.shadowColor = "rgba(0,0,0,0.32)";
     ctx.shadowBlur = Math.max(4, size * 0.12);
     ctx.fillStyle = train.body;
@@ -5675,7 +5707,7 @@
     ctx.textAlign = "center";
     ctx.textBaseline = "bottom";
     ctx.fillStyle = "#344054";
-    ctx.fillText(`🛫 ${name}`, x, y - 116);
+    ctx.fillText(`${train.helicopter ? '🚁' : '🛫'} ${stationLabel(name)}`, x, y - 116);
     ctx.restore();
   }
 
@@ -5749,7 +5781,7 @@
     ctx.textAlign = "center";
     ctx.textBaseline = "bottom";
     ctx.fillStyle = "#344054";
-    ctx.fillText(`⚓ ${name}`, x, y - 86);
+    ctx.fillText(`⚓ ${stationLabel(name)}`, x, y - 86);
     ctx.restore();
   }
 
@@ -5822,6 +5854,10 @@ function drawAirports() {
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(tilt);
+    if (train.helicopter) {
+      drawHelicopterOn(ctx,0,0,planeW,train);
+      ctx.restore(); return;
+    }
     if (state === "running") {
       ctx.strokeStyle = "rgba(255,255,255,0.75)";
       ctx.lineWidth = Math.max(3, planeH * 0.07);

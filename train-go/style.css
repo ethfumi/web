@@ -1063,7 +1063,7 @@ body.sea-mode #station-passengers {
 
 body.air-mode .train-btn[data-train="airplane"] svg,
 body.sea-mode .train-btn[data-train="ferry"] svg {
-  width: min(48vmin, 300px);
+  width: 100%;
 }
 
 body.map-view-active #game {

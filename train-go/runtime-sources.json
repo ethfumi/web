@@ -5,6 +5,7 @@
   "all-rail-route-data.js",
   "through-route-data.js",
   "air-route-data.js",
+  "all-air-route-data.js",
   "sea-route-data.js",
   "fare-data.js",
   "map-data.js",

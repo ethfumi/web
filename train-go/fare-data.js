@@ -55,6 +55,9 @@
       [1200, 26800], [1600, 31800], [2000, 36800], [3000, 45800], [5000, 59800],
       [10000, 79800],
     ],
+    // 船のゲーム用距離帯。船種・客室・繁忙期・燃油調整額は再現しない。
+    sea: [[3,200],[10,600],[30,1500],[60,2500],[100,4000],[200,6500],
+      [500,10000],[1000,18000],[1500,25000]],
   };
 
   // 600km 超の幹線は 20km ごと約 330 円増し（公表表の伸び方に合わせた近似）。
@@ -170,7 +173,7 @@
     if (FIXED_FARES[routeKey] != null) return "fixed";
     if (ROUTE_FARE_CLASS[routeKey]) return ROUTE_FARE_CLASS[routeKey];
     if (route?.kind === "air") return "air";
-    if (route?.kind === "sea") return "jrMain";
+    if (route?.kind === "sea") return "sea";
     if (route?.kind === "shinkansen") return "shinkansen";
     return "jrMain";
   }
