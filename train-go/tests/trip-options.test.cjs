@@ -84,11 +84,11 @@ test('kanji presentation leaves station identity and spoken departure names unch
   assert.equal(names.station('ちば','sobu','kana'),'ちば');
   assert.match(names.route('keio','kanji'),/京王/);
   let banner='',speech='';
-  const s=vm.createContext({activeRoute:data.routes.sobu,currentStationName:'ちば',nextStationName:'にしちば',
+  const s=vm.createContext({window:scope.window,activeRoute:data.routes.sobu,currentStationName:'ちば',nextStationName:'にしちば',passingStation:false,deadheadMode:false,
     isAirRoute:()=>false,isSeaRoute:()=>false,routeTerminalStation:()=>({name:'みたか'}),
     stationLabel:name=>names.station(name,'sobu','kanji'),showPlayBanner:text=>{banner=text;},say:text=>{speech=text;}});
-  vm.runInContext(functionSource('announceInitialDeparture','startGame'),s);s.announceInitialDeparture();
+  vm.runInContext(functionSource('nextAnnouncementOptions','isAirRoute')+functionSource('announceInitialDeparture','startGame'),s);s.announceInitialDeparture();
   assert.match(banner,/千葉.*三鷹/);
-  assert.match(speech,/ちばはつ、みたかゆき/);
+  assert.match(speech,/みたか行き/);assert.match(speech,/次は、にしちば、にしちばです/);
   assert.equal(data.routes.sobu.start,'みたか');
 });
