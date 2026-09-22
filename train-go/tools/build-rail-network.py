@@ -114,5 +114,5 @@ if __name__ == '__main__':
         if args.check:
             assert path.read_text('utf8') == text, f'{name} is stale; run tools/build-rail-network.py'
         else:
-            path.write_text(text,'utf8')
+            path.write_text(text, encoding='utf8', newline='\n')
         print(('checked' if args.check else 'wrote'),name)
