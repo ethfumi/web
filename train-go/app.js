@@ -34,6 +34,10 @@
   function stationLabel(name, key = activeRouteMapKey()) { return nameResolver.station(name, key, choices.state.nameMode); }
   function routeLabel(key = selectedRouteKey) { return nameResolver.route(key, choices.state.nameMode); }
   function placeLabel(name) { return nameResolver.place(name,choices.state.nameMode); }
+  function nextAnnouncementOptions() {
+    return {station:nextStationName,terminal:!activeRoute.loopKm&&nextStationName===routeTerminalStation().name,
+      passing:passingStation,outOfService:deadheadMode};
+  }
 
   function isAirRoute(route = activeRoute) {
     return route?.kind === "air";
@@ -1476,12 +1480,12 @@
     }
     if (activeRoute.loopKm) {
       showPlayBanner(`🚉 ${stationLabel(origin)} はつ　${routeLabel(activeRouteMapKey())}`, 3200);
-      say(`このでんしゃは、${activeRoute.start}はつ、${activeRoute.name}です。つぎは、${nextStationName}です`);
+      say(`ご乗車ありがとうございます。この電車は、${activeRoute.name}です。${window.TRAIN_GO_ANNOUNCEMENTS.next(nextAnnouncementOptions())}`);
       return;
     }
     const destination = routeTerminalStation().name;
     showPlayBanner(`🚉 ${stationLabel(origin)} はつ　➡ ${stationLabel(destination)} ゆき`, 3200);
-    say(`このでんしゃは、${origin}はつ、${destination}ゆきです。つぎは、${nextStationName}です`);
+    say(`ご乗車ありがとうございます。この電車は、${destination}行きです。${window.TRAIN_GO_ANNOUNCEMENTS.next(nextAnnouncementOptions())}`);
   }
 
   function startGame(key) {
@@ -1657,9 +1661,7 @@
       } else if (isSeaRoute()) {
         say(`${nextStationName}へ、しゅっこうします`);
       } else {
-        say(passingStation
-          ? `このでんしゃは、${deadheadMode ? "かいそうれっしゃ" : activeRoute.expressModeName}です。${nextStationName}は、とおりすぎます`
-          : `つぎは、${nextStationName}`);
+        say(window.TRAIN_GO_ANNOUNCEMENTS.next(nextAnnouncementOptions()));
       }
     }
     const departureSpeed = isAirRoute()
@@ -1725,9 +1727,7 @@
     } else {
       arrivalBanner.textContent = isTurnaround ? "おりかえし〜！" : "とうちゃく〜！";
       showStationDoorPrompt();
-      say(isTurnaround
-        ? `${currentStationName}にとうちゃく！おりかえして、${routeTerminalStation().name}へいくよ。ドアをあけてみよう！`
-        : `${currentStationName}〜、${currentStationName}〜、とうちゃく！ドアをあけてみよう！`);
+      say(window.TRAIN_GO_ANNOUNCEMENTS.arrival({station:currentStationName,terminal:isTurnaround}));
     }
     spawnConfetti(celebration ? 90 : 40);
   }
@@ -1860,7 +1860,7 @@
     stationPassengers.classList.add("hidden");
     arrivalBanner.classList.remove("passenger-exchange");
     arrivalBanner.textContent = "しゅっぱつできるよ！";
-    say("ドアがしまりまーす。しゅっぱつしんこう！");
+    say("ドアが閉まります。ご注意ください。");
   }
 
   function createTrainPreview(key) {
@@ -2000,9 +2000,9 @@
     const progress = (distance - segmentStartDistance) / segmentLength;
     if (progress < 0.52) return;
     midAnnouncementDone = true;
-    say(passingStation
-      ? `まもなく、${nextStationName}を、つうかします`
-      : `まもなく、${nextStationName}です。おりるかたは、じゅんびしてください`);
+    if(isNonRailRoute()) {
+      say(`まもなく、${nextStationName}です。おりるかたは、じゅんびしてください`);
+    } else say(window.TRAIN_GO_ANNOUNCEMENTS.approach(nextAnnouncementOptions()));
   }
 
   function addCar(typeKey = trainKey) {
@@ -3024,7 +3024,7 @@
       const couplingNote = train === TRAINS.hayabusa && !komachiCoupled
         ? "ただし、もりおかで、れんけつします。"
         : "";
-      announcement = `かいそうれっしゃ！${routeTerminalStation().name}まで、とまりません。${couplingNote}`;
+      announcement = `${window.TRAIN_GO_ANNOUNCEMENTS.deadhead()}${couplingNote}`;
     } else {
       expressMode = true;
       deadheadMode = false;

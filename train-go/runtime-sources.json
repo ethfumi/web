@@ -17,6 +17,7 @@
   "geographic-label-data.js",
   "landmark-data.js",
   "trip-options.js",
+  "train-announcements.js",
   "catalog.js",
   "map-cache.js",
   "app.js"
