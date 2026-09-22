@@ -10,7 +10,7 @@ from pathlib import Path
 
 import mapbox_vector_tile
 from pmtiles.reader import Reader
-from shapely.geometry import box, shape, mapping, Polygon
+from shapely.geometry import box, shape, mapping, Polygon, LineString
 from shapely.ops import unary_union
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -32,6 +32,43 @@ def encode_path(points):
         result.extend([current[0]-previous[0], current[1]-previous[1]])
         previous = current
     return result
+
+
+def simplify_near_terminals(polygon, terminals, radius):
+    """Retain the finer original shore only near terminals, keeping the coarse ring elsewhere."""
+    def close_to_bounds(geometry,points):
+        left,bottom,right,top=geometry.bounds
+        return [p for p in points if left-radius<=p[0]<=right+radius and bottom-radius<=p[1]<=top+radius]
+    terminals=close_to_bounds(polygon,terminals)
+    coarse=polygon.simplify(24,preserve_topology=True)
+    if not terminals:
+        return coarse
+    def refine(original,simplified):
+        candidates=close_to_bounds(original,terminals)
+        if not candidates:return list(simplified.coords)
+        original=list(original.coords)[:-1]
+        positions={tuple(p):i for i,p in enumerate(original)}
+        kept=list(simplified.coords)
+        result=[]
+        for a,b in zip(kept,kept[1:]):
+            if a not in positions or b not in positions:
+                return list(simplified.coords)
+            start,end=positions[a],positions[b]
+            segment=original[start:end+1] if end>start else original[start:]+original[:end+1]
+            near=any((p[0]-q[0])**2+(p[1]-q[1])**2<=radius**2 for p in segment for q in candidates)
+            points=list(LineString(segment).simplify(6).coords) if near else [a,b]
+            result.extend(points[:-1])
+        return result+[result[0]]
+    holes=[]
+    original_holes={tuple(point):ring for ring in polygon.interiors for point in ring.coords}
+    for hole in coarse.interiors:
+        if not close_to_bounds(hole,terminals):
+            holes.append(list(hole.coords))
+            continue
+        original=original_holes.get(tuple(hole.coords[0]))
+        holes.append(refine(original,hole) if original is not None else list(hole.coords))
+    result=Polygon(refine(polygon.exterior,coarse.exterior),holes)
+    return result if result.is_valid else polygon.simplify(6,preserve_topology=True)
 
 
 def deduplicate_tiles(tiles):
@@ -85,6 +122,24 @@ def build(cache):
     # GSI omits river geometry below z10. Apply the same detail to railway areas nationwide.
     detail_tiles = {tile_xy(s[2], s[3], 10) for s in stations.values() if not s[5]}
     requested.update((10,x+dx,y+dy) for x,y in detail_tiles for dx in [-1,0,1] for dy in [-1,0,1])
+    # The same offline coast detail must also cover islands without railways.
+    transport_points=[]
+    for file,field in [('air-network.json','airports'),('ferry-network.json','ports')]:
+        path=ROOT/'data'/file
+        if path.exists():
+            records=json.loads(path.read_text('utf8'))[field]
+            transport_points.extend((row[3],row[4]) if field=='airports' else (row[2],row[3]) for row in records)
+    for lon,lat in transport_points:
+        x,y=tile_xy(lon,lat,8)
+        requested.update((8,x+dx,y+dy) for dx in [-1,0,1] for dy in [-1,0,1])
+        x,y=tile_xy(lon,lat,10)
+        requested.add((10,x,y))
+    ports_by_tile={}
+    for lon,lat in transport_points:
+        x,y=tile_xy(lon,lat,10)
+        for dx in [-1,0,1]:
+            for dy in [-1,0,1]:
+                ports_by_tile.setdefault((x+dx,y+dy),[]).append((lon,lat))
     print(f'Extracting {len(requested)} small tiles via byte ranges', flush=True)
 
     def extract(tile):
@@ -105,6 +160,9 @@ def build(cache):
             clip = box(0,0,extent,extent)
             middle_lat = lonlat(x+0.5,y+0.5,z)[1]
             meters_per_unit = 40075016.686*math.cos(math.radians(middle_lat))/(2**z*extent)
+            local_ports=[(((lon+180)/360*2**z-x)*extent,
+                          ((1-math.asinh(math.tan(math.radians(lat)))/math.pi)/2*2**z-y)*extent)
+                         for lon,lat in ports_by_tile.get((x,y),[])] if z==10 else []
             def transform_coords(coords):
                 if isinstance(coords[0], (int,float)):
                     return lonlat(x+coords[0]/extent, y+coords[1]/extent, z)
@@ -113,13 +171,13 @@ def build(cache):
                 geom = shape(feature['geometry'])
                 if not geom.is_valid:
                     geom = geom.buffer(0)
-                # Roughly 200m simplification nationwide; keep topology of narrow rivers and islands.
-                geom = geom.intersection(clip).simplify(3 if z == 8 else 24, preserve_topology=True)
+                geom = geom.intersection(clip)
                 if geom.is_empty:
                     continue
                 parts = list(geom.geoms) if geom.geom_type.startswith('Multi') or geom.geom_type == 'GeometryCollection' else [geom]
                 for part in parts:
                     if part.geom_type == ('Polygon' if layer_name == 'WA' else 'LineString'):
+                        part=simplify_near_terminals(part,local_ports,500/meters_per_unit) if z==10 else part.simplify(3,preserve_topology=True)
                         if z >= 10 and part.area*meters_per_unit**2 < 100000 and not part.intersects(clip.boundary):
                             continue
                         coords = transform_coords(mapping(part)['coordinates'])

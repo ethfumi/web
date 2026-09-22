@@ -2499,6 +2499,7 @@
     "airHonolulu", "airGuam",
     "ferryMiyajima", "ferrySakurajima", "ferrySeikan", "ferryTokyoBay",
     "ferryOgasawara", "ferryTaiheiyo", "ferryShinnihonkai",
+    ...(window.TRAIN_GO_ROUTE_DATA?.ferryNetwork?.keys || []),
   ])];
 
   const routeCatalog = window.TRAIN_GO_ROUTE_DATA.routeCatalog || {};
@@ -2674,7 +2675,8 @@
     tripReverse.setAttribute("aria-pressed", String(reverse));
     document.getElementById("trip-direction").classList.toggle("hidden", Boolean(route.loopKm));
     const terminal = route.stations[route.terminalIndex ?? route.stations.length-2];
-    document.getElementById("trip-summary").textContent = `${routeLabel()}　${stationNamesForRoute(route).length}えき・${(route.loopKm || terminal.km-route.startKm).toFixed(1)}km`;
+    const stopUnit=isSeaRoute(route) ? "みなと" : isAirRoute(route) ? "かしょ" : "えき";
+    document.getElementById("trip-summary").textContent = `${routeLabel()}　${stationNamesForRoute(route).length}${stopUnit}・${(route.loopKm || terminal.km-route.startKm).toFixed(1)}km`;
   }
 
   function arrangeRecentRoutes() {
@@ -3867,17 +3869,19 @@
       if (!mapIntersectsScene(scene, tile, 0)) continue;
       let paths = waterTilePaths.get(tile);
       if (!paths) {
+        const landHoles = new Path2D();
         const polygonPaths = tile.water.map(rings => {
           const path = new Path2D();
-          for (const ring of rings) {
+          for (const [index,ring] of rings.entries()) {
             appendWaterPath(path, ring);
             path.closePath();
+            if (index) { appendWaterPath(landHoles,ring); landHoles.closePath(); }
           }
           return path;
         });
         const rivers = new Path2D();
         for (const line of tile.rivers) appendWaterPath(rivers, line);
-        paths = {polygons:polygonPaths, rivers};
+        paths = {polygons:polygonPaths, rivers, landHoles};
         waterTilePaths.set(tile, paths);
       }
       const b = tile.worldBounds;
@@ -3889,9 +3893,11 @@
       ctx.rect(left,top,width,height);
       ctx.clip();
       ctx.fillStyle = timeOfDay === "night" ? "#263f47" : "#e4f0cf";
-      ctx.fillRect(left,top,width,height);
+      // Coarse water data does not cover the entire open ocean. Its missing area is not land.
+      if (tile.z >= 10) ctx.fillRect(left,top,width,height);
       ctx.translate(scene.screenCenterX-scene.centerWorldX*scene.scale, scene.screenCenterY-scene.centerWorldY*scene.scale);
       ctx.scale(scene.scale,scene.scale);
+      if (tile.z < 10) ctx.fill(paths.landHoles);
       ctx.fillStyle = timeOfDay === "night" ? "#173b53" : "#80c8e2";
       for (const path of paths.polygons) ctx.fill(path,"evenodd");
       ctx.strokeStyle = timeOfDay === "night" ? "#4c829c" : "#72bfdc";
@@ -3905,7 +3911,7 @@
     const mapGradient = ctx.createLinearGradient(0, 0, 0, H);
     mapGradient.addColorStop(0, timeOfDay === "night" ? "#17344a" : "#d9f0f6");
     mapGradient.addColorStop(1, timeOfDay === "night" ? "#10283c" : "#b9dfea");
-    ctx.fillStyle = mapGradient;
+    ctx.fillStyle = MAP_WATER_TILES.length ? (timeOfDay === "night" ? "#173b53" : "#80c8e2") : mapGradient;
     ctx.fillRect(-mapCachePadding, -mapCachePadding, W + mapCachePadding * 2, H + mapCachePadding * 2);
 
     const isFollow = scene.mode === "follow";
@@ -4090,6 +4096,7 @@
     drawRelatedRouteStations(scene, candidates, labelSize);
     relatedRouteCandidates = candidates;
     for (const {mapKey,map} of candidates) {
+      if (map.reference) continue;
       const labelPoint = map.points[Math.floor(map.points.length / 2)];
       const labelX = scene.screenCenterX + (mapWorldX(labelPoint.lon) - scene.centerWorldX) * scene.scale;
       const labelY = scene.screenCenterY + (mapWorldY(labelPoint.lat) - scene.centerWorldY) * scene.scale;

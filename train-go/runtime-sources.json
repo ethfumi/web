@@ -7,6 +7,7 @@
   "air-route-data.js",
   "all-air-route-data.js",
   "sea-route-data.js",
+  "all-ferry-route-data.js",
   "fare-data.js",
   "map-data.js",
   "map-water-data.js",
