@@ -4630,7 +4630,7 @@
   }
 
   function drawMapRestStops(scene,labelSize) {
-    if(scene.scale<.008)return;
+    if(!mapLayerVisibility.road||scene.scale<.008)return;
     ctx.save();ctx.textAlign='center';ctx.textBaseline='bottom';
     const size=Math.max(10,labelSize*.75);ctx.font='bold '+size+'px sans-serif';
     for(const [name,kana,lon,lat] of window.TRAIN_GO_REST_STOPS) {
