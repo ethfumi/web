@@ -96,6 +96,21 @@
       ["しちのへとわだ",668.0,141.1540,40.7190],["しんあおもり",713.7,140.6930,40.8270]]},
   };
   Object.assign(maps, window.TRAIN_GO_ROUTE_DATA?.maps || {});
+  // The long-distance course omits local stops, but shares the Chuo corridor.
+  // Use its intermediate map vertices without changing the playable stops/km.
+  if(maps.chuoMain&&maps.chuo) {
+    const local=maps.chuo.points,expanded=[];
+    const original=maps.chuoMain.points;
+    for(let i=0;i<original.length;i++) {
+      const a=original[i],b=original[i+1];expanded.push(a);
+      if(!b)continue;
+      const from=local.findIndex(p=>p[0]===a[0]),to=local.findIndex(p=>p[0]===b[0]);
+      if(from<0||to<=from+1)continue;
+      const span=local[to][1]-local[from][1];
+      for(const point of local.slice(from+1,to))expanded.push([point[0],a[1]+(b[1]-a[1])*(point[1]-local[from][1])/span,point[2],point[3]]);
+    }
+    maps.chuoMain.points=expanded;
+  }
   for (const map of Object.values(maps)) {
     map.points = map.points.map(([name,km,lon,lat]) => ({name,km,lon,lat}));
     map.coords = map.points.map((point) => [point.lon,point.lat]);
