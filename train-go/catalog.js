@@ -35,7 +35,7 @@
   }
   function convoyKeys(initial,preferred,defaults,trains) {
     if(trains[initial]?.kind!=='car')return [];
-    return [...new Set([...preferred,...defaults])].filter(key=>key!==initial&&trains[key]?.kind==='car').slice(0,9).concat(initial);
+    return [...new Set(['carAmbulance','carPolice','carFireEngine',...preferred,...defaults])].filter(key=>key!==initial&&trains[key]?.kind==='car').slice(0,9).concat(initial);
   }
   window.TRAIN_GO_CATALOG={normalize,matches,groups,couplingKeys,convoyKeys,inPrefecture,TRAIN_SEARCH_ALIASES};
 })();
