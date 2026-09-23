@@ -12,6 +12,7 @@
   "international-route-data.js",
   "fare-data.js",
   "map-data.js",
+  "rail-shape-data.js",
   "line-colors.js",
   "regional-land-data.js",
   "map-water-data.js",

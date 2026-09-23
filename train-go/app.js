@@ -150,6 +150,7 @@
   for (const [key,map] of Object.entries(ROUTE_MAPS)) {
     const route=ROUTES[key];
     map.stopNames=route ? new Set([route.start,...route.stations.map(s=>s.name)]) : null;
+    map.stationPoints=map.points.filter(point=>point.name);
     for (let i = 0; i < map.points.length; i++) {
       const point = map.points[i];
       point.worldX = mapWorldX(point.lon);
@@ -166,14 +167,15 @@
     for (let i = 1; i < map.points.length; i++) {
       spanTotal += Math.hypot(map.points[i].worldX - map.points[i - 1].worldX, map.points[i].worldY - map.points[i - 1].worldY);
     }
-    map.meanStationSpanMeters = map.points.length > 1 ? spanTotal / (map.points.length - 1) : 0;
+    const stationCount=map.stationPoints.length;
+    map.meanStationSpanMeters = stationCount > 1 ? spanTotal / (stationCount - 1) : 0;
   }
   // 乗換駅: 2 つ以上の路線に同じ駅名がある。引いた地図で残す駅名と、周辺路線の駅の点の基準。
   const MAP_INTERCHANGE_STATIONS = (() => {
     const counts = new Map();
     for (const map of Object.values(ROUTE_MAPS)) {
       if (map.kind === "air" || map.kind === "sea" || map.kind === "road") continue;
-      for (const name of new Set(map.points.map((point) => point.name))) counts.set(name, (counts.get(name) || 0) + 1);
+      for (const name of new Set(map.stationPoints.map((point) => point.name))) counts.set(name, (counts.get(name) || 0) + 1);
     }
     return new Set([...counts].filter(([, count]) => count >= 2).map(([name]) => name));
   })();
@@ -4390,7 +4392,8 @@
       ctx.strokeStyle = map.color;
       ctx.beginPath();
       let any = false;
-      for (const point of map.points) {
+      for (const point of map.stationPoints || map.points) {
+        if(!point.name)continue;
         if (nonRail && !map.stopNames?.has(point.name)) continue;
         if (onlyInterchange && !MAP_INTERCHANGE_STATIONS.has(point.name)) continue;
         const x = scene.screenCenterX + (point.worldX - scene.centerWorldX) * scene.scale;
@@ -4424,7 +4427,8 @@
     for (let pass = 0; pass < 2; pass++) {
       for (const {mapKey,map} of relatedRouteCandidates) {
         const nonRail = map.kind === "air" || map.kind === "sea" || map.kind === "road";
-        for (const point of map.points) {
+        for (const point of map.stationPoints || map.points) {
+          if(!point.name)continue;
           if (nonRail && !map.stopNames?.has(point.name)) continue;
           const interchange = MAP_INTERCHANGE_STATIONS.has(point.name);
           if ((pass === 0) !== interchange) continue;

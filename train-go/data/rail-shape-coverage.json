@@ -1,0 +1,3953 @@
+{
+  "matched": 10635,
+  "total": 10635,
+  "endpointRepairs": [
+    [
+      [
+        "東海旅客鉄道",
+        "東海道線"
+      ],
+      [
+        137.88653,
+        34.71924
+      ],
+      [
+        137.886528,
+        34.719239
+      ],
+      0.212
+    ]
+  ],
+  "routes": {
+    "yamanote": {
+      "title": "JR山手線",
+      "matched": 30,
+      "total": 30,
+      "missing": []
+    },
+    "chuo": {
+      "title": "JR中央線(快速)",
+      "matched": 29,
+      "total": 29,
+      "missing": []
+    },
+    "sobu": {
+      "title": "JR中央・総武線",
+      "matched": 38,
+      "total": 38,
+      "missing": []
+    },
+    "tozai": {
+      "title": "東京メトロ東西線",
+      "matched": 22,
+      "total": 22,
+      "missing": []
+    },
+    "inokashira": {
+      "title": "京王井の頭線",
+      "matched": 16,
+      "total": 16,
+      "missing": []
+    },
+    "keio": {
+      "title": "京王線",
+      "matched": 31,
+      "total": 31,
+      "missing": []
+    },
+    "keioSagamihara": {
+      "title": "京王相模原線",
+      "matched": 26,
+      "total": 26,
+      "missing": []
+    },
+    "tokaido": {
+      "title": "東海道新幹線",
+      "matched": 16,
+      "total": 16,
+      "missing": []
+    },
+    "tohoku": {
+      "title": "東北新幹線",
+      "matched": 19,
+      "total": 19,
+      "missing": []
+    },
+    "ginza": {
+      "title": "東京メトロ銀座線",
+      "matched": 18,
+      "total": 18,
+      "missing": []
+    },
+    "marunouchi": {
+      "title": "東京メトロ丸ノ内線",
+      "matched": 24,
+      "total": 24,
+      "missing": []
+    },
+    "hibiya": {
+      "title": "東京メトロ日比谷線",
+      "matched": 21,
+      "total": 21,
+      "missing": []
+    },
+    "chiyoda": {
+      "title": "東京メトロ千代田線",
+      "matched": 19,
+      "total": 19,
+      "missing": []
+    },
+    "yurakucho": {
+      "title": "東京メトロ有楽町線",
+      "matched": 23,
+      "total": 23,
+      "missing": []
+    },
+    "hanzomon": {
+      "title": "東京メトロ半蔵門線",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "namboku": {
+      "title": "東京メトロ南北線",
+      "matched": 18,
+      "total": 18,
+      "missing": []
+    },
+    "fukutoshin": {
+      "title": "東京メトロ副都心線",
+      "matched": 15,
+      "total": 15,
+      "missing": []
+    },
+    "asakusa": {
+      "title": "都営浅草線",
+      "matched": 19,
+      "total": 19,
+      "missing": []
+    },
+    "mita": {
+      "title": "都営三田線",
+      "matched": 26,
+      "total": 26,
+      "missing": []
+    },
+    "shinjukuSubway": {
+      "title": "都営新宿線",
+      "matched": 20,
+      "total": 20,
+      "missing": []
+    },
+    "oedo": {
+      "title": "都営大江戸線",
+      "matched": 38,
+      "total": 38,
+      "missing": []
+    },
+    "odakyu": {
+      "title": "小田急小田原線",
+      "matched": 46,
+      "total": 46,
+      "missing": []
+    },
+    "toyoko": {
+      "title": "東急東横線",
+      "matched": 20,
+      "total": 20,
+      "missing": []
+    },
+    "keikyu": {
+      "title": "京急本線",
+      "matched": 49,
+      "total": 49,
+      "missing": []
+    },
+    "osakaLoop": {
+      "title": "JR大阪環状線",
+      "matched": 19,
+      "total": 19,
+      "missing": []
+    },
+    "saikyo": {
+      "title": "JR埼京線",
+      "matched": 18,
+      "total": 18,
+      "missing": []
+    },
+    "shonanShinjuku": {
+      "title": "JR湘南新宿ライン",
+      "matched": 21,
+      "total": 21,
+      "missing": []
+    },
+    "uenoTokyo": {
+      "title": "JR上野東京ライン",
+      "matched": 20,
+      "total": 20,
+      "missing": []
+    },
+    "keihinTohoku": {
+      "title": "JR京浜東北線",
+      "matched": 46,
+      "total": 46,
+      "missing": []
+    },
+    "keiyo": {
+      "title": "JR京葉線",
+      "matched": 16,
+      "total": 16,
+      "missing": []
+    },
+    "yurikamome": {
+      "title": "ゆりかもめ",
+      "matched": 15,
+      "total": 15,
+      "missing": []
+    },
+    "rinkai": {
+      "title": "東京臨海高速鉄道",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "yokosuka": {
+      "title": "JR横須賀線",
+      "matched": 18,
+      "total": 18,
+      "missing": []
+    },
+    "uchibo": {
+      "title": "JR内房線",
+      "matched": 31,
+      "total": 31,
+      "missing": []
+    },
+    "hokkaido": {
+      "title": "北海道新幹線",
+      "matched": 3,
+      "total": 3,
+      "missing": []
+    },
+    "joetsu": {
+      "title": "上越新幹線",
+      "matched": 11,
+      "total": 11,
+      "missing": []
+    },
+    "hokuriku": {
+      "title": "北陸新幹線",
+      "matched": 23,
+      "total": 23,
+      "missing": []
+    },
+    "yamagata": {
+      "title": "山形新幹線",
+      "matched": 10,
+      "total": 10,
+      "missing": []
+    },
+    "akita": {
+      "title": "秋田新幹線",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "sanyo": {
+      "title": "山陽新幹線",
+      "matched": 18,
+      "total": 18,
+      "missing": []
+    },
+    "kyushu": {
+      "title": "九州新幹線",
+      "matched": 11,
+      "total": 11,
+      "missing": []
+    },
+    "nishiKyushu": {
+      "title": "西九州新幹線",
+      "matched": 4,
+      "total": 4,
+      "missing": []
+    },
+    "hankyuTakarazuka": {
+      "title": "阪急宝塚本線",
+      "matched": 18,
+      "total": 18,
+      "missing": []
+    },
+    "osakaChuo": {
+      "title": "OsakaMetro中央線",
+      "matched": 14,
+      "total": 14,
+      "missing": []
+    },
+    "tsukubaExpress": {
+      "title": "つくばエクスプレス",
+      "matched": 19,
+      "total": 19,
+      "missing": []
+    },
+    "joban": {
+      "title": "JR常磐線(上野～取手)",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "jobanLocal": {
+      "title": "千代田線・常磐線",
+      "matched": 31,
+      "total": 31,
+      "missing": []
+    },
+    "yokohama": {
+      "title": "JR横浜線",
+      "matched": 19,
+      "total": 19,
+      "missing": []
+    },
+    "nambu": {
+      "title": "JR南武線",
+      "matched": 25,
+      "total": 25,
+      "missing": []
+    },
+    "musashino": {
+      "title": "JR武蔵野線",
+      "matched": 25,
+      "total": 25,
+      "missing": []
+    },
+    "sagami": {
+      "title": "JR相模線",
+      "matched": 17,
+      "total": 17,
+      "missing": []
+    },
+    "tobuSkytree": {
+      "title": "東武スカイツリーライン",
+      "matched": 28,
+      "total": 28,
+      "missing": []
+    },
+    "takasaki": {
+      "title": "JR高崎線",
+      "matched": 18,
+      "total": 18,
+      "missing": []
+    },
+    "newShuttle": {
+      "title": "埼玉新都市交通伊奈線",
+      "matched": 12,
+      "total": 12,
+      "missing": []
+    },
+    "yuiRail": {
+      "title": "ゆいレール",
+      "matched": 18,
+      "total": 18,
+      "missing": []
+    },
+    "kantoLine11231": {
+      "title": "JR東北本線(黒磯～利府・盛岡)",
+      "matched": 82,
+      "total": 82,
+      "missing": []
+    },
+    "kantoLine11229": {
+      "title": "JR常磐線(取手～いわき)",
+      "matched": 34,
+      "total": 34,
+      "missing": []
+    },
+    "tokaidoLocal": {
+      "title": "JR東海道本線(東京～熱海)",
+      "matched": 20,
+      "total": 20,
+      "missing": []
+    },
+    "tsurumi": {
+      "title": "JR鶴見線",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "negishi": {
+      "title": "JR根岸線",
+      "matched": 11,
+      "total": 11,
+      "missing": []
+    },
+    "chuoMain": {
+      "title": "JR中央本線(東京～塩尻)",
+      "matched": 66,
+      "total": 66,
+      "missing": []
+    },
+    "sobuMain": {
+      "title": "JR総武本線",
+      "matched": 30,
+      "total": 30,
+      "missing": []
+    },
+    "ome": {
+      "title": "JR青梅線",
+      "matched": 24,
+      "total": 24,
+      "missing": []
+    },
+    "itsukaichi": {
+      "title": "JR五日市線",
+      "matched": 6,
+      "total": 6,
+      "missing": []
+    },
+    "hachikoSouth": {
+      "title": "JR八高線(八王子～高麗川)",
+      "matched": 8,
+      "total": 8,
+      "missing": []
+    },
+    "hachikoNorth": {
+      "title": "JR八高線(高麗川～高崎)",
+      "matched": 15,
+      "total": 15,
+      "missing": []
+    },
+    "utsunomiya": {
+      "title": "JR東北本線(宇都宮線)",
+      "matched": 32,
+      "total": 32,
+      "missing": []
+    },
+    "kawagoe": {
+      "title": "JR川越線",
+      "matched": 10,
+      "total": 10,
+      "missing": []
+    },
+    "sotobo": {
+      "title": "JR外房線",
+      "matched": 26,
+      "total": 26,
+      "missing": []
+    },
+    "narita": {
+      "title": "JR成田線",
+      "matched": 16,
+      "total": 16,
+      "missing": []
+    },
+    "kashima": {
+      "title": "JR鹿島線",
+      "matched": 6,
+      "total": 6,
+      "missing": []
+    },
+    "kururi": {
+      "title": "JR久留里線",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "togane": {
+      "title": "JR東金線",
+      "matched": 4,
+      "total": 4,
+      "missing": []
+    },
+    "karasuyama": {
+      "title": "JR烏山線",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "agatsuma": {
+      "title": "JR吾妻線",
+      "matched": 17,
+      "total": 17,
+      "missing": []
+    },
+    "shinetsu": {
+      "title": "JR信越本線",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "suigun": {
+      "title": "JR水郡線",
+      "matched": 40,
+      "total": 40,
+      "missing": []
+    },
+    "mito": {
+      "title": "JR水戸線",
+      "matched": 15,
+      "total": 15,
+      "missing": []
+    },
+    "nikko": {
+      "title": "JR日光線",
+      "matched": 6,
+      "total": 6,
+      "missing": []
+    },
+    "ryomo": {
+      "title": "JR両毛線",
+      "matched": 21,
+      "total": 21,
+      "missing": []
+    },
+    "joetsuLocal": {
+      "title": "JR上越線",
+      "matched": 35,
+      "total": 35,
+      "missing": []
+    },
+    "gotemba": {
+      "title": "JR御殿場線",
+      "matched": 18,
+      "total": 18,
+      "missing": []
+    },
+    "tobuTojo": {
+      "title": "東武東上線",
+      "matched": 38,
+      "total": 38,
+      "missing": []
+    },
+    "tobuIsesaki": {
+      "title": "東武伊勢崎線",
+      "matched": 53,
+      "total": 53,
+      "missing": []
+    },
+    "tobuNikko": {
+      "title": "東武日光線",
+      "matched": 25,
+      "total": 25,
+      "missing": []
+    },
+    "tobuNoda": {
+      "title": "東武野田線",
+      "matched": 34,
+      "total": 34,
+      "missing": []
+    },
+    "tobuKameido": {
+      "title": "東武亀戸線",
+      "matched": 4,
+      "total": 4,
+      "missing": []
+    },
+    "tobuDaishi": {
+      "title": "東武大師線",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "tobuOgose": {
+      "title": "東武越生線",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "tobuUtsunomiya": {
+      "title": "東武宇都宮線",
+      "matched": 11,
+      "total": 11,
+      "missing": []
+    },
+    "tobuKinugawa": {
+      "title": "東武鬼怒川線",
+      "matched": 8,
+      "total": 8,
+      "missing": []
+    },
+    "tobuSano": {
+      "title": "東武佐野線",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "tobuKiryu": {
+      "title": "東武桐生線",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "tobuKoizumi": {
+      "title": "東武小泉線",
+      "matched": 6,
+      "total": 6,
+      "missing": []
+    },
+    "seibuIkebukuro": {
+      "title": "西武池袋線",
+      "matched": 30,
+      "total": 30,
+      "missing": []
+    },
+    "seibuChichibu": {
+      "title": "西武秩父線",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "seibuYurakucho": {
+      "title": "西武有楽町線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "seibuToshima": {
+      "title": "西武豊島線",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "seibuSayama": {
+      "title": "西武狭山線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "seibuYamaguchi": {
+      "title": "西武山口線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "seibuShinjuku": {
+      "title": "西武新宿線",
+      "matched": 28,
+      "total": 28,
+      "missing": []
+    },
+    "seibuHaijima": {
+      "title": "西武拝島線",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "seibuSeibu-en": {
+      "title": "西武西武園線",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "seibuKokubunji": {
+      "title": "西武国分寺線",
+      "matched": 4,
+      "total": 4,
+      "missing": []
+    },
+    "seibuTama-ko": {
+      "title": "西武多摩湖線",
+      "matched": 6,
+      "total": 6,
+      "missing": []
+    },
+    "seibuTamagawa": {
+      "title": "西武多摩川線",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "keiseiMain": {
+      "title": "京成本線",
+      "matched": 42,
+      "total": 42,
+      "missing": []
+    },
+    "keiseiOshiage": {
+      "title": "京成押上線",
+      "matched": 6,
+      "total": 6,
+      "missing": []
+    },
+    "keiseiKanamachi": {
+      "title": "京成金町線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "keiseiChiba": {
+      "title": "京成千葉線",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "keiseiChihara": {
+      "title": "京成千原線",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "keiseiSkyAccess": {
+      "title": "京成成田空港線(成田スカイアクセス)",
+      "matched": 10,
+      "total": 10,
+      "missing": []
+    },
+    "keiseiMatsudo": {
+      "title": "京成松戸線",
+      "matched": 23,
+      "total": 23,
+      "missing": []
+    },
+    "keioTakao": {
+      "title": "京王高尾線",
+      "matched": 6,
+      "total": 6,
+      "missing": []
+    },
+    "keioKeibajo": {
+      "title": "京王競馬場線",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "keioDobutsuen": {
+      "title": "京王動物園線",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "odakyuEnoshima": {
+      "title": "小田急江ノ島線",
+      "matched": 16,
+      "total": 16,
+      "missing": []
+    },
+    "odakyuTama": {
+      "title": "小田急多摩線",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "tokyuMeguro": {
+      "title": "東急目黒線",
+      "matched": 12,
+      "total": 12,
+      "missing": []
+    },
+    "tokyuDenentoshi": {
+      "title": "東急田園都市線",
+      "matched": 26,
+      "total": 26,
+      "missing": []
+    },
+    "tokyuOimachi": {
+      "title": "東急大井町線",
+      "matched": 17,
+      "total": 17,
+      "missing": []
+    },
+    "tokyuIkegami": {
+      "title": "東急池上線",
+      "matched": 14,
+      "total": 14,
+      "missing": []
+    },
+    "tokyuTamagawa": {
+      "title": "東急多摩川線",
+      "matched": 6,
+      "total": 6,
+      "missing": []
+    },
+    "tokyuSetagaya": {
+      "title": "東急世田谷線",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "tokyuKodomonokuni": {
+      "title": "東急こどもの国線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "tokyuShin-yokohama": {
+      "title": "東急新横浜線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "keikyuAirport": {
+      "title": "京急空港線",
+      "matched": 6,
+      "total": 6,
+      "missing": []
+    },
+    "keikyuDaishi": {
+      "title": "京急大師線",
+      "matched": 6,
+      "total": 6,
+      "missing": []
+    },
+    "keikyuZushi": {
+      "title": "京急逗子線",
+      "matched": 3,
+      "total": 3,
+      "missing": []
+    },
+    "keikyuKurihama": {
+      "title": "京急久里浜線",
+      "matched": 8,
+      "total": 8,
+      "missing": []
+    },
+    "sotetsuMain": {
+      "title": "相鉄本線",
+      "matched": 17,
+      "total": 17,
+      "missing": []
+    },
+    "sotetsuIzumino": {
+      "title": "相鉄いずみ野線",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "sotetsuShin-yokohama": {
+      "title": "相鉄新横浜線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "todenArakawa": {
+      "title": "都営都電荒川線",
+      "matched": 29,
+      "total": 29,
+      "missing": []
+    },
+    "nipporiToneri": {
+      "title": "日暮里・舎人ライナー",
+      "matched": 12,
+      "total": 12,
+      "missing": []
+    },
+    "chichibu": {
+      "title": "秩父鉄道",
+      "matched": 36,
+      "total": 36,
+      "missing": []
+    },
+    "saitamaRail": {
+      "title": "埼玉高速鉄道",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "isumi": {
+      "title": "いすみ鉄道",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "minatomirai": {
+      "title": "みなとみらい線",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "watetsu": {
+      "title": "わたらせ渓谷鐵道",
+      "matched": 16,
+      "total": 16,
+      "missing": []
+    },
+    "yukarigaoka": {
+      "title": "ユーカリが丘線",
+      "matched": 8,
+      "total": 8,
+      "missing": []
+    },
+    "daiyuzan": {
+      "title": "伊豆箱根鉄道大雄山線",
+      "matched": 11,
+      "total": 11,
+      "missing": []
+    },
+    "hitachinaka": {
+      "title": "ひたちなか海浜鉄道湊線",
+      "matched": 10,
+      "total": 10,
+      "missing": []
+    },
+    "yokohamaBlue": {
+      "title": "横浜市営地下鉄ブルーライン",
+      "matched": 31,
+      "total": 31,
+      "missing": []
+    },
+    "yokohamaGreen": {
+      "title": "横浜市営地下鉄グリーンライン",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "seaside": {
+      "title": "金沢シーサイドライン",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "joso": {
+      "title": "関東鉄道常総線",
+      "matched": 24,
+      "total": 24,
+      "missing": []
+    },
+    "ryugasaki": {
+      "title": "関東鉄道竜ヶ崎線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "enoden": {
+      "title": "江ノ島電鉄線",
+      "matched": 14,
+      "total": 14,
+      "missing": []
+    },
+    "kashimaRinkai": {
+      "title": "鹿島臨海鉄道大洗鹿島線",
+      "matched": 15,
+      "total": 15,
+      "missing": []
+    },
+    "shibayama": {
+      "title": "芝山鉄道",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "kominato": {
+      "title": "小湊鉄道",
+      "matched": 17,
+      "total": 17,
+      "missing": []
+    },
+    "shonanMonorail": {
+      "title": "湘南モノレール",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "joshin": {
+      "title": "上信電鉄",
+      "matched": 20,
+      "total": 20,
+      "missing": []
+    },
+    "jomo": {
+      "title": "上毛電気鉄道",
+      "matched": 22,
+      "total": 22,
+      "missing": []
+    },
+    "moka": {
+      "title": "真岡鐵道",
+      "matched": 16,
+      "total": 16,
+      "missing": []
+    },
+    "chibaMonorail1": {
+      "title": "千葉都市モノレール１号線",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "chibaMonorail2": {
+      "title": "千葉都市モノレール２号線",
+      "matched": 12,
+      "total": 12,
+      "missing": []
+    },
+    "ryutetsu": {
+      "title": "流鉄流山線",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "tamaMonorail": {
+      "title": "多摩モノレール",
+      "matched": 18,
+      "total": 18,
+      "missing": []
+    },
+    "choshi": {
+      "title": "銚子電鉄線",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "tokyoMonorail": {
+      "title": "東京モノレール",
+      "matched": 10,
+      "total": 10,
+      "missing": []
+    },
+    "toyoRapid": {
+      "title": "東葉高速鉄道",
+      "matched": 8,
+      "total": 8,
+      "missing": []
+    },
+    "hakoneTozan": {
+      "title": "箱根登山鉄道",
+      "matched": 10,
+      "total": 10,
+      "missing": []
+    },
+    "hokuso": {
+      "title": "北総鉄道",
+      "matched": 14,
+      "total": 14,
+      "missing": []
+    },
+    "yagan": {
+      "title": "野岩鉄道会津鬼怒川線",
+      "matched": 8,
+      "total": 8,
+      "missing": []
+    },
+    "disneyResort": {
+      "title": "ディズニーリゾートライン線",
+      "matched": 4,
+      "total": 4,
+      "missing": []
+    },
+    "utsunomiyaLightRail": {
+      "title": "宇都宮芳賀ライトレール線",
+      "matched": 18,
+      "total": 18,
+      "missing": []
+    },
+    "railLine1006": {
+      "title": "上越新幹線(上越線)",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "railLine11101": {
+      "title": "JR函館本線(函館～長万部)",
+      "matched": 19,
+      "total": 19,
+      "missing": []
+    },
+    "railLine11101Branch1": {
+      "title": "JR函館本線(函館～長万部)",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "railLine11102": {
+      "title": "JR函館本線(長万部～小樽)",
+      "matched": 16,
+      "total": 16,
+      "missing": []
+    },
+    "railLine11103": {
+      "title": "JR函館本線(小樽～旭川)",
+      "matched": 40,
+      "total": 40,
+      "missing": []
+    },
+    "railLine11104": {
+      "title": "JR室蘭本線(長万部・室蘭～苫小牧)",
+      "matched": 29,
+      "total": 29,
+      "missing": []
+    },
+    "railLine11104Branch1": {
+      "title": "JR室蘭本線(長万部・室蘭～苫小牧)",
+      "matched": 4,
+      "total": 4,
+      "missing": []
+    },
+    "railLine11105": {
+      "title": "JR室蘭本線(苫小牧～岩見沢)",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "railLine11106": {
+      "title": "JR根室本線(滝川～富良野)",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "railLine11107": {
+      "title": "JR根室本線(新得～釧路)",
+      "matched": 24,
+      "total": 24,
+      "missing": []
+    },
+    "railLine11108": {
+      "title": "JR根室本線(花咲線)(釧路～根室)",
+      "matched": 16,
+      "total": 16,
+      "missing": []
+    },
+    "railLine11109": {
+      "title": "JR千歳線",
+      "matched": 16,
+      "total": 16,
+      "missing": []
+    },
+    "railLine11109Branch1": {
+      "title": "JR千歳線",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "railLine11110": {
+      "title": "JR石勝線",
+      "matched": 6,
+      "total": 6,
+      "missing": []
+    },
+    "railLine11111": {
+      "title": "JR日高本線",
+      "matched": 3,
+      "total": 3,
+      "missing": []
+    },
+    "railLine11112": {
+      "title": "JR札沼線",
+      "matched": 14,
+      "total": 14,
+      "missing": []
+    },
+    "railLine11114": {
+      "title": "JR富良野線",
+      "matched": 17,
+      "total": 17,
+      "missing": []
+    },
+    "railLine11115": {
+      "title": "JR宗谷本線",
+      "matched": 34,
+      "total": 34,
+      "missing": []
+    },
+    "railLine11116": {
+      "title": "JR石北本線",
+      "matched": 32,
+      "total": 32,
+      "missing": []
+    },
+    "railLine11117": {
+      "title": "JR釧網本線",
+      "matched": 24,
+      "total": 24,
+      "missing": []
+    },
+    "railLine11202": {
+      "title": "JR奥羽本線(新庄～青森)",
+      "matched": 66,
+      "total": 66,
+      "missing": []
+    },
+    "kantoLine11231Branch1": {
+      "title": "JR東北本線(黒磯～利府・盛岡)",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "railLine11203": {
+      "title": "JR大湊線(はまなすベイライン大湊線)",
+      "matched": 10,
+      "total": 10,
+      "missing": []
+    },
+    "railLine11204": {
+      "title": "JR五能線",
+      "matched": 42,
+      "total": 42,
+      "missing": []
+    },
+    "railLine11205": {
+      "title": "JR津軽線",
+      "matched": 17,
+      "total": 17,
+      "missing": []
+    },
+    "railLine11206": {
+      "title": "JR八戸線",
+      "matched": 23,
+      "total": 23,
+      "missing": []
+    },
+    "railLine11208": {
+      "title": "JR大船渡線(ドラゴンレール大船渡線)",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "railLine11209": {
+      "title": "JR釜石線(銀河ドリームライン釜石線)",
+      "matched": 23,
+      "total": 23,
+      "missing": []
+    },
+    "railLine11210": {
+      "title": "JR北上線",
+      "matched": 14,
+      "total": 14,
+      "missing": []
+    },
+    "railLine11211": {
+      "title": "JR田沢湖線",
+      "matched": 17,
+      "total": 17,
+      "missing": []
+    },
+    "railLine11212": {
+      "title": "JR花輪線(十和田八幡平四季彩ライン)",
+      "matched": 26,
+      "total": 26,
+      "missing": []
+    },
+    "railLine11213": {
+      "title": "JR山田線",
+      "matched": 14,
+      "total": 14,
+      "missing": []
+    },
+    "railLine11214": {
+      "title": "JR羽越本線",
+      "matched": 59,
+      "total": 59,
+      "missing": []
+    },
+    "railLine11215": {
+      "title": "JR男鹿線",
+      "matched": 8,
+      "total": 8,
+      "missing": []
+    },
+    "railLine11216": {
+      "title": "JR奥羽本線(山形線)(福島～新庄)",
+      "matched": 34,
+      "total": 34,
+      "missing": []
+    },
+    "railLine11217": {
+      "title": "JR仙山線",
+      "matched": 19,
+      "total": 19,
+      "missing": []
+    },
+    "railLine11218": {
+      "title": "JR左沢線(フルーツライン左沢線)",
+      "matched": 11,
+      "total": 11,
+      "missing": []
+    },
+    "railLine11219": {
+      "title": "JR米坂線",
+      "matched": 19,
+      "total": 19,
+      "missing": []
+    },
+    "railLine11220": {
+      "title": "JR陸羽西線(奥の細道最上川ライン)",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine11221": {
+      "title": "JR陸羽東線(奥の細道湯けむりライン)",
+      "matched": 26,
+      "total": 26,
+      "missing": []
+    },
+    "railLine11222": {
+      "title": "JR仙石線",
+      "matched": 31,
+      "total": 31,
+      "missing": []
+    },
+    "railLine11223": {
+      "title": "JR石巻線",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "railLine11224": {
+      "title": "JR気仙沼線",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "railLine11225": {
+      "title": "JR磐越西線(郡山～会津若松)",
+      "matched": 15,
+      "total": 15,
+      "missing": []
+    },
+    "railLine11226": {
+      "title": "JR磐越西線(森と水とロマンの鉄道)",
+      "matched": 27,
+      "total": 27,
+      "missing": []
+    },
+    "railLine11227": {
+      "title": "JR只見線",
+      "matched": 35,
+      "total": 35,
+      "missing": []
+    },
+    "railLine11228": {
+      "title": "JR磐越東線(ゆうゆうあぶくまライン)",
+      "matched": 15,
+      "total": 15,
+      "missing": []
+    },
+    "railLine11230": {
+      "title": "JR常磐線(いわき～仙台)",
+      "matched": 34,
+      "total": 34,
+      "missing": []
+    },
+    "nambuBranch1": {
+      "title": "JR南武線",
+      "matched": 4,
+      "total": 4,
+      "missing": []
+    },
+    "tsurumiBranch1": {
+      "title": "JR鶴見線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "tsurumiBranch2": {
+      "title": "JR鶴見線",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "chuoMainBranch1": {
+      "title": "JR中央本線(東京～塩尻)",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "naritaBranch1": {
+      "title": "JR成田線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "naritaBranch2": {
+      "title": "JR成田線",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine11328": {
+      "title": "JR成田エクスプレス",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "suigunBranch1": {
+      "title": "JR水郡線",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "railLine11401": {
+      "title": "JR小海線(八ヶ岳高原線)",
+      "matched": 30,
+      "total": 30,
+      "missing": []
+    },
+    "railLine11402": {
+      "title": "JR身延線",
+      "matched": 38,
+      "total": 38,
+      "missing": []
+    },
+    "railLine11403": {
+      "title": "JR信越本線(篠ノ井～長野)",
+      "matched": 4,
+      "total": 4,
+      "missing": []
+    },
+    "railLine11404": {
+      "title": "JR信越本線(直江津～新潟)",
+      "matched": 41,
+      "total": 41,
+      "missing": []
+    },
+    "railLine11406": {
+      "title": "JR白新線",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine11407": {
+      "title": "JR飯山線",
+      "matched": 30,
+      "total": 30,
+      "missing": []
+    },
+    "railLine11408": {
+      "title": "JR越後線",
+      "matched": 32,
+      "total": 32,
+      "missing": []
+    },
+    "railLine11409": {
+      "title": "JR大糸線",
+      "matched": 40,
+      "total": 40,
+      "missing": []
+    },
+    "railLine11410": {
+      "title": "JR弥彦線",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "railLine11411": {
+      "title": "JR中央本線(名古屋～塩尻)",
+      "matched": 39,
+      "total": 39,
+      "missing": []
+    },
+    "railLine11412": {
+      "title": "JR篠ノ井線",
+      "matched": 14,
+      "total": 14,
+      "missing": []
+    },
+    "railLine11413": {
+      "title": "JR飯田線(豊橋～天竜峡)",
+      "matched": 50,
+      "total": 50,
+      "missing": []
+    },
+    "railLine11414": {
+      "title": "JR飯田線(天竜峡～辰野)",
+      "matched": 43,
+      "total": 43,
+      "missing": []
+    },
+    "railLine11415": {
+      "title": "JR北陸本線(米原～敦賀)",
+      "matched": 11,
+      "total": 11,
+      "missing": []
+    },
+    "railLine11416": {
+      "title": "JR高山本線",
+      "matched": 44,
+      "total": 44,
+      "missing": []
+    },
+    "railLine11417": {
+      "title": "JR城端線",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "railLine11418": {
+      "title": "JR氷見線",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "railLine11419": {
+      "title": "JR七尾線",
+      "matched": 19,
+      "total": 19,
+      "missing": []
+    },
+    "railLine11421": {
+      "title": "JR越美北線(九頭竜線)",
+      "matched": 22,
+      "total": 22,
+      "missing": []
+    },
+    "railLine11422": {
+      "title": "JR小浜線",
+      "matched": 23,
+      "total": 23,
+      "missing": []
+    },
+    "railLine11501": {
+      "title": "JR東海道本線(熱海～浜松)",
+      "matched": 34,
+      "total": 34,
+      "missing": []
+    },
+    "railLine11502": {
+      "title": "JR東海道本線(浜松～岐阜)",
+      "matched": 40,
+      "total": 40,
+      "missing": []
+    },
+    "railLine11503": {
+      "title": "JR東海道本線(岐阜～美濃赤坂・米原)",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine11503Branch1": {
+      "title": "JR東海道本線(岐阜～美濃赤坂・米原)",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "railLine11504": {
+      "title": "JR伊東線",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "railLine11506": {
+      "title": "JR武豊線",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine11507": {
+      "title": "JR太多線",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "railLine11508": {
+      "title": "JR関西本線(名古屋～亀山)",
+      "matched": 17,
+      "total": 17,
+      "missing": []
+    },
+    "railLine11509": {
+      "title": "JR関西本線(亀山～加茂)",
+      "matched": 11,
+      "total": 11,
+      "missing": []
+    },
+    "railLine11510": {
+      "title": "JR紀勢本線",
+      "matched": 40,
+      "total": 40,
+      "missing": []
+    },
+    "railLine11511": {
+      "title": "JR草津線",
+      "matched": 10,
+      "total": 10,
+      "missing": []
+    },
+    "railLine11512": {
+      "title": "JR参宮線",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine11513": {
+      "title": "JR名松線",
+      "matched": 14,
+      "total": 14,
+      "missing": []
+    },
+    "railLine11601": {
+      "title": "JR東海道本線(琵琶湖線)(米原～京都)",
+      "matched": 19,
+      "total": 19,
+      "missing": []
+    },
+    "railLine11602": {
+      "title": "JR東海道本線(京都線)(京都～大阪)",
+      "matched": 16,
+      "total": 16,
+      "missing": []
+    },
+    "railLine11603": {
+      "title": "JR東海道本線(神戸線)(大阪～神戸)",
+      "matched": 16,
+      "total": 16,
+      "missing": []
+    },
+    "railLine11605": {
+      "title": "JR湖西線",
+      "matched": 21,
+      "total": 21,
+      "missing": []
+    },
+    "railLine11607": {
+      "title": "JR関西本線(大和路線)(加茂～ＪＲ難波)",
+      "matched": 21,
+      "total": 21,
+      "missing": []
+    },
+    "railLine11608": {
+      "title": "JR山陽本線(神戸線)(神戸～姫路)",
+      "matched": 22,
+      "total": 22,
+      "missing": []
+    },
+    "railLine11609": {
+      "title": "JR山陽本線(姫路～岡山)",
+      "matched": 19,
+      "total": 19,
+      "missing": []
+    },
+    "railLine11610": {
+      "title": "JR山陽本線(岡山～三原)",
+      "matched": 19,
+      "total": 19,
+      "missing": []
+    },
+    "railLine11611": {
+      "title": "JR山陽本線(三原～岩国)",
+      "matched": 30,
+      "total": 30,
+      "missing": []
+    },
+    "railLine11612": {
+      "title": "JR山陽本線(岩国～門司)",
+      "matched": 36,
+      "total": 36,
+      "missing": []
+    },
+    "railLine11613": {
+      "title": "JR山陽本線(兵庫～和田岬)",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "railLine11614": {
+      "title": "JR山陰本線(嵯峨野線)(京都～園部)",
+      "matched": 15,
+      "total": 15,
+      "missing": []
+    },
+    "railLine11615": {
+      "title": "JR山陰本線(園部～豊岡)",
+      "matched": 23,
+      "total": 23,
+      "missing": []
+    },
+    "railLine11616": {
+      "title": "JR山陰本線(豊岡～米子)",
+      "matched": 40,
+      "total": 40,
+      "missing": []
+    },
+    "railLine11617": {
+      "title": "JR片町線(学研都市線)",
+      "matched": 23,
+      "total": 23,
+      "missing": []
+    },
+    "railLine11618": {
+      "title": "JR奈良線",
+      "matched": 20,
+      "total": 20,
+      "missing": []
+    },
+    "railLine11622": {
+      "title": "JR舞鶴線",
+      "matched": 8,
+      "total": 8,
+      "missing": []
+    },
+    "railLine11624": {
+      "title": "JR桜島線(ゆめ咲線)",
+      "matched": 3,
+      "total": 3,
+      "missing": []
+    },
+    "railLine11625": {
+      "title": "JR東西線",
+      "matched": 8,
+      "total": 8,
+      "missing": []
+    },
+    "railLine11626": {
+      "title": "JR阪和線(天王寺～和歌山)",
+      "matched": 34,
+      "total": 34,
+      "missing": []
+    },
+    "railLine11627": {
+      "title": "JR阪和線(鳳～東羽衣)",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "railLine11628": {
+      "title": "JR関西空港線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "railLine11629": {
+      "title": "JR福知山線(宝塚線)(大阪～篠山口)",
+      "matched": 22,
+      "total": 22,
+      "missing": []
+    },
+    "railLine11630": {
+      "title": "JR福知山線(篠山口～福知山)",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine11631": {
+      "title": "JR赤穂線",
+      "matched": 21,
+      "total": 21,
+      "missing": []
+    },
+    "railLine11632": {
+      "title": "JR加古川線",
+      "matched": 20,
+      "total": 20,
+      "missing": []
+    },
+    "railLine11633": {
+      "title": "JR姫新線(姫路～佐用)",
+      "matched": 11,
+      "total": 11,
+      "missing": []
+    },
+    "railLine11634": {
+      "title": "JR姫新線(佐用～新見)",
+      "matched": 24,
+      "total": 24,
+      "missing": []
+    },
+    "railLine11635": {
+      "title": "JR播但線",
+      "matched": 17,
+      "total": 17,
+      "missing": []
+    },
+    "railLine11636": {
+      "title": "JR和歌山線",
+      "matched": 35,
+      "total": 35,
+      "missing": []
+    },
+    "railLine11637": {
+      "title": "JR桜井線",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "railLine11639": {
+      "title": "JR紀勢本線(きのくに線)(新宮～和歌山)",
+      "matched": 53,
+      "total": 53,
+      "missing": []
+    },
+    "railLine11640": {
+      "title": "JR紀勢本線(和歌山～和歌山市)",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "railLine11641": {
+      "title": "JRおおさか東線",
+      "matched": 14,
+      "total": 14,
+      "missing": []
+    },
+    "railLine11701": {
+      "title": "JR山陰本線(米子～益田)",
+      "matched": 44,
+      "total": 44,
+      "missing": []
+    },
+    "railLine11702": {
+      "title": "JR山陰本線(益田・仙崎～下関)",
+      "matched": 38,
+      "total": 38,
+      "missing": []
+    },
+    "railLine11702Branch1": {
+      "title": "JR山陰本線(益田・仙崎～下関)",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "railLine11703": {
+      "title": "JR伯備線",
+      "matched": 32,
+      "total": 32,
+      "missing": []
+    },
+    "railLine11704": {
+      "title": "JR因美線",
+      "matched": 19,
+      "total": 19,
+      "missing": []
+    },
+    "railLine11705": {
+      "title": "JR境線",
+      "matched": 15,
+      "total": 15,
+      "missing": []
+    },
+    "railLine11706": {
+      "title": "JR木次線",
+      "matched": 17,
+      "total": 17,
+      "missing": []
+    },
+    "railLine11708": {
+      "title": "JR山口線",
+      "matched": 27,
+      "total": 27,
+      "missing": []
+    },
+    "railLine11709": {
+      "title": "JR宇野線",
+      "matched": 14,
+      "total": 14,
+      "missing": []
+    },
+    "railLine11710": {
+      "title": "JR本四備讃線(瀬戸大橋線)",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "railLine11713": {
+      "title": "JR吉備線",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine11714": {
+      "title": "JR芸備線",
+      "matched": 45,
+      "total": 45,
+      "missing": []
+    },
+    "railLine11715": {
+      "title": "JR津山線",
+      "matched": 16,
+      "total": 16,
+      "missing": []
+    },
+    "railLine11716": {
+      "title": "JR呉線",
+      "matched": 31,
+      "total": 31,
+      "missing": []
+    },
+    "railLine11717": {
+      "title": "JR可部線",
+      "matched": 15,
+      "total": 15,
+      "missing": []
+    },
+    "railLine11720": {
+      "title": "JR福塩線",
+      "matched": 29,
+      "total": 29,
+      "missing": []
+    },
+    "railLine11721": {
+      "title": "JR宇部線",
+      "matched": 17,
+      "total": 17,
+      "missing": []
+    },
+    "railLine11722": {
+      "title": "JR美祢線",
+      "matched": 11,
+      "total": 11,
+      "missing": []
+    },
+    "railLine11723": {
+      "title": "JR小野田線",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine11723Branch1": {
+      "title": "JR小野田線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "railLine11724": {
+      "title": "JR岩徳線",
+      "matched": 15,
+      "total": 15,
+      "missing": []
+    },
+    "railLine11801": {
+      "title": "JR土讃線",
+      "matched": 60,
+      "total": 60,
+      "missing": []
+    },
+    "railLine11802": {
+      "title": "JR高徳線",
+      "matched": 28,
+      "total": 28,
+      "missing": []
+    },
+    "railLine11803": {
+      "title": "JR徳島線(よしの川ブルーライン)",
+      "matched": 25,
+      "total": 25,
+      "missing": []
+    },
+    "railLine11804": {
+      "title": "JR牟岐線",
+      "matched": 28,
+      "total": 28,
+      "missing": []
+    },
+    "railLine11805": {
+      "title": "JR鳴門線",
+      "matched": 6,
+      "total": 6,
+      "missing": []
+    },
+    "railLine11806": {
+      "title": "JR予讃線",
+      "matched": 56,
+      "total": 56,
+      "missing": []
+    },
+    "railLine11807": {
+      "title": "JR予讃・内子線",
+      "matched": 29,
+      "total": 29,
+      "missing": []
+    },
+    "railLine11807Branch1": {
+      "title": "JR予讃・内子線",
+      "matched": 12,
+      "total": 12,
+      "missing": []
+    },
+    "railLine11808": {
+      "title": "JR予土線(しまんとグリーンライン)",
+      "matched": 21,
+      "total": 21,
+      "missing": []
+    },
+    "railLine11901": {
+      "title": "JR博多南線",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "railLine11902": {
+      "title": "JR鹿児島本線(下関・門司港～博多)",
+      "matched": 31,
+      "total": 31,
+      "missing": []
+    },
+    "railLine11902Branch1": {
+      "title": "JR鹿児島本線(下関・門司港～博多)",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "railLine11903": {
+      "title": "JR鹿児島本線(博多～八代)",
+      "matched": 50,
+      "total": 50,
+      "missing": []
+    },
+    "railLine11904": {
+      "title": "JR鹿児島本線(川内～鹿児島)",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "railLine11905": {
+      "title": "JR長崎本線(鳥栖～長崎)",
+      "matched": 34,
+      "total": 34,
+      "missing": []
+    },
+    "railLine11905Branch1": {
+      "title": "JR長崎本線(鳥栖～長崎)",
+      "matched": 8,
+      "total": 8,
+      "missing": []
+    },
+    "railLine11906": {
+      "title": "JR日豊本線(門司港～佐伯)",
+      "matched": 59,
+      "total": 59,
+      "missing": []
+    },
+    "railLine11907": {
+      "title": "JR日豊本線(佐伯～鹿児島中央)",
+      "matched": 56,
+      "total": 56,
+      "missing": []
+    },
+    "railLine11908": {
+      "title": "JR篠栗線(福北ゆたか線)",
+      "matched": 11,
+      "total": 11,
+      "missing": []
+    },
+    "railLine11909": {
+      "title": "JR筑肥線(姪浜～西唐津)",
+      "matched": 20,
+      "total": 20,
+      "missing": []
+    },
+    "railLine11910": {
+      "title": "JR筑豊本線(若松線)(若松～折尾)",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "railLine11911": {
+      "title": "JR筑豊本線(福北ゆたか線)(折尾～桂川)",
+      "matched": 15,
+      "total": 15,
+      "missing": []
+    },
+    "railLine11912": {
+      "title": "JR筑豊本線(原田線)(桂川～原田)",
+      "matched": 4,
+      "total": 4,
+      "missing": []
+    },
+    "railLine11913": {
+      "title": "JR久大本線(ゆふ高原線)",
+      "matched": 36,
+      "total": 36,
+      "missing": []
+    },
+    "railLine11914": {
+      "title": "JR日田彦山線",
+      "matched": 28,
+      "total": 28,
+      "missing": []
+    },
+    "railLine11915": {
+      "title": "JR後藤寺線",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "railLine11916": {
+      "title": "JR香椎線(海の中道線)(西戸崎～香椎)",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "railLine11917": {
+      "title": "JR香椎線(香椎～宇美)",
+      "matched": 10,
+      "total": 10,
+      "missing": []
+    },
+    "railLine11918": {
+      "title": "JR佐世保線",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "railLine11920": {
+      "title": "JR筑肥線(西唐津～伊万里)",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "railLine11921": {
+      "title": "JR唐津線",
+      "matched": 15,
+      "total": 15,
+      "missing": []
+    },
+    "railLine11922": {
+      "title": "JR大村線",
+      "matched": 14,
+      "total": 14,
+      "missing": []
+    },
+    "railLine11923": {
+      "title": "JR豊肥本線(阿蘇高原線)",
+      "matched": 36,
+      "total": 36,
+      "missing": []
+    },
+    "railLine11924": {
+      "title": "JR三角線",
+      "matched": 12,
+      "total": 12,
+      "missing": []
+    },
+    "railLine11925": {
+      "title": "JR肥薩線(えびの高原線)(八代～吉松)",
+      "matched": 18,
+      "total": 18,
+      "missing": []
+    },
+    "railLine11926": {
+      "title": "JR肥薩線(吉松～隼人)",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine11927": {
+      "title": "JR宮崎空港線",
+      "matched": 3,
+      "total": 3,
+      "missing": []
+    },
+    "railLine11928": {
+      "title": "JR日南線",
+      "matched": 28,
+      "total": 28,
+      "missing": []
+    },
+    "railLine11929": {
+      "title": "JR吉都線(えびの高原線)",
+      "matched": 16,
+      "total": 16,
+      "missing": []
+    },
+    "railLine11930": {
+      "title": "JR指宿枕崎線",
+      "matched": 35,
+      "total": 35,
+      "missing": []
+    },
+    "tobuIsesakiBranch1": {
+      "title": "東武伊勢崎線",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "tobuKoizumiBranch1": {
+      "title": "東武小泉線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "keioBranch1": {
+      "title": "京王京王線",
+      "matched": 3,
+      "total": 3,
+      "missing": []
+    },
+    "marunouchiBranch1": {
+      "title": "東京メトロ丸ノ内線",
+      "matched": 3,
+      "total": 3,
+      "missing": []
+    },
+    "railLine30001": {
+      "title": "名鉄名古屋本線",
+      "matched": 59,
+      "total": 59,
+      "missing": []
+    },
+    "railLine30002": {
+      "title": "名鉄豊川線",
+      "matched": 4,
+      "total": 4,
+      "missing": []
+    },
+    "railLine30003": {
+      "title": "名鉄西尾線",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "railLine30004": {
+      "title": "名鉄蒲郡線",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine30005": {
+      "title": "名鉄三河線",
+      "matched": 11,
+      "total": 11,
+      "missing": []
+    },
+    "railLine30005Branch1": {
+      "title": "名鉄三河線",
+      "matched": 11,
+      "total": 11,
+      "missing": []
+    },
+    "railLine30006": {
+      "title": "名鉄豊田線",
+      "matched": 8,
+      "total": 8,
+      "missing": []
+    },
+    "railLine30007": {
+      "title": "名鉄空港線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "railLine30008": {
+      "title": "名鉄常滑線",
+      "matched": 25,
+      "total": 25,
+      "missing": []
+    },
+    "railLine30009": {
+      "title": "名鉄河和線",
+      "matched": 19,
+      "total": 19,
+      "missing": []
+    },
+    "railLine30010": {
+      "title": "名鉄知多新線",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "railLine30011": {
+      "title": "名鉄築港線",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "railLine30012": {
+      "title": "名鉄瀬戸線",
+      "matched": 19,
+      "total": 19,
+      "missing": []
+    },
+    "railLine30013": {
+      "title": "名鉄津島線",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "railLine30014": {
+      "title": "名鉄尾西線",
+      "matched": 21,
+      "total": 21,
+      "missing": []
+    },
+    "railLine30015": {
+      "title": "名鉄犬山線",
+      "matched": 19,
+      "total": 19,
+      "missing": []
+    },
+    "railLine30016": {
+      "title": "名鉄各務原線",
+      "matched": 17,
+      "total": 17,
+      "missing": []
+    },
+    "railLine30017": {
+      "title": "名鉄広見線",
+      "matched": 10,
+      "total": 10,
+      "missing": []
+    },
+    "railLine30018": {
+      "title": "名鉄小牧線",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "railLine30020": {
+      "title": "名鉄竹鼻線",
+      "matched": 8,
+      "total": 8,
+      "missing": []
+    },
+    "railLine30021": {
+      "title": "名鉄羽島線",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "railLine31001": {
+      "title": "近鉄難波線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "railLine31002": {
+      "title": "近鉄橿原線",
+      "matched": 16,
+      "total": 16,
+      "missing": []
+    },
+    "railLine31003": {
+      "title": "近鉄南大阪線",
+      "matched": 27,
+      "total": 27,
+      "missing": []
+    },
+    "railLine31005": {
+      "title": "近鉄大阪線",
+      "matched": 47,
+      "total": 47,
+      "missing": []
+    },
+    "railLine31007": {
+      "title": "近鉄吉野線",
+      "matched": 15,
+      "total": 15,
+      "missing": []
+    },
+    "railLine31008": {
+      "title": "近鉄湯の山線",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine31009": {
+      "title": "近鉄山田線",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "railLine31010": {
+      "title": "近鉄鳥羽線",
+      "matched": 4,
+      "total": 4,
+      "missing": []
+    },
+    "railLine31011": {
+      "title": "近鉄天理線",
+      "matched": 3,
+      "total": 3,
+      "missing": []
+    },
+    "railLine31012": {
+      "title": "近鉄道明寺線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "railLine31013": {
+      "title": "四日市あすなろう鉄道内部線",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "railLine31014": {
+      "title": "四日市あすなろう鉄道八王子線",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "railLine31015": {
+      "title": "近鉄志摩線",
+      "matched": 15,
+      "total": 15,
+      "missing": []
+    },
+    "railLine31016": {
+      "title": "近鉄生駒線",
+      "matched": 11,
+      "total": 11,
+      "missing": []
+    },
+    "railLine31017": {
+      "title": "近鉄田原本線",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "railLine31018": {
+      "title": "近鉄御所線",
+      "matched": 3,
+      "total": 3,
+      "missing": []
+    },
+    "railLine31019": {
+      "title": "近鉄鈴鹿線",
+      "matched": 4,
+      "total": 4,
+      "missing": []
+    },
+    "railLine31020": {
+      "title": "近鉄奈良線",
+      "matched": 18,
+      "total": 18,
+      "missing": []
+    },
+    "railLine31021": {
+      "title": "近鉄信貴線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "railLine31022": {
+      "title": "近鉄長野線",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "railLine31023": {
+      "title": "近鉄けいはんな線",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "railLine31024": {
+      "title": "近鉄西信貴ケーブル",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "railLine31025": {
+      "title": "近鉄京都線",
+      "matched": 27,
+      "total": 27,
+      "missing": []
+    },
+    "railLine31026": {
+      "title": "近鉄生駒ケーブル",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "railLine31026Branch1": {
+      "title": "近鉄生駒ケーブル",
+      "matched": 3,
+      "total": 3,
+      "missing": []
+    },
+    "railLine31027": {
+      "title": "近鉄名古屋線",
+      "matched": 43,
+      "total": 43,
+      "missing": []
+    },
+    "railLine32001": {
+      "title": "南海本線",
+      "matched": 40,
+      "total": 40,
+      "missing": []
+    },
+    "railLine32002": {
+      "title": "南海空港線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "railLine32003": {
+      "title": "南海和歌山港線",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "railLine32004": {
+      "title": "南海高師浜線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "railLine32005": {
+      "title": "南海加太線",
+      "matched": 8,
+      "total": 8,
+      "missing": []
+    },
+    "railLine32006": {
+      "title": "南海多奈川線",
+      "matched": 3,
+      "total": 3,
+      "missing": []
+    },
+    "railLine32007": {
+      "title": "南海高野線(りんかんサンライン)",
+      "matched": 41,
+      "total": 41,
+      "missing": []
+    },
+    "railLine32008": {
+      "title": "南海高野山ケーブル",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "railLine32009": {
+      "title": "南海汐見橋線",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "railLine32010": {
+      "title": "南海泉北線",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "railLine33001": {
+      "title": "京阪本線",
+      "matched": 41,
+      "total": 41,
+      "missing": []
+    },
+    "railLine33002": {
+      "title": "京阪宇治線",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "railLine33003": {
+      "title": "京阪交野線",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "railLine33004": {
+      "title": "京阪鴨東線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "railLine33005": {
+      "title": "京阪石清水八幡宮参道ケーブル",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "railLine33006": {
+      "title": "京阪石山坂本線",
+      "matched": 20,
+      "total": 20,
+      "missing": []
+    },
+    "railLine33007": {
+      "title": "京阪京津線",
+      "matched": 6,
+      "total": 6,
+      "missing": []
+    },
+    "railLine33008": {
+      "title": "京阪中之島線",
+      "matched": 4,
+      "total": 4,
+      "missing": []
+    },
+    "railLine34001": {
+      "title": "阪急神戸本線",
+      "matched": 15,
+      "total": 15,
+      "missing": []
+    },
+    "railLine34003": {
+      "title": "阪急京都本線",
+      "matched": 27,
+      "total": 27,
+      "missing": []
+    },
+    "railLine34004": {
+      "title": "阪急今津線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "railLine34004Branch1": {
+      "title": "阪急今津線",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "railLine34005": {
+      "title": "阪急甲陽線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "railLine34006": {
+      "title": "阪急伊丹線",
+      "matched": 3,
+      "total": 3,
+      "missing": []
+    },
+    "railLine34007": {
+      "title": "阪急箕面線",
+      "matched": 3,
+      "total": 3,
+      "missing": []
+    },
+    "railLine34008": {
+      "title": "阪急千里線",
+      "matched": 10,
+      "total": 10,
+      "missing": []
+    },
+    "railLine34009": {
+      "title": "阪急嵐山線",
+      "matched": 3,
+      "total": 3,
+      "missing": []
+    },
+    "railLine35001": {
+      "title": "阪神本線",
+      "matched": 32,
+      "total": 32,
+      "missing": []
+    },
+    "railLine35002": {
+      "title": "阪神なんば線",
+      "matched": 10,
+      "total": 10,
+      "missing": []
+    },
+    "railLine35003": {
+      "title": "阪神武庫川線",
+      "matched": 3,
+      "total": 3,
+      "missing": []
+    },
+    "railLine36001": {
+      "title": "西鉄天神大牟田線",
+      "matched": 49,
+      "total": 49,
+      "missing": []
+    },
+    "railLine36002": {
+      "title": "西鉄太宰府線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "railLine36003": {
+      "title": "西鉄甘木線",
+      "matched": 11,
+      "total": 11,
+      "missing": []
+    },
+    "railLine36004": {
+      "title": "西鉄貝塚線",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine99101": {
+      "title": "札幌市営地下鉄東西線",
+      "matched": 18,
+      "total": 18,
+      "missing": []
+    },
+    "railLine99102": {
+      "title": "札幌市営地下鉄南北線",
+      "matched": 15,
+      "total": 15,
+      "missing": []
+    },
+    "railLine99103": {
+      "title": "札幌市営地下鉄東豊線",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "railLine99104": {
+      "title": "札幌市電山鼻線",
+      "matched": 24,
+      "total": 24,
+      "missing": []
+    },
+    "railLine99105": {
+      "title": "函館市電２系統",
+      "matched": 22,
+      "total": 22,
+      "missing": []
+    },
+    "railLine99106": {
+      "title": "函館市電５系統",
+      "matched": 22,
+      "total": 22,
+      "missing": []
+    },
+    "railLine99108": {
+      "title": "道南いさりび鉄道線",
+      "matched": 11,
+      "total": 11,
+      "missing": []
+    },
+    "railLine99201": {
+      "title": "津軽鉄道",
+      "matched": 11,
+      "total": 11,
+      "missing": []
+    },
+    "railLine99202": {
+      "title": "弘南鉄道弘南線",
+      "matched": 12,
+      "total": 12,
+      "missing": []
+    },
+    "railLine99203": {
+      "title": "弘南鉄道大鰐線",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "railLine99205": {
+      "title": "いわて銀河鉄道",
+      "matched": 17,
+      "total": 17,
+      "missing": []
+    },
+    "railLine99206": {
+      "title": "青い森鉄道",
+      "matched": 26,
+      "total": 26,
+      "missing": []
+    },
+    "railLine99208": {
+      "title": "三陸鉄道リアス線",
+      "matched": 40,
+      "total": 40,
+      "missing": []
+    },
+    "railLine99209": {
+      "title": "秋田内陸縦貫鉄道",
+      "matched": 28,
+      "total": 28,
+      "missing": []
+    },
+    "railLine99210": {
+      "title": "由利高原鉄道",
+      "matched": 11,
+      "total": 11,
+      "missing": []
+    },
+    "railLine99211": {
+      "title": "山形鉄道フラワー長井線",
+      "matched": 16,
+      "total": 16,
+      "missing": []
+    },
+    "railLine99213": {
+      "title": "阿武隈急行",
+      "matched": 23,
+      "total": 23,
+      "missing": []
+    },
+    "railLine99214": {
+      "title": "仙台市営地下鉄南北線",
+      "matched": 16,
+      "total": 16,
+      "missing": []
+    },
+    "railLine99218": {
+      "title": "仙台市営地下鉄東西線",
+      "matched": 12,
+      "total": 12,
+      "missing": []
+    },
+    "railLine99215": {
+      "title": "福島交通飯坂線",
+      "matched": 11,
+      "total": 11,
+      "missing": []
+    },
+    "railLine99216": {
+      "title": "会津鉄道",
+      "matched": 20,
+      "total": 20,
+      "missing": []
+    },
+    "railLine99217": {
+      "title": "仙台空港線",
+      "matched": 3,
+      "total": 3,
+      "missing": []
+    },
+    "railLine99401": {
+      "title": "富士急行",
+      "matched": 17,
+      "total": 17,
+      "missing": []
+    },
+    "railLine99402": {
+      "title": "北越急行ほくほく線",
+      "matched": 11,
+      "total": 11,
+      "missing": []
+    },
+    "railLine99403": {
+      "title": "しなの鉄道",
+      "matched": 18,
+      "total": 18,
+      "missing": []
+    },
+    "railLine99427": {
+      "title": "北しなの線",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "railLine99404": {
+      "title": "上田電鉄別所線",
+      "matched": 14,
+      "total": 14,
+      "missing": []
+    },
+    "railLine99405": {
+      "title": "長野電鉄長野線",
+      "matched": 23,
+      "total": 23,
+      "missing": []
+    },
+    "railLine99407": {
+      "title": "アルピコ交通上高地線",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "railLine99408": {
+      "title": "富山地鉄本線",
+      "matched": 40,
+      "total": 40,
+      "missing": []
+    },
+    "railLine99409": {
+      "title": "富山地鉄立山線",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "railLine99410": {
+      "title": "富山地鉄不二越・上滝線",
+      "matched": 15,
+      "total": 15,
+      "missing": []
+    },
+    "railLine99412": {
+      "title": "黒部峡谷鉄道",
+      "matched": 3,
+      "total": 3,
+      "missing": []
+    },
+    "railLine99413": {
+      "title": "富山地鉄市内線",
+      "matched": 21,
+      "total": 21,
+      "missing": []
+    },
+    "railLine99422": {
+      "title": "富山地鉄富山都心線",
+      "matched": 4,
+      "total": 4,
+      "missing": []
+    },
+    "railLine99414": {
+      "title": "万葉線",
+      "matched": 24,
+      "total": 24,
+      "missing": []
+    },
+    "railLine99415": {
+      "title": "富山地鉄富山港線",
+      "matched": 14,
+      "total": 14,
+      "missing": []
+    },
+    "railLine99416": {
+      "title": "北陸鉄道石川線",
+      "matched": 16,
+      "total": 16,
+      "missing": []
+    },
+    "railLine99417": {
+      "title": "北陸鉄道浅野川線",
+      "matched": 11,
+      "total": 11,
+      "missing": []
+    },
+    "railLine99423": {
+      "title": "日本海ひすいライン",
+      "matched": 12,
+      "total": 12,
+      "missing": []
+    },
+    "railLine99424": {
+      "title": "妙高はねうまライン",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine99425": {
+      "title": "あいの風とやま鉄道線",
+      "matched": 22,
+      "total": 22,
+      "missing": []
+    },
+    "railLine99426": {
+      "title": "IRいしかわ鉄道線",
+      "matched": 18,
+      "total": 18,
+      "missing": []
+    },
+    "railLine99455": {
+      "title": "ハピラインふくい線",
+      "matched": 19,
+      "total": 19,
+      "missing": []
+    },
+    "railLine99418": {
+      "title": "のと鉄道七尾線",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "railLine99419": {
+      "title": "えちぜん鉄道勝山永平寺線",
+      "matched": 22,
+      "total": 22,
+      "missing": []
+    },
+    "railLine99420": {
+      "title": "えちぜん鉄道三国芦原線",
+      "matched": 23,
+      "total": 23,
+      "missing": []
+    },
+    "railLine99421": {
+      "title": "福井鉄道福武線",
+      "matched": 24,
+      "total": 24,
+      "missing": []
+    },
+    "railLine99501": {
+      "title": "伊豆急行",
+      "matched": 15,
+      "total": 15,
+      "missing": []
+    },
+    "railLine99502": {
+      "title": "伊豆箱根鉄道駿豆線",
+      "matched": 12,
+      "total": 12,
+      "missing": []
+    },
+    "railLine99503": {
+      "title": "岳南線",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine99504": {
+      "title": "静岡鉄道静岡清水線",
+      "matched": 14,
+      "total": 14,
+      "missing": []
+    },
+    "railLine99505": {
+      "title": "天竜浜名湖鉄道",
+      "matched": 38,
+      "total": 38,
+      "missing": []
+    },
+    "railLine99506": {
+      "title": "遠州鉄道",
+      "matched": 17,
+      "total": 17,
+      "missing": []
+    },
+    "railLine99507": {
+      "title": "大井川鐵道大井川本線",
+      "matched": 19,
+      "total": 19,
+      "missing": []
+    },
+    "railLine99508": {
+      "title": "大井川鐵道井川線",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "railLine99509": {
+      "title": "西名古屋港線(あおなみ線)",
+      "matched": 10,
+      "total": 10,
+      "missing": []
+    },
+    "railLine99510": {
+      "title": "JR東海交通事業城北線",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "railLine99511": {
+      "title": "愛知環状鉄道",
+      "matched": 22,
+      "total": 22,
+      "missing": []
+    },
+    "railLine99512": {
+      "title": "東部丘陵線(リニモ)",
+      "matched": 8,
+      "total": 8,
+      "missing": []
+    },
+    "railLine99513": {
+      "title": "名古屋市営地下鉄東山線",
+      "matched": 21,
+      "total": 21,
+      "missing": []
+    },
+    "railLine99514": {
+      "title": "名古屋市営地下鉄名城線",
+      "matched": 28,
+      "total": 28,
+      "missing": []
+    },
+    "railLine99515": {
+      "title": "名古屋市営地下鉄名港線",
+      "matched": 6,
+      "total": 6,
+      "missing": []
+    },
+    "railLine99516": {
+      "title": "名古屋市営地下鉄鶴舞線",
+      "matched": 19,
+      "total": 19,
+      "missing": []
+    },
+    "railLine99517": {
+      "title": "名古屋市営地下鉄桜通線",
+      "matched": 20,
+      "total": 20,
+      "missing": []
+    },
+    "railLine99518": {
+      "title": "名古屋市営地下鉄上飯田線",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "railLine99520": {
+      "title": "豊橋鉄道渥美線",
+      "matched": 15,
+      "total": 15,
+      "missing": []
+    },
+    "railLine99521": {
+      "title": "豊橋鉄道東田本線",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "railLine99522": {
+      "title": "豊橋鉄道運動公園前線",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "railLine99523": {
+      "title": "ゆとりーとライン",
+      "matched": 8,
+      "total": 8,
+      "missing": []
+    },
+    "railLine99524": {
+      "title": "明知鉄道",
+      "matched": 10,
+      "total": 10,
+      "missing": []
+    },
+    "railLine99525": {
+      "title": "長良川鉄道越美南線",
+      "matched": 37,
+      "total": 37,
+      "missing": []
+    },
+    "railLine99526": {
+      "title": "樽見鉄道",
+      "matched": 18,
+      "total": 18,
+      "missing": []
+    },
+    "railLine99528": {
+      "title": "三岐鉄道三岐線",
+      "matched": 14,
+      "total": 14,
+      "missing": []
+    },
+    "railLine99529": {
+      "title": "三岐鉄道北勢線",
+      "matched": 12,
+      "total": 12,
+      "missing": []
+    },
+    "railLine99530": {
+      "title": "伊勢鉄道",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine99531": {
+      "title": "伊賀鉄道伊賀線",
+      "matched": 14,
+      "total": 14,
+      "missing": []
+    },
+    "railLine99532": {
+      "title": "養老鉄道養老線",
+      "matched": 26,
+      "total": 26,
+      "missing": []
+    },
+    "railLine99601": {
+      "title": "近江鉄道本線",
+      "matched": 24,
+      "total": 24,
+      "missing": []
+    },
+    "railLine99602": {
+      "title": "近江鉄道多賀線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "railLine99603": {
+      "title": "近江鉄道八日市線",
+      "matched": 6,
+      "total": 6,
+      "missing": []
+    },
+    "railLine99604": {
+      "title": "信楽高原鐵道",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "railLine99605": {
+      "title": "嵯峨野観光鉄道",
+      "matched": 3,
+      "total": 3,
+      "missing": []
+    },
+    "railLine99606": {
+      "title": "叡山電鉄叡山本線",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "railLine99607": {
+      "title": "叡山電鉄鞍馬線",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine99608": {
+      "title": "京都丹後鉄道宮福線",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "railLine99609": {
+      "title": "京都丹後鉄道宮豊線",
+      "matched": 12,
+      "total": 12,
+      "missing": []
+    },
+    "railLine99653": {
+      "title": "京都丹後鉄道宮舞線",
+      "matched": 6,
+      "total": 6,
+      "missing": []
+    },
+    "railLine99610": {
+      "title": "京都市営地下鉄烏丸線",
+      "matched": 14,
+      "total": 14,
+      "missing": []
+    },
+    "railLine99611": {
+      "title": "京都市営地下鉄東西線",
+      "matched": 16,
+      "total": 16,
+      "missing": []
+    },
+    "railLine99612": {
+      "title": "京福電鉄嵐山本線",
+      "matched": 12,
+      "total": 12,
+      "missing": []
+    },
+    "railLine99613": {
+      "title": "京福電鉄北野線",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine99614": {
+      "title": "北大阪急行線",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "railLine99617": {
+      "title": "水間鉄道",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine99618": {
+      "title": "OsakaMetro御堂筋線",
+      "matched": 19,
+      "total": 19,
+      "missing": []
+    },
+    "railLine99619": {
+      "title": "OsakaMetro谷町線",
+      "matched": 25,
+      "total": 25,
+      "missing": []
+    },
+    "railLine99620": {
+      "title": "OsakaMetro四つ橋線",
+      "matched": 10,
+      "total": 10,
+      "missing": []
+    },
+    "railLine99622": {
+      "title": "OsakaMetro千日前線",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "railLine99623": {
+      "title": "OsakaMetro堺筋線",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine99624": {
+      "title": "OsakaMetro長堀鶴見緑地線",
+      "matched": 16,
+      "total": 16,
+      "missing": []
+    },
+    "railLine99652": {
+      "title": "OsakaMetro今里筋線",
+      "matched": 10,
+      "total": 10,
+      "missing": []
+    },
+    "railLine99625": {
+      "title": "OsakaMetro南港ポートタウン線",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine99626": {
+      "title": "大阪モノレール線",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "railLine99627": {
+      "title": "大阪モノレール彩都線",
+      "matched": 4,
+      "total": 4,
+      "missing": []
+    },
+    "railLine99628": {
+      "title": "阪堺電軌上町線",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine99629": {
+      "title": "阪堺電軌阪堺線",
+      "matched": 30,
+      "total": 30,
+      "missing": []
+    },
+    "railLine99630": {
+      "title": "神戸高速東西線",
+      "matched": 6,
+      "total": 6,
+      "missing": []
+    },
+    "railLine99630Branch1": {
+      "title": "神戸高速東西線",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "railLine99631": {
+      "title": "神戸高速南北線",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "railLine99632": {
+      "title": "神鉄有馬線",
+      "matched": 14,
+      "total": 14,
+      "missing": []
+    },
+    "railLine99633": {
+      "title": "神鉄三田線",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine99634": {
+      "title": "神鉄公園都市線",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "railLine99635": {
+      "title": "神鉄粟生線",
+      "matched": 19,
+      "total": 19,
+      "missing": []
+    },
+    "railLine99636": {
+      "title": "神戸市営地下鉄北神線",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "railLine99637": {
+      "title": "山陽電鉄本線",
+      "matched": 42,
+      "total": 42,
+      "missing": []
+    },
+    "railLine99638": {
+      "title": "山陽電鉄網干線",
+      "matched": 6,
+      "total": 6,
+      "missing": []
+    },
+    "railLine99615": {
+      "title": "能勢電鉄妙見線",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "railLine99640": {
+      "title": "能勢電鉄日生線",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "railLine99643": {
+      "title": "北条鉄道",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "railLine99644": {
+      "title": "智頭急行",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "railLine99645": {
+      "title": "神戸市営地下鉄西神線",
+      "matched": 8,
+      "total": 8,
+      "missing": []
+    },
+    "railLine99646": {
+      "title": "神戸市営地下鉄山手線",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "railLine99647": {
+      "title": "神戸市営地下鉄海岸線(夢かもめ)",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine99648": {
+      "title": "神戸新交通ポートアイランド線",
+      "matched": 8,
+      "total": 8,
+      "missing": []
+    },
+    "railLine99648Branch1": {
+      "title": "神戸新交通ポートアイランド線",
+      "matched": 12,
+      "total": 12,
+      "missing": []
+    },
+    "railLine99649": {
+      "title": "神戸新交通六甲アイランド線",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "railLine99650": {
+      "title": "紀州鉄道",
+      "matched": 4,
+      "total": 4,
+      "missing": []
+    },
+    "railLine99651": {
+      "title": "わかやま電鉄貴志川線",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "railLine99701": {
+      "title": "若桜鉄道",
+      "matched": 8,
+      "total": 8,
+      "missing": []
+    },
+    "railLine99702": {
+      "title": "一畑電車北松江線",
+      "matched": 21,
+      "total": 21,
+      "missing": []
+    },
+    "railLine99703": {
+      "title": "一畑電車大社線",
+      "matched": 4,
+      "total": 4,
+      "missing": []
+    },
+    "railLine99704": {
+      "title": "水島臨海鉄道",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine99705": {
+      "title": "井原鉄道",
+      "matched": 14,
+      "total": 14,
+      "missing": []
+    },
+    "railLine99706": {
+      "title": "岡山電軌東山本線",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine99707": {
+      "title": "岡山電軌清輝橋線",
+      "matched": 8,
+      "total": 8,
+      "missing": []
+    },
+    "railLine99709": {
+      "title": "アストラムライン",
+      "matched": 21,
+      "total": 21,
+      "missing": []
+    },
+    "railLine99710": {
+      "title": "広電１系統(宇品線)",
+      "matched": 24,
+      "total": 24,
+      "missing": []
+    },
+    "railLine99711": {
+      "title": "広電２系統(宮島線)",
+      "matched": 38,
+      "total": 38,
+      "missing": []
+    },
+    "railLine99712": {
+      "title": "広電３系統(己斐線)",
+      "matched": 17,
+      "total": 17,
+      "missing": []
+    },
+    "railLine99713": {
+      "title": "広電５系統(比治山線)",
+      "matched": 16,
+      "total": 16,
+      "missing": []
+    },
+    "railLine99714": {
+      "title": "広電６系統(江波線)",
+      "matched": 17,
+      "total": 17,
+      "missing": []
+    },
+    "railLine99715": {
+      "title": "広電７系統(都心線)",
+      "matched": 25,
+      "total": 25,
+      "missing": []
+    },
+    "railLine99716": {
+      "title": "広電８系統(横川線)",
+      "matched": 11,
+      "total": 11,
+      "missing": []
+    },
+    "railLine99717": {
+      "title": "広電９系統(白島線)",
+      "matched": 4,
+      "total": 4,
+      "missing": []
+    },
+    "railLine99734": {
+      "title": "広電Ｌ系統(循環線)",
+      "matched": 21,
+      "total": 21,
+      "missing": []
+    },
+    "railLine99718": {
+      "title": "錦川鉄道錦川清流線",
+      "matched": 12,
+      "total": 12,
+      "missing": []
+    },
+    "railLine99801": {
+      "title": "阿佐海岸鉄道阿佐東線",
+      "matched": 3,
+      "total": 3,
+      "missing": []
+    },
+    "railLine99802": {
+      "title": "琴電琴平線",
+      "matched": 22,
+      "total": 22,
+      "missing": []
+    },
+    "railLine99803": {
+      "title": "琴電長尾線",
+      "matched": 17,
+      "total": 17,
+      "missing": []
+    },
+    "railLine99804": {
+      "title": "琴電志度線",
+      "matched": 15,
+      "total": 15,
+      "missing": []
+    },
+    "railLine99805": {
+      "title": "伊予鉄道郡中線",
+      "matched": 11,
+      "total": 11,
+      "missing": []
+    },
+    "railLine99806": {
+      "title": "伊予鉄道高浜線",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine99807": {
+      "title": "伊予鉄道横河原線",
+      "matched": 14,
+      "total": 14,
+      "missing": []
+    },
+    "railLine99808": {
+      "title": "伊予鉄道１系統(環状線)",
+      "matched": 22,
+      "total": 22,
+      "missing": []
+    },
+    "railLine99809": {
+      "title": "伊予鉄道２系統(環状線)",
+      "matched": 22,
+      "total": 22,
+      "missing": []
+    },
+    "railLine99810": {
+      "title": "伊予鉄道３系統(市駅線)",
+      "matched": 10,
+      "total": 10,
+      "missing": []
+    },
+    "railLine99811": {
+      "title": "伊予鉄道５系統(松山駅前線)",
+      "matched": 12,
+      "total": 12,
+      "missing": []
+    },
+    "railLine99812": {
+      "title": "伊予鉄道６系統(本町線)",
+      "matched": 6,
+      "total": 6,
+      "missing": []
+    },
+    "railLine99814": {
+      "title": "土佐くろしお鉄道中村線",
+      "matched": 14,
+      "total": 14,
+      "missing": []
+    },
+    "railLine99815": {
+      "title": "土佐くろしお鉄道宿毛線",
+      "matched": 7,
+      "total": 7,
+      "missing": []
+    },
+    "railLine99816": {
+      "title": "土佐くろしお鉄道ごめん・なはり線",
+      "matched": 20,
+      "total": 20,
+      "missing": []
+    },
+    "railLine99817": {
+      "title": "とさでん交通後免線",
+      "matched": 32,
+      "total": 32,
+      "missing": []
+    },
+    "railLine99818": {
+      "title": "とさでん交通伊野線",
+      "matched": 33,
+      "total": 33,
+      "missing": []
+    },
+    "railLine99819": {
+      "title": "とさでん交通桟橋線",
+      "matched": 10,
+      "total": 10,
+      "missing": []
+    },
+    "railLine99901": {
+      "title": "甘木鉄道",
+      "matched": 10,
+      "total": 10,
+      "missing": []
+    },
+    "railLine99902": {
+      "title": "平成筑豊鉄道伊田線",
+      "matched": 14,
+      "total": 14,
+      "missing": []
+    },
+    "railLine99903": {
+      "title": "平成筑豊鉄道糸田線",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "railLine99904": {
+      "title": "平成筑豊鉄道田川線",
+      "matched": 16,
+      "total": 16,
+      "missing": []
+    },
+    "railLine99928": {
+      "title": "平成筑豊鉄道門司港レトロ観光線",
+      "matched": 3,
+      "total": 3,
+      "missing": []
+    },
+    "railLine99905": {
+      "title": "福岡市営地下鉄空港線",
+      "matched": 12,
+      "total": 12,
+      "missing": []
+    },
+    "railLine99906": {
+      "title": "福岡市営地下鉄箱崎線",
+      "matched": 6,
+      "total": 6,
+      "missing": []
+    },
+    "railLine99907": {
+      "title": "福岡市営地下鉄七隈線",
+      "matched": 17,
+      "total": 17,
+      "missing": []
+    },
+    "railLine99908": {
+      "title": "北九州高速鉄道",
+      "matched": 12,
+      "total": 12,
+      "missing": []
+    },
+    "railLine99909": {
+      "title": "筑豊電気鉄道",
+      "matched": 19,
+      "total": 19,
+      "missing": []
+    },
+    "railLine99910": {
+      "title": "松浦鉄道西九州線(有田～伊万里)",
+      "matched": 10,
+      "total": 10,
+      "missing": []
+    },
+    "railLine99911": {
+      "title": "松浦鉄道西九州線(伊万里～佐世保)",
+      "matched": 46,
+      "total": 46,
+      "missing": []
+    },
+    "railLine99912": {
+      "title": "島原鉄道",
+      "matched": 23,
+      "total": 23,
+      "missing": []
+    },
+    "railLine99913": {
+      "title": "長崎電軌１系統",
+      "matched": 25,
+      "total": 25,
+      "missing": []
+    },
+    "railLine99914": {
+      "title": "長崎電軌３系統",
+      "matched": 23,
+      "total": 23,
+      "missing": []
+    },
+    "railLine99915": {
+      "title": "長崎電軌４系統",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine99916": {
+      "title": "長崎電軌５系統",
+      "matched": 12,
+      "total": 12,
+      "missing": []
+    },
+    "railLine99917": {
+      "title": "熊本電鉄本線",
+      "matched": 12,
+      "total": 12,
+      "missing": []
+    },
+    "railLine99918": {
+      "title": "熊本電鉄上熊本線",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "railLine99919": {
+      "title": "南阿蘇鉄道高森線",
+      "matched": 9,
+      "total": 9,
+      "missing": []
+    },
+    "railLine99920": {
+      "title": "くま川鉄道湯前線",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "railLine99921": {
+      "title": "肥薩おれんじ鉄道",
+      "matched": 27,
+      "total": 27,
+      "missing": []
+    },
+    "railLine99922": {
+      "title": "熊本市電Ａ系統",
+      "matched": 25,
+      "total": 25,
+      "missing": []
+    },
+    "railLine99923": {
+      "title": "熊本市電Ｂ系統",
+      "matched": 27,
+      "total": 27,
+      "missing": []
+    },
+    "railLine99925": {
+      "title": "鹿児島市電１系統",
+      "matched": 23,
+      "total": 23,
+      "missing": []
+    },
+    "railLine99926": {
+      "title": "鹿児島市電２系統",
+      "matched": 19,
+      "total": 19,
+      "missing": []
+    },
+    "railLine11232": {
+      "title": "JR仙石東北ライン",
+      "matched": 13,
+      "total": 13,
+      "missing": []
+    },
+    "seikanCable": {
+      "title": "青函トンネル竜飛斜坑線",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "tsukubaCable": {
+      "title": "筑波山ケーブルカー",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "takaoCable": {
+      "title": "高尾山ケーブルカー",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "mitakeCable": {
+      "title": "御岳山ケーブルカー",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "hakoneCable": {
+      "title": "箱根登山ケーブルカー",
+      "matched": 5,
+      "total": 5,
+      "missing": []
+    },
+    "oyamaCable": {
+      "title": "大山ケーブルカー",
+      "matched": 2,
+      "total": 2,
+      "missing": []
+    },
+    "jukkokuCable": {
+      "title": "十国峠パノラマケーブルカー",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "tateyamaCable": {
+      "title": "立山ケーブルカー",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "kurobeCable": {
+      "title": "黒部ケーブルカー",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "sakamotoCable": {
+      "title": "坂本ケーブル",
+      "matched": 3,
+      "total": 3,
+      "missing": []
+    },
+    "eizanCable": {
+      "title": "叡山ケーブル",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "kuramaCable": {
+      "title": "鞍馬山ケーブル",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "amanohashidateCable": {
+      "title": "天橋立ケーブルカー",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "rokkoCable": {
+      "title": "六甲ケーブル",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "mayaCable": {
+      "title": "摩耶ケーブル",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "yakuriCable": {
+      "title": "八栗ケーブル",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "sarakuraCable": {
+      "title": "皿倉山ケーブルカー",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "rakutenchiCable": {
+      "title": "別府ラクテンチケーブル線",
+      "matched": 1,
+      "total": 1,
+      "missing": []
+    },
+    "throughNumazuUtsunomiya": {
+      "title": "上野東京ライン・沼津〜宇都宮",
+      "matched": 46,
+      "total": 46,
+      "missing": []
+    },
+    "throughAtamiTakasaki": {
+      "title": "上野東京ライン・熱海〜高崎",
+      "matched": 44,
+      "total": 44,
+      "missing": []
+    },
+    "throughZushiUtsunomiya": {
+      "title": "湘南新宿ライン・逗子〜宇都宮",
+      "matched": 35,
+      "total": 35,
+      "missing": []
+    },
+    "throughOdawaraTakasaki": {
+      "title": "湘南新宿ライン・小田原〜高崎",
+      "matched": 42,
+      "total": 42,
+      "missing": []
+    },
+    "throughChuorinkanKuki": {
+      "title": "田園都市・半蔵門・東武線・中央林間〜久喜",
+      "matched": 68,
+      "total": 68,
+      "missing": []
+    },
+    "throughChuorinkanMinamikurihashi": {
+      "title": "田園都市・半蔵門・東武線・中央林間〜南栗橋",
+      "matched": 69,
+      "total": 69,
+      "missing": []
+    },
+    "throughOgawamachiYokohama": {
+      "title": "東武・副都心・東横・みなとみらい線・小川町〜元町・中華街",
+      "matched": 62,
+      "total": 62,
+      "missing": []
+    },
+    "throughHannoYokohama": {
+      "title": "西武・副都心・東横・みなとみらい線・飯能〜元町・中華街",
+      "matched": 57,
+      "total": 57,
+      "missing": []
+    },
+    "throughChichibuYokohama": {
+      "title": "西武・副都心・東横・みなとみらい線・西武秩父〜元町・中華街",
+      "matched": 67,
+      "total": 67,
+      "missing": []
+    }
+  }
+}
