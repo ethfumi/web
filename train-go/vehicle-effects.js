@@ -34,5 +34,33 @@
       snowplow:[38,-55,20,5],airportTug:[10,-57,16,6],
       tamper:[58,-61,16,6],grinder:[58,-61,16,6],ballast:[58,-61,16,6]})[shape] || [40,-54,20,5];
   }
-  window.TRAIN_GO_VEHICLE_EFFECTS={profiles,normalCalls,sound,lightAlpha,lightRect};
+  function createFireBell(audio,destination) {
+    const gain=audio.createGain(),tones=[1320,2138].map(frequency=>{
+      const osc=audio.createOscillator();osc.type='sine';osc.frequency.value=frequency;
+      osc.connect(gain);osc.start();return osc;
+    });
+    gain.gain.value=0;gain.connect(destination);
+    let lastStep=-1,stopped=false;
+    return {
+      update(time,active) {
+        if(stopped)return;
+        const step=Math.floor(time/.4);
+        if(!active){gain.gain.cancelScheduledValues(time);gain.gain.setValueAtTime(0,time);lastStep=-1;return;}
+        if(step===lastStep)return;
+        lastStep=step;
+        if(step%6>=3)return;
+        gain.gain.cancelScheduledValues(time);
+        gain.gain.setValueAtTime(.001,time);
+        gain.gain.linearRampToValueAtTime(.7,time+.004);
+        gain.gain.exponentialRampToValueAtTime(.001,time+.32);
+      },
+      stop(time) {
+        if(stopped)return;stopped=true;
+        gain.gain.cancelScheduledValues(time);gain.gain.setTargetAtTime(0,time,.025);
+        let remaining=tones.length;
+        tones.forEach(osc=>{osc.onended=()=>{osc.disconnect();if(--remaining===0)gain.disconnect();};osc.stop(time+.2);});
+      },
+    };
+  }
+  window.TRAIN_GO_VEHICLE_EFFECTS={profiles,normalCalls,sound,lightAlpha,lightRect,createFireBell};
 })();
