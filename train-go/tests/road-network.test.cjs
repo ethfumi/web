@@ -37,7 +37,7 @@ test('cars cannot be coupled to trains, including restored preferences',()=>{
   const catalogue=s.window.TRAIN_GO_CATALOG,options=s.window.TRAIN_GO_TRIP_OPTIONS;
   assert.deepEqual(Array.from(catalogue.couplingKeys('nozomi',data.roadNetwork.vehicleKeys,[],data.trains)),['nozomi']);
   assert.equal(catalogue.couplingKeys('carCompact',[],['nozomi'],data.trains).length,0);
-  assert.deepEqual(Array.from(catalogue.convoyKeys('carPolice',['nozomi','carLadder','carPolice'],['carLadder','carBus'],data.trains)),['carLadder','carBus','carPolice']);
+  assert.deepEqual(Array.from(catalogue.convoyKeys('carPolice',['nozomi','carLadder','carPolice'],['carLadder','carBus'],data.trains)),['carAmbulance','carFireEngine','carLadder','carBus','carPolice']);
   assert.deepEqual(Array.from(catalogue.convoyKeys('nozomi',[],['carBus'],data.trains)),[]);
   const prefs=options.createPreferences({getItem:()=>JSON.stringify({coupling:['carBus','nozomi','carTruck']}),setItem:()=>{}},data.routes,data.trains);
   assert.deepEqual(Array.from(prefs.state.coupling),['nozomi']);
