@@ -97,7 +97,7 @@ def main():
     if not args.cache:
         roads=json.loads((ROOT/'data/road-network.json').read_text('utf8'))['roads']
         template=(ROOT/'tools/road-runtime.js').read_text('utf8')
-        (ROOT/'road-route-data.js').write_text(template.replace('/* ROAD_RECORDS */',json.dumps(roads,ensure_ascii=False,separators=(',',':'))),encoding='utf8')
+        (ROOT/'road-route-data.js').write_text(template.replace('/* ROAD_RECORDS */',json.dumps(roads,ensure_ascii=False,separators=(',',':'))),encoding='utf8',newline='\n')
         print('Regenerated',len(roads),'roads from the offline snapshot');return
     if not args.inventory:parser.error('--inventory is required with --cache')
     selected=json.loads(args.inventory.read_text('utf8'))
@@ -145,6 +145,6 @@ def main():
     payload={'source':'OpenStreetMap contributors, ODbL 1.0','simplificationMeters':35,'roads':roads}
     target=ROOT/'data/road-network.json';target.write_text(json.dumps(payload,ensure_ascii=False,separators=(',',':'))+'\n',encoding='utf8')
     template=(ROOT/'tools/road-runtime.js').read_text('utf8')
-    (ROOT/'road-route-data.js').write_text(template.replace('/* ROAD_RECORDS */',json.dumps(roads,ensure_ascii=False,separators=(',',':'))),encoding='utf8')
+    (ROOT/'road-route-data.js').write_text(template.replace('/* ROAD_RECORDS */',json.dumps(roads,ensure_ascii=False,separators=(',',':'))),encoding='utf8',newline='\n')
     print(json.dumps({'roads':len(roads),'courses':sum(len(r[4]) for r in roads),'categories':{c:sum(r[1]==c for r in roads) for c in ['national','expressway','tokyo','regional']},'missing':failures},ensure_ascii=False))
 if __name__=='__main__':main()

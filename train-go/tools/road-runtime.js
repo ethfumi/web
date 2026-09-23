@@ -10,8 +10,16 @@
     ['carMinivan','ミニバン','みにばん','#669ad1','minivan'],
     ['carBus','バス','ばす','#f3ede0','bus'],
     ['carTruck','トラック','とらっく','#5d9ccb','truck'],
+    ['carFireEngine','消防車','しょうぼうしゃ','#e64840','fireEngine',true],
+    ['carPolice','パトカー','ぱとかー','#f4f6f7','police',true],
+    ['carExcavator','ショベルカー','しょべるかー','#efbf37','excavator',true],
+    ['carDumpTruck','ダンプカー','だんぷかー','#edb539','dumpTruck',true],
+    ['carAmbulance','救急車','きゅうきゅうしゃ','#f4f6f7','ambulance',true],
+    ['carGarbageTruck','ごみ収集車','ごみしゅうしゅうしゃ','#65a875','garbageTruck',true],
+    ['carMixerTruck','ミキサー車','みきさーしゃ','#62a5ce','mixerTruck',true],
+    ['carCraneTruck','クレーン車','くれーんしゃ','#f2c344','craneTruck',true],
   ];
-  for(const [key,title,name,body,shape] of vehicles)data.trains[key]={name,title,kind:'car',shape,body,stripe:'#405b71',edge:'#334858',face:'#b5def0',callName:name};
+  for(const [key,title,name,body,shape,workVehicle=false] of vehicles)data.trains[key]={name,title,kind:'car',shape,body,workVehicle,stripe:'#405b71',edge:'#334858',face:'#b5def0',callName:name};
   const roads=/* ROAD_RECORDS */;
   const keys=[];
   for(const [id,category,title,name,courses,,refs] of roads)courses.forEach((course,index)=>{
