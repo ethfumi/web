@@ -2488,7 +2488,69 @@
     return svg;
   }
 
+  function drawWorkVehicleOn(g,type,x,y,width) {
+    g.save();g.translate(x,y);g.scale(width/180,width/180);
+    g.lineJoin='round';g.lineCap='round';g.lineWidth=2;g.strokeStyle=type.edge;
+    const shape=type.shape;
+    const box=(x,y,w,h,color)=>{g.fillStyle=color;g.fillRect(x,y,w,h);g.strokeRect(x,y,w,h);};
+    const path=(points,color)=>{g.beginPath();points.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.closePath();g.fillStyle=color;g.fill();g.stroke();};
+    const line=(points,color,width=2)=>{g.beginPath();points.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.strokeStyle=color;g.lineWidth=width;g.stroke();g.strokeStyle=type.edge;g.lineWidth=2;};
+    const circle=(x,y,r,color)=>{g.beginPath();g.arc(x,y,r,0,Math.PI*2);g.fillStyle=color;g.fill();g.stroke();};
+    if(shape==='excavator') {
+      g.beginPath();g.roundRect(-75,-19,111,20,10);g.fillStyle='#34414a';g.fill();
+      for(let x=-62;x<30;x+=18)circle(x,-9,6,'#929ea3');
+      box(-71,-33,99,15,type.body);box(-42,-57,35,28,type.body);box(-35,-51,21,18,'#a5d5e4');
+      line([[8,-28],[27,-60],[62,-38],[71,-17]],type.edge,10);
+      line([[8,-28],[27,-60],[62,-38],[71,-17]],type.body,6);
+      line([[11,-29],[31,-47]],'#f4e5a3',2);
+      path([[63,-22],[80,-23],[87,-7],[67,-5],[57,-12]],type.body);
+    } else {
+      if(shape==='police') {
+        path([[-82,-12],[-82,-30],[-55,-35],[-37,-51],[29,-51],[53,-34],[82,-26],[85,-12]],type.body);
+        path([[-47,-34],[-31,-45],[24,-45],[44,-34]],'#9ed4e9');
+        box(-79,-24,159,12,'#27333c');line([[-5,-45],[-5,-34]],'#fff',4);
+        circle(1,-23,6,'#e1b345');box(-12,-58,29,6,'#ed4a43');
+      } else if(shape==='ambulance') {
+        path([[-82,-12],[-82,-52],[-72,-58],[45,-58],[60,-33],[83,-27],[83,-12]],type.body);
+        box(-68,-48,33,18,'#c4e7f0');path([[14,-49],[40,-49],[50,-34],[14,-34]],'#9ed4e9');
+        box(-80,-27,158,6,'#e45047');box(21,-63,23,5,'#e45047');
+        line([[-58,-38],[-53,-38],[-49,-43],[-45,-33],[-41,-38]],'#368bac',2);
+      } else {
+        box(-84,-19,163,8,'#52616b');
+        path([[30,-13],[30,-48],[62,-48],[83,-29],[83,-13]],type.body);
+        path([[36,-43],[58,-43],[73,-30],[36,-30]],'#a5d5e4');
+        if(shape==='fireEngine') {
+          box(-82,-48,106,29,type.body);
+          for(let x=-75;x<15;x+=30){box(x,-42,24,19,'#c1cbd0');line([[x+3,-35],[x+21,-35]],'#7c8d96');}
+          line([[-78,-57],[26,-57]],'#dce4e6',3);line([[-78,-51],[26,-51]],'#dce4e6',3);
+          for(let x=-75;x<27;x+=13)line([[x,-57],[x,-51]],'#dce4e6');
+          circle(-24,-30,10,'#5f7480');circle(-24,-30,6,'#e6d6a8');box(40,-54,20,5,'#ff796d');
+        } else if(shape==='dumpTruck') {
+          path([[-85,-51],[20,-51],[10,-20],[-74,-20]],type.body);
+          for(let x=-65;x<10;x+=23)line([[x,-45],[x+4,-25]],'#ae7c27',3);
+        } else if(shape==='garbageTruck') {
+          path([[-83,-19],[-87,-40],[-70,-56],[19,-56],[25,-19]],type.body);
+          box(-81,-37,13,15,'#435a51');line([[-57,-28],[-20,-28],[-20,-44]],'#e5f4dc',4);
+          path([[-26,-41],[-20,-48],[-14,-41]],'#e5f4dc');
+        } else if(shape==='mixerTruck') {
+          g.save();g.translate(-30,-38);g.rotate(-.2);g.beginPath();g.ellipse(0,0,46,23,0,0,Math.PI*2);g.fillStyle='#f3f6ed';g.fill();g.stroke();
+          line([[-23,-18],[-4,18]],type.body,10);line([[6,-21],[24,16]],type.body,10);g.restore();
+          path([[-81,-28],[-69,-33],[-66,-19],[-78,-13]],'#83999f');
+        } else if(shape==='craneTruck') {
+          box(-70,-38,72,19,type.body);circle(-29,-30,11,'#65727b');
+          line([[-47,-39],[51,-61]],type.edge,10);line([[-47,-39],[51,-61]],type.body,6);
+          line([[50,-60],[50,-28]],'#53616b',2);
+          line([[50,-28],[50,-22],[55,-22],[58,-27]],'#53616b',3);
+          box(-69,-55,15,5,'#ee9845');
+        }
+      }
+      g.fillStyle='#ffeaa2';g.fillRect(76,-24,7,6);g.fillStyle='#e34d48';g.fillRect(-81,-22,4,7);
+      for(const x of [-55,55]){circle(x,-10,11,'#2c3540');circle(x,-10,5,'#bdc8cf');}
+    }
+    g.restore();
+  }
   function drawRoadVehicleOn(g,type,x,y,width) {
+    if(type.workVehicle){drawWorkVehicleOn(g,type,x,y,width);return;}
     const bus=type.shape==='bus',truck=type.shape==='truck';
     const tall=bus||truck||['kei','suv','minivan'].includes(type.shape);
     const roofLeft=type.shape==='minivan'?-63:type.shape==='kei'?-55:-39;
@@ -2522,6 +2584,29 @@
     ctx.beginPath();ctx.roundRect(-size*.5,-size*.22,size,size*.44,size*.12);ctx.fill();ctx.stroke();
     ctx.fillStyle='#6aa3bc';ctx.fillRect(size*.15,-size*.17,size*.12,size*.34);
     ctx.fillStyle='#ffefab';ctx.fillRect(size*.44,-size*.18,size*.05,size*.09);ctx.fillRect(size*.44,size*.09,size*.05,size*.09);
+    if(train.workVehicle) {
+      ctx.scale(size,size);ctx.lineWidth=.035;ctx.lineCap='round';
+      if(['fireEngine','police','ambulance'].includes(train.shape)) {
+        if(train.shape==='police'){ctx.fillStyle='#293741';ctx.fillRect(-.4,-.2,.26,.4);}
+        ctx.fillStyle='#ed4a43';ctx.fillRect(.07,-.2,.08,.4);
+        if(train.shape==='fireEngine') {
+          ctx.strokeStyle='#edf1ec';ctx.strokeRect(-.43,-.08,.46,.16);
+          for(let x=-.39;x<0;x+=.1){ctx.beginPath();ctx.moveTo(x,-.08);ctx.lineTo(x,.08);ctx.stroke();}
+        }
+      } else if(train.shape==='excavator'||train.shape==='craneTruck') {
+        if(train.shape==='excavator') {
+          ctx.fillStyle='#35424c';ctx.fillRect(-.43,-.29,.7,.12);ctx.fillRect(-.43,.17,.7,.12);
+        }
+        ctx.strokeStyle=train.body;ctx.lineWidth=.12;ctx.beginPath();ctx.moveTo(-.2,0);ctx.lineTo(.1,-.3);ctx.lineTo(.5,-.32);ctx.stroke();
+        ctx.fillStyle='#58636b';ctx.fillRect(.43,-.36,.18,.16);
+      } else if(train.shape==='mixerTruck') {
+        ctx.fillStyle='#eff4eb';ctx.beginPath();ctx.ellipse(-.2,0,.23,.17,0,0,Math.PI*2);ctx.fill();
+        ctx.strokeStyle=train.body;ctx.beginPath();ctx.moveTo(-.26,-.12);ctx.lineTo(-.14,.12);ctx.stroke();
+      } else {
+        ctx.fillStyle=train.shape==='dumpTruck'?'#936c37':'#d4e6d1';ctx.fillRect(-.43,-.15,.48,.3);
+        ctx.strokeStyle=train.edge;ctx.strokeRect(-.43,-.15,.48,.3);
+      }
+    }
     ctx.restore();
   }
   function drawRoadScene() {

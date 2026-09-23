@@ -6,10 +6,17 @@ for(const file of JSON.parse(read('runtime-sources.json')).filter(f=>f!=='app.js
 const data=s.window.TRAIN_GO_ROUTE_DATA,maps=s.window.TRAIN_GO_MAP_DATA.maps;
 const source=JSON.parse(read('data/road-network.json'));
 
-test('national roads, Tokyo arterials and seven vehicles are selectable offline',()=>{
+test('national roads, Tokyo arterials and road vehicles are selectable offline',()=>{
   assert.equal(source.roads.filter(r=>r[1]==='national').length,459);
   for(const name of ['環七通り','環八通り','山手通り','明治通り','青梅街道'])assert.ok(source.roads.some(r=>r[2].includes(name)),name);
-  assert.equal(data.roadNetwork.vehicleKeys.length,7);
+  assert.equal(data.roadNetwork.vehicleKeys.length,15);
+  for(const key of ['carFireEngine','carPolice','carExcavator','carDumpTruck','carAmbulance','carGarbageTruck','carMixerTruck','carCraneTruck']) {
+    assert.ok(data.roadNetwork.vehicleKeys.includes(key),key);
+    assert.equal(data.trains[key].kind,'car');
+    assert.equal(data.trains[key].workVehicle,true);
+    assert.doesNotMatch(data.trains[key].name,/[一-龯々ァ-ヶ]/);
+    assert.ok(s.window.TRAIN_GO_CATALOG.matches(`${data.trains[key].title} ${data.trains[key].name}`,data.trains[key].title));
+  }
   for(const key of data.roadNetwork.keys){
     const route=data.routes[key],map=maps[key];
     assert.equal(route.kind,'road');assert.equal(map.kind,'road');
@@ -28,7 +35,7 @@ test('national roads, Tokyo arterials and seven vehicles are selectable offline'
 
 test('cars cannot be coupled to trains, including restored preferences',()=>{
   const catalogue=s.window.TRAIN_GO_CATALOG,options=s.window.TRAIN_GO_TRIP_OPTIONS;
-  assert.deepEqual(Array.from(catalogue.couplingKeys('nozomi',['carBus','carTruck'],[],data.trains)),['nozomi']);
+  assert.deepEqual(Array.from(catalogue.couplingKeys('nozomi',data.roadNetwork.vehicleKeys,[],data.trains)),['nozomi']);
   assert.equal(catalogue.couplingKeys('carCompact',[],['nozomi'],data.trains).length,0);
   const prefs=options.createPreferences({getItem:()=>JSON.stringify({coupling:['carBus','nozomi','carTruck']}),setItem:()=>{}},data.routes,data.trains);
   assert.deepEqual(Array.from(prefs.state.coupling),['nozomi']);
