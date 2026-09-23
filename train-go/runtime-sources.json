@@ -11,6 +11,7 @@
   "road-route-data.js",
   "work-rail-vehicles.js",
   "vehicle-effects.js",
+  "road-layout.js",
   "international-route-data.js",
   "fare-data.js",
   "map-data.js",
