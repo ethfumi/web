@@ -9,7 +9,7 @@ const source=JSON.parse(read('data/road-network.json'));
 test('national roads, Tokyo arterials and road vehicles are selectable offline',()=>{
   assert.equal(source.roads.filter(r=>r[1]==='national').length,459);
   for(const name of ['環七通り','環八通り','山手通り','明治通り','青梅街道'])assert.ok(source.roads.some(r=>r[2].includes(name)),name);
-  assert.equal(data.roadNetwork.vehicleKeys.length,23);
+  assert.equal(data.roadNetwork.vehicleKeys.length,28);
   for(const key of ['carFireEngine','carPolice','carExcavator','carDumpTruck','carAmbulance','carGarbageTruck','carMixerTruck','carCraneTruck']) {
     assert.ok(data.roadNetwork.vehicleKeys.includes(key),key);
     assert.equal(data.trains[key].kind,'car');

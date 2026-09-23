@@ -26,6 +26,11 @@
     ['carSweeper','道路清掃車','どうろせいそうしゃ','#69a7bf','sweeper',true],
     ['carRoller','ロードローラー','ろーどろーらー','#e9b533','roller',true],
     ['carBulldozer','ブルドーザー','ぶるどーざー','#e7bd3f','bulldozer',true],
+    ['carStairs','タラップ車','たらっぷしゃ','#edf3f5','stairs',true],
+    ['carAirportTug','トーイングトラクター','とーいんぐとらくたー','#edc43d','airportTug',true],
+    ['carHighLoader','ハイリフトローダー','はいりふとろーだー','#e9edf1','highLoader',true],
+    ['carBeltLoader','ベルトローダー','べるとろーだー','#eff2e5','beltLoader',true],
+    ['carAirportFuel','航空機給油車','こうくうききゅうゆしゃ','#c3dce8','airportFuel',true],
   ];
   for(const [key,title,name,body,shape,workVehicle=false] of vehicles)data.trains[key]={name,title,kind:'car',shape,body,workVehicle,stripe:'#405b71',edge:'#334858',face:'#b5def0',callName:name};
   const roads=/* ROAD_RECORDS */;

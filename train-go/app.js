@@ -2532,6 +2532,10 @@
         path([[66,-17],[88,-24],[92,-5],[65,-5]],type.body);
       }
       for(const x of [-68,65])circle(x,-7,7,'#34414a');
+    } else if(shape==='airportTug') {
+      box(-84,-31,167,20,type.body);box(-17,-51,51,20,type.body);box(-11,-46,37,13,type.face);
+      for(const x of [-57,57]){circle(x,-11,13,'#34414a');circle(x,-11,6,'#a3afb5');}
+      line([[-87,-15],[-99,-15]],'#66747e',5);box(73,-29,7,6,'#fff4b3');
     } else if(shape==='bulldozer') {
       box(-73,-24,112,17,'#34414a');for(let x=-60;x<40;x+=20)circle(x,-12,7,'#89959a');
       box(-48,-48,60,25,type.body);box(-36,-66,38,22,type.body);box(-31,-62,26,15,type.face);
@@ -2585,9 +2589,25 @@
           line([[-65,-43],[17,-69]],'#73818a',2);
           if(shape==='aerial')box(8,-77,30,14,'#eff3e9');
           else {line([[-60,-36],[22,-62]],'#e8ecee',3);for(let i=0;i<7;i++)line([[-60+i*12,-36-i*3.8],[-65+i*12,-43-i*3.8]],'#e8ecee',2);}
-        } else if(shape==='tanker') {
+        } else if(shape==='stairs') {
+          box(-81,-27,107,8,type.body);
+          path([[-76,-30],[6,-69],[27,-69],[27,-61],[-70,-22]],type.body);
+          for(let i=0;i<8;i++)line([[-69+i*10,-28-i*4.7],[-59+i*10,-28-i*4.7]],'#6b7d88',2);
+          line([[-78,-43],[5,-82],[27,-82]],'#8ba0ac',2);
+          for(const [x,y] of [[-78,-43],[-37,-62],[5,-82],[27,-82]])line([[x,y],[x,y+13]],'#8ba0ac',2);
+        } else if(shape==='highLoader') {
+          line([[-74,-23],[9,-56],[-74,-56],[9,-23]],'#73848d',4);
+          box(-84,-64,112,9,type.body);box(-81,-84,72,19,'#a8bdc8');
+          line([[-77,-80],[-14,-80]],'#e5eef2',2);box(-4,-81,27,17,'#dce5ea');
+        } else if(shape==='beltLoader') {
+          line([[-67,-24],[-13,-57],[7,-24]],'#85969f',4);
+          path([[-85,-31],[17,-68],[21,-59],[-81,-22]],'#465661');
+          line([[-85,-33],[17,-70]],type.body,4);line([[-81,-22],[21,-59]],type.body,4);
+          box(-35,-56,17,12,'#b58452');
+        } else if(shape==='tanker'||shape==='airportFuel') {
           g.fillStyle='#dce4e7';g.beginPath();g.roundRect(-85,-54,109,33,15);g.fill();g.stroke();
           for(const x of [-58,-9])line([[x,-51],[x,-24]],'#849ba7',3);box(-41,-59,21,5,'#768b95');
+          if(shape==='airportFuel'){circle(-28,-33,10,'#445a69');circle(-28,-33,6,'#a7b9c3');line([[-18,-33],[-7,-25],[8,-25]],'#445a69',3);}
         } else if(shape==='tow') {
           box(-82,-26,107,8,type.body);line([[-35,-26],[-49,-56],[-78,-48]],type.body,8);
           line([[-78,-48],[-78,-28],[-70,-25]],'#63737f',3);
@@ -2642,7 +2662,7 @@
   }
   function createRoadVehiclePreview(type) {
     const el=document.createElement('canvas');el.width=400;el.height=140;
-    const g=el.getContext('2d');g.scale(2,2);drawRoadVehicleOn(g,type,100,62,170);return el;
+    const g=el.getContext('2d');g.scale(2,2);drawRoadVehicleOn(g,type,100,62,['stairs','highLoader','beltLoader'].includes(type.shape)?125:170);return el;
   }
   function drawMapRoadVehicle(x,y,angle,size,type=train) {
     ctx.save();ctx.translate(x,y);ctx.rotate(angle+(routeDirection<0?Math.PI:0));
