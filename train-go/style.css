@@ -1051,6 +1051,9 @@ body.choosing-car #select-screen { z-index: 100; }
 
 #map-scale { width: 160px; padding: 5px 10px 8px; border-radius: 10px; background: rgba(255,255,255,.9); color: #263247; font: bold 12px sans-serif; text-align: center; pointer-events: none; }
 #map-scale-bar { display: block; box-sizing: border-box; height: 6px; margin: 2px auto 0; border: solid #263247; border-width: 0 2px 2px; }
+#road-direction { display: none; }
+body.road-mode #road-direction { display: block; position: fixed; top: 20vmin; right: 2vmin; max-width: min(48vw,420px); padding: 8px 14px; border-radius: 14px; background: rgba(255,255,255,.9); color: #34576a; font-size: clamp(13px,2vmin,22px); line-height: 1.5; white-space: pre-line; pointer-events: none; }
+body.road-mode.map-view-active #road-direction { display: none; }
 #map-camera-controls {
   position: fixed;
   top: 17vmin;
