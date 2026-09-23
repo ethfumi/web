@@ -1,5 +1,7 @@
 # 全国鉄道路線データ
 
+道路・車モードの出典と収録範囲は [道路データ](roads.md) を参照。
+
 ## 水域データ
 
 `map-water-data.js` は[国土地理院最適化ベクトルタイル](https://github.com/gsi-cyberjapan/optimal_bvmap)（2026年7月1日時点）を加工したもの。
@@ -25,7 +27,7 @@ python train-go/tools/build-runtime.py --optimize
 `runtime-sources.json` に列挙した読みやすいソースを `tools/build-runtime.py` で `runtime.js.gz` にまとめる。
 `loader.js` がブラウザ内で展開して実行するため、GitHub Pages側の圧縮設定に依存しない。
 DecompressionStream非対応環境は同梱のfflate 0.8.2（MIT、`vendor/fflate.LICENSE`）を使用する。
-共有用のOGP画像はオフライン保存対象に含めない。配布ファイルの更新時は必ず再生成し、`--check` でソースとの一致と起動用ファイル合計2,500,000バイト以下を検査する。容量は上限として扱い、残容量を埋めるために精度や収録量を増やさない。
+共有用のOGP画像はオフライン保存対象に含めない。配布ファイルの更新時は必ず再生成し、`--check` でソースとの一致と起動用ファイル合計3,200,000バイト以下を検査する。容量は上限として扱い、残容量を埋めるために精度や収録量を増やさない。
 
 ```sh
 python train-go/tools/build-runtime.py

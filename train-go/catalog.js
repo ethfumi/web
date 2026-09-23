@@ -28,7 +28,7 @@
     return {recommended:top,recent:history,items:rest,total:keys.length};
   }
   function couplingKeys(initial,preferred,defaults,trains) {
-    const valid=key=>trains[key]&&!['airplane','ferry'].includes(trains[key].kind);
+    const valid=key=>trains[key]&&!['airplane','ferry','car'].includes(trains[key].kind);
     const other=[...new Set([...preferred,...defaults])].filter(key=>key!==initial&&valid(key)).slice(0,9);
     return valid(initial)?[...other,initial]:[];
   }
