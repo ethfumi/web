@@ -2507,6 +2507,21 @@
   const catalog = window.TRAIN_GO_CATALOG;
   const routeSearch = document.getElementById('route-search');
   const routeResultCount = document.getElementById('route-result-count');
+  const prefectureData=window.TRAIN_GO_PREFECTURES;
+  const routePrefecture=document.getElementById('route-prefecture');
+  const trainPrefecture=document.getElementById('train-prefecture');
+  const regionKeys=new Set(window.TRAIN_GO_ROUTE_DATA.railRegions.map(r=>r.key));
+  for(const select of [routePrefecture,trainPrefecture]) {
+    for(const code of ['',...prefectureData.prefectures.map(p=>p[0])]) {
+      const option=document.createElement('option');option.value=code;select.appendChild(option);
+    }
+  }
+  function updatePrefectureLabels() {
+    for(const select of [routePrefecture,trainPrefecture]) for(const option of select.options) {
+      const row=prefectureData.prefectures.find(p=>p[0]===Number(option.value));
+      option.textContent=row?row[choices.state.nameMode==='kanji'?1:2]:choices.state.nameMode==='kanji'?'都道府県すべて':'とどうふけん ぜんぶ';
+    }
+  }
   const routeMetadata = new Map(window.TRAIN_GO_ROUTE_DATA.metadata.map(m=>[m.key,m]));
   const catalogRouteKeys = [...new Set([...ROUTE_SELECTION_ORDER,...Object.keys(ROUTES)])].filter(key=>ROUTES[key]);
   const routeSearchTexts = new Map(catalogRouteKeys.map(key=>[key,catalog.normalize(
@@ -2534,7 +2549,7 @@
       const region=routeRegion==='all' || (routeRegion==='air'?kind==='air'
         :routeRegion==='sea'?kind==='sea':routeRegion==='shinkansen'?entry?.kind==='shinkansen'
         :routeRegion==='through'?entry?.through:entry?.regions.includes(routeRegion));
-      return region&&catalog.matches(routeSearchTexts.get(key),routeSearch.value);
+      return region&&catalog.inPrefecture(key,routePrefecture.value,prefectureData)&&catalog.matches(routeSearchTexts.get(key),routeSearch.value);
     });
     const group=catalog.groups(keys,choices.state.routes,null);
     document.getElementById('recent-routes').replaceChildren(...group.recent.map(makeRouteButton));
@@ -2553,11 +2568,18 @@
       const button=document.createElement('button');button.type='button';button.textContent=name;
       button.dataset.region=key;button.setAttribute('aria-pressed',String(key===routeRegion));
       button.addEventListener('click',()=>{
+        if(key==='all'||regionKeys.has(key))routePrefecture.value='';
         routeRegion=key;filters.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
         filterRouteChoices();
       });filters.appendChild(button);
     }
     routeSearch.addEventListener('input',()=>filterRouteChoices());
+    routePrefecture.addEventListener('change',()=>{
+      if(routePrefecture.value&&regionKeys.has(routeRegion)){
+        routeRegion='all';filters.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.region==='all')));
+      }
+      filterRouteChoices();
+    });
     document.getElementById('route-search-clear').addEventListener('click',()=>{routeSearch.value='';filterRouteChoices();routeSearch.focus();});
   }
 
@@ -2600,6 +2622,11 @@
   }
   const trainSearch=document.getElementById('train-search');
   const trainFilter=document.getElementById('train-filter');
+  const trainRouteKeys=new Map();
+  for(const routeKey of catalogRouteKeys) for(const key of [routeTrainKey(routeKey),...(EXTRA_TRAINS_AFTER_ROUTE[routeKey]||[])]) {
+    if(!trainRouteKeys.has(key))trainRouteKeys.set(key,[]);
+    trainRouteKeys.get(key).push(routeKey);
+  }
   for(const {key,name} of [{key:'all',name:'🌏 ぜんぶ'},{key:'shinkansen',name:'🚄 しんかんせん'},...window.TRAIN_GO_ROUTE_DATA.railRegions]) {
     const option=document.createElement('option');option.value=key;option.textContent=name;trainFilter.appendChild(option);
   }
@@ -2641,8 +2668,9 @@
       const allowed=couplingPickerOpen?isCoupleableTrainKey(key):isAirRoute()?kind==='airplane':isSeaRoute()?kind==='ferry':isCoupleableTrainKey(key);
       const category=trainFilter.value;
       const region=category==='all'||(category==='shinkansen'?isShinkansenTrainKey(key)
-        :(trainMetadata.get(key)||[{key}]).some(m=>routeCatalog[m.key]?.regions.includes(category)));
-      return allowed&&region&&catalog.matches(trainSearchTexts.get(key),trainSearch.value);
+        :(trainRouteKeys.get(key)||[]).some(route=>routeCatalog[route]?.regions.includes(category)));
+      const pref=!trainPrefecture.value||(trainRouteKeys.get(key)||[]).some(route=>catalog.inPrefecture(route,trainPrefecture.value,prefectureData));
+      return allowed&&region&&pref&&catalog.matches(trainSearchTexts.get(key),trainSearch.value);
     });
     const group=catalog.groups(keys,choices.state.trains,routeTrainKey(selectedRouteKey));
     document.getElementById('recommended-trains').replaceChildren(...group.recommended.map(key=>makeTrainButton(key,true)));
@@ -2654,7 +2682,14 @@
     document.getElementById('train-result-count').textContent=keys.length?`${keys.length} しゅるい`:'みつからないよ。ことばや ちいきを かえてみてね';
   }
   trainSearch.addEventListener('input',()=>renderTrainChoices());
-  trainFilter.addEventListener('change',()=>renderTrainChoices());
+  trainFilter.addEventListener('change',()=>{
+    if(trainFilter.value==='all'||regionKeys.has(trainFilter.value))trainPrefecture.value='';
+    renderTrainChoices();
+  });
+  trainPrefecture.addEventListener('change',()=>{
+    if(trainPrefecture.value&&regionKeys.has(trainFilter.value))trainFilter.value='all';
+    renderTrainChoices();
+  });
 
 
   const routeSelectPage = document.getElementById("route-select-page");
@@ -2699,6 +2734,7 @@
 
 
   function updateChoiceNames() {
+    updatePrefectureLabels();
     if(!routeSelectPage.classList.contains('hidden'))filterRouteChoices();
     if(!trainSelectPage.classList.contains('hidden'))renderTrainChoices();
     const target=choices.state.nameMode==='kana'?'漢字':'ひらがな';
@@ -2752,7 +2788,7 @@
     document.getElementById('all-routes').replaceChildren();document.getElementById('recent-routes').replaceChildren();
     vehicleSelectTitle.textContent=couplingPickerOpen?'つなげる でんしゃを えらぼう'
       :isAirRoute()?'どの そらの のりものに のる？':isSeaRoute()?'どの ふねに のる？':'どの でんしゃに のる？';
-    trainSearch.value='';trainFilter.value='all';
+    trainSearch.value='';trainFilter.value='all';trainPrefecture.value='';
     document.querySelector('.trip-settings').classList.toggle('hidden',couplingPickerOpen);
     btnBackToRoutes.textContent=couplingPickerOpen?'✓ とじる':'← もどる';
     btnBackToRoutes.setAttribute('aria-label',couplingPickerOpen?'車両選びを閉じる':'ろせんえらびにもどる');

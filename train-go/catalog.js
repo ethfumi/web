@@ -16,6 +16,9 @@
   function matches(text,query) {
     return normalize(query).trim().split(/\s+/).filter(Boolean).every(term=>normalize(text).includes(term));
   }
+  function inPrefecture(routeKey,prefecture,data) {
+    return !prefecture||(data.routes[routeKey]||[]).includes(Number(prefecture));
+  }
   function groups(keys,recent,recommended) {
     const available=new Set(keys);
     const top=recommended && available.has(recommended)?[recommended]:[];
@@ -29,5 +32,5 @@
     const other=[...new Set([...preferred,...defaults])].filter(key=>key!==initial&&valid(key)).slice(0,9);
     return valid(initial)?[...other,initial]:[];
   }
-  window.TRAIN_GO_CATALOG={normalize,matches,groups,couplingKeys,TRAIN_SEARCH_ALIASES};
+  window.TRAIN_GO_CATALOG={normalize,matches,groups,couplingKeys,inPrefecture,TRAIN_SEARCH_ALIASES};
 })();
