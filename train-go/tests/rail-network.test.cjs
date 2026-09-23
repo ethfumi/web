@@ -14,6 +14,16 @@ const maps = context.window.TRAIN_GO_MAP_DATA.maps;
 const coverage = JSON.parse(read('data/rail-coverage.json'));
 const config = JSON.parse(read('data/rail-route-overrides.json'));
 
+test('Chuo Main follows the local corridor instead of a Shinjuku-Kichijoji shortcut',()=>{
+  const main=maps.chuoMain.points,local=maps.chuo.points;
+  for(const name of ['かんだ','おちゃのみず','なかの','こうえんじ','あさがや','おぎくぼ','にしおぎくぼ','むさしさかい','くにたち']) {
+    const a=main.find(p=>p.name===name),b=local.find(p=>p.name===name);
+    assert.ok(a&&b,name);assert.equal(a.lon,b.lon,name);assert.equal(a.lat,b.lat,name);
+  }
+  assert.equal(data.routes.chuoMain.stations.some(s=>s.name==='なかの'),false,'map refinement must not change scheduled stops');
+  for(let i=1;i<main.length;i++)assert.ok(main[i].km>main[i-1].km);
+});
+
 test('every source line is accounted for and every included course can be selected', () => {
   const db = JSON.parse(read('data/station-database.json'));
   assert.equal(coverage.lines.length, db.lines.length);

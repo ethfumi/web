@@ -34,13 +34,44 @@ test('station names that do not fit above or below get another chance without re
     "for(let i=0;i<7;i++){const x=230+i*24,y=140,text='駅'+i;",
     'const pos=claimMapLabelBox(x,y-11,120,20)?y-11:claimMapLabelBox(x,y+29,120,20)?y+29:null;',
     'if(pos===null)deferStationLabel(text,x,y,120,20);',
-    'else{ctx.fillText(text,x,pos);mapDrawnStationNames.add(text);}}'
+    'else{ctx.fillText(text,x,pos);rememberStationLabel(text,x,y);}}'
   ].join('\n'),s);
   const original=drawn.map(x=>x.text);
   s.drawDeferredStationLabels();
   assert.ok(drawn.length>original.length);
   assert.deepEqual(drawn.slice(0,original.length).map(x=>x.text),original);
   assert.equal(new Set(drawn.map(x=>x.text)).size,drawn.length);
+});
+
+test('same-name station labels only merge at nearby station points, including deferred labels',()=>{
+  const drawn=[];
+  const s=vm.createContext({W:900,H:500,mapCachePadding:0,
+    ctx:{font:'20px sans-serif',fillStyle:'#000',save(){},restore(){},fillText(text,x,y){drawn.push({text,x,y});}},claimMapLabelBox:()=>true});
+  vm.runInContext(between('  const mapDeferredStationLabels =','  const mapTextMetrics ='),s);
+  s.rememberStationLabel('市ヶ谷',100,100);
+  assert.equal(s.hasNearbyStationLabel('市ヶ谷',110,110,20),true);
+  assert.equal(s.hasNearbyStationLabel('市ヶ谷',350,250,20),false);
+  s.deferStationLabel('市ヶ谷',110,110,80,20);
+  s.deferStationLabel('市ヶ谷',350,250,80,20);
+  s.deferStationLabel('市ヶ谷',650,250,80,20);
+  s.drawDeferredStationLabels();
+  assert.equal(drawn.length,2,'distant same-name stations must both get a label');
+  assert.equal(s.hasNearbyStationLabel('市ヶ谷',350,250,20),true);
+  s.drawDeferredStationLabels();assert.equal(drawn.length,2,'fallback must not duplicate labels already drawn');
+});
+
+test('related stations keep distant duplicate names but do not repeat a nearby label',()=>{
+  const drawn=[];
+  const s=vm.createContext({W:900,H:500,mapCachePadding:0,isDebug:false,timeOfDay:'day',
+    relatedRouteCandidates:[{mapKey:'test',map:{points:[100,110,400].map(x=>({name:'いちがや',worldX:x,worldY:100}))}}],
+    MAP_INTERCHANGE_STATIONS:new Set(['いちがや']),stationLabel:()=> '市ヶ谷',measureMapText:()=>({width:80}),
+    mapPointIsVisible:()=>true,claimMapLabelBox:()=>true,
+    ctx:{font:'20px sans-serif',fillStyle:'#000',save(){},restore(){},fillText(text,x,y){drawn.push({text,x,y});}}});
+  vm.runInContext(between('  const mapDeferredStationLabels =','  const mapTextMetrics =')
+    +between('  function drawRelatedStationLabels(','  // 周辺路線の名前。'),s);
+  s.rememberStationLabel('市ヶ谷',-500,-500);
+  s.drawRelatedStationLabels({screenCenterX:0,screenCenterY:0,centerWorldX:0,centerWorldY:0,scale:1},20);
+  assert.deepEqual(drawn.map(p=>p.x),[100,400]);
 });
 
 test('disabled transport categories never enter the route candidate list',()=>{

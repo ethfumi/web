@@ -1,12 +1,12 @@
 // オンラインでは常に最新版を取得し、通信できない時だけ保存済みデータを使う。
-const CACHE = "train-go-v138";
+const CACHE = "train-go-v139";
 const ASSETS = [
   ".",
   "index.html",
-  "style.css?v=138",
-  "loader.js?v=138",
-  "runtime.js.gz?v=138",
-  "vendor/fflate.min.js?v=138",
+  "style.css?v=139",
+  "loader.js?v=139",
+  "runtime.js.gz?v=139",
+  "vendor/fflate.min.js?v=139",
   "manifest.webmanifest",
   "icons/icon-180.png",
   "icons/icon-512.png",

@@ -4409,14 +4409,11 @@
 
   // 周辺路線の駅名。走行中路線の駅名を置いたあと、少し小さい字で置く。
   // 乗換駅を先に全路線ぶん試し、次にそれ以外。縮尺で丸ごと落とさず、
-  // 他の駅名と重ならなければ置く。走行中路線にもある駅(乗換駅)はそちらで描いているので飛ばす。
+  // 他の駅名と重ならなければ置く。同名でも駅の点が離れていれば、それぞれに名前を付ける。
   let relatedRouteCandidates = [];
   function drawRelatedStationLabels(scene, labelSize) {
     if (!relatedRouteCandidates.length) return;
     const fontSize = Math.max(9, labelSize * 0.8);
-    const ownNames = mapLayerVisible(activeRouteMap())
-      ? new Set([activeRoute.start, ...activeRoute.stations.map((station) => station.name)]) : new Set();
-    const placedNames = new Set();
     ctx.save();
     ctx.font = "bold " + fontSize + "px sans-serif";
     ctx.textAlign = "center";
@@ -4431,11 +4428,11 @@
           if (nonRail && !map.stopNames?.has(point.name)) continue;
           const interchange = MAP_INTERCHANGE_STATIONS.has(point.name);
           if ((pass === 0) !== interchange) continue;
-          if (ownNames.has(point.name) || placedNames.has(point.name)) continue;
           const x = scene.screenCenterX + (point.worldX - scene.centerWorldX) * scene.scale;
           const y = scene.screenCenterY + (point.worldY - scene.centerWorldY) * scene.scale;
           if (!mapPointIsVisible(scene, x, y)) continue;
           const label = stationLabel(point.name, mapKey);
+          if(hasNearbyStationLabel(label,x,y,fontSize))continue;
           const width = measureMapText(label).width + fontSize * 0.4;
           const above = y - fontSize * 0.5;
           const below = y + fontSize * 1.4;
@@ -4446,8 +4443,7 @@
             continue;
           }
           ctx.fillText(label, x, labelY);
-          mapDrawnStationNames.add(label);
-          placedNames.add(point.name);
+          rememberStationLabel(label,x,y);
           drawn++;
         }
       }
@@ -4598,7 +4594,7 @@
           continue;
         }
         ctx.fillText(label, position.screenX, labelY);
-        mapDrawnStationNames.add(label);
+        rememberStationLabel(label,position.screenX,position.screenY);
       }
     }
     ctx.restore();
@@ -4867,22 +4863,30 @@
   let mapCachePadding = 0;
   let mapStaticCache = null;
   const mapDeferredStationLabels = new Map();
-  const mapDrawnStationNames = new Set();
+  const mapDrawnStationNames = new Map();
+  function hasNearbyStationLabel(text,x,y,height) {
+    return (mapDrawnStationNames.get(text)||[]).some(p=>Math.hypot(p.x-x,p.y-y)<Math.max(24,height*2));
+  }
+  function rememberStationLabel(text,x,y) {
+    if(!mapDrawnStationNames.has(text))mapDrawnStationNames.set(text,[]);
+    mapDrawnStationNames.get(text).push({x,y});
+  }
   function deferStationLabel(text,x,y,width,height) {
-    if (!mapDeferredStationLabels.has(text)) mapDeferredStationLabels.set(text,{text,x,y,width,height,font:ctx.font,color:ctx.fillStyle});
+    const key=`${text}|${Math.round(x)}|${Math.round(y)}`;
+    if (!mapDeferredStationLabels.has(key)) mapDeferredStationLabels.set(key,{text,x,y,width,height,font:ctx.font,color:ctx.fillStyle});
   }
   function drawDeferredStationLabels() {
     ctx.save();ctx.textAlign='center';ctx.textBaseline='bottom';
     for (const label of mapDeferredStationLabels.values()) {
-      if (mapDrawnStationNames.has(label.text)) continue;
       const {x,y,width,height}=label;
+      if (hasNearbyStationLabel(label.text,x,y,height)) continue;
       const offset=width/2+height*.7;
       for (const [cx,cy] of [[x+offset,y+height*.4],[x-offset,y+height*.4],[x,y-height*1.65],[x,y+height*2.55]]) {
         if (cx-width/2 < -mapCachePadding || cx+width/2 > W+mapCachePadding
           || cy-height < -mapCachePadding || cy > H+mapCachePadding) continue;
         if (!claimMapLabelBox(cx,cy,width,height)) continue;
         ctx.font=label.font;ctx.fillStyle=label.color;ctx.fillText(label.text,cx,cy);
-        mapDrawnStationNames.add(label.text);
+        rememberStationLabel(label.text,x,y);
         break;
       }
     }
