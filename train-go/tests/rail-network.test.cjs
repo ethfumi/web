@@ -53,7 +53,7 @@ test('every added course has finite increasing distances, coordinates, a train a
     assert.ok(points.length >= 2, key);
     for (let i = 0; i < points.length; i++) {
       const p = points[i];
-      assert.ok(p.name && Number.isFinite(p.km), key);
+      assert.ok((p.name || p.geometryOnly) && Number.isFinite(p.km), key);
       assert.ok(p.lon >= 122 && p.lon <= 146 && p.lat >= 24 && p.lat <= 46, key);
       if (i) assert.ok(p.km > points[i-1].km, `${key}: ${p.name}`);
     }
@@ -67,7 +67,7 @@ test('every added course has finite increasing distances, coordinates, a train a
 });
 
 test('branches do not connect unrelated dead ends and loops close in the travel direction', () => {
-  const names = key => Array.from(maps[key].points, p => p.name);
+  const names = key => Array.from(maps[key].points.filter(p=>p.name), p => p.name);
   assert.equal(names('tsurumi').includes('うみしばうら'), false);
   assert.equal(names('tsurumi').includes('おおかわ'), false);
   assert.deepEqual(names('tsurumiBranch1'), ['あさの','しんしばうら','うみしばうら']);

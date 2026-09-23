@@ -73,7 +73,7 @@ test('Keio destination is deterministic and through courses appear on their memb
   assert.ok(options.courseChoices(data,'tobuSkytree').includes('throughChuorinkanMinamikurihashi'));
   assert.ok(data.maps.throughNumazuUtsunomiya.endKm>200);
   for(const course of data.throughRoutes){
-    const points=data.maps[course.key].points;
+    const points=data.maps[course.key].points.filter(p=>p.name);
     for(let i=1;i<points.length;i++)assert.notEqual(points[i].name,points[i-1].name,course.key);
   }
 });
