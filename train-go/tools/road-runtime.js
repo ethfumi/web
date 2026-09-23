@@ -18,6 +18,14 @@
     ['carGarbageTruck','ごみ収集車','ごみしゅうしゅうしゃ','#65a875','garbageTruck',true],
     ['carMixerTruck','ミキサー車','みきさーしゃ','#62a5ce','mixerTruck',true],
     ['carCraneTruck','クレーン車','くれーんしゃ','#f2c344','craneTruck',true],
+    ['carLadder','はしご車','はしごしゃ','#e64840','ladder',true],
+    ['carAerial','高所作業車','こうしょさぎょうしゃ','#e7bd3f','aerial',true],
+    ['carSnowplow','除雪車','じょせつしゃ','#ed963e','snowplow',true],
+    ['carTow','レッカー車','れっかーしゃ','#508fc5','tow',true],
+    ['carTanker','タンクローリー','たんくろーりー','#d6dce0','tanker',true],
+    ['carSweeper','道路清掃車','どうろせいそうしゃ','#69a7bf','sweeper',true],
+    ['carRoller','ロードローラー','ろーどろーらー','#e9b533','roller',true],
+    ['carBulldozer','ブルドーザー','ぶるどーざー','#e7bd3f','bulldozer',true],
   ];
   for(const [key,title,name,body,shape,workVehicle=false] of vehicles)data.trains[key]={name,title,kind:'car',shape,body,workVehicle,stripe:'#405b71',edge:'#334858',face:'#b5def0',callName:name};
   const roads=/* ROAD_RECORDS */;
