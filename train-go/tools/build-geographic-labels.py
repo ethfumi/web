@@ -10,7 +10,11 @@ readings={'青ヶ島':'あおがしま','八丈島':'はちじょうじま','利
           '与那国島':'よなぐにじま','西表島':'いりおもてじま','沖永良部島':'おきのえらぶじま',
           '父島':'ちちじま','母島':'ははじま','口永良部島':'くちのえらぶじま'}
 labels=[]
-for name,lon,lat,kind in json.loads((ROOT/'data/geographic-labels.json').read_text('utf8')):
+islands=json.loads((ROOT/'data/geographic-labels.json').read_text('utf8'))
+# Water tiles cover transport stops, so they can omit islands without a recorded stop.
+if not any(p[0]=='択捉島' for p in islands):
+    islands.append(['択捉島',147.85,45.1,'island'])
+for name,lon,lat,kind in islands:
     if kind!='island':continue
     kana=readings.get(name) or ''.join(t['hira'] for t in converter.convert(name))
     if any(l[0]==name and abs(l[2]-lon)<.1 and abs(l[3]-lat)<.1 for l in labels):continue
