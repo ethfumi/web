@@ -32,7 +32,7 @@ test('a location result moves the manual camera and stale or hidden-view results
     const status={classList:{remove(){},add(){}},textContent:''};
     const ctx=vm.createContext({document:{getElementById:id=>id==='btn-map-location'?button:status},
       navigator:{geolocation:{}},window:{TRAIN_GO_MAP_LOCATION:{request:(_,fn)=>success=fn}},
-      activeRoute:{},mapLocationRequest:0,state:'running',mapMode:'follow',mapUserLocation:null,
+      activeRoute:{},mapLocationRequest:0,state:'running',mapMode:'follow',mapUserLocation:null,mapMomentum:{stop(){}},
       mapScrollAuto:true,mapZoomAuto:true,mapManualCenterWorldX:NaN,mapManualCenterWorldY:NaN,mapManualScale:NaN,
       mapStaticCache:{},W:1280,H:720,mapWorldX:x=>x*10,mapWorldY:y=>-y*10,clampMapScale:x=>x,updateMapCameraControls(){}});
     vm.runInContext(code,ctx);assert.equal(success,undefined);click();assert.equal(button.disabled,true);

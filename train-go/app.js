@@ -832,6 +832,7 @@
   const MAP_GESTURE_MOVE_THRESHOLD_PX = 6;
   const MAP_PINCH_DISTANCE_THRESHOLD_PX = 8;
   const mapPanGesture = { pointerId: null, startX: 0, startY: 0, lastX: 0, lastY: 0, moved: false };
+  const mapMomentum = window.TRAIN_GO_MAP_INERTIA.create();
   const mapTouchPoints = new Map();
   const mapPinchGesture = {
     active: false,
@@ -2709,7 +2710,7 @@
       const entry=routeCatalog[key],kind=ROUTES[key].kind;
       const region=routeRegion==='all' || (routeRegion==='air'?kind==='air'
         :routeRegion==='sea'?kind==='sea':routeRegion==='road'?kind==='road':routeRegion==='shinkansen'?entry?.kind==='shinkansen'
-        :routeRegion==='through'?entry?.through:entry?.regions.includes(routeRegion));
+        :routeRegion==='through'?entry?.through:routeRegion==='international'?entry?.international:entry?.regions.includes(routeRegion));
       return region&&catalog.inPrefecture(key,routePrefecture.value,prefectureData)&&catalog.matches(routeSearchTexts.get(key),routeSearch.value);
     });
     const group=catalog.groups(keys,choices.state.routes,null);
@@ -2724,7 +2725,7 @@
   function buildRouteFilters() {
     const filters=document.getElementById('route-region-filters');
     for(const {key,name} of [{key:'all',name:'🌏 ぜんぶ'},{key:'shinkansen',name:'🚄 しんかんせん'},
-      {key:'through',name:'🔗 ちょくつう'},...window.TRAIN_GO_ROUTE_DATA.railRegions,
+      {key:'through',name:'🔗 ちょくつう'},{key:'international',name:'🌐 こくさいせん'},...window.TRAIN_GO_ROUTE_DATA.railRegions,
       {key:'air',name:'✈️ ひこうき'},{key:'sea',name:'⛴️ ふね'},{key:'road',name:'🚗 くるま'}]) {
       const button=document.createElement('button');button.type='button';button.textContent=name;
       button.dataset.region=key;button.setAttribute('aria-pressed',String(key===routeRegion));
@@ -3044,12 +3045,14 @@
   }
 
   canvas.addEventListener("pointerdown", (event) => {
+    const interruptedGlide=mapMomentum.active;
+    if(mapMode!=="scenery")mapMomentum.begin(event.timeStamp);
     if (mapMode !== "scenery" && event.pointerType === "touch") {
       if (collectFallingStar(event)) return;
       mapTouchPoints.set(event.pointerId, {
         x: event.clientX, y: event.clientY,
         startX: event.clientX, startY: event.clientY,
-        moved: false,
+        moved: interruptedGlide,
       });
       if (mapTouchPoints.size === 1) {
         mapPanGesture.pointerId = event.pointerId;
@@ -3057,7 +3060,7 @@
         mapPanGesture.startY = event.clientY;
         mapPanGesture.lastX = event.clientX;
         mapPanGesture.lastY = event.clientY;
-        mapPanGesture.moved = false;
+        mapPanGesture.moved = interruptedGlide;
       } else if (mapTouchPoints.size === 2) {
         prepareMapPinch();
       }
@@ -3072,7 +3075,7 @@
       mapPanGesture.startY = event.clientY;
       mapPanGesture.lastX = event.clientX;
       mapPanGesture.lastY = event.clientY;
-      mapPanGesture.moved = false;
+      mapPanGesture.moved = interruptedGlide;
       captureCanvasPointer(event.pointerId);
       event.preventDefault();
       return;
@@ -3107,6 +3110,7 @@
         const scale = Math.max(lastMapScene.scale, 0.0001);
         mapManualCenterWorldX -= dx / scale;
         mapManualCenterWorldY -= dy / scale;
+        mapMomentum.drag(dx,dy,event.timeStamp);
       }
       event.preventDefault();
       return;
@@ -3123,6 +3127,7 @@
     const scale = Math.max(lastMapScene.scale, 0.0001);
     mapManualCenterWorldX -= dx / scale;
     mapManualCenterWorldY -= dy / scale;
+    mapMomentum.drag(dx,dy,event.timeStamp);
     event.preventDefault();
   });
 
@@ -3132,11 +3137,14 @@
     mapPanGesture.pointerId = null;
     releaseCanvasPointer(event.pointerId);
     if (wasTap) handleCanvasTap(event);
+    else mapMomentum.release(event.timeStamp);
   }
   function finishMapTouch(event, cancelled = false) {
     const point = mapTouchPoints.get(event.pointerId);
     if (!point) return;
     const wasTap = !cancelled && !mapPinchGesture.active && !point.moved;
+    const coast=!cancelled&&!mapScrollAuto&&!mapPinchGesture.active&&point.moved&&mapTouchPoints.size===1;
+    if(!coast)mapMomentum.stop();
     mapTouchPoints.delete(event.pointerId);
     releaseCanvasPointer(event.pointerId);
 
@@ -3158,10 +3166,12 @@
         mapPanGesture.lastX = remainingPoint.x;
         mapPanGesture.lastY = remainingPoint.y;
         mapPanGesture.moved = remainingPoint.moved;
+        mapMomentum.begin(event.timeStamp);
       } else {
         mapPanGesture.pointerId = null;
       }
     }
+    if (coast)mapMomentum.release(event.timeStamp);
     if (wasTap) handleCanvasTap(event);
   }
   canvas.addEventListener("pointerup", (event) => {
@@ -3169,6 +3179,7 @@
     else finishMapPan(event);
   });
   canvas.addEventListener("pointercancel", (event) => {
+    mapMomentum.stop();
     if (event.pointerType === "touch") {
       finishMapTouch(event, true);
       return;
@@ -3288,6 +3299,7 @@
     document.body.classList.toggle("map-camera-pan-manual", active && !mapScrollAuto);
   }
   function resetMapCamera() {
+    mapMomentum.stop();
     // うえからは最初からカメラを手動にする。列車を追い続けるより、指でスクロールして
     // 周りの路線や駅を眺めたいことが多い。「カメラ じどう」でいつでも追従に戻せる。
     mapScrollAuto = mapMode !== "follow";
@@ -3310,6 +3322,7 @@
     return Math.max(0.00035, Math.min(6, scale));
   }
   function changeMapZoom(multiplier) {
+    mapMomentum.stop();
     if (mapZoomAuto) return;
     if (!Number.isFinite(mapManualScale)) seedManualMapCamera();
     if (!Number.isFinite(mapManualScale)) return;
@@ -3323,6 +3336,7 @@
     return pair ? Math.hypot(pair[1].x - pair[0].x, pair[1].y - pair[0].y) : 0;
   }
   function prepareMapPinch() {
+    mapMomentum.stop();
     const distance = mapPinchDistance(mapPinchPair());
     mapPinchGesture.active = false;
     mapPinchGesture.startDistance = distance >= 1 ? distance : 0;
@@ -3421,11 +3435,13 @@
     setMapMode(MAP_MODE_SEQUENCE[(currentIndex + 1) % MAP_MODE_SEQUENCE.length], true);
   });
   btnMapScroll.addEventListener("click", () => {
+    mapMomentum.stop();
     if (mapScrollAuto) seedManualMapCamera();
     mapScrollAuto = !mapScrollAuto;
     updateMapCameraControls();
   });
   btnMapZoom.addEventListener("click", () => {
+    mapMomentum.stop();
     if (mapZoomAuto) seedManualMapCamera();
     mapZoomAuto = !mapZoomAuto;
     updateMapCameraControls();
@@ -3445,6 +3461,7 @@
       if(request!==mapLocationRequest)return;
       btnMapLocation.disabled=false;
       if(state==='select'||mapMode==='scenery'||activeRoute!==requestedRoute){mapLocationStatus.classList.add('hidden');return;}
+      mapMomentum.stop();
       mapUserLocation=location;
       mapScrollAuto=false;mapZoomAuto=false;
       mapManualCenterWorldX=mapWorldX(location.lon);mapManualCenterWorldY=mapWorldY(location.lat);
@@ -4136,6 +4153,22 @@
     ctx.restore();
   }
 
+  function drawNeighborLabels(scene,labelSize) {
+    ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';
+    for(const [name,kana,lon,lat,kind] of window.TRAIN_GO_NEIGHBOR_LABELS||[]) {
+      const x=scene.screenCenterX+(mapWorldX(lon)-scene.centerWorldX)*scene.scale;
+      const y=scene.screenCenterY+(mapWorldY(lat)-scene.centerWorldY)*scene.scale;
+      if(!mapPointIsVisible(scene,x,y))continue;
+      const country=kind==='country',size=Math.max(country?18:12,labelSize*(country?1.25:.85));
+      const label=choices.state.nameMode==='kanji'?name:kana;
+      ctx.font=`bold ${size}px sans-serif`;
+      if(!claimMapLabelBox(x,y+size/2,measureMapText(label).width+10,size+6))continue;
+      ctx.lineWidth=4;ctx.strokeStyle=timeOfDay==='night'?'#263f47':'rgba(250,253,238,.95)';
+      ctx.strokeText(label,x,y);ctx.fillStyle=timeOfDay==='night'?'#f1eed8':country?'#506d54':'#34576a';ctx.fillText(label,x,y);
+      if(!country){ctx.beginPath();ctx.arc(x,y+size*.85,2.5,0,Math.PI*2);ctx.fill();}
+    }
+    ctx.restore();
+  }
   function drawGeographicLabels(scene,labelSize) {
     ctx.save();ctx.textAlign='center';ctx.textBaseline='bottom';
     for (const [name,kana,lon,lat,kind,elevation] of window.TRAIN_GO_GEOGRAPHIC_LABELS || []) {
@@ -4325,7 +4358,7 @@
     drawRelatedRouteStations(scene, candidates, labelSize);
     relatedRouteCandidates = candidates;
     for (const {mapKey,map} of candidates) {
-      if (map.reference) continue;
+      if (map.reference && !map.referenceLabel) continue;
       const labelPoint = map.points[Math.floor(map.points.length / 2)];
       const labelX = scene.screenCenterX + (mapWorldX(labelPoint.lon) - scene.centerWorldX) * scene.scale;
       const labelY = scene.screenCenterY + (mapWorldY(labelPoint.lat) - scene.centerWorldY) * scene.scale;
@@ -4333,7 +4366,7 @@
       // 名前はここでは描かず、駅名を置いたあとに回す (drawMapRelatedLineLabels)。
       const pending = relatedLineLabels[relatedLineLabelCount]
         || (relatedLineLabels[relatedLineLabelCount] = {});
-      pending.name = routeLabel(mapKey);
+      pending.name = (choices.state.nameMode==='kanji'?map.referenceTitle:map.referenceLabel) || routeLabel(mapKey);
       pending.x = labelX;
       pending.y = labelY;
       relatedLineLabelCount++;
@@ -4878,6 +4911,7 @@
     ctx.save();
     profiled("map:background", () => drawYamanoteMapBackground(scene));
     profiled("map:townscape", () => drawMapTownscape(scene));
+    profiled("map:neighbors",()=>drawNeighborLabels(scene,labelSize));
     profiled("map:relatedLines", () => drawYamanoteRelatedLines(scene, labelSize));
     if (mapLayerVisible(activeRouteMap())) profiled("map:route", () => drawYamanoteRoute(scene, labelSize));
     profiled("map:relatedStationLabels", () => drawRelatedStationLabels(scene, labelSize));
@@ -4905,8 +4939,9 @@
         const width = Math.ceil((W + padding * 2) * DPR);
         const height = Math.ceil((H + padding * 2) * DPR);
         const surface = mapBackground;
-        surface.width = width;
-        surface.height = height;
+        // Keep the backing store while panning; resizing discards the GPU bitmap.
+        if(surface.width!==width)surface.width=width;
+        if(surface.height!==height)surface.height=height;
         surface.style.width = `${width / DPR}px`;
         surface.style.height = `${height / DPR}px`;
         const displayContext = ctx;
@@ -5000,6 +5035,7 @@
       canvas.dataset.mapZoomMode = mapZoomAuto ? "auto" : "manual";
       canvas.dataset.mapCenterX = scene.centerWorldX.toFixed(1);
       canvas.dataset.mapCenterY = scene.centerWorldY.toFixed(1);
+      canvas.dataset.mapMomentum = String(mapMomentum.active);
       canvas.dataset.mapTrainCount = String(scene.mode === "follow" ? scene.carPositions.length : 1);
       canvas.dataset.mapPowerStarX = Number.isFinite(mapPowerStarScreenPoint.x) ? String(Math.round(mapPowerStarScreenPoint.x)) : "";
       canvas.dataset.mapPowerStarY = Number.isFinite(mapPowerStarScreenPoint.y) ? String(Math.round(mapPowerStarScreenPoint.y)) : "";
@@ -6709,6 +6745,13 @@ function drawAirports() {
       resize();
     }
 
+    if(mapMode!=="scenery"&&!mapScrollAuto&&!mapTouchPoints.size&&mapPanGesture.pointerId===null&&!document.hidden) {
+      const glide=mapMomentum.step(dt);
+      if(glide&&Number.isFinite(lastMapScene.scale)) {
+        mapManualCenterWorldX-=glide.x/Math.max(lastMapScene.scale,.0001);
+        mapManualCenterWorldY-=glide.y/Math.max(lastMapScene.scale,.0001);
+      }
+    } else if(document.hidden)mapMomentum.stop();
     updateAutoOperations(dt);
     updateFallingStar(dt);
 
@@ -7254,6 +7297,26 @@ function drawAirports() {
       state = previousState;
     });
     document.body.appendChild(debugMapMultitapButton);
+
+    const debugMapFlickButton=document.createElement('button');
+    debugMapFlickButton.className='debug-control';debugMapFlickButton.textContent='テスト: ちずの慣性';
+    debugMapFlickButton.setAttribute('aria-label','地図のタッチ慣性と停止を確認する');
+    Object.assign(debugMapFlickButton.style,{position:'fixed',left:'58%',top:'490px',zIndex:'99',padding:'8px'});
+    debugMapFlickButton.addEventListener('click',()=>{
+      if(mapMode==='scenery')setMapMode('follow');
+      seedManualMapCamera();mapScrollAuto=false;updateMapCameraControls();
+      const time=performance.now();
+      const touch=(type,x,t)=>{
+        const event=new PointerEvent(type,{bubbles:true,cancelable:true,pointerType:'touch',pointerId:301,clientX:x,clientY:H*.75});
+        Object.defineProperty(event,'timeStamp',{value:time+t});canvas.dispatchEvent(event);
+      };
+      touch('pointerdown',400,0);
+      for(let i=1;i<=4;i++)touch('pointermove',400+i*12,i*16);
+      touch('pointerup',448,65);
+      const started=mapMomentum.active,startX=mapManualCenterWorldX;
+      setTimeout(()=>{canvas.dataset.mapInertiaTest=JSON.stringify({started,moved:Math.abs(mapManualCenterWorldX-startX)>1,stopped:!mapMomentum.active});},1000);
+    });
+    document.body.appendChild(debugMapFlickButton);
 
     const debugAirBrakingButton = document.createElement("button");
     debugAirBrakingButton.type = "button";

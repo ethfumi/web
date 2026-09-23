@@ -9,6 +9,7 @@
   "sea-route-data.js",
   "all-ferry-route-data.js",
   "road-route-data.js",
+  "international-route-data.js",
   "fare-data.js",
   "map-data.js",
   "line-colors.js",
@@ -23,6 +24,7 @@
   "train-announcements.js",
   "catalog.js",
   "map-cache.js",
+  "map-inertia.js",
   "map-location.js",
   "app.js"
 ]

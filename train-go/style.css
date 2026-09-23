@@ -35,6 +35,8 @@ body.loading #select-screen { visibility: hidden; }
   pointer-events: none;
   transform-origin: 0 0;
 }
+body.map-view-active #map-background { will-change: transform; }
+#select-screen, #stamp-book, #quick-add-options { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
 
 #map-layer-controls { display: flex; gap: 5px; }
 #map-layer-controls button { padding: 8px; font-size: clamp(11px,1.7vmin,16px); min-height: 40px; border: 0; border-radius: 18px; background: #fff; color: #36516a; opacity: 0.65; }
