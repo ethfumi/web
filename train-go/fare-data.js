@@ -170,6 +170,7 @@
   };
 
   function fareClassFor(routeKey, route) {
+    if (route?.kind === "road") return "road";
     if (FIXED_FARES[routeKey] != null) return "fixed";
     if (ROUTE_FARE_CLASS[routeKey]) return ROUTE_FARE_CLASS[routeKey];
     if (route?.kind === "air") return "air";
@@ -179,6 +180,8 @@
   }
 
   function fareYen(routeKey, distanceKm, route = null) {
+    // Road mode does not simulate fares, tolls or fuel costs.
+    if (route?.kind === "road") return 0;
     if (FIXED_FARES[routeKey] != null) return FIXED_FARES[routeKey];
     const fareClass = fareClassFor(routeKey, route);
     const table = TABLES[fareClass] || TABLES.jrMain;

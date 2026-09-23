@@ -45,8 +45,9 @@
   function isSeaRoute(route = activeRoute) {
     return route?.kind === "sea";
   }
+  function isRoadRoute(route = activeRoute) { return route?.kind === "road"; }
   function isNonRailRoute(route = activeRoute) {
-    return isAirRoute(route) || isSeaRoute(route);
+    return isAirRoute(route) || isSeaRoute(route) || isRoadRoute(route);
   }
 
   const CAR_COUNT_WORDS = [
@@ -171,15 +172,15 @@
   const MAP_INTERCHANGE_STATIONS = (() => {
     const counts = new Map();
     for (const map of Object.values(ROUTE_MAPS)) {
-      if (map.kind === "air" || map.kind === "sea") continue;
+      if (map.kind === "air" || map.kind === "sea" || map.kind === "road") continue;
       for (const name of new Set(map.points.map((point) => point.name))) counts.set(name, (counts.get(name) || 0) + 1);
     }
     return new Set([...counts].filter(([, count]) => count >= 2).map(([name]) => name));
   })();
-  const MAP_ROUTES_BY_KIND = {rail:[], air:[], sea:[]};
+  const MAP_ROUTES_BY_KIND = {rail:[], air:[], sea:[], road:[]};
   for (const key of MAP_ROUTE_DRAW_ORDER) {
     const kind=ROUTE_MAPS[key]?.kind;
-    MAP_ROUTES_BY_KIND[kind==='air'||kind==='sea' ? kind : 'rail'].push(key);
+    MAP_ROUTES_BY_KIND[['air','sea','road'].includes(kind) ? kind : 'rail'].push(key);
   }
   function visibleMapRouteKeys() {
     return Object.keys(MAP_ROUTES_BY_KIND).flatMap(kind=>mapLayerVisibility[kind] ? MAP_ROUTES_BY_KIND[kind] : []);
@@ -423,7 +424,7 @@
     freight: { name: "かもつれっしゃ", kind: "freight", cars: 26, speedKmh: 100, body: "#40505d", stripe: "#e49a31" },
   };
   for (const {key,trainKey,kind,cars,speedKmh} of window.TRAIN_GO_ROUTE_DATA?.metadata || []) {
-    if (kind === "air" || kind === "sea") continue;
+    if (kind === "air" || kind === "sea" || kind === "road") continue;
     const type = TRAINS[trainKey || key];
     OPPOSING_TRAIN_TYPES[key] = {
       name:type.name, kind:kind === "shinkansen" ? "shinkansen" : "local",
@@ -774,7 +775,7 @@
       runningGain.gain.setTargetAtTime(state === "running" ? 0.02 + soundSpeedKmh / 32000 : 0.001, t, 0.14);
       return;
     }
-    if (isSeaRoute()) {
+    if (isSeaRoute() || isRoadRoute()) {
       const soundSpeedKmh = Math.min(displaySpeed(speed), 80);
       runningOsc.frequency.setTargetAtTime(32 + soundSpeedKmh * 0.2, t, 0.18);
       runningRailOsc.frequency.setTargetAtTime(55 + soundSpeedKmh * 0.35, t, 0.18);
@@ -840,10 +841,10 @@
     anchorWorldY: NaN,
   };
   let activeRoute = ROUTES[selectedRouteKey];
-  let mapLayerVisibility = {rail:true, air:false, sea:false};
+  let mapLayerVisibility = {rail:true, air:false, sea:false, road:false};
 
   function mapLayerVisible(map) {
-    const kind = map?.kind === "air" ? "air" : map?.kind === "sea" ? "sea" : "rail";
+    const kind = map?.kind === "air" ? "air" : map?.kind === "sea" ? "sea" : map?.kind === "road" ? "road" : "rail";
     return mapLayerVisibility[kind];
   }
   let train = TRAINS.nozomi;
@@ -1437,6 +1438,7 @@
   }
 
   function randomBoardingCount(maxSeats) {
+    if(isRoadRoute())return 0;
     if (maxSeats <= 0) return 0;
     const min = isAirRoute() ? AIR_BOARDING_MIN : isSeaRoute() ? SEA_BOARDING_MIN : TRAIN_BOARDING_MIN;
     const max = isAirRoute() ? AIR_BOARDING_MAX : isSeaRoute() ? SEA_BOARDING_MAX : TRAIN_BOARDING_MAX;
@@ -1480,6 +1482,11 @@
       say(`このふねは、${origin}はつ、${destination}ゆきです。まもなく、しゅっこうします`);
       return;
     }
+    if (isRoadRoute()) {
+      showPlayBanner(`🚗 ${routeLabel()}　➡ ${stationLabel(routeTerminalStation().name)}`,3200);
+      say(`${routeTerminalStation().name}へ、ドライブにしゅっぱつ。シートベルトをしめましょう`);
+      return;
+    }
     if (activeRoute.loopKm) {
       showPlayBanner(`🚉 ${stationLabel(origin)} はつ　${routeLabel(activeRouteMapKey())}`, 3200);
       say(`ご乗車ありがとうございます。この電車は、${activeRoute.name}です。${window.TRAIN_GO_ANNOUNCEMENTS.next(nextAnnouncementOptions())}`);
@@ -1494,7 +1501,7 @@
     mapMode = "scenery";
     resetMapCamera();
     activeRoute = routeForGameStart();
-    mapLayerVisibility = {rail:!isNonRailRoute(), air:isAirRoute(), sea:isSeaRoute()};
+    mapLayerVisibility = {rail:!isNonRailRoute(), air:isAirRoute(), sea:isSeaRoute(), road:isRoadRoute()};
     document.querySelectorAll("[data-map-layer]").forEach(button => button.setAttribute("aria-pressed", String(mapLayerVisibility[button.dataset.mapLayer])));
     // 編成ごとに色が違う形式は、走らせるたびにどの編成が来るかが変わる。
     trainKey = pickTrainVariant(key);
@@ -1562,6 +1569,7 @@
     setMapMode("scenery");
     document.body.classList.toggle("air-mode", isAirRoute());
     document.body.classList.toggle("sea-mode", isSeaRoute());
+    document.body.classList.toggle("road-mode", isRoadRoute());
     selectScreen.classList.add("hidden");
     runUi.classList.remove("hidden");
     btnHome.classList.remove("hidden");
@@ -1578,9 +1586,9 @@
     runUi.classList.toggle("hidden", isNonRailRoute());
     btnDriver.querySelector("span:first-child").textContent = isAirRoute() ? "👩‍✈️" : isSeaRoute() ? "🧑‍✈️" : "🧑‍✈️";
     btnDriver.querySelector("span:last-child").textContent = isAirRoute() ? "パイロット" : isSeaRoute() ? "せんちょう" : "うんてんし";
-    btnMapRecenter.querySelector("span:first-child").textContent = isAirRoute() ? "✈️" : isSeaRoute() ? "⛴️" : "🚃";
-    btnMapRecenter.querySelector("span:last-child").textContent = isAirRoute() ? "ひこうきへ" : isSeaRoute() ? "ふねへ" : "でんしゃへ";
-    btnMapRecenter.setAttribute("aria-label", isAirRoute() ? "ひこうきのいちにもどる" : isSeaRoute() ? "ふねのいちにもどる" : "でんしゃのいちにもどる");
+    btnMapRecenter.querySelector("span:first-child").textContent = isAirRoute() ? "✈️" : isSeaRoute() ? "⛴️" : isRoadRoute() ? "🚗" : "🚃";
+    btnMapRecenter.querySelector("span:last-child").textContent = isAirRoute() ? "ひこうきへ" : isSeaRoute() ? "ふねへ" : isRoadRoute() ? "くるまへ" : "でんしゃへ";
+    btnMapRecenter.setAttribute("aria-label", isAirRoute() ? "ひこうきのいちにもどる" : isSeaRoute() ? "ふねのいちにもどる" : isRoadRoute() ? "くるまのいちにもどる" : "でんしゃのいちにもどる");
     document.querySelector("#distance-meter > small").textContent = isAirRoute() ? "ひこうきょり" : isSeaRoute() ? "こうかいきょり" : "そうこうきょり";
     clearRouteEvent();
     updateDriveUi();
@@ -1665,6 +1673,8 @@
         say(`${nextStationName}へ、しゅっぱつ。りりくします`);
       } else if (isSeaRoute()) {
         say(`${nextStationName}へ、しゅっこうします`);
+      } else if (isRoadRoute()) {
+        say(`${nextStationName}へ、しゅっぱつします`);
       } else {
         say(window.TRAIN_GO_ANNOUNCEMENTS.next(nextAnnouncementOptions()));
       }
@@ -1808,6 +1818,11 @@
   }
 
   function exchangePassengers() {
+    if(isRoadRoute()) {
+      arrivalBanner.textContent=`🚗 ${stationLabel(currentStationName)}に とうちゃく！`;
+      say(`${currentStationName}にとうちゃくしました。おりかえして、ドライブをつづけよう`);
+      return;
+    }
     const alighting = onboardPassengers.filter((passenger) => passenger.destination === currentStationName);
     onboardPassengers = onboardPassengers.filter((passenger) => passenger.destination !== currentStationName);
     deliveredPassengers += alighting.length;
@@ -1885,7 +1900,7 @@
   function isCoupleableTrainKey(key) {
     const type = TRAINS[key];
     if (!type) return false;
-    if (type.kind === "airplane" || type.kind === "ferry") return false;
+    if (["airplane","ferry","car"].includes(type.kind)) return false;
     return true;
   }
 
@@ -2005,7 +2020,9 @@
     const progress = (distance - segmentStartDistance) / segmentLength;
     if (progress < 0.52) return;
     midAnnouncementDone = true;
-    if(isNonRailRoute()) {
+    if(isRoadRoute()) {
+      say(`まもなく、${nextStationName}にとうちゃくします`);
+    } else if(isNonRailRoute()) {
       say(`まもなく、${nextStationName}です。おりるかたは、じゅんびしてください`);
     } else say(window.TRAIN_GO_ANNOUNCEMENTS.approach(nextAnnouncementOptions()));
   }
@@ -2471,9 +2488,64 @@
     return svg;
   }
 
+  function drawRoadVehicleOn(g,type,x,y,width) {
+    const bus=type.shape==='bus',truck=type.shape==='truck';
+    const tall=bus||truck||['kei','suv','minivan'].includes(type.shape);
+    const roofLeft=type.shape==='minivan'?-63:type.shape==='kei'?-55:-39;
+    const roofRight=type.shape==='minivan'?48:type.shape==='suv'?36:27;
+    const length=type.shape==='kei'?.78:type.shape==='compact'?.88:bus?1.08:1;
+    g.save();g.translate(x,y);g.scale(width/180*length,width/180);
+    g.lineJoin='round';g.lineWidth=2;g.strokeStyle=type.edge;
+    g.fillStyle=type.body;
+    g.beginPath();
+    if(bus){g.roundRect(-86,-62,172,55,8);}
+    else if(truck){g.rect(-85,-65,109,54);g.moveTo(29,-11);g.lineTo(29,-48);g.lineTo(62,-48);g.lineTo(83,-29);g.lineTo(83,-11);g.closePath();}
+    else {g.moveTo(-82,-12);g.lineTo(-82,-30);g.lineTo(-68,-34);g.lineTo(roofLeft,tall?-62:-52);g.lineTo(roofRight,tall?-62:-52);g.lineTo(63,-34);g.lineTo(79,-28);g.lineTo(84,-12);g.closePath();}
+    g.fill();g.stroke();g.fillStyle='#9ed4e9';
+    if(bus)for(let i=0;i<6;i++)g.fillRect(-74+i*25,-53,20,22);
+    else if(truck){g.beginPath();g.moveTo(35,-43);g.lineTo(59,-43);g.lineTo(74,-29);g.lineTo(35,-29);g.fill();}
+    else {g.beginPath();g.moveTo(-59,-34);g.lineTo(roofLeft+5,tall?-56:-46);g.lineTo(roofRight-5,tall?-56:-46);g.lineTo(55,-34);g.closePath();g.fill();g.strokeStyle=type.body;g.lineWidth=5;g.beginPath();g.moveTo(-6,-59);g.lineTo(-6,-32);g.stroke();}
+    g.fillStyle=type.stripe;g.fillRect(-78,-24,156,5);
+    g.fillStyle='#ffeaa2';g.fillRect(75,-24,8,8);g.fillStyle='#e34d48';g.fillRect(-82,-23,5,9);
+    for(const wheel of [-53,53]){g.fillStyle='#2c3540';g.beginPath();g.arc(wheel,-10,13,0,Math.PI*2);g.fill();g.fillStyle='#bdc8cf';g.beginPath();g.arc(wheel,-10,6,0,Math.PI*2);g.fill();}
+    g.restore();
+  }
+  function createRoadVehiclePreview(type) {
+    const el=document.createElement('canvas');el.width=400;el.height=140;
+    const g=el.getContext('2d');g.scale(2,2);drawRoadVehicleOn(g,type,100,62,170);return el;
+  }
+  function drawMapRoadVehicle(x,y,angle,size) {
+    ctx.save();ctx.translate(x,y);ctx.rotate(angle+(routeDirection<0?Math.PI:0));
+    ctx.fillStyle='#273743';
+    for(const a of [-.29,.29])for(const b of [-.24,.16])ctx.fillRect(size*a-size*.08,size*b,size*.16,size*.08);
+    ctx.fillStyle=train.body;ctx.strokeStyle=train.edge;ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.roundRect(-size*.5,-size*.22,size,size*.44,size*.12);ctx.fill();ctx.stroke();
+    ctx.fillStyle='#6aa3bc';ctx.fillRect(size*.15,-size*.17,size*.12,size*.34);
+    ctx.fillStyle='#ffefab';ctx.fillRect(size*.44,-size*.18,size*.05,size*.09);ctx.fillRect(size*.44,size*.09,size*.05,size*.09);
+    ctx.restore();
+  }
+  function drawRoadScene() {
+    const y=groundY(),left=-W/viewScale,right=W*2/viewScale+W;
+    ctx.fillStyle=timeOfDay==='night'?'#37414c':'#687783';ctx.fillRect(left,y,right-left,H/viewScale);
+    ctx.fillStyle='#e8e9d5';ctx.fillRect(left,y+8,right-left,4);
+    ctx.fillStyle='#f5ecd2';const offset=visualDistance%180;
+    for(let x=left-offset;x<right;x+=180)ctx.fillRect(x,y+H*.1,90,5);
+    const width=Math.min(330,W*.4),x=W*.53;
+    ctx.save();ctx.translate(x,y);if(trainFacesLeft())ctx.scale(-1,1);
+    drawRoadVehicleOn(ctx,train,0,-2,width);ctx.restore();
+    const signX=W*.78,signY=y-H*.25;
+    ctx.fillStyle='#a2abb1';ctx.fillRect(signX-3,signY,6,y-signY);
+    ctx.font=`bold ${Math.max(13,Math.min(24,W*.024))}px sans-serif`;ctx.textAlign='center';
+    const label=stationLabel(nextStationName),signWidth=Math.max(110,ctx.measureText(label).width+32);
+    ctx.fillStyle='#34705e';ctx.fillRect(signX-signWidth/2,signY-36,signWidth,42);
+    ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.strokeRect(signX-signWidth/2+4,signY-32,signWidth-8,34);
+    ctx.fillStyle='#fff';ctx.fillText(label,signX,signY-7);
+  }
+
   function createVehiclePreview(type) {
     if (type.kind === "airplane") return createAirplanePreview(type);
     if (type.kind === "ferry") return createFerryPreview(type);
+    if (type.kind === "car") return createRoadVehiclePreview(type);
     return createRailPreview(type);
   }
 
@@ -2500,6 +2572,7 @@
     "ferryMiyajima", "ferrySakurajima", "ferrySeikan", "ferryTokyoBay",
     "ferryOgasawara", "ferryTaiheiyo", "ferryShinnihonkai",
     ...(window.TRAIN_GO_ROUTE_DATA?.ferryNetwork?.keys || []),
+    ...(window.TRAIN_GO_ROUTE_DATA?.roadNetwork?.keys || []),
   ])];
 
 
@@ -2508,6 +2581,9 @@
   const routeSearch = document.getElementById('route-search');
   const routeResultCount = document.getElementById('route-result-count');
   const prefectureData=window.TRAIN_GO_PREFECTURES;
+  for(const key of window.TRAIN_GO_ROUTE_DATA.roadNetwork.keys) {
+    routeCatalog[key].regions=[...new Set((prefectureData.routes[key]||[]).map(code=>prefectureData.prefectures[code-1][3]))];
+  }
   const routePrefecture=document.getElementById('route-prefecture');
   const trainPrefecture=document.getElementById('train-prefecture');
   const regionKeys=new Set(window.TRAIN_GO_ROUTE_DATA.railRegions.map(r=>r.key));
@@ -2547,7 +2623,7 @@
     const keys=catalogRouteKeys.filter(key=>{
       const entry=routeCatalog[key],kind=ROUTES[key].kind;
       const region=routeRegion==='all' || (routeRegion==='air'?kind==='air'
-        :routeRegion==='sea'?kind==='sea':routeRegion==='shinkansen'?entry?.kind==='shinkansen'
+        :routeRegion==='sea'?kind==='sea':routeRegion==='road'?kind==='road':routeRegion==='shinkansen'?entry?.kind==='shinkansen'
         :routeRegion==='through'?entry?.through:entry?.regions.includes(routeRegion));
       return region&&catalog.inPrefecture(key,routePrefecture.value,prefectureData)&&catalog.matches(routeSearchTexts.get(key),routeSearch.value);
     });
@@ -2564,7 +2640,7 @@
     const filters=document.getElementById('route-region-filters');
     for(const {key,name} of [{key:'all',name:'🌏 ぜんぶ'},{key:'shinkansen',name:'🚄 しんかんせん'},
       {key:'through',name:'🔗 ちょくつう'},...window.TRAIN_GO_ROUTE_DATA.railRegions,
-      {key:'air',name:'✈️ ひこうき'},{key:'sea',name:'⛴️ ふね'}]) {
+      {key:'air',name:'✈️ ひこうき'},{key:'sea',name:'⛴️ ふね'},{key:'road',name:'🚗 くるま'}]) {
       const button=document.createElement('button');button.type='button';button.textContent=name;
       button.dataset.region=key;button.setAttribute('aria-pressed',String(key===routeRegion));
       button.addEventListener('click',()=>{
@@ -2587,7 +2663,7 @@
   // その路線で最初にすすめる車両。路線キーと車両キーが同じものが多く、
   // 新幹線だけ路線名と車両名が違うので個別に対応づける。
   function routeTrainKey(routeKey) {
-    return window.TRAIN_GO_ROUTE_DATA?.metadata.find(({key}) => key === routeKey)?.trainKey
+    return routeMetadata.get(routeKey)?.trainKey
       || ({tokaido:"nozomi", tohoku:"hayabusa"}[routeKey] || routeKey);
   }
 
@@ -2610,6 +2686,7 @@
       add(routeTrainKey(routeKey));
       for (const extra of EXTRA_TRAINS_AFTER_ROUTE[routeKey] || []) add(extra);
     }
+    for (const key of window.TRAIN_GO_ROUTE_DATA.roadNetwork.vehicleKeys) add(key);
     return order;
   })();
 
@@ -2623,7 +2700,7 @@
   const trainSearch=document.getElementById('train-search');
   const trainFilter=document.getElementById('train-filter');
   const trainRouteKeys=new Map();
-  for(const routeKey of catalogRouteKeys) for(const key of [routeTrainKey(routeKey),...(EXTRA_TRAINS_AFTER_ROUTE[routeKey]||[])]) {
+  for(const routeKey of catalogRouteKeys) for(const key of [routeTrainKey(routeKey),...(EXTRA_TRAINS_AFTER_ROUTE[routeKey]||[]),...(ROUTES[routeKey].kind==='road'?window.TRAIN_GO_ROUTE_DATA.roadNetwork.vehicleKeys:[])]) {
     if(!trainRouteKeys.has(key))trainRouteKeys.set(key,[]);
     trainRouteKeys.get(key).push(routeKey);
   }
@@ -2632,6 +2709,7 @@
   }
   function trainCaption(key) {
     const type=TRAINS[key],model=tripOptions.MODEL_LABELS[key];
+    if(type.kind==='car')return choices.state.nameMode==='kanji'?type.title:type.name;
     const meta=trainMetadata.get(key)?.[0];
     const routeKey=routeCatalog[key]?key:meta?.key;
     const description=model?type.name.replace(/の?しんかんせん$/,'').replace('きいろいけんさしゃ','けんさしゃ')
@@ -2640,7 +2718,7 @@
     return model?`${nameResolver.model(model,choices.state.nameMode)}\n${display}`:display.replace(/のでんしゃ$/,'');
   }
   const trainSearchTexts=new Map(TRAIN_SELECTION_ORDER.map(key=>[key,catalog.normalize(
-    [TRAINS[key].name,TRAINS[key].callName,tripOptions.MODEL_LABELS[key],catalog.TRAIN_SEARCH_ALIASES[key],routeCatalog[key]?.title,ROUTES[key]?.name,
+    [TRAINS[key].name,TRAINS[key].title,TRAINS[key].callName,tripOptions.MODEL_LABELS[key],catalog.TRAIN_SEARCH_ALIASES[key],routeCatalog[key]?.title,ROUTES[key]?.name,
       ...(trainMetadata.get(key)||[]).flatMap(m=>[routeCatalog[m.key]?.title,ROUTES[m.key]?.name])].join(' '))]));
   const trainPreviewObserver=typeof IntersectionObserver==='function'?new IntersectionObserver(entries=>{
     for(const {target,isIntersecting} of entries) {
@@ -2665,7 +2743,7 @@
     trainPreviewObserver?.disconnect();
     const keys=TRAIN_SELECTION_ORDER.filter(key=>{
       const kind=TRAINS[key].kind;
-      const allowed=couplingPickerOpen?isCoupleableTrainKey(key):isAirRoute()?kind==='airplane':isSeaRoute()?kind==='ferry':isCoupleableTrainKey(key);
+      const allowed=couplingPickerOpen?isCoupleableTrainKey(key):isAirRoute()?kind==='airplane':isSeaRoute()?kind==='ferry':isRoadRoute()?kind==='car':isCoupleableTrainKey(key);
       const category=trainFilter.value;
       const region=category==='all'||(category==='shinkansen'?isShinkansenTrainKey(key)
         :(trainRouteKeys.get(key)||[]).some(route=>routeCatalog[route]?.regions.includes(category)));
@@ -2728,7 +2806,7 @@
     tripReverse.setAttribute("aria-pressed", String(reverse));
     document.getElementById("trip-direction").classList.toggle("hidden", Boolean(route.loopKm));
     const terminal = route.stations[route.terminalIndex ?? route.stations.length-2];
-    const stopUnit=isSeaRoute(route) ? "みなと" : isAirRoute(route) ? "かしょ" : "えき";
+    const stopUnit=isSeaRoute(route) ? "みなと" : isAirRoute(route) || isRoadRoute(route) ? "かしょ" : "えき";
     document.getElementById("trip-summary").textContent = `${routeLabel()}　${stationNamesForRoute(route).length}${stopUnit}・${(route.loopKm || terminal.km-route.startKm).toFixed(1)}km`;
   }
 
@@ -2787,7 +2865,7 @@
     routeSelectPage.classList.add('hidden');trainSelectPage.classList.remove('hidden');selectScreen.classList.add('selecting-train');
     document.getElementById('all-routes').replaceChildren();document.getElementById('recent-routes').replaceChildren();
     vehicleSelectTitle.textContent=couplingPickerOpen?'つなげる でんしゃを えらぼう'
-      :isAirRoute()?'どの そらの のりものに のる？':isSeaRoute()?'どの ふねに のる？':'どの でんしゃに のる？';
+      :isAirRoute()?'どの そらの のりものに のる？':isSeaRoute()?'どの ふねに のる？':isRoadRoute()?'どの くるまに のる？':'どの でんしゃに のる？';
     trainSearch.value='';trainFilter.value='all';trainPrefecture.value='';
     document.querySelector('.trip-settings').classList.toggle('hidden',couplingPickerOpen);
     btnBackToRoutes.textContent=couplingPickerOpen?'✓ とじる':'← もどる';
@@ -3093,7 +3171,7 @@
   });
   btnDriver.addEventListener("click", () => {
     ensureAudio();
-    const calls = isAirRoute() ? PILOT_CALLS : isSeaRoute() ? CAPTAIN_CALLS : DRIVER_CALLS;
+    const calls = isAirRoute() ? PILOT_CALLS : isSeaRoute() ? CAPTAIN_CALLS : isRoadRoute() ? ["シートベルトをしめて、しゅっぱつしましょう", "あんぜんうんてんで、すすみます", "まもなく、もくてきちです"] : DRIVER_CALLS;
     const call = calls[driverCallIndex % calls.length];
     driverCallIndex++;
     showPlayBanner(`${isAirRoute() ? "👩‍✈️" : isSeaRoute() ? "⚓" : "🧑‍✈️"} ${call}`);
@@ -3248,7 +3326,7 @@
     if (isDebug) canvas.dataset.viewMode = mapMode;
     if (!announce) return;
     const message = mapMode === "follow"
-      ? (isAirRoute() ? "✈️ うえから ひこうきを みてみよう！" : isSeaRoute() ? "⛴️ うえから ふねを みてみよう！" : "🚃 うえから へんせいを みてみよう！")
+      ? (isAirRoute() ? "✈️ うえから ひこうきを みてみよう！" : isSeaRoute() ? "⛴️ うえから ふねを みてみよう！" : isRoadRoute() ? "🚗 うえから くるまを みてみよう！" : "🚃 うえから へんせいを みてみよう！")
       : mapMode === "overview" ? "🗺️ ぜんたいちず！" : "🌆 よこから！";
     showPlayBanner(message, 2200);
   }
@@ -3431,9 +3509,12 @@
     let km = rawKm;
     if (map.loopKm) km = ((km % map.loopKm) + map.loopKm) % map.loopKm;
     const points = map.points;
-    let nextIndex = points.findIndex((point) => point.km >= km);
-    if (nextIndex < 0) nextIndex = points.length - 1;
-    else if (nextIndex === 0) nextIndex = 1;
+    // Road curves have many vertices; find the segment without scanning them every frame.
+    let nextIndex=1,last=points.length-1;
+    while(nextIndex<last) {
+      const middle=(nextIndex+last)>>1;
+      if(points[middle].km<km)nextIndex=middle+1;else last=middle;
+    }
     const previous = points[nextIndex - 1];
     const next = points[nextIndex];
     const progress = (km - previous.km) / Math.max(next.km - previous.km, 0.001);
@@ -3719,7 +3800,7 @@
     for (const mapKey of MAP_ROUTES_BY_KIND.rail) {
       const map = ROUTE_MAPS[mapKey];
       // 空路・海路の沿線に街ブロックを置かない（太平洋全体図で重くなる原因になる）。
-      if (map.kind === "air" || map.kind === "sea") continue;
+      if (map.kind === "air" || map.kind === "sea" || map.kind === "road") continue;
       const stepKm = map.endKm > 200 ? Math.max(12, map.endKm / 35) : map.endKm > 100 ? 10 : 1.8;
       const position = {};
       for (let km = 0; km <= map.endKm; km += stepKm) {
@@ -4184,7 +4265,7 @@
     ctx.lineWidth = Math.max(1, dotRadius * 0.45);
     let drawn = 0;
     for (const {map} of candidates) {
-      const nonRail = map.kind === "air" || map.kind === "sea";
+      const nonRail = map.kind === "air" || map.kind === "sea" || map.kind === "road";
       const spacingPx = map.meanStationSpanMeters * scene.scale;
       if (!nonRail && spacingPx < dotRadius * 1.5) continue;
       const onlyInterchange = !nonRail && spacingPx < dotRadius * 4;
@@ -4227,7 +4308,7 @@
     // 乗換駅を先に全路線ぶん置いてから、それ以外を置く。
     for (let pass = 0; pass < 2; pass++) {
       for (const {mapKey,map} of relatedRouteCandidates) {
-        const nonRail = map.kind === "air" || map.kind === "sea";
+        const nonRail = map.kind === "air" || map.kind === "sea" || map.kind === "road";
         for (const point of map.points) {
           if (nonRail && !map.stopNames?.has(point.name)) continue;
           const interchange = MAP_INTERCHANGE_STATIONS.has(point.name);
@@ -4280,7 +4361,7 @@
   }
 
   function drawMapAirports(scene, map) {
-    if (!isNonRailRoute() || map.points.length < 2) return;
+    if (!isAirRoute() || map.points.length < 2) return;
     const endpointIndexes = [0, map.points.length - 1];
     ctx.save();
     for (const index of endpointIndexes) {
@@ -4333,7 +4414,7 @@
     ctx.stroke();
     ctx.strokeStyle = map.color;
     ctx.lineWidth = routeWidth;
-    ctx.setLineDash(isNonRailRoute() ? [routeWidth * 3, routeWidth * 1.8] : []);
+    ctx.setLineDash(isAirRoute() || isSeaRoute() ? [routeWidth * 3, routeWidth * 1.8] : []);
     drawMapGeoPathCulled(scene, map.coords);
     ctx.stroke();
     ctx.setLineDash([]);
@@ -4493,6 +4574,11 @@
 
   function drawYamanoteFollowTrain(scene) {
     const count = scene.carPositions.length;
+    if(isRoadRoute()) {
+      const p=scene.carPositions[0];
+      drawMapRoadVehicle(scene.screenCenterX+(p.worldX-scene.centerWorldX)*scene.scale,scene.screenCenterY+(p.worldY-scene.centerWorldY)*scene.scale,p.angle,Math.max(20,Math.min(60,10*scene.scale)));
+      return;
+    }
     if (train.kind === "airplane" || train.kind === "ferry") {
       const position = scene.carPositions[0];
       const x = scene.screenCenterX + (position.worldX - scene.centerWorldX) * scene.scale;
@@ -4560,6 +4646,7 @@
 
   function drawYamanoteOverviewMarker(scene, labelSize, position) {
     const point = mapScenePoint(scene, position.worldX, position.worldY, yamanoteTrainScreenPoint);
+    if(isRoadRoute()){drawMapRoadVehicle(point.x,point.y,position.angle,labelSize*1.8);return point;}
     if (train.kind === "airplane") {
       drawMapAirplaneShape(point.x, point.y, position.angle, labelSize * 2.2);
       return point;
@@ -4801,7 +4888,7 @@
       ? `　${starBoostType.icon} ×${starBoostMultiplier} ${Math.ceil(starBoostTime)}びょう`
       : "";
     const roundedKm = Math.round(position.km * 10) / 10;
-    const vehicleText = isAirRoute() ? "✈️ ひこうちゅう" : isSeaRoute() ? "⛴️ こうかいちゅう" : `🚃 ${totalCarCount()}りょう`;
+    const vehicleText = isAirRoute() ? "✈️ ひこうちゅう" : isSeaRoute() ? "⛴️ こうかいちゅう" : isRoadRoute() ? "🚗 ドライブ" : `🚃 ${totalCarCount()}りょう`;
     const badgeText = scene.portrait
       ? `${modeText}　${roundedKm}km　${vehicleText}　🧭↑${boostText}`
       : `${modeText}　${roundedKm} km　${vehicleText}　🧭 きた↑${boostText}`;
@@ -6677,6 +6764,8 @@ function drawAirports() {
           }
           drawFerry();
           if (trainFacesLeft()) ctx.restore();
+        } else if (isRoadRoute()) {
+          drawRoadScene();
         } else {
           drawTunnel();
           profiled("scenery:track", drawTrack);

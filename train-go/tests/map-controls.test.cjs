@@ -44,13 +44,15 @@ test('station names that do not fit above or below get another chance without re
 });
 
 test('disabled transport categories never enter the route candidate list',()=>{
-  const s=vm.createContext({MAP_ROUTE_DRAW_ORDER:['rail','air','sea','ref'],
-    ROUTE_MAPS:{rail:{},air:{kind:'air'},sea:{kind:'sea'},ref:{kind:'sea'}},
-    mapLayerVisibility:{rail:true,air:false,sea:false}});
+  const s=vm.createContext({MAP_ROUTE_DRAW_ORDER:['rail','air','sea','ref','road'],
+    ROUTE_MAPS:{rail:{},air:{kind:'air'},sea:{kind:'sea'},ref:{kind:'sea'},road:{kind:'road'}},
+    mapLayerVisibility:{rail:true,air:false,sea:false,road:false}});
   vm.runInContext(between('  const MAP_ROUTES_BY_KIND =','  const MAP_WATER_TILES ='),s);
   assert.deepEqual(Array.from(s.visibleMapRouteKeys()),['rail']);
   s.mapLayerVisibility.sea=true;
   assert.deepEqual(Array.from(s.visibleMapRouteKeys()),['rail','sea','ref']);
+  s.mapLayerVisibility={rail:false,air:false,sea:false,road:true};
+  assert.deepEqual(Array.from(s.visibleMapRouteKeys()),['road']);
 });
 
 test('unmapped ocean and holes cut for detail tiles are not painted as land',()=>{

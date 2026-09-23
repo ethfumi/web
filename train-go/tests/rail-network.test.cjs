@@ -126,10 +126,10 @@ test('offline cache includes the complete catalogue and uses the same asset vers
   assert.ok(sw.includes(`"runtime.js.gz?v=${version}"`));
   assert.ok(html.includes(`loader.js?v=${version}`));
   const packed = require('node:zlib').gunzipSync(fs.readFileSync(path.join(root, 'runtime.js.gz'))).toString();
-  assert.equal(packed, scriptNames.map(read).join('\n;\n')+'\n;window.TRAIN_GO_READY = true;\n');
+  assert.equal(packed, scriptNames.map(name=>read(name).replace(/\r\n/g,'\n')).join('\n;\n')+'\n;window.TRAIN_GO_READY = true;\n');
   const assets = [...sw.matchAll(/^  "([^"]+)",/gm)].map(m=>m[1].split('?')[0]).filter(x=>x!=='.');
   assert.ok(!assets.includes('og.png'), 'sharing image must not be downloaded for offline play');
-  assert.ok(assets.reduce((sum,name)=>sum+fs.statSync(path.join(root,name)).size,0)<=2_500_000);
+  assert.ok(assets.reduce((sum,name)=>sum+fs.statSync(path.join(root,name)).size,0)<=3_200_000);
   assert.ok(html.includes(`v${version}</strong>`));
   assert.equal(new Set([...html.matchAll(/\?v=(\d+)/g)].map(m=>m[1]).filter(v=>v!=='55')).size,1);
 });

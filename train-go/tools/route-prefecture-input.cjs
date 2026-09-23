@@ -7,6 +7,6 @@ const data=scope.window.TRAIN_GO_ROUTE_DATA,maps=scope.window.TRAIN_GO_MAP_DATA.
 const result={};
 for(const [key,route] of Object.entries(data.routes)) {
   const stops=new Set([route.start,...route.stations.map(s=>s.name)]);
-  result[key]=(maps[key]?.points||[]).filter(p=>stops.has(p.name)).map(p=>[p.lon,p.lat]);
+  result[key]=(maps[key]?.points||[]).filter((p,i)=>route.kind==='road' ? i%5===0||i===maps[key].points.length-1 : stops.has(p.name)).map(p=>[p.lon,p.lat]);
 }
 process.stdout.write(JSON.stringify(result));
