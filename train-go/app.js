@@ -614,6 +614,7 @@
   let runningNoiseFilter = null;
   let runningNoiseBuffer = null;
   let runningGain = null;
+  let runningFireBell = null;
   function ensureAudio() {
     if (!audioCtx) {
       const AC = window.AudioContext || window.webkitAudioContext;
@@ -767,6 +768,7 @@
     runningOsc.connect(runningGain);
     runningRailOsc.connect(runningGain);
     runningGain.connect(audioCtx.destination);
+    if(isRoadRoute()&&vehicleEffects.profiles[train.shape]?.siren==='fire')runningFireBell=vehicleEffects.createFireBell(audioCtx,runningGain);
     runningOsc.start(t);
     runningRailOsc.start(t);
   }
@@ -775,6 +777,7 @@
     if (!audioCtx || !runningOsc || !runningRailOsc || !runningGain) return;
     const t = audioCtx.currentTime;
     if(isRoadRoute()||train.kind==='maintenance') {
+      runningFireBell?.update(t,state==='running');
       const [primary,secondary,volume]=vehicleEffects.sound(train.shape,t,Math.min(displaySpeed(speed),80));
       runningOsc.frequency.setTargetAtTime(primary,t,.08);
       runningRailOsc.frequency.setTargetAtTime(secondary,t,.1);
@@ -805,6 +808,7 @@
 
   function stopRunningSound() {
     if (!audioCtx || !runningOsc || !runningGain) return;
+    runningFireBell?.stop(audioCtx.currentTime);runningFireBell=null;
     const sources = [runningOsc, runningRailOsc, runningNoiseSource].filter(Boolean);
     const gain = runningGain;
     runningOsc = null;
