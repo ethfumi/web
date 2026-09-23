@@ -36,6 +36,7 @@ def main():
         (ROOT/'rail-shape-data.js').write_text(template.replace('/* RAIL_SHAPES */',json.dumps(payload,separators=(',',':'))),encoding='utf8',newline='\n')
         print('Regenerated rail shapes from the offline snapshot');return
     supplements={(v['route'],v['segment']):v for v in json.loads((ROOT/'data/rail-shape-supplements.json').read_text('utf8'))}
+    station_overrides=json.loads((ROOT/'data/rail-shape-station-overrides.json').read_text('utf8'))
     inputs=json.loads(subprocess.check_output(['node',str(ROOT/'tools/rail-shape-input.cjs')]))
     sections=json.loads((args.source/'N02-25_RailroadSection.geojson').read_text('utf8'))['features']
     stations=json.loads((args.source/'N02-25_Station.geojson').read_text('utf8'))['features']
@@ -87,10 +88,10 @@ def main():
         offset=edge.project(point);snapped=edge.interpolate(offset)
         record=(gid,eid,offset,(snapped.x,snapped.y),p['N02_005'])
         for name in {normalize(p['N02_005']),reading(p['N02_005'])}:station_index[name].append(record)
-    def candidates(point,shinkansen):
+    def candidates(point,shinkansen,hint=None):
         names={normalize(point[4]),normalize(point[0]),reading(point[4])}
         records={ (r[0],r[1]):r for name in names for r in station_index.get(name,[]) }
-        position=xy(point[2:4]);result=[]
+        position=xy(hint or point[2:4]);result=[]
         for record in records.values():
             dist=math.dist(position,record[3])
             if dist>8000:continue
@@ -145,7 +146,8 @@ def main():
         return -bank_index[canonical] if reverse else bank_index[canonical]
     for key,route in inputs.items():
         points=route['points'];shinkansen='新幹線' in route['title'] and key not in {'akita','yamagata','railLine1006'}
-        choices=[candidates(point,shinkansen) for point in points]
+        hints=station_overrides.get(key,{})
+        choices=[candidates(point,shinkansen,hints.get(point[0],{}).get('position')) for point in points]
         counts=collections.Counter(g for records in choices for g in {r[1][0] for r in records})
         allowed=frozenset(g for g,count in counts.items() if count>=max(1,max(counts.values(),default=0)*.12))
         # New stations can postdate the shape snapshot; project their existing

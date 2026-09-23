@@ -48,6 +48,16 @@ test('shared segment joins stay within the map simplification tolerance',()=>{
   }
 });
 
+test('Osaka Higashi uses the underground Osaka platforms and approaches Shin-Osaka without backtracking',()=>{
+  const points=maps.railLine11641.points;
+  const end=points.findIndex(p=>p.name==='しんおおさか'),leg=points.slice(0,end+1);
+  assert.ok(leg[0].lon>135.4925&&leg[0].lon<135.4938,'Umekita underground Osaka platforms');
+  const approach=leg.filter(p=>p.lat>34.725);
+  assert.ok(approach.length>=2);
+  for(let i=1;i<approach.length;i++)assert.ok(approach[i].lat>=approach[i-1].lat,'no artificial southbound reversal before Shin-Osaka');
+  assert.equal(points[end].km,before.railLine11641.points.find(p=>p.name==='しんおおさか').km);
+});
+
 test('curve vertices never turn into extra station circles',()=>{
   const app=read('app.js'),start=app.indexOf('  function drawRelatedRouteStations('),end=app.indexOf('  // 周辺路線の駅名。',start);
   let circles=0;
