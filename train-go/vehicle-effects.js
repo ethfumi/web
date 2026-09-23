@@ -1,5 +1,10 @@
 (() => {
   const profiles={
+    stairs:{light:'#ffb52e',calls:['ひこうきのいりぐちへ、かいだんをはこびます','たらっぷしゃ、ゆっくりすすみます']},
+    airportTug:{light:'#ffb52e',calls:['ひこうきをおす、じゅんびよし！','まわりをかくにん。ゆっくりすすみます']},
+    highLoader:{light:'#ffb52e',calls:['にもつを、ひこうきのたかさへあげます','にもつのこてい、よし！']},
+    beltLoader:{light:'#ffb52e',calls:['ベルトでにもつを、はこびます','スーツケースを、たいせつにはこびます']},
+    airportFuel:{light:'#ffb52e',calls:['ひこうきのねんりょうを、はこびます','ホースのかくにん、よし！']},
     police:{light:'#ff463f',siren:'police',calls:['パトロールにしゅっぱつします','パトカーがとおります。みちをあけてください','こうさてん、あんぜんかくにん！']},
     ambulance:{light:'#ff463f',siren:'ambulance',calls:['きゅうきゅうしゃがとおります。みちをあけてください','びょういんへむかいます','あんぜんをかくにんして、すすみます']},
     fireEngine:{light:'#ff463f',siren:'fire',calls:['しょうぼうしゃ、しゅつどうします','しょうぼうしゃがとおります。みちをあけてください','げんばにむかいます。あんぜんかくにん！']},
