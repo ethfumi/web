@@ -28,6 +28,7 @@
   const {trains: TRAINS, routes: ROUTES} = window.TRAIN_GO_ROUTE_DATA;
   const tripOptions = window.TRAIN_GO_TRIP_OPTIONS;
   const vehicleEffects = window.TRAIN_GO_VEHICLE_EFFECTS;
+  const roadDirectionLabel = document.getElementById('road-direction');
   let choiceStorage;
   try { choiceStorage = window.localStorage; } catch { choiceStorage = {getItem:()=>null,setItem:()=>{}}; }
   const choices = tripOptions.createPreferences(choiceStorage, ROUTES, TRAINS);
@@ -1158,6 +1159,11 @@
     distanceValue.textContent = String(Math.floor(distance / PIXELS_PER_METER));
     distanceKmValue.textContent = `${(Math.floor(distance / PIXELS_PER_METER) / 1000).toFixed(1)} km`;
     const nextRemaining = nextStationRemainingMeters();
+    if(isRoadRoute()) {
+      const text=`このさき：${stationLabel(nextStationName)}\nあと ${remainingDistanceKm(nextRemaining)}`;
+      if(roadDirectionLabel.textContent!==text)roadDirectionLabel.textContent=text;
+      roadDirectionLabel.hidden=mapMode!=='scenery';
+    }
     const terminalRemaining = terminalRemainingMeters();
     nextStationDistanceLabel.textContent = isNonRailRoute()
       ? `とうちゃく ${stationLabel(nextStationName) || "くうこう"}まで`
@@ -2701,10 +2707,10 @@
   function drawMapRoadConvoy(scene) {
     const size=Math.max(12,Math.min(60,10*scene.scale));
     const lead=yamanoteMapPosition(),direction=routeDirection;
-    const lanes=Math.min(4,Math.max(2,cars)),previous=Array(lanes).fill(null);
+    const lanes=2,previous=Array(lanes).fill(null);
     for(let i=0;i<cars;i++) {
       const lane=i%lanes,row=Math.floor(i/lanes);
-      const p=yamanoteMapPositionAt(lead.km-direction*row*.025,{});
+      const p=yamanoteMapPositionAt(lead.km-direction*(row*.025+lane*.008),{});
       let x=scene.screenCenterX+(p.worldX-scene.centerWorldX)*scene.scale;
       let y=scene.screenCenterY+(p.worldY-scene.centerWorldY)*scene.scale;
       // Keep markers separate when zoomed out or waiting together at an endpoint.
@@ -2720,26 +2726,46 @@
   function drawRoadScene() {
     const y=groundY(),left=-W/viewScale,right=W*2/viewScale+W;
     const layout=window.TRAIN_GO_ROAD_LAYOUT.layout(cars,W,H),{lanes,spacing}=layout;
-    const roadTop=y-(lanes-1)*spacing-12;
+    const roadTop=y;
     ctx.fillStyle=timeOfDay==='night'?'#37414c':'#687783';ctx.fillRect(left,roadTop,right-left,H/viewScale);
     ctx.fillStyle='#e8e9d5';ctx.fillRect(left,roadTop+3,right-left,4);
     ctx.fillStyle='#f5ecd2';const offset=visualDistance%180;
-    for(let lane=0;lane<lanes;lane++)for(let x=left-offset;x<right;x+=180)ctx.fillRect(x,y-lane*spacing+spacing*.45,90,4);
+    for(let x=left-offset;x<right;x+=180)ctx.fillRect(x,y+spacing*.65,90,4);
+    drawRoadsideSigns(y);
     const width=layout.carWidth,anchor=W*NOSE_R;
-    const nose=Math.min(anchor+(W*.97-anchor)/viewScale,Math.max(anchor,layout.extent+W*.03));
+    const nose=anchor;
     const x=nose-width/2;
     ctx.save();
     if(trainFacesLeft()){const anchor=W*NOSE_R;const center=anchor+(W*.5-anchor)/Math.max(viewScale,.001);ctx.translate(center*2,0);ctx.scale(-1,1);}
-    for(let lane=lanes-1;lane>=0;lane--)for(let i=lane;i<cars;i+=lanes)
-      drawRoadVehicleOn(ctx,TRAINS[carTypes[i]],x-Math.floor(i/lanes)*(width+layout.gap),y-lane*spacing-2,width,true);
+    for(let lane=0;lane<lanes;lane++)for(let i=lane;i<cars;i+=lanes)
+      drawRoadVehicleOn(ctx,TRAINS[carTypes[i]],x-layout.offset(i),y+lane*spacing-2,width,true);
     ctx.restore();
-    const signX=W*.78,signY=y-H*.25;
-    ctx.fillStyle='#a2abb1';ctx.fillRect(signX-3,signY,6,y-signY);
-    ctx.font=`bold ${Math.max(13,Math.min(24,W*.024))}px sans-serif`;ctx.textAlign='center';
-    const label=stationLabel(nextStationName),signWidth=Math.max(110,ctx.measureText(label).width+32);
-    ctx.fillStyle='#34705e';ctx.fillRect(signX-signWidth/2,signY-36,signWidth,42);
-    ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.strokeRect(signX-signWidth/2+4,signY-32,signWidth-8,34);
-    ctx.fillStyle='#fff';ctx.fillText(label,signX,signY-7);
+  }
+
+  function drawRoadsideSigns(y) {
+    const interval=1800,first=Math.floor(visualDistance/interval)-2;
+    const range=viewRange();
+    for(let i=first;i<first+8;i++) {
+      const x=W*.8+i*interval-visualDistance;
+      if(x<range.x0-50||x>range.x1+50)continue;
+      const kind=((i%3)+3)%3,top=y-145;
+      ctx.save();ctx.fillStyle='#9aa7aa';ctx.fillRect(x-3,top,6,145);
+      ctx.translate(x,top);ctx.lineWidth=3;
+      if(kind===0) {
+        ctx.save();ctx.rotate(Math.PI/4);ctx.fillStyle='#f8d34a';ctx.strokeStyle='#46505a';ctx.fillRect(-24,-24,48,48);ctx.strokeRect(-24,-24,48,48);ctx.restore();
+        ctx.strokeStyle='#394653';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(0,20);ctx.lineTo(0,5);ctx.quadraticCurveTo(0,-9,16,-9);ctx.stroke();
+        ctx.fillStyle='#394653';ctx.beginPath();ctx.moveTo(11,-17);ctx.lineTo(23,-9);ctx.lineTo(11,-1);ctx.fill();
+      } else {
+        ctx.fillStyle='#427da8';ctx.strokeStyle='#fff';ctx.fillRect(-29,-30,58,58);ctx.strokeRect(-26,-27,52,52);
+        if(kind===1){ctx.font='bold 40px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff';ctx.fillText('P',0,0);}
+        else {
+          ctx.fillStyle='#fff';ctx.beginPath();ctx.moveTo(0,-24);ctx.lineTo(-23,20);ctx.lineTo(23,20);ctx.closePath();ctx.fill();
+          ctx.strokeStyle='#427da8';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,-9,3,0,Math.PI*2);ctx.stroke();
+          ctx.beginPath();ctx.moveTo(0,-5);ctx.lineTo(-3,5);ctx.lineTo(-11,13);ctx.moveTo(-3,5);ctx.lineTo(7,13);ctx.moveTo(-1,-2);ctx.lineTo(8,4);ctx.stroke();
+        }
+      }
+      ctx.restore();
+    }
   }
 
   function createVehiclePreview(type) {
