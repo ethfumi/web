@@ -27,6 +27,7 @@
 
   const {trains: TRAINS, routes: ROUTES} = window.TRAIN_GO_ROUTE_DATA;
   const tripOptions = window.TRAIN_GO_TRIP_OPTIONS;
+  const vehicleEffects = window.TRAIN_GO_VEHICLE_EFFECTS;
   let choiceStorage;
   try { choiceStorage = window.localStorage; } catch { choiceStorage = {getItem:()=>null,setItem:()=>{}}; }
   const choices = tripOptions.createPreferences(choiceStorage, ROUTES, TRAINS);
@@ -772,6 +773,13 @@
   function updateRunningSound() {
     if (!audioCtx || !runningOsc || !runningRailOsc || !runningGain) return;
     const t = audioCtx.currentTime;
+    if(isRoadRoute()||train.kind==='maintenance') {
+      const [primary,secondary,volume]=vehicleEffects.sound(train.shape,t,Math.min(displaySpeed(speed),80));
+      runningOsc.frequency.setTargetAtTime(primary,t,.08);
+      runningRailOsc.frequency.setTargetAtTime(secondary,t,.1);
+      runningGain.gain.setTargetAtTime(state==='running'?volume:.001,t,.14);
+      return;
+    }
     if (isAirRoute()) {
       const soundSpeedKmh = Math.min(displaySpeed(speed), 1400);
       runningOsc.frequency.setTargetAtTime(48 + soundSpeedKmh * 0.018, t, 0.2);
@@ -2502,7 +2510,7 @@
     return svg;
   }
 
-  function drawWorkVehicleOn(g,type,x,y,width) {
+  function drawWorkVehicleOn(g,type,x,y,width,animated=false) {
     g.save();g.translate(x,y);g.scale(width/180,width/180);
     g.lineJoin='round';g.lineCap='round';g.lineWidth=2;g.strokeStyle=type.edge;
     const shape=type.shape;
@@ -2599,10 +2607,18 @@
       g.fillStyle='#ffeaa2';g.fillRect(76,-24,7,6);g.fillStyle='#e34d48';g.fillRect(-81,-22,4,7);
       for(const x of [-55,55]){circle(x,-10,11,'#2c3540');circle(x,-10,5,'#bdc8cf');}
     }
+    const beacon=vehicleEffects.profiles[type.shape]?.light;
+    if(beacon){
+      g.save();g.globalAlpha=animated?vehicleEffects.lightAlpha(performance.now()/1000):.8;
+      g.fillStyle=beacon;g.shadowColor=beacon;g.shadowBlur=animated?10:0;
+      const bx=type.shape==='police'?-8:type.kind==='maintenance'?58:38;
+      const by=type.shape==='ambulance'?-63:type.shape==='police'?-58:type.kind==='maintenance'?-61:-54;
+      g.fillRect(bx,by,16,6);g.restore();
+    }
     g.restore();
   }
-  function drawRoadVehicleOn(g,type,x,y,width) {
-    if(type.workVehicle){drawWorkVehicleOn(g,type,x,y,width);return;}
+  function drawRoadVehicleOn(g,type,x,y,width,animated=false) {
+    if(type.workVehicle){drawWorkVehicleOn(g,type,x,y,width,animated);return;}
     const bus=type.shape==='bus',truck=type.shape==='truck';
     const tall=bus||truck||['kei','suv','minivan'].includes(type.shape);
     const roofLeft=type.shape==='minivan'?-63:type.shape==='kei'?-55:-39;
@@ -2658,6 +2674,8 @@
         ctx.fillStyle=type.shape==='dumpTruck'?'#936c37':'#d4e6d1';ctx.fillRect(-.43,-.15,.48,.3);
         ctx.strokeStyle=type.edge;ctx.strokeRect(-.43,-.15,.48,.3);
       }
+      const beacon=vehicleEffects.profiles[type.shape]?.light;
+      if(beacon){ctx.globalAlpha=vehicleEffects.lightAlpha(performance.now()/1000);ctx.fillStyle=beacon;ctx.shadowColor=beacon;ctx.shadowBlur=8;ctx.fillRect(.07,-.2,.09,.4);}
     }
     ctx.restore();
   }
@@ -2686,7 +2704,7 @@
     const width=Math.min(330,W*.4),x=W*NOSE_R-width/2;
     ctx.save();
     if(trainFacesLeft()){const anchor=W*NOSE_R;const center=anchor+(W*.5-anchor)/Math.max(viewScale,.001);ctx.translate(center*2,0);ctx.scale(-1,1);}
-    for(let i=cars-1;i>=0;i--)drawRoadVehicleOn(ctx,TRAINS[carTypes[i]],x-i*(width+60),y-2,width);
+    for(let i=cars-1;i>=0;i--)drawRoadVehicleOn(ctx,TRAINS[carTypes[i]],x-i*(width+60),y-2,width,true);
     ctx.restore();
     const signX=W*.78,signY=y-H*.25;
     ctx.fillStyle='#a2abb1';ctx.fillRect(signX-3,signY,6,y-signY);
@@ -3338,7 +3356,7 @@
   });
   btnDriver.addEventListener("click", () => {
     ensureAudio();
-    const calls = isAirRoute() ? PILOT_CALLS : isSeaRoute() ? CAPTAIN_CALLS : isRoadRoute() ? ["シートベルトをしめて、しゅっぱつしましょう", "あんぜんうんてんで、すすみます", "まもなく、もくてきちです"] : DRIVER_CALLS;
+    const calls = vehicleEffects.profiles[train.shape]?.calls || (isAirRoute() ? PILOT_CALLS : isSeaRoute() ? CAPTAIN_CALLS : isRoadRoute() ? vehicleEffects.normalCalls : DRIVER_CALLS);
     const call = calls[driverCallIndex % calls.length];
     driverCallIndex++;
     showPlayBanner(`${isAirRoute() ? "👩‍✈️" : isSeaRoute() ? "⚓" : "🧑‍✈️"} ${call}`);
@@ -6361,6 +6379,7 @@ function drawAirports() {
         index: i,
         wheelY: y,
         wheelSpin: wheelAngle,
+        animated: true,
         night: timeOfDay === "night",
       });
 
@@ -6373,7 +6392,7 @@ function drawAirports() {
   // 1両分の車体。走行画面と「どの でんしゃに のる？」のプレビューが同じ絵になるよう、
   // 描画先の context を引数で受け取り、両方からこの関数を呼ぶ。
   function drawRailCarOn(g, carTrain, profile, left, top, bodyW, bodyH, opts) {
-    if(carTrain.kind==='maintenance') {drawWorkVehicleOn(g,carTrain,left+bodyW/2,opts?.wheelY??top+bodyH+10,bodyW);return;}
+    if(carTrain.kind==='maintenance') {drawWorkVehicleOn(g,carTrain,left+bodyW/2,opts?.wheelY??top+bodyH+10,bodyW,opts?.animated);return;}
     const {isHead = false, isTail = false, index = 0,
       wheelY = null, wheelSpin = 0, night = false} = opts || {};
     const nose = carNose(carTrain);

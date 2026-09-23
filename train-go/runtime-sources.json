@@ -10,6 +10,7 @@
   "all-ferry-route-data.js",
   "road-route-data.js",
   "work-rail-vehicles.js",
+  "vehicle-effects.js",
   "international-route-data.js",
   "fare-data.js",
   "map-data.js",
