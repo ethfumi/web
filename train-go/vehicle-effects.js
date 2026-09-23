@@ -29,5 +29,10 @@
   }
   // A soft 1.5 Hz pulse, limited to small beacons rather than a screen flash.
   const lightAlpha=seconds=>.35+.65*(.5+.5*Math.sin(seconds*Math.PI*3));
-  window.TRAIN_GO_VEHICLE_EFFECTS={profiles,normalCalls,sound,lightAlpha};
+  function lightRect(shape) {
+    return ({police:[-12,-58,29,6],ambulance:[21,-63,23,5],fireEngine:[40,-54,20,5],
+      snowplow:[38,-55,20,5],airportTug:[10,-57,16,6],
+      tamper:[58,-61,16,6],grinder:[58,-61,16,6],ballast:[58,-61,16,6]})[shape] || [40,-54,20,5];
+  }
+  window.TRAIN_GO_VEHICLE_EFFECTS={profiles,normalCalls,sound,lightAlpha,lightRect};
 })();
