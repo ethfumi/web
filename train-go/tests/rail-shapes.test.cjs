@@ -11,7 +11,7 @@ for(const file of JSON.parse(read('runtime-sources.json')).filter(f=>f!=='app.js
 const maps=scope.window.TRAIN_GO_MAP_DATA.maps;
 test('all existing rail courses receive curves without changing station identities, game distances or other modes',()=>{
   const coverage=JSON.parse(read('data/rail-shape-coverage.json'));
-  assert.equal(coverage.matched,coverage.total);assert.equal(coverage.total,10635);
+  assert.equal(coverage.matched,coverage.total);assert.equal(coverage.total,11587);
   assert.equal(JSON.stringify(scope.window.TRAIN_GO_ROUTE_DATA.routes),routesBefore);
   let count=0;
   for(const [key,map] of Object.entries(maps)) {
@@ -25,7 +25,7 @@ test('all existing rail courses receive curves without changing station identiti
     }
     if(map.loopKm){assert.equal(map.points[0].lon,map.points.at(-1).lon);assert.equal(map.points[0].lat,map.points.at(-1).lat);}
   }
-  assert.equal(count,655);
+  assert.equal(count,681);
 });
 test('Chuo bends through Yoyogi and Shinanomachi, and the Seto crossing follows the bridge corridor',()=>{
   const near=(key,lon,lat,limit=.001)=>maps[key].points.some(p=>Math.hypot((p.lon-lon)*.8,p.lat-lat)<limit);

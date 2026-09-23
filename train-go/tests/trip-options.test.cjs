@@ -68,13 +68,31 @@ test('Keio destination is deterministic and through courses appear on their memb
   const s=vm.createContext({selectedRouteKey:'keio',ROUTES:data.routes,URLSearchParams,location:{search:''},Math:{random:()=>{throw Error('random destination');}}});
   vm.runInContext(functionSource('routeForGameStart','stationNamesForRoute'),s);
   assert.equal(s.routeForGameStart(),data.routes.keio);
-  assert.equal(data.throughRoutes.length,9);
+  assert.equal(data.throughRoutes.length,35);
   assert.ok(options.courseChoices(data,'uenoTokyo').includes('throughNumazuUtsunomiya'));
   assert.ok(options.courseChoices(data,'tobuSkytree').includes('throughChuorinkanMinamikurihashi'));
   assert.ok(data.maps.throughNumazuUtsunomiya.endKm>200);
   for(const course of data.throughRoutes){
     const points=data.maps[course.key].points.filter(p=>p.name);
     for(let i=1;i<points.length;i++)assert.notEqual(points[i].name,points[i-1].name,course.key);
+  }
+});
+
+test('Nishifunabashi through choices preserve the two Keiyo branches and new services are discoverable',()=>{
+  const stationNames=key=>[data.routes[key].start,...data.routes[key].stations.slice(0,-1).map(s=>s.name)];
+  assert.deepEqual(Array.from(stationNames('throughNishifunabashiMakuhari')),
+    ['にしふなばし','みなみふなばし','しんならしの','まくはりとよすな','かいひんまくはり']);
+  const tokyo=stationNames('throughFuchuTokyo'),west=tokyo.indexOf('にしふなばし');
+  assert.equal(tokyo[west+1],'いちかわしおはま');
+  assert.equal(tokyo.includes('ふたまたしんまち'),false);
+  assert.equal(tokyo.includes('みなみふなばし'),false);
+  for(const key of ['musashino','keiyo'])assert.ok(options.courseChoices(data,key).includes('throughNishifunabashiMakuhari'));
+  for(const key of ['throughMitakaToyoKatsutadai','throughHonatsugiToride','throughEbinaShinjuku','throughMinohNakamozu','throughInuyamaToyotashi','throughFukuokaNishikaratsu']) {
+    const course=data.throughRoutes.find(c=>c.key===key);assert.ok(course,key);
+    assert.ok(data.trains[course.trainKey],key);
+    for(const member of course.members)if(data.routes[member])assert.ok(options.courseChoices(data,member).includes(key),`${member}: ${key}`);
+    const start=options.initialState(data.routes[key],true);
+    assert.equal(start.currentStationName,stationNames(key).at(-1));
   }
 });
 
