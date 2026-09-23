@@ -12,6 +12,7 @@
     redShinkansen:'つばめ さくら 800',
     orangeShinkansen:'かもめ N700S',
     purpleShinkansen:'つばさ E3',
+    railTamper:'マルタイ 保線車',railGrinder:'保線車',railBallast:'保線車',
   };
   function matches(text,query) {
     return normalize(query).trim().split(/\s+/).filter(Boolean).every(term=>normalize(text).includes(term));
@@ -32,5 +33,9 @@
     const other=[...new Set([...preferred,...defaults])].filter(key=>key!==initial&&valid(key)).slice(0,9);
     return valid(initial)?[...other,initial]:[];
   }
-  window.TRAIN_GO_CATALOG={normalize,matches,groups,couplingKeys,inPrefecture,TRAIN_SEARCH_ALIASES};
+  function convoyKeys(initial,preferred,defaults,trains) {
+    if(trains[initial]?.kind!=='car')return [];
+    return [...new Set([...preferred,...defaults])].filter(key=>key!==initial&&trains[key]?.kind==='car').slice(0,9).concat(initial);
+  }
+  window.TRAIN_GO_CATALOG={normalize,matches,groups,couplingKeys,convoyKeys,inPrefecture,TRAIN_SEARCH_ALIASES};
 })();

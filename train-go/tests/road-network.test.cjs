@@ -9,7 +9,7 @@ const source=JSON.parse(read('data/road-network.json'));
 test('national roads, Tokyo arterials and road vehicles are selectable offline',()=>{
   assert.equal(source.roads.filter(r=>r[1]==='national').length,459);
   for(const name of ['環七通り','環八通り','山手通り','明治通り','青梅街道'])assert.ok(source.roads.some(r=>r[2].includes(name)),name);
-  assert.equal(data.roadNetwork.vehicleKeys.length,15);
+  assert.equal(data.roadNetwork.vehicleKeys.length,23);
   for(const key of ['carFireEngine','carPolice','carExcavator','carDumpTruck','carAmbulance','carGarbageTruck','carMixerTruck','carCraneTruck']) {
     assert.ok(data.roadNetwork.vehicleKeys.includes(key),key);
     assert.equal(data.trains[key].kind,'car');
@@ -37,8 +37,17 @@ test('cars cannot be coupled to trains, including restored preferences',()=>{
   const catalogue=s.window.TRAIN_GO_CATALOG,options=s.window.TRAIN_GO_TRIP_OPTIONS;
   assert.deepEqual(Array.from(catalogue.couplingKeys('nozomi',data.roadNetwork.vehicleKeys,[],data.trains)),['nozomi']);
   assert.equal(catalogue.couplingKeys('carCompact',[],['nozomi'],data.trains).length,0);
+  assert.deepEqual(Array.from(catalogue.convoyKeys('carPolice',['nozomi','carLadder','carPolice'],['carLadder','carBus'],data.trains)),['carLadder','carBus','carPolice']);
+  assert.deepEqual(Array.from(catalogue.convoyKeys('nozomi',[],['carBus'],data.trains)),[]);
   const prefs=options.createPreferences({getItem:()=>JSON.stringify({coupling:['carBus','nozomi','carTruck']}),setItem:()=>{}},data.routes,data.trains);
   assert.deepEqual(Array.from(prefs.state.coupling),['nozomi']);
+  const convoy=options.createPreferences({getItem:()=>JSON.stringify({convoy:['carLadder','railTamper','carBus']}),setItem:()=>{}},data.routes,data.trains);
+  assert.deepEqual(Array.from(convoy.state.convoy),['carLadder','carBus']);
+  for(const key of data.workRailKeys) {
+    assert.equal(data.trains[key].kind,'maintenance');
+    assert.ok(catalogue.couplingKeys('nozomi',[key],[],data.trains).includes(key));
+    assert.ok(!catalogue.convoyKeys('carPolice',[key],[],data.trains).includes(key));
+  }
   const names=options.createNameResolver(data);
   for(const key of data.roadNetwork.keys){
     assert.ok(!/[一-龯]/.test(names.route(key,'kana')),key);
@@ -56,4 +65,16 @@ test('dense road geometry interpolates forward and reverse positions without a l
     assert.ok(Math.abs(p.worldX-km*100)<1e-7);
     assert.ok(reads<25,`vertex reads: ${reads}`);
   }
+});
+
+test('road companions preserve the first vehicle, reject rail stock and remove from the tail',()=>{
+  const app=read('app.js'),scope=vm.createContext({TRAINS:data.trains,trainKey:'carPolice',cars:1,carTypes:['carPolice'],MAX_CARS:100,
+    isRoadRoute:()=>true,isCoupleableTrainKey:()=>false,pickTrainVariant:k=>k,baseTrainKey:k=>k,
+    say:()=>{},spawnConfetti:()=>{},carWord:n=>`${n}だい`,komachiCoupled:false});
+  vm.runInContext(app.slice(app.indexOf('  function addCar('),app.indexOf('  function spawnConfetti(')),scope);
+  scope.addCar('carLadder');scope.addCar('railTamper');scope.addCar('carSnowplow');
+  assert.deepEqual(Array.from(scope.carTypes),['carPolice','carLadder','carSnowplow']);
+  scope.removeCar();assert.deepEqual(Array.from(scope.carTypes),['carPolice','carLadder']);
+  scope.removeCar();scope.removeCar();assert.deepEqual(Array.from(scope.carTypes),['carPolice']);
+  assert.equal(scope.totalCarCount(),1);
 });

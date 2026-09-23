@@ -18,6 +18,7 @@
       nameMode:saved.nameMode === "kanji" ? "kanji" : "kana",
       routes:validRecent(saved.routes, routes), trains:validRecent(saved.trains, trains),
       coupling:validRecent(saved.coupling,trains).filter(key=>!['airplane','ferry','car'].includes(trains[key].kind)).slice(0,9),
+      convoy:validRecent(saved.convoy,trains).filter(key=>trains[key].kind==='car').slice(0,9),
       reverse:Object.fromEntries(Object.entries(saved.reverse || {}).filter(([key,value]) => Object.hasOwn(routes,key) && typeof value === "boolean")),
     };
     function save() {

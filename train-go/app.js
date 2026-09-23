@@ -66,6 +66,7 @@
 
   // 11両以降は「11りょう」表記でも日本語 TTS が「じゅういちりょう」と読んでくれる
   function carWord(n) {
+    if(isRoadRoute())return `${n}だい`;
     return n <= CAR_COUNT_WORDS.length ? CAR_COUNT_WORDS[n - 1] : `${n}りょう`;
   }
 
@@ -1588,7 +1589,7 @@
     btnStationDoors.classList.add("hidden");
     stationPassengers.classList.add("hidden");
     populateQuickAddButtons();
-    runUi.classList.toggle("hidden", isNonRailRoute());
+    runUi.classList.toggle("hidden", isAirRoute() || isSeaRoute());
     btnDriver.querySelector("span:first-child").textContent = isAirRoute() ? "👩‍✈️" : isSeaRoute() ? "🧑‍✈️" : "🧑‍✈️";
     btnDriver.querySelector("span:last-child").textContent = isAirRoute() ? "パイロット" : isSeaRoute() ? "せんちょう" : "うんてんし";
     btnMapRecenter.querySelector("span:first-child").textContent = isAirRoute() ? "✈️" : isSeaRoute() ? "⛴️" : isRoadRoute() ? "🚗" : "🚃";
@@ -1919,8 +1920,13 @@
 
   function populateQuickAddButtons() {
     // 選んだ候補を左側へ並べ、出発時の車両は右端の独立したボタンに固定する。
-    const otherKeys = catalog.couplingKeys(trainKey,choices.state.coupling,quickAddTrainKeys(trainKey),TRAINS).slice(0,-1);
-    btnCouple.setAttribute("aria-label", `${TRAINS[trainKey].callName}を連結`);
+    const road=isRoadRoute(),action=road?'を追加':'を連結';
+    const otherKeys = (road?catalog.convoyKeys(trainKey,choices.state.convoy,window.TRAIN_GO_ROUTE_DATA.roadNetwork.vehicleKeys,TRAINS):catalog.couplingKeys(trainKey,choices.state.coupling,quickAddTrainKeys(trainKey),TRAINS)).slice(0,-1);
+    document.getElementById('btn-choose-car').setAttribute('aria-label',road?'一緒に走る車を選ぶ':'連結する車両を選ぶ');
+    document.querySelector('#btn-choose-car span:first-child').textContent=road?'🚗':'🚃';
+    btnRemove.setAttribute('aria-label',road?'最後の車を外す':'きりはなす');
+    btnRemove.textContent=road?'🚗−':'🚃−';
+    btnCouple.setAttribute("aria-label", `${TRAINS[trainKey].callName}${action}`);
     btnCouple.querySelector(".quick-train-art").replaceChildren(createTrainPreview(trainKey));
     document.querySelectorAll(".btn-quick-add:not(#btn-couple)").forEach((btn, index) => {
       const key = otherKeys[index];
@@ -1931,7 +1937,7 @@
       }
       btn.classList.remove("hidden");
       btn.dataset.car = key;
-      btn.setAttribute("aria-label", `${TRAINS[key].callName}を連結`);
+      btn.setAttribute("aria-label", `${TRAINS[key].callName}${action}`);
       btn.querySelector(".quick-train-art").replaceChildren(createTrainPreview(key));
     });
   }
@@ -2033,6 +2039,7 @@
   }
 
   function addCar(typeKey = trainKey) {
+    if(isRoadRoute()?TRAINS[typeKey]?.kind!=='car':!isCoupleableTrainKey(typeKey))return;
     if (cars >= MAX_CARS) {
       say(`${carWord(totalCarCount())}！ながーい！これでまんたんだよ！`);
       return;
@@ -2040,12 +2047,13 @@
     // 編成ごとに色が違う形式は、つなぐたびに別の色が来る。
     carTypes.push(pickTrainVariant(baseTrainKey(typeKey)));
     cars = carTypes.length;
-    say(`れんけつ！ぜんぶで、${carWord(totalCarCount())}！`);
+    say(`${isRoadRoute()?'いっしょにはしろう':'れんけつ'}！ぜんぶで、${carWord(totalCarCount())}！`);
     spawnConfetti(12);
   }
 
   function removeCar() {
     if (cars <= 1) {
+      if(isRoadRoute()){say('これがさいごのいちだいだよ！');return;}
       const count = totalCarCount();
       say(komachiCoupled
         ? `${carWord(count)}！これいじょうは、きりはなせないよ！`
@@ -2395,6 +2403,7 @@
 
   // 編成全体の長さ。停車位置・カメラの引き・加速の演出がこの値を使う。
   function trainTotalWidth(typeKeys = carTypes) {
+    if(isRoadRoute())return typeKeys.length*(Math.min(330,W*.4)+60);
     const { gap } = carMetrics();
     let total = 0;
     for (const key of typeKeys) total += carSlotWidth(key) + gap;
@@ -2501,7 +2510,28 @@
     const path=(points,color)=>{g.beginPath();points.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.closePath();g.fillStyle=color;g.fill();g.stroke();};
     const line=(points,color,width=2)=>{g.beginPath();points.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.strokeStyle=color;g.lineWidth=width;g.stroke();g.strokeStyle=type.edge;g.lineWidth=2;};
     const circle=(x,y,r,color)=>{g.beginPath();g.arc(x,y,r,0,Math.PI*2);g.fillStyle=color;g.fill();g.stroke();};
-    if(shape==='excavator') {
+    if(type.kind==='maintenance') {
+      box(-85,-22,170,10,type.body);box(-82,-51,33,29,type.body);box(45,-55,38,33,type.body);
+      box(-77,-46,23,16,type.face);box(50,-49,27,18,type.face);
+      if(shape==='tamper') {
+        box(-40,-40,76,12,type.body);
+        for(let x=-34;x<35;x+=14){line([[x,-27],[x,-8],[x+5,-4]],'#52616b',4);}
+      } else if(shape==='grinder') {
+        box(-44,-46,83,24,type.body);
+        for(let x=-35;x<36;x+=16){box(x,-40,9,12,'#657782');circle(x,-9,6,'#727a80');}
+      } else {
+        box(-39,-39,73,17,type.body);path([[-43,-19],[-18,-4],[22,-4],[39,-19]],'#859299');
+        path([[66,-17],[88,-24],[92,-5],[65,-5]],type.body);
+      }
+      for(const x of [-68,65])circle(x,-7,7,'#34414a');
+    } else if(shape==='bulldozer') {
+      box(-73,-24,112,17,'#34414a');for(let x=-60;x<40;x+=20)circle(x,-12,7,'#89959a');
+      box(-48,-48,60,25,type.body);box(-36,-66,38,22,type.body);box(-31,-62,26,15,type.face);
+      line([[5,-23],[62,-13]],'#707c83',7);path([[57,-35],[79,-31],[84,-3],[57,-3]],type.body);
+    } else if(shape==='roller') {
+      box(-72,-33,127,15,type.body);box(-33,-57,39,26,type.body);box(-27,-52,27,18,type.face);
+      circle(-51,-12,14,'#34414a');box(27,-28,46,27,'#89959a');line([[31,-28],[31,-1]],'#d4dce0',3);
+    } else if(shape==='excavator') {
       g.beginPath();g.roundRect(-75,-19,111,20,10);g.fillStyle='#34414a';g.fill();
       for(let x=-62;x<30;x+=18)circle(x,-9,6,'#929ea3');
       box(-71,-33,99,15,type.body);box(-42,-57,35,28,type.body);box(-35,-51,21,18,'#a5d5e4');
@@ -2541,6 +2571,23 @@
           g.save();g.translate(-30,-38);g.rotate(-.2);g.beginPath();g.ellipse(0,0,46,23,0,0,Math.PI*2);g.fillStyle='#f3f6ed';g.fill();g.stroke();
           line([[-23,-18],[-4,18]],type.body,10);line([[6,-21],[24,16]],type.body,10);g.restore();
           path([[-81,-28],[-69,-33],[-66,-19],[-78,-13]],'#83999f');
+        } else if(shape==='ladder'||shape==='aerial') {
+          box(-80,-39,102,20,type.body);
+          line([[-65,-43],[17,-69]],'#e8ecee',8);
+          line([[-65,-43],[17,-69]],'#73818a',2);
+          if(shape==='aerial')box(8,-77,30,14,'#eff3e9');
+          else {line([[-60,-36],[22,-62]],'#e8ecee',3);for(let i=0;i<7;i++)line([[-60+i*12,-36-i*3.8],[-65+i*12,-43-i*3.8]],'#e8ecee',2);}
+        } else if(shape==='tanker') {
+          g.fillStyle='#dce4e7';g.beginPath();g.roundRect(-85,-54,109,33,15);g.fill();g.stroke();
+          for(const x of [-58,-9])line([[x,-51],[x,-24]],'#849ba7',3);box(-41,-59,21,5,'#768b95');
+        } else if(shape==='tow') {
+          box(-82,-26,107,8,type.body);line([[-35,-26],[-49,-56],[-78,-48]],type.body,8);
+          line([[-78,-48],[-78,-28],[-70,-25]],'#63737f',3);
+        } else if(shape==='snowplow') {
+          box(-82,-48,107,29,type.body);path([[74,-25],[95,-36],[99,-4],[75,-4]],'#8598a2');box(38,-55,20,5,'#f1a338');
+        } else if(shape==='sweeper') {
+          box(-82,-53,105,34,type.body);box(-70,-46,80,20,'#a4c9d1');
+          for(const x of [-22,20]){circle(x,-9,9,'#454d54');for(let i=-1;i<=1;i++)line([[x+i*4,-12],[x+i*6,-2]],'#949f9f');}
         } else if(shape==='craneTruck') {
           box(-70,-38,72,19,type.body);circle(-29,-30,11,'#65727b');
           line([[-47,-39],[51,-61]],type.edge,10);line([[-47,-39],[51,-61]],type.body,6);
@@ -2581,38 +2628,54 @@
     const el=document.createElement('canvas');el.width=400;el.height=140;
     const g=el.getContext('2d');g.scale(2,2);drawRoadVehicleOn(g,type,100,62,170);return el;
   }
-  function drawMapRoadVehicle(x,y,angle,size) {
+  function drawMapRoadVehicle(x,y,angle,size,type=train) {
     ctx.save();ctx.translate(x,y);ctx.rotate(angle+(routeDirection<0?Math.PI:0));
     ctx.fillStyle='#273743';
     for(const a of [-.29,.29])for(const b of [-.24,.16])ctx.fillRect(size*a-size*.08,size*b,size*.16,size*.08);
-    ctx.fillStyle=train.body;ctx.strokeStyle=train.edge;ctx.lineWidth=1.5;
+    ctx.fillStyle=type.body;ctx.strokeStyle=type.edge;ctx.lineWidth=1.5;
     ctx.beginPath();ctx.roundRect(-size*.5,-size*.22,size,size*.44,size*.12);ctx.fill();ctx.stroke();
     ctx.fillStyle='#6aa3bc';ctx.fillRect(size*.15,-size*.17,size*.12,size*.34);
     ctx.fillStyle='#ffefab';ctx.fillRect(size*.44,-size*.18,size*.05,size*.09);ctx.fillRect(size*.44,size*.09,size*.05,size*.09);
-    if(train.workVehicle) {
+    if(type.workVehicle) {
       ctx.scale(size,size);ctx.lineWidth=.035;ctx.lineCap='round';
-      if(['fireEngine','police','ambulance'].includes(train.shape)) {
-        if(train.shape==='police'){ctx.fillStyle='#293741';ctx.fillRect(-.4,-.2,.26,.4);}
+      if(['fireEngine','police','ambulance'].includes(type.shape)) {
+        if(type.shape==='police'){ctx.fillStyle='#293741';ctx.fillRect(-.4,-.2,.26,.4);}
         ctx.fillStyle='#ed4a43';ctx.fillRect(.07,-.2,.08,.4);
-        if(train.shape==='fireEngine') {
+        if(type.shape==='fireEngine') {
           ctx.strokeStyle='#edf1ec';ctx.strokeRect(-.43,-.08,.46,.16);
           for(let x=-.39;x<0;x+=.1){ctx.beginPath();ctx.moveTo(x,-.08);ctx.lineTo(x,.08);ctx.stroke();}
         }
-      } else if(train.shape==='excavator'||train.shape==='craneTruck') {
-        if(train.shape==='excavator') {
+      } else if(type.shape==='excavator'||type.shape==='craneTruck') {
+        if(type.shape==='excavator') {
           ctx.fillStyle='#35424c';ctx.fillRect(-.43,-.29,.7,.12);ctx.fillRect(-.43,.17,.7,.12);
         }
-        ctx.strokeStyle=train.body;ctx.lineWidth=.12;ctx.beginPath();ctx.moveTo(-.2,0);ctx.lineTo(.1,-.3);ctx.lineTo(.5,-.32);ctx.stroke();
+        ctx.strokeStyle=type.body;ctx.lineWidth=.12;ctx.beginPath();ctx.moveTo(-.2,0);ctx.lineTo(.1,-.3);ctx.lineTo(.5,-.32);ctx.stroke();
         ctx.fillStyle='#58636b';ctx.fillRect(.43,-.36,.18,.16);
-      } else if(train.shape==='mixerTruck') {
+      } else if(type.shape==='mixerTruck') {
         ctx.fillStyle='#eff4eb';ctx.beginPath();ctx.ellipse(-.2,0,.23,.17,0,0,Math.PI*2);ctx.fill();
-        ctx.strokeStyle=train.body;ctx.beginPath();ctx.moveTo(-.26,-.12);ctx.lineTo(-.14,.12);ctx.stroke();
+        ctx.strokeStyle=type.body;ctx.beginPath();ctx.moveTo(-.26,-.12);ctx.lineTo(-.14,.12);ctx.stroke();
       } else {
-        ctx.fillStyle=train.shape==='dumpTruck'?'#936c37':'#d4e6d1';ctx.fillRect(-.43,-.15,.48,.3);
-        ctx.strokeStyle=train.edge;ctx.strokeRect(-.43,-.15,.48,.3);
+        ctx.fillStyle=type.shape==='dumpTruck'?'#936c37':'#d4e6d1';ctx.fillRect(-.43,-.15,.48,.3);
+        ctx.strokeStyle=type.edge;ctx.strokeRect(-.43,-.15,.48,.3);
       }
     }
     ctx.restore();
+  }
+  function drawMapRoadConvoy(scene) {
+    const size=Math.max(12,Math.min(60,10*scene.scale));
+    const lead=yamanoteMapPosition(),direction=routeDirection;
+    let previous=null;
+    for(let i=0;i<cars;i++) {
+      const p=yamanoteMapPositionAt(lead.km-direction*i*.025,{});
+      let x=scene.screenCenterX+(p.worldX-scene.centerWorldX)*scene.scale;
+      let y=scene.screenCenterY+(p.worldY-scene.centerWorldY)*scene.scale;
+      // Keep markers separate when zoomed out or waiting together at an endpoint.
+      if(previous&&Math.hypot(x-previous.x,y-previous.y)<size*1.35) {
+        x=previous.x-Math.cos(p.angle)*direction*size*1.35;
+        y=previous.y-Math.sin(p.angle)*direction*size*1.35;
+      }
+      drawMapRoadVehicle(x,y,p.angle,size,TRAINS[carTypes[i]]);previous={x,y};
+    }
   }
   function drawRoadScene() {
     const y=groundY(),left=-W/viewScale,right=W*2/viewScale+W;
@@ -2620,9 +2683,11 @@
     ctx.fillStyle='#e8e9d5';ctx.fillRect(left,y+8,right-left,4);
     ctx.fillStyle='#f5ecd2';const offset=visualDistance%180;
     for(let x=left-offset;x<right;x+=180)ctx.fillRect(x,y+H*.1,90,5);
-    const width=Math.min(330,W*.4),x=W*.53;
-    ctx.save();ctx.translate(x,y);if(trainFacesLeft())ctx.scale(-1,1);
-    drawRoadVehicleOn(ctx,train,0,-2,width);ctx.restore();
+    const width=Math.min(330,W*.4),x=W*NOSE_R-width/2;
+    ctx.save();
+    if(trainFacesLeft()){const anchor=W*NOSE_R;const center=anchor+(W*.5-anchor)/Math.max(viewScale,.001);ctx.translate(center*2,0);ctx.scale(-1,1);}
+    for(let i=cars-1;i>=0;i--)drawRoadVehicleOn(ctx,TRAINS[carTypes[i]],x-i*(width+60),y-2,width);
+    ctx.restore();
     const signX=W*.78,signY=y-H*.25;
     ctx.fillStyle='#a2abb1';ctx.fillRect(signX-3,signY,6,y-signY);
     ctx.font=`bold ${Math.max(13,Math.min(24,W*.024))}px sans-serif`;ctx.textAlign='center';
@@ -2777,6 +2842,7 @@
       for (const extra of EXTRA_TRAINS_AFTER_ROUTE[routeKey] || []) add(extra);
     }
     for (const key of window.TRAIN_GO_ROUTE_DATA.roadNetwork.vehicleKeys) add(key);
+    for (const key of window.TRAIN_GO_ROUTE_DATA.workRailKeys) add(key);
     return order;
   })();
 
@@ -2799,7 +2865,7 @@
   }
   function trainCaption(key) {
     const type=TRAINS[key],model=tripOptions.MODEL_LABELS[key];
-    if(type.kind==='car')return choices.state.nameMode==='kanji'?type.title:type.name;
+    if(type.kind==='car'||type.kind==='maintenance')return choices.state.nameMode==='kanji'?type.title:type.name;
     const meta=trainMetadata.get(key)?.[0];
     const routeKey=routeCatalog[key]?key:meta?.key;
     const description=model?type.name.replace(/の?しんかんせん$/,'').replace('きいろいけんさしゃ','けんさしゃ')
@@ -2826,14 +2892,14 @@
     else preview.appendChild(createVehiclePreview(TRAINS[key]));
     const caption=document.createElement('span');caption.className='train-caption';caption.textContent=trainCaption(key);
     button.append(preview,caption);button.title=caption.textContent.replace('\n','・');
-    button.setAttribute('aria-label',button.title+(couplingPickerOpen?'を連結':''));
+    button.setAttribute('aria-label',button.title+(couplingPickerOpen?(isRoadRoute()?'を追加':'を連結'):''));
     return button;
   }
   function renderTrainChoices() {
     trainPreviewObserver?.disconnect();
     const keys=TRAIN_SELECTION_ORDER.filter(key=>{
       const kind=TRAINS[key].kind;
-      const allowed=couplingPickerOpen?isCoupleableTrainKey(key):isAirRoute()?kind==='airplane':isSeaRoute()?kind==='ferry':isRoadRoute()?kind==='car':isCoupleableTrainKey(key);
+      const allowed=couplingPickerOpen?(isRoadRoute()?kind==='car':isCoupleableTrainKey(key)):isAirRoute()?kind==='airplane':isSeaRoute()?kind==='ferry':isRoadRoute()?kind==='car':isCoupleableTrainKey(key);
       const category=trainFilter.value;
       const region=category==='all'||(category==='shinkansen'?isShinkansenTrainKey(key)
         :(trainRouteKeys.get(key)||[]).some(route=>routeCatalog[route]?.regions.includes(category)));
@@ -2954,7 +3020,7 @@
     if(!keepGroup)routeChoiceGroupKey=routeKey;
     routeSelectPage.classList.add('hidden');trainSelectPage.classList.remove('hidden');selectScreen.classList.add('selecting-train');
     document.getElementById('all-routes').replaceChildren();document.getElementById('recent-routes').replaceChildren();
-    vehicleSelectTitle.textContent=couplingPickerOpen?'つなげる でんしゃを えらぼう'
+    vehicleSelectTitle.textContent=couplingPickerOpen?(isRoadRoute()?'いっしょに はしる くるまを えらぼう':'つなげる でんしゃを えらぼう')
       :isAirRoute()?'どの そらの のりものに のる？':isSeaRoute()?'どの ふねに のる？':isRoadRoute()?'どの くるまに のる？':'どの でんしゃに のる？';
     trainSearch.value='';trainFilter.value='all';trainPrefecture.value='';
     document.querySelector('.trip-settings').classList.toggle('hidden',couplingPickerOpen);
@@ -2995,7 +3061,8 @@
     ensureAudio();const key=button.dataset.train;
     if(couplingPickerOpen) {
       addCar(key);
-      choices.state.coupling=[key,...choices.state.coupling.filter(k=>k!==key)].slice(0,9);
+      const preference=isRoadRoute()?'convoy':'coupling';
+      choices.state[preference]=[key,...choices.state[preference].filter(k=>k!==key)].slice(0,9);
       choices.remember('trains',key);populateQuickAddButtons();closeCouplingPicker();
     } else {
       startGame(key);
@@ -4694,11 +4761,7 @@
 
   function drawYamanoteFollowTrain(scene) {
     const count = scene.carPositions.length;
-    if(isRoadRoute()) {
-      const p=scene.carPositions[0];
-      drawMapRoadVehicle(scene.screenCenterX+(p.worldX-scene.centerWorldX)*scene.scale,scene.screenCenterY+(p.worldY-scene.centerWorldY)*scene.scale,p.angle,Math.max(20,Math.min(60,10*scene.scale)));
-      return;
-    }
+    if(isRoadRoute()) {drawMapRoadConvoy(scene);return;}
     if (train.kind === "airplane" || train.kind === "ferry") {
       const position = scene.carPositions[0];
       const x = scene.screenCenterX + (position.worldX - scene.centerWorldX) * scene.scale;
@@ -4766,7 +4829,7 @@
 
   function drawYamanoteOverviewMarker(scene, labelSize, position) {
     const point = mapScenePoint(scene, position.worldX, position.worldY, yamanoteTrainScreenPoint);
-    if(isRoadRoute()){drawMapRoadVehicle(point.x,point.y,position.angle,labelSize*1.8);return point;}
+    if(isRoadRoute()){drawMapRoadConvoy(scene);return point;}
     if (train.kind === "airplane") {
       drawMapAirplaneShape(point.x, point.y, position.angle, labelSize * 2.2);
       return point;
@@ -5034,7 +5097,7 @@
       ? `　${starBoostType.icon} ×${starBoostMultiplier} ${Math.ceil(starBoostTime)}びょう`
       : "";
     const roundedKm = Math.round(position.km * 10) / 10;
-    const vehicleText = isAirRoute() ? "✈️ ひこうちゅう" : isSeaRoute() ? "⛴️ こうかいちゅう" : isRoadRoute() ? "🚗 ドライブ" : `🚃 ${totalCarCount()}りょう`;
+    const vehicleText = isAirRoute() ? "✈️ ひこうちゅう" : isSeaRoute() ? "⛴️ こうかいちゅう" : isRoadRoute() ? `🚗 ${cars}だい` : `🚃 ${totalCarCount()}りょう`;
     const badgeText = scene.portrait
       ? `${modeText}　${roundedKm}km　${vehicleText}　🧭↑${boostText}`
       : `${modeText}　${roundedKm} km　${vehicleText}　🧭 きた↑${boostText}`;
@@ -6310,6 +6373,7 @@ function drawAirports() {
   // 1両分の車体。走行画面と「どの でんしゃに のる？」のプレビューが同じ絵になるよう、
   // 描画先の context を引数で受け取り、両方からこの関数を呼ぶ。
   function drawRailCarOn(g, carTrain, profile, left, top, bodyW, bodyH, opts) {
+    if(carTrain.kind==='maintenance') {drawWorkVehicleOn(g,carTrain,left+bodyW/2,opts?.wheelY??top+bodyH+10,bodyW);return;}
     const {isHead = false, isTail = false, index = 0,
       wheelY = null, wheelSpin = 0, night = false} = opts || {};
     const nose = carNose(carTrain);
@@ -6838,7 +6902,8 @@ function drawAirports() {
     // 編成全体が画面に入るようにカメラをなめらかに引く (W=0 の非表示中は更新しない)。
     // 100両でも全編成が画面に入るまで縮小する。
     if (W > 0) {
-      const leftScale = (W * (NOSE_R - 0.03)) / Math.max(trainTotalWidth(), 1);
+      const availableWidth=isRoadRoute()?Math.min(NOSE_R,1-NOSE_R):NOSE_R;
+      const leftScale = (W * (availableWidth - 0.03)) / Math.max(trainTotalWidth(), 1);
       const komachiIsNear = komachiStationX !== null
         && komachiStationX - distance < W * 1.2;
       const rightScale = komachiCoupled || komachiIsNear

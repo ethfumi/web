@@ -1090,7 +1090,6 @@ body.choosing-car #select-screen { z-index: 100; }
   font-size: clamp(20px, 3.5vmin, 34px);
 }
 /* 空路・海路では鉄道専用の連結・ドア・ライト操作を隠す（乗客パネルは表示）。 */
-body.road-mode #run-ui,
 body.road-mode #btn-station-doors,
 body.road-mode #btn-headlight,
 body.road-mode #onboard-panel,
