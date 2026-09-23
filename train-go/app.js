@@ -2411,7 +2411,7 @@
 
   // 編成全体の長さ。停車位置・カメラの引き・加速の演出がこの値を使う。
   function trainTotalWidth(typeKeys = carTypes) {
-    if(isRoadRoute())return typeKeys.length*(Math.min(330,W*.4)+60);
+    if(isRoadRoute())return window.TRAIN_GO_ROAD_LAYOUT.layout(typeKeys.length,W,H).extent;
     const { gap } = carMetrics();
     let total = 0;
     for (const key of typeKeys) total += carSlotWidth(key) + gap;
@@ -2702,29 +2702,37 @@
   function drawMapRoadConvoy(scene) {
     const size=Math.max(12,Math.min(60,10*scene.scale));
     const lead=yamanoteMapPosition(),direction=routeDirection;
-    let previous=null;
+    const lanes=Math.min(4,Math.max(2,cars)),previous=Array(lanes).fill(null);
     for(let i=0;i<cars;i++) {
-      const p=yamanoteMapPositionAt(lead.km-direction*i*.025,{});
+      const lane=i%lanes,row=Math.floor(i/lanes);
+      const p=yamanoteMapPositionAt(lead.km-direction*row*.025,{});
       let x=scene.screenCenterX+(p.worldX-scene.centerWorldX)*scene.scale;
       let y=scene.screenCenterY+(p.worldY-scene.centerWorldY)*scene.scale;
       // Keep markers separate when zoomed out or waiting together at an endpoint.
-      if(previous&&Math.hypot(x-previous.x,y-previous.y)<size*1.35) {
-        x=previous.x-Math.cos(p.angle)*direction*size*1.35;
-        y=previous.y-Math.sin(p.angle)*direction*size*1.35;
+      const lateral=(lane-(lanes-1)/2)*size*.65;
+      x-=Math.sin(p.angle)*lateral;y+=Math.cos(p.angle)*lateral;
+      if(previous[lane]&&Math.hypot(x-previous[lane].x,y-previous[lane].y)<size*1.35) {
+        x=previous[lane].x-Math.cos(p.angle)*direction*size*1.35;
+        y=previous[lane].y-Math.sin(p.angle)*direction*size*1.35;
       }
-      drawMapRoadVehicle(x,y,p.angle,size,TRAINS[carTypes[i]]);previous={x,y};
+      drawMapRoadVehicle(x,y,p.angle,size,TRAINS[carTypes[i]]);previous[lane]={x,y};
     }
   }
   function drawRoadScene() {
     const y=groundY(),left=-W/viewScale,right=W*2/viewScale+W;
-    ctx.fillStyle=timeOfDay==='night'?'#37414c':'#687783';ctx.fillRect(left,y,right-left,H/viewScale);
-    ctx.fillStyle='#e8e9d5';ctx.fillRect(left,y+8,right-left,4);
+    const layout=window.TRAIN_GO_ROAD_LAYOUT.layout(cars,W,H),{lanes,spacing}=layout;
+    const roadTop=y-(lanes-1)*spacing-12;
+    ctx.fillStyle=timeOfDay==='night'?'#37414c':'#687783';ctx.fillRect(left,roadTop,right-left,H/viewScale);
+    ctx.fillStyle='#e8e9d5';ctx.fillRect(left,roadTop+3,right-left,4);
     ctx.fillStyle='#f5ecd2';const offset=visualDistance%180;
-    for(let x=left-offset;x<right;x+=180)ctx.fillRect(x,y+H*.1,90,5);
-    const width=Math.min(330,W*.4),x=W*NOSE_R-width/2;
+    for(let lane=0;lane<lanes;lane++)for(let x=left-offset;x<right;x+=180)ctx.fillRect(x,y-lane*spacing+spacing*.45,90,4);
+    const width=layout.carWidth,anchor=W*NOSE_R;
+    const nose=Math.min(anchor+(W*.97-anchor)/viewScale,Math.max(anchor,layout.extent+W*.03));
+    const x=nose-width/2;
     ctx.save();
     if(trainFacesLeft()){const anchor=W*NOSE_R;const center=anchor+(W*.5-anchor)/Math.max(viewScale,.001);ctx.translate(center*2,0);ctx.scale(-1,1);}
-    for(let i=cars-1;i>=0;i--)drawRoadVehicleOn(ctx,TRAINS[carTypes[i]],x-i*(width+60),y-2,width,true);
+    for(let lane=lanes-1;lane>=0;lane--)for(let i=lane;i<cars;i+=lanes)
+      drawRoadVehicleOn(ctx,TRAINS[carTypes[i]],x-Math.floor(i/lanes)*(width+layout.gap),y-lane*spacing-2,width,true);
     ctx.restore();
     const signX=W*.78,signY=y-H*.25;
     ctx.fillStyle='#a2abb1';ctx.fillRect(signX-3,signY,6,y-signY);
@@ -6948,7 +6956,7 @@ function drawAirports() {
       const rightScale = komachiCoupled || komachiIsNear
         ? (W * (1 - NOSE_R - 0.03)) / (komachiTrainWidth() + komachiGap)
         : 1;
-      const targetScale = Math.max(Math.min(1, leftScale, rightScale), 0.018);
+      const targetScale = isRoadRoute()?window.TRAIN_GO_ROAD_LAYOUT.layout(cars,W,H).scale:Math.max(Math.min(1, leftScale, rightScale), 0.018);
       viewScale += (targetScale - viewScale) * Math.min(dt * 3, 1);
     }
 
