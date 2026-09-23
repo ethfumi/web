@@ -569,6 +569,8 @@
   const btnMapMode = document.getElementById("btn-map-mode");
   const mapModeLabel = document.getElementById("map-mode-label");
   const mapCameraControls = document.getElementById("map-camera-controls");
+  const mapScaleLabel = document.getElementById("map-scale-label");
+  const mapScaleBar = document.getElementById("map-scale-bar");
   const btnMapScroll = document.getElementById("btn-map-scroll");
   const mapScrollLabel = document.getElementById("map-scroll-label");
   const btnMapZoom = document.getElementById("btn-map-zoom");
@@ -4980,10 +4982,26 @@
     if (mapBackground.style.transform !== transform) mapBackground.style.transform = transform;
   }
 
+  function updateMapScale(scene) {
+    // The map uses a fixed reference latitude; horizontal ground distance varies with latitude.
+    const latitude = MAP_REFERENCE_LATITUDE - scene.centerWorldY / MAP_METERS_PER_LATITUDE;
+    const metersPerPixel = Math.cos(latitude * Math.PI / 180) /
+      Math.cos(MAP_REFERENCE_LATITUDE * Math.PI / 180) / scene.scale;
+    const maximum = 130 * metersPerPixel;
+    if (!(maximum > 0) || !Number.isFinite(maximum)) return;
+    const unit = 10 ** Math.floor(Math.log10(maximum));
+    const meters = [5, 2, 1].find(n => n * unit <= maximum) * unit;
+    const label = meters >= 1000 ? `${meters / 1000} km` : `${Number(meters.toPrecision(3))} m`;
+    const width = `${(meters / metersPerPixel).toFixed(1)}px`;
+    if (mapScaleLabel.textContent !== label) mapScaleLabel.textContent = label;
+    if (mapScaleBar.style.width !== width) mapScaleBar.style.width = width;
+  }
+
   function drawYamanoteMap() {
     ctx.clearRect(0, 0, W, H);
     const automaticScene = mapMode === "follow" ? yamanoteFollowScene() : yamanoteOverviewScene();
     const scene = applyManualMapCamera(automaticScene);
+    updateMapScale(scene);
     const labelSize = Math.max(10, Math.min(W, H) * (scene.portrait ? 0.024 : 0.021));
     ctx.save();
     drawCachedMap(scene, labelSize);
