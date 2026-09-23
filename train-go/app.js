@@ -2977,7 +2977,7 @@
       const pref=!trainPrefecture.value||(trainRouteKeys.get(key)||[]).some(route=>catalog.inPrefecture(route,trainPrefecture.value,prefectureData));
       return allowed&&region&&pref&&catalog.matches(trainSearchTexts.get(key),trainSearch.value);
     });
-    const group=catalog.groups(keys,choices.state.trains,routeTrainKey(selectedRouteKey));
+    const group=catalog.groups(keys,choices.state.trains,isRoadRoute()?null:routeTrainKey(selectedRouteKey));
     document.getElementById('recommended-trains').replaceChildren(...group.recommended.map(key=>makeTrainButton(key,true)));
     document.getElementById('recommended-train-section').classList.toggle('hidden',!group.recommended.length);
     document.getElementById('recent-trains').replaceChildren(...group.recent.map(key=>makeTrainButton(key)));
