@@ -30,7 +30,7 @@ test('all 272 domestic passenger pairs have one playable route, including five h
   assert.equal(source.airports.length,87);
   assert.equal(data.airNetwork.keys.length,272);
   assert.equal(new Set(data.airNetwork.keys).size,272);
-  assert.equal(Object.values(data.routes).filter(r=>r.kind==='air').length,274);
+  assert.equal(Object.values(data.routes).filter(r=>r.kind==='air'&&!r.international).length,274);
   for (const key of data.airNetwork.keys) {
     const route=data.routes[key], map=data.maps[key];
     assert.equal(route.kind,'air');
@@ -92,7 +92,7 @@ test('ferry courses have named endpoints, ordered geometry and auditable source 
   const text=data.ferryNetwork.keys.map(k=>data.routeCatalog[k].search).join(' ');
   for (const island of ['母島','青ヶ島','北大東','天売','焼尻','口之島','悪石','与論','与那国','礼文','大神島']) assert.ok(text.includes(island),island);
   const references=Object.entries(data.maps).filter(([,m])=>m.reference);
-  assert.equal(references.length,coverage.referenceSegments);
+  assert.equal(references.length,coverage.referenceSegments+data.internationalNetwork.referenceCount);
   for (const [key] of references) {
     assert.equal(data.routes[key],undefined,'unnamed reference geometry must not invent a playable port');
     assert.ok(scope.window.TRAIN_GO_MAP_DATA.drawOrder.includes(key),'reference geometry must be drawn');

@@ -9,7 +9,7 @@ const between=(start,end)=>app.slice(app.indexOf(start),app.indexOf(end,app.inde
 test('follow camera starts with manual zoom and keeps its initial scale while the train moves',()=>{
   const s=vm.createContext({mapMode:'follow',mapScrollAuto:true,mapZoomAuto:true,
     mapManualCenterWorldX:0,mapManualCenterWorldY:0,mapManualScale:0,
-    mapPanGesture:{},mapTouchPoints:new Map(),mapPinchGesture:{},lastMapScene:{},updateMapCameraControls(){}});
+    mapPanGesture:{},mapTouchPoints:new Map(),mapPinchGesture:{},mapMomentum:{stop(){}},lastMapScene:{},updateMapCameraControls(){}});
   vm.runInContext(between('  function resetMapCamera()','  function seedManualMapCamera()')
     +between('  function applyManualMapCamera(','  function mapPointIsVisible('),s);
   s.resetMapCamera();
