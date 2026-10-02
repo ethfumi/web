@@ -262,6 +262,8 @@ void main() {
 
   // 次のフレームで、自動カメラを追従の途中を飛ばして目標へ合わせる。
   let snapCamera = true;
+  let camFollow = '';
+  const camOffset = { x: 0, y: 0 };
 
   function resize() {
     const w = Math.round(canvas.clientWidth * dpr());
@@ -334,30 +336,49 @@ void main() {
     if (!state.autoCam) return;
     const { sys, sc, cam } = state;
     const limit = sc.view * 6;
-    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-    for (let i = 0; i < 3; i++) {
-      const x = sys.p[2 * i];
-      const y = sys.p[2 * i + 1];
-      if (Math.hypot(x, y) > limit) continue;
-      minX = Math.min(minX, x);
-      maxX = Math.max(maxX, x);
-      minY = Math.min(minY, y);
-      maxY = Math.max(maxY, y);
+    // 遠くへ弾き出された星が出たら、残った連星(いちばん近い 2 つ)だけを追う。
+    let follow = [0, 1, 2];
+    if (follow.some((i) => Math.hypot(sys.p[2 * i], sys.p[2 * i + 1]) > limit)) {
+      let best = Infinity;
+      for (const [i, j] of [[0, 1], [1, 2], [2, 0]]) {
+        const d = Math.hypot(sys.p[2 * i] - sys.p[2 * j], sys.p[2 * i + 1] - sys.p[2 * j + 1]);
+        if (d < best) {
+          best = d;
+          follow = [i, j];
+        }
+      }
     }
-    let tx = 0, ty = 0, half = sc.view;
-    const inside = minX > -sc.view && maxX < sc.view && minY > -sc.view && maxY < sc.view;
-    if (minX <= maxX && !inside) {
-      tx = (minX + maxX) / 2;
-      ty = (minY + maxY) / 2;
-      half = Math.max(sc.view, 1.15 * Math.max(maxX - minX, maxY - minY) / 2);
+    // 中心は追う星の重心。星そのものと違って滑らかに動くので、画面が揺れない。
+    let M = 0, tx = 0, ty = 0;
+    for (const i of follow) {
+      M += sys.m[i];
+      tx += sys.m[i] * sys.p[2 * i];
+      ty += sys.m[i] * sys.p[2 * i + 1];
     }
+    tx /= M;
+    ty /= M;
+    let reach = 0;
+    for (const i of follow) {
+      reach = Math.max(reach, Math.abs(sys.p[2 * i] - tx), Math.abs(sys.p[2 * i + 1] - ty));
+    }
+    const half = Math.max(follow.length === 3 ? sc.view : sc.view * 0.5, 1.15 * reach);
     const target = fitPx(half);
-    const rate = target > cam.px ? 2.5 : 0.6;
-    const k = snapCamera ? 1 : 1 - Math.exp(-dtReal * rate);
+    const snap = snapCamera;
     snapCamera = false;
-    cam.px += (target - cam.px) * k;
-    cam.x += (tx - cam.x) * k;
-    cam.y += (ty - cam.y) * k;
+    cam.px += (target - cam.px) * (snap ? 1 : 1 - Math.exp(-dtReal * (target > cam.px ? 2.5 : 0.6)));
+    // 重心には遅れずについていき、追う相手が替わったときの位置の差だけを滑らかに詰める。
+    // 差ごと追いかける方式だと、早送り中に連星の速さへ追いつけず画面から外れる。
+    const key = follow.join('');
+    if (key !== camFollow) {
+      camFollow = key;
+      camOffset.x = cam.x - tx;
+      camOffset.y = cam.y - ty;
+    }
+    const keep = snap ? 0 : Math.exp(-dtReal * 2.5);
+    camOffset.x *= keep;
+    camOffset.y *= keep;
+    cam.x = tx + camOffset.x;
+    cam.y = ty + camOffset.y;
   }
 
   const posPx = new Float32Array(6);
@@ -457,6 +478,7 @@ void main() {
 
   function setAutoCam(on) {
     state.autoCam = on;
+    camFollow = '';
     setToggle('cameraToggle', on);
   }
 

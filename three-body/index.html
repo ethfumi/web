@@ -8,14 +8,14 @@
   <meta property="og:title" content="THREE BODIES / GRAVITY FIELD">
   <meta property="og:description" content="8 の字、蝶、毛糸玉、ピタゴラス問題。三体問題の有名な軌道をリアルタイムに計算する">
   <title>THREE BODIES / GRAVITY FIELD</title>
-  <link rel="stylesheet" href="./style.css?v=1.0">
+  <link rel="stylesheet" href="./style.css?v=1.1">
 </head>
 <body>
 <main class="app">
   <canvas id="scene" aria-label="三体問題の重力シミュレーション"></canvas>
   <header class="topbar">
     <div>
-      <span class="eyebrow">THREE BODIES · v1.0 · BY <a href="https://x.com/fumilin" target="_blank" rel="me noopener noreferrer">@fumilin ↗</a></span>
+      <span class="eyebrow">THREE BODIES · v1.1 · BY <a href="https://x.com/fumilin" target="_blank" rel="me noopener noreferrer">@fumilin ↗</a></span>
       <h1><span id="title">FIGURE-8</span> <em id="subtitle">/ MOORE 1993</em></h1>
     </div>
     <div class="readout">
@@ -45,13 +45,13 @@
   </aside>
   <nav class="dock" aria-label="再生コントロール">
     <button id="motion" class="play" aria-label="一時停止">Ⅱ</button>
-    <label class="speed"><span>SPEED</span><output id="speedValue">×1.0</output><input id="speed" type="range" min="-1" max="1" step=".05" value="0"></label>
+    <label class="speed"><span>SPEED</span><output id="speedValue">×1.0</output><input id="speed" type="range" min="-1" max="2" step=".05" value="0"></label>
     <button id="openPanel" class="dockButton" aria-label="軌道ライブラリを開く"><b>⌁</b><small>LIBRARY</small></button>
     <button id="reset" class="dockButton" aria-label="最初からやり直す"><b>↺</b><small>RESET</small></button>
   </nav>
   <div id="error" class="error" hidden><b>WEBGL2 NOT AVAILABLE</b><p>最新の Safari または Chrome で開いてください。</p></div>
 </main>
-<script src="./physics.js?v=1.0"></script>
-<script src="./app.js?v=1.0"></script>
+<script src="./physics.js?v=1.1"></script>
+<script src="./app.js?v=1.1"></script>
 </body>
 </html>
