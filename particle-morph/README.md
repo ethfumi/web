@@ -4,7 +4,11 @@
 
 ## 形
 
-Galaxy / Sphere / Torus Knot / Ripple / Lattice / Saturn / Black Hole / DNA / Möbius / Shell / Orrery / Lorenz
+Galaxy / Sphere / Torus Knot / Ripple / Lattice / Saturn / Black Hole / DNA / Möbius / Shell / Orrery / Lorenz / Mandelbrot
+
+Mandelbrot では、ドラッグが窓の移動、ホイールとピンチが集合のズームになる（float の精度で数十万倍まで）。
+乱数を複素平面の窓にまき、脱出までの反復回数を高さと色にする。集合の内側の粒は画面外へ落とし、境界の帯だけが山脈になる。
+ズームすると反復の上限を 60 から 400 まで増やす。
 
 ## 操作
 
