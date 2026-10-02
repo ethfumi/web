@@ -8,14 +8,15 @@
   <meta property="og:title" content="THREE BODIES / GRAVITY FIELD">
   <meta property="og:description" content="8 の字、蝶、毛糸玉、ピタゴラス問題。三体問題の有名な軌道をリアルタイムに計算する">
   <title>THREE BODIES / GRAVITY FIELD</title>
-  <link rel="stylesheet" href="./style.css?v=1.1">
+  <link rel="stylesheet" href="./style.css?v=1.2">
 </head>
 <body>
 <main class="app">
   <canvas id="scene" aria-label="三体問題の重力シミュレーション"></canvas>
+  <canvas id="overlay" aria-hidden="true"></canvas>
   <header class="topbar">
     <div>
-      <span class="eyebrow">THREE BODIES · v1.1 · BY <a href="https://x.com/fumilin" target="_blank" rel="me noopener noreferrer">@fumilin ↗</a></span>
+      <span class="eyebrow">THREE BODIES · v1.2 · BY <a href="https://x.com/fumilin" target="_blank" rel="me noopener noreferrer">@fumilin ↗</a></span>
       <h1><span id="title">FIGURE-8</span> <em id="subtitle">/ MOORE 1993</em></h1>
     </div>
     <div class="readout">
@@ -25,10 +26,11 @@
       <span id="ghostRead" hidden>GHOST Δ <b id="ghostOut">1.0e-6</b></span>
       <span><b id="fps">-- FPS</b></span>
     </div>
+    <div class="notice" id="notice" hidden></div>
   </header>
   <aside class="panel" id="panel" aria-label="シミュレーション設定">
     <header><div><span>ORBIT LIBRARY</span><b>初期条件を切り替える</b></div><button id="closePanel" aria-label="設定を閉じる">×</button></header>
-    <div class="scenarioGrid" id="scenarioGrid"></div>
+    <div id="scenarios"></div>
     <section class="theory" aria-live="polite">
       <span>INITIAL CONDITION / STORY</span>
       <h2 id="theoryTitle"></h2>
@@ -36,12 +38,18 @@
       <p id="theoryText"></p>
       <ul class="masses" id="massList"></ul>
     </section>
+    <div class="option"><span><b>EDIT</b><small>星をつまんで動かす。矢印の先をつまむと速度が変わる</small></span><div class="segments"><button id="editToggle">OFF</button></div></div>
+    <div id="massEdit" hidden>
+      <div id="massSliders"></div>
+      <div class="option"><span><b>CENTER</b><small>重心を原点に止める</small></span><div class="segments"><button id="recenter">APPLY</button></div></div>
+    </div>
     <label><span><b>TRAIL</b><small>軌跡の長さ</small></span><output id="trailValue">×1.0</output><input id="trail" type="range" min="-1" max="1" step=".05" value="0"></label>
-    <div class="option"><span><b>INTEGRATOR</b><small id="methodNote"></small></span><div class="segments" id="methods"></div></div>
-    <div class="option"><span><b>GHOST</b><small>星 1 を 10⁻⁶ ずらした分身を並走させる</small></span><div class="segments"><button id="ghostToggle">OFF</button></div></div>
+    <div class="option"><span><b>INTEGRATOR</b><small id="methodNote"></small></span><div class="segments wide" id="methods"></div></div>
+    <div class="option"><span><b>GHOST</b><small id="ghostNote"></small></span><div class="segments" id="ghostModes"><button data-mode="off">OFF</button><button data-mode="shift">10⁻⁶</button><button data-mode="method">METHOD</button></div><div class="segments wide" id="ghostMethods" hidden></div></div>
+    <div class="option"><span><b>ROTATING FRAME</b><small>重い 2 体を結ぶ線を止めて見る</small></span><div class="segments"><button id="frameToggle">OFF</button></div></div>
     <div class="option"><span><b>CONTOUR</b><small>重力ポテンシャルの等高線</small></span><div class="segments"><button id="contourToggle" class="active">ON</button></div></div>
     <div class="option"><span><b>AUTO CAMERA</b><small>星を画面に収め続ける</small></span><div class="segments"><button id="cameraToggle" class="active">ON</button></div></div>
-    <p class="keys">SPACE 再生/停止 · 1–0 軌道 · N / B 次/前 · R やり直し · G 分身</p>
+    <p class="keys">SPACE 再生/停止 · 1–0 軌道 · N / B 次/前 · R やり直し · G 分身 · F 回転座標 · E 編集</p>
   </aside>
   <nav class="dock" aria-label="再生コントロール">
     <button id="motion" class="play" aria-label="一時停止">Ⅱ</button>
@@ -51,7 +59,7 @@
   </nav>
   <div id="error" class="error" hidden><b>WEBGL2 NOT AVAILABLE</b><p>最新の Safari または Chrome で開いてください。</p></div>
 </main>
-<script src="./physics.js?v=1.1"></script>
-<script src="./app.js?v=1.1"></script>
+<script src="./physics.js?v=1.2"></script>
+<script src="./app.js?v=1.2"></script>
 </body>
 </html>

@@ -160,7 +160,8 @@
     const o = opts || {};
     const eta = o.eta ?? 0.005;
     const dtMax = o.dtMax ?? 0.01;
-    const dtMin = o.dtMin ?? 1e-9;
+    // 下限に張りつくのは星どうしが 1e-6 より近づく正面衝突のときで、そこでは誤差が出る。
+    const dtMin = o.dtMin ?? 1e-12;
     const maxSteps = o.maxSteps ?? Infinity;
     const onStep = o.onStep;
     const step = METHODS[method].step;
@@ -302,6 +303,64 @@
     ]);
   }
 
+  function eulerLine() {
+    // 等質量が一直線に並ぶ。外側の星は中央と反対側の両方に引かれるので v² = 1 + 1/4。
+    // 完全に対称な初期値は丸め誤差も対称に入って永久に崩れないので、中央を 1e-9 ずらす。
+    // ずれは半周ごとに約 250 倍に育つ。
+    const v = Math.sqrt(1.25);
+    return recenter([
+      { m: 1, x: -1, y: 0, vx: 0, vy: -v },
+      { m: 1, x: 1e-9, y: 0, vx: 0, vy: 0 },
+      { m: 1, x: 1, y: 0, vx: 0, vy: v },
+    ]);
+  }
+
+  // 恒星(質量 1)と円軌道の惑星(質量 mu)に、惑星と同じ角速度で回る小天体を足す。
+  // angleDeg は恒星から見た惑星との角度、dr は軌道半径のずれ。
+  function coorbital(mu, angleDeg, dr) {
+    const omega = Math.sqrt(1 + mu);
+    const pair = recenter([
+      { m: 1, x: 0, y: 0, vx: 0, vy: 0 },
+      { m: mu, x: 1, y: 0, vx: 0, vy: omega },
+    ]);
+    const th = (angleDeg * Math.PI) / 180;
+    const x = pair[0].x + (1 + dr) * Math.cos(th);
+    const y = pair[0].y + (1 + dr) * Math.sin(th);
+    return recenter([...pair, { m: 1e-9, x, y, vx: -omega * y, vy: omega * x }]);
+  }
+
+  // 近日点 rp・遠日点 ra の楕円軌道に乗せた探査機が、phaseDeg の位置から回り始めた惑星とすれ違う。
+  function slingshot(mu, rp, ra, phaseDeg) {
+    const omega = Math.sqrt(1 + mu);
+    const th = (phaseDeg * Math.PI) / 180;
+    const vp = Math.sqrt(2 / rp - 2 / (rp + ra));
+    return recenter([
+      { m: 1, x: 0, y: 0, vx: 0, vy: 0 },
+      { m: mu, x: Math.cos(th), y: Math.sin(th), vx: -omega * Math.sin(th), vy: omega * Math.cos(th) },
+      { m: 1e-9, x: rp, y: 0, vx: 0, vy: vp },
+    ]);
+  }
+
+  // 間隔 1 の等質量の連星に、衝突径数 b・速さ v の星が左から飛び込む。
+  function flyby(b, v, phaseDeg) {
+    const th = (phaseDeg * Math.PI) / 180;
+    const vb = Math.sqrt(2) / 2;
+    return recenter([
+      { m: 1, x: 0.5 * Math.cos(th), y: 0.5 * Math.sin(th), vx: -vb * Math.sin(th), vy: vb * Math.cos(th) },
+      { m: 1, x: -0.5 * Math.cos(th), y: -0.5 * Math.sin(th), vx: vb * Math.sin(th), vy: -vb * Math.cos(th) },
+      { m: 1, x: -7, y: b, vx: v, vy: 0 },
+    ]);
+  }
+
+  function suvakovScenario(id, name, p1, p2, period) {
+    return {
+      id, group: 'periodic', name, sub: 'ŠUVAKOV–DMITRAŠINOVIĆ 2013',
+      make: () => suvakov(p1, p2), period, view: 1.6, speed: Math.max(1.2, period / 7), trail: period * 1.02,
+      formula: `r = (−1,0) (1,0) (0,0)\nv₁ = v₂ = (${p1}, ${p2}),  v₃ = −2v₁`,
+      text: `2013 年に見つかった 13 種の周期解の仲間。名前は、3 体の並び方を球面に写したときの軌跡の形から付けられた。1 周期は T ≈ ${period}。`,
+    };
+  }
+
   // 束縛された(全エネルギーが負の)ランダムな 3 体。同じ seed なら同じ初期条件。
   function randomBodies(seed) {
     const rng = mulberry32(seed);
@@ -336,64 +395,113 @@
     return bodies;
   }
 
+  const GROUPS = [
+    { id: 'periodic', label: 'PERIODIC', note: '同じ軌道を繰り返す解' },
+    { id: 'classic', label: 'CLASSIC', note: '18〜20 世紀の有名な問題' },
+    { id: 'system', label: 'SOLAR SYSTEM', note: '恒星と惑星と小さな天体' },
+    { id: 'chaos', label: 'CHAOS', note: '散乱とカオス' },
+  ];
+
+  // group の並びは GROUPS の順。N / B キーはこの配列の順に巡る。
   const SCENARIOS = [
     {
-      id: 'figure8', key: '1', name: 'FIGURE-8', sub: 'MOORE 1993',
+      id: 'figure8', key: '1', group: 'periodic', name: 'FIGURE-8', sub: 'MOORE 1993',
       make: figureEight, period: 6.32591398, view: 1.5, speed: 1.2, trail: 6.4,
       formula: 'r₁ = −r₂ = (0.97000436, −0.24308753),  r₃ = 0\nv₃ = (−0.93240737, −0.86473146),  v₁ = v₂ = −v₃/2',
       text: '等しい質量の 3 つの星が、1 本の 8 の字を等間隔で追いかけ合う軌道。1993 年に Cristopher Moore が数値計算で見つけ、2000 年に Chenciner と Montgomery が存在を証明した。少し揺らしても形を保つ、数少ない安定な周期解。',
     },
     {
-      id: 'butterfly1', key: '2', name: 'BUTTERFLY I', sub: 'ŠUVAKOV–DMITRAŠINOVIĆ 2013',
+      id: 'butterfly1', key: '2', group: 'periodic', name: 'BUTTERFLY I', sub: 'ŠUVAKOV–DMITRAŠINOVIĆ 2013',
       make: () => suvakov(0.30689, 0.12551), period: 6.2356, view: 1.5, speed: 1.2, trail: 6.3,
       formula: 'r = (−1,0) (1,0) (0,0)\nv₁ = v₂ = (0.30689, 0.12551),  v₃ = −2v₁',
       text: '2013 年にベオグラードの Šuvakov と Dmitrašinović が計算機で探し当てた 13 種の周期解のひとつ。蝶の羽のような形を描く。不安定なので、初期値の丸め誤差が育って数周でほどけていく。',
     },
     {
-      id: 'moth1', key: '3', name: 'MOTH I', sub: 'ŠUVAKOV–DMITRAŠINOVIĆ 2013',
+      id: 'moth1', key: '3', group: 'periodic', name: 'MOTH I', sub: 'ŠUVAKOV–DMITRAŠINOVIĆ 2013',
       make: () => suvakov(0.46444, 0.39606), period: 14.8939, view: 1.6, speed: 2, trail: 15,
       formula: 'r = (−1,0) (1,0) (0,0)\nv₁ = v₂ = (0.46444, 0.39606),  v₃ = −2v₁',
       text: '同じ 2013 年の発見から、蛾の名がついた解。3 つの星が翅を広げたような輪郭を繰り返しなぞる。',
     },
     {
-      id: 'yinyang1', key: '4', name: 'YIN-YANG I', sub: 'ŠUVAKOV–DMITRAŠINOVIĆ 2013',
+      id: 'yinyang1', key: '4', group: 'periodic', name: 'YIN-YANG I', sub: 'ŠUVAKOV–DMITRAŠINOVIĆ 2013',
       make: () => suvakov(0.51394, 0.30474), period: 17.3284, view: 1.7, speed: 2.4, trail: 17.5,
       formula: 'r = (−1,0) (1,0) (0,0)\nv₁ = v₂ = (0.51394, 0.30474),  v₃ = −2v₁',
-      text: '陰陽の勾玉が絡み合うような軌道。同じ形を時間の向きだけ変えてたどる、対になる解を持つ。',
+      text: '陰陽の勾玉が絡み合うような軌道。同じ 2013 年の発見のひとつ。',
     },
     {
-      id: 'yarn', key: '5', name: 'YARN', sub: 'ŠUVAKOV–DMITRAŠINOVIĆ 2013',
+      id: 'yarn', key: '5', group: 'periodic', name: 'YARN', sub: 'ŠUVAKOV–DMITRAŠINOVIĆ 2013',
       make: () => suvakov(0.55906, 0.34919), period: 55.5018, view: 1.8, speed: 5, trail: 56,
       formula: 'r = (−1,0) (1,0) (0,0)\nv₁ = v₂ = (0.55906, 0.34919),  v₃ = −2v₁',
       text: '毛糸玉。1 周期が長く、軌跡が幾重にも巻きついて玉になる。巻き終わると、また同じ糸の上を走りはじめる。',
     },
+    suvakovScenario('butterfly2', 'BUTTERFLY II', 0.39295, 0.09758, 7.0039),
+    suvakovScenario('butterfly3', 'BUTTERFLY III', 0.40592, 0.23016, 13.8658),
+    suvakovScenario('butterfly4', 'BUTTERFLY IV', 0.350112, 0.07934, 79.4759),
+    suvakovScenario('moth2', 'MOTH II', 0.43917, 0.45297, 28.6703),
+    suvakovScenario('moth3', 'MOTH III', 0.38344, 0.37736, 25.8406),
+    suvakovScenario('bumblebee', 'BUMBLEBEE', 0.18428, 0.58719, 63.5345),
+    suvakovScenario('goggles', 'GOGGLES', 0.0833, 0.12789, 10.4668),
+    suvakovScenario('dragonfly', 'DRAGONFLY', 0.08058, 0.58884, 21.271),
+    suvakovScenario('yinyang1b', 'YIN-YANG I B', 0.2827, 0.32721, 10.9626),
+    suvakovScenario('yinyang2a', 'YIN-YANG II A', 0.41682, 0.33033, 55.7898),
+    suvakovScenario('yinyang2b', 'YIN-YANG II B', 0.41734, 0.3131, 54.2076),
     {
-      id: 'lagrange', key: '6', name: 'LAGRANGE', sub: 'EQUILATERAL 1772',
+      id: 'lagrange', key: '6', group: 'classic', name: 'LAGRANGE', sub: 'EQUILATERAL 1772',
       make: lagrange, period: 2 * Math.PI / Math.sqrt(3 / Math.pow(Math.sqrt(3), 3)), view: 1.5, speed: 4, trail: 9,
       formula: '|rᵢ| = 1,  θ = 90° 210° 330°\nω² = M / a³,  a = √3',
       text: '1772 年にラグランジュが見つけた、正三角形のまま回り続ける解。質量が等しいと不安定で、計算機の丸め誤差(10⁻¹⁶ 程度)だけを種に、しばらく回ったあと突然崩れてカオスになる。太陽・木星・トロヤ群のように質量比が極端なら安定になる。',
     },
     {
-      id: 'burrau', key: '7', name: 'PYTHAGOREAN', sub: 'BURRAU 1913',
+      id: 'euler', group: 'classic', name: 'EULER', sub: 'COLLINEAR 1767',
+      make: eulerLine, period: 2 * Math.PI / Math.sqrt(1.25), view: 1.5, speed: 2, trail: 8,
+      formula: 'r = (−1,0) (10⁻⁹,0) (1,0)\nv = (0, ∓√1.25),  中央は静止',
+      text: '1767 年にオイラーが見つけた、3 体が一直線に並んだまま回る解。ラグランジュの正三角形解より先に見つかった、三体問題で最初の厳密解。とても不安定で、ここでは中央の星を 10⁻⁹ だけずらしてある。そのずれが半周ごとに約 250 倍に育ち、2 周目で列が崩れる。',
+    },
+    {
+      id: 'burrau', key: '7', group: 'classic', name: 'PYTHAGOREAN', sub: 'BURRAU 1913',
       // 接近遭遇が深く、刻みが粗いと弾き出しの時刻がずれる。
       make: burrau, view: 4.5, speed: 3, trail: 12, eta: 0.002,
       formula: 'm = 3, 4, 5   v = 0\nr = (1,3) (−2,−1) (1,−1)',
       text: '辺が 3:4:5 の直角三角形の頂点に、向かいの辺と同じ質量の星を静止させて放す。1913 年に Burrau が出した問題で、1967 年に Szebehely と Peters が計算機で最後まで解いた。何度もすれ違ったあと、t ≈ 60 で 2 つが連星になり、残る 1 つが弾き出される。',
     },
     {
-      id: 'moon', key: '8', name: 'STAR·PLANET·MOON', sub: 'HIERARCHY',
+      id: 'moon', key: '8', group: 'system', name: 'STAR·PLANET·MOON', sub: 'HIERARCHY',
       make: starPlanetMoon, view: 1.35, speed: 1.2, trail: 5,
       formula: 'm = 1, 10⁻², 10⁻⁵\nr(planet) = 1,  r(moon) = 0.05',
       text: '恒星・惑星・月。質量と距離に大きな段差がある「階層的」な三体は、2 つの二体問題にほぼ分かれて安定に回る。月の軌道は、惑星の重力が勝つ範囲(ヒル球)の内側にある。',
     },
     {
-      id: 'binary', key: '9', name: 'CIRCUMBINARY', sub: 'PLANET OF TWO SUNS',
+      id: 'binary', key: '9', group: 'system', name: 'CIRCUMBINARY', sub: 'PLANET OF TWO SUNS',
       make: circumbinary, view: 3.8, speed: 4, trail: 40,
       formula: 'm = 1, 1, 10⁻³\na(binary) = 1,  r(planet) = 3.2',
       text: '2 つの太陽のまわりを回る惑星。連星の間隔のおよそ 2〜3 倍より外側なら、惑星の軌道は安定する。ケプラー 16b など、実在の周連星惑星もこの境界のすぐ外側で見つかっている。',
     },
     {
-      id: 'random', key: '0', name: 'RANDOM', sub: 'CHAOS',
+      id: 'trojan', group: 'system', name: 'TROJAN', sub: 'L4 TADPOLE', rotating: [0, 1],
+      make: () => coorbital(1e-3, 100, 0), view: 1.4, speed: 12, trail: 90,
+      formula: 'm = 1, 10⁻³, 10⁻⁹\n惑星の 100° 前方、同じ半径・同じ角速度',
+      text: '恒星・惑星と正三角形をつくる点(L4)は惑星の 60° 前方にある。その少し先に置いた小天体は、L4 のまわりをおたまじゃくし形にゆっくり往復し続ける。木星のこの場所には、トロヤ群と呼ばれる小惑星が 1 万個以上見つかっている。ROTATING FRAME を切ると、ただの円軌道にしか見えない。',
+    },
+    {
+      id: 'horseshoe', group: 'system', name: 'HORSESHOE', sub: 'CO-ORBITAL', rotating: [0, 1],
+      make: () => coorbital(1e-3, 180, 0), view: 1.4, speed: 40, trail: 400,
+      formula: 'm = 1, 10⁻³, 10⁻⁹\n惑星の反対側、同じ半径・同じ角速度',
+      text: '惑星と同じ軌道を回る小天体。惑星に後ろから近づくと外側の軌道へ押し出されて遅れはじめ、1 周遅れで前から近づくと内側へ入ってまた追いかける。惑星と一緒に回る座標で見ると、軌跡が馬蹄形になる。土星の衛星ヤヌスとエピメテウスは、約 4 年ごとにこのやり方で軌道を入れ替えている。',
+    },
+    {
+      id: 'slingshot', group: 'system', name: 'SLINGSHOT', sub: 'GRAVITY ASSIST',
+      make: () => slingshot(1e-3, 0.5, 1.15, 63), view: 2, speed: 0.8, trail: 30, eta: 0.002,
+      formula: 'm = 1, 10⁻³, 10⁻⁹\n探査機: 近日点 0.5・遠日点 1.15 の楕円',
+      text: '探査機が t ≈ 1.3 で惑星のすぐ後ろをかすめ、惑星の公転の勢いをもらって加速する。軌道の長半径は 0.8 から 6 へ伸び、惑星の軌道の 10 倍の遠さまで届くようになる。燃料を使わずに速度を得るスイングバイで、ボイジャーの木星通過や、はやぶさの地球スイングバイと同じ原理。',
+    },
+    {
+      id: 'exchange', group: 'chaos', name: 'EXCHANGE', sub: 'BINARY + VISITOR',
+      make: () => flyby(1, 0.5, 45), view: 3, speed: 2, trail: 20, eta: 0.002,
+      formula: 'm = 1, 1, 1   連星の間隔 1\n来訪者: 速さ 0.5、衝突径数 1',
+      text: '回り合う連星に、遠くから 3 つ目の星が飛び込む。もつれ合ったあと、来訪者が連星の片方と入れ替わり、元の相方が弾き出される。星が密集した球状星団の中で実際に起きている交換反応。',
+    },
+    {
+      id: 'random', key: '0', group: 'chaos', name: 'RANDOM', sub: 'CHAOS',
       make: randomBodies, view: 2.2, speed: 2, trail: 14, random: true,
       formula: 'm ∈ [0.4, 2.0]   E < 0\nΣ m r = 0,  Σ m v = 0',
       text: 'ランダムな質量と初速の 3 体。ほとんどの初期条件はカオスで、たいてい最後は 1 つが弾き出されて連星が残る。もう一度選ぶと別の宇宙が始まる。',
@@ -405,7 +513,7 @@
   }
 
   return {
-    System, METHODS, SCENARIOS, advance, energy, momentum, separation, freeFallTime,
+    System, METHODS, GROUPS, SCENARIOS, advance, energy, momentum, separation, freeFallTime,
     recenter, suvakov, randomBodies, createSystem,
   };
 });
