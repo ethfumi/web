@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#03060c">
+  <meta name="description" content="3 つの星が重力で引き合う軌道を、ブラウザでリアルタイムに計算して描く三体問題シミュレーター">
+  <meta property="og:title" content="THREE BODIES / GRAVITY FIELD">
+  <meta property="og:description" content="8 の字、蝶、毛糸玉、ピタゴラス問題。三体問題の有名な軌道をリアルタイムに計算する">
+  <title>THREE BODIES / GRAVITY FIELD</title>
+  <link rel="stylesheet" href="./style.css?v=1.0">
+</head>
+<body>
+<main class="app">
+  <canvas id="scene" aria-label="三体問題の重力シミュレーション"></canvas>
+  <header class="topbar">
+    <div>
+      <span class="eyebrow">THREE BODIES · v1.0 · BY <a href="https://x.com/fumilin" target="_blank" rel="me noopener noreferrer">@fumilin ↗</a></span>
+      <h1><span id="title">FIGURE-8</span> <em id="subtitle">/ MOORE 1993</em></h1>
+    </div>
+    <div class="readout">
+      <span>T <b id="timeOut">0.00</b></span>
+      <span id="orbitRead">ORBIT <b id="orbitOut">0.00</b></span>
+      <span>ΔE <b id="energyOut">0.000 ppm</b></span>
+      <span id="ghostRead" hidden>GHOST Δ <b id="ghostOut">1.0e-6</b></span>
+      <span><b id="fps">-- FPS</b></span>
+    </div>
+  </header>
+  <aside class="panel" id="panel" aria-label="シミュレーション設定">
+    <header><div><span>ORBIT LIBRARY</span><b>初期条件を切り替える</b></div><button id="closePanel" aria-label="設定を閉じる">×</button></header>
+    <div class="scenarioGrid" id="scenarioGrid"></div>
+    <section class="theory" aria-live="polite">
+      <span>INITIAL CONDITION / STORY</span>
+      <h2 id="theoryTitle"></h2>
+      <code id="formula"></code>
+      <p id="theoryText"></p>
+      <ul class="masses" id="massList"></ul>
+    </section>
+    <label><span><b>TRAIL</b><small>軌跡の長さ</small></span><output id="trailValue">×1.0</output><input id="trail" type="range" min="-1" max="1" step=".05" value="0"></label>
+    <div class="option"><span><b>INTEGRATOR</b><small id="methodNote"></small></span><div class="segments" id="methods"></div></div>
+    <div class="option"><span><b>GHOST</b><small>星 1 を 10⁻⁶ ずらした分身を並走させる</small></span><div class="segments"><button id="ghostToggle">OFF</button></div></div>
+    <div class="option"><span><b>CONTOUR</b><small>重力ポテンシャルの等高線</small></span><div class="segments"><button id="contourToggle" class="active">ON</button></div></div>
+    <div class="option"><span><b>AUTO CAMERA</b><small>星を画面に収め続ける</small></span><div class="segments"><button id="cameraToggle" class="active">ON</button></div></div>
+    <p class="keys">SPACE 再生/停止 · 1–0 軌道 · N / B 次/前 · R やり直し · G 分身</p>
+  </aside>
+  <nav class="dock" aria-label="再生コントロール">
+    <button id="motion" class="play" aria-label="一時停止">Ⅱ</button>
+    <label class="speed"><span>SPEED</span><output id="speedValue">×1.0</output><input id="speed" type="range" min="-1" max="1" step=".05" value="0"></label>
+    <button id="openPanel" class="dockButton" aria-label="軌道ライブラリを開く"><b>⌁</b><small>LIBRARY</small></button>
+    <button id="reset" class="dockButton" aria-label="最初からやり直す"><b>↺</b><small>RESET</small></button>
+  </nav>
+  <div id="error" class="error" hidden><b>WEBGL2 NOT AVAILABLE</b><p>最新の Safari または Chrome で開いてください。</p></div>
+</main>
+<script src="./physics.js?v=1.0"></script>
+<script src="./app.js?v=1.0"></script>
+</body>
+</html>
