@@ -1,54 +1,151 @@
 <!doctype html>
-<html lang="en">
+<html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Morph</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#02030a">
+<meta name="description" content="十数万個の光の粒が、銀河・球・結び目・波・格子へと形を変えていく WebGL アニメーション">
+<meta property="og:title" content="MORPH / PARTICLE FIELD">
+<meta property="og:description" content="十数万個の光の粒が形を変えていく WebGL アニメーション">
+<title>MORPH / PARTICLE FIELD</title>
 <style>
-  html, body { margin: 0; height: 100%; background: #02030a; overflow: hidden; }
-  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  :root {
+    --ink: #dfe8ff;
+    --dim: #7f8fae;
+    --line: rgba(160, 185, 235, .16);
+    --glass: rgba(5, 8, 20, .74);
+    --accent: #8fb8ff;
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+    --sans: system-ui, -apple-system, "Hiragino Sans", "Yu Gothic UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #02030a; color: var(--ink); font-family: var(--sans); overflow: hidden; overscroll-behavior: none; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+  canvas.dragging { cursor: grabbing; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  .vignette { position: fixed; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, .65) 100%); }
+
+  .topbar { position: fixed; top: max(14px, env(safe-area-inset-top)); left: max(16px, env(safe-area-inset-left)); pointer-events: none; }
+  .topbar a { color: inherit; pointer-events: auto; }
+  .eyebrow { font: 10px/1 var(--mono); letter-spacing: .18em; color: var(--dim); }
+  h1 { margin: 6px 0 8px; font: 600 22px/1.1 var(--mono); letter-spacing: .06em; }
+  h1 em { font-style: normal; font-weight: 400; font-size: 12px; color: var(--dim); letter-spacing: .14em; }
+  .readout { display: flex; gap: 14px; font: 11px/1.4 var(--mono); letter-spacing: .08em; color: var(--dim); }
+  .readout b { color: var(--ink); font-weight: 500; }
+
   .hud {
-    position: fixed; left: 4vw; bottom: 5vh; color: #dfe8ff;
-    font: 500 12px/1 ui-monospace, "SF Mono", Consolas, "Cascadia Mono", monospace;
-    letter-spacing: 0.32em; text-transform: uppercase; user-select: none; pointer-events: none;
+    position: fixed; left: max(16px, env(safe-area-inset-left)); bottom: 5vh;
+    font: 500 12px/1 var(--mono); letter-spacing: .32em; text-transform: uppercase;
+    user-select: none; pointer-events: none; transition: opacity .3s ease;
   }
   .cap { display: flex; align-items: baseline; gap: 1.4em; transition: opacity .45s ease, transform .45s ease; }
   .cap.off { opacity: 0; transform: translateY(6px); }
   .num { opacity: .45; }
-  .name { font-size: 22px; font-weight: 300; letter-spacing: 0.42em; }
+  .name { font-size: 22px; font-weight: 300; letter-spacing: .42em; }
   .bars { display: flex; gap: 6px; margin-top: 18px; }
   .bar { width: 44px; height: 2px; background: rgba(223, 232, 255, .16); overflow: hidden; }
-  .bar i { display: block; height: 100%; width: 100%; background: #dfe8ff; transform-origin: left; transform: scaleX(0); }
-  .tag {
-    position: fixed; right: 4vw; top: 5vh; color: rgba(223, 232, 255, .4);
-    font: 500 11px/1 ui-monospace, "SF Mono", Consolas, "Cascadia Mono", monospace;
-    letter-spacing: 0.32em; text-transform: uppercase; user-select: none; pointer-events: none;
+  .bar i { display: block; height: 100%; width: 100%; background: var(--ink); transform-origin: left; transform: scaleX(0); }
+
+  .fab {
+    position: fixed; top: max(14px, env(safe-area-inset-top)); right: 16px;
+    display: grid; justify-items: center; gap: 3px; padding: 8px 12px;
+    border: 1px solid var(--line); border-radius: 999px; background: var(--glass);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   }
-  .vignette { position: fixed; inset: 0; pointer-events: none;
-    background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, .65) 100%); }
-  .err { position: fixed; inset: 0; display: grid; place-items: center; color: #dfe8ff; font: 14px system-ui, sans-serif; }
+  .fab b { font-size: 15px; font-weight: 400; line-height: 1; }
+  .fab small { font: 8px/1 var(--mono); letter-spacing: .14em; color: var(--dim); }
+  body.panelOpen .fab { display: none; }
+
+  .panel {
+    position: fixed; top: 0; right: 0; bottom: 0; width: 348px; padding: 16px 16px 28px; overflow-y: auto;
+    background: var(--glass); border-left: 1px solid var(--line);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    transform: translateX(100%); transition: transform .28s ease;
+    scrollbar-width: thin; scrollbar-color: var(--line) transparent;
+  }
+  body.panelOpen .panel { transform: none; }
+  .panel > header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .panel > header span { display: block; font: 10px/1 var(--mono); letter-spacing: .18em; color: var(--dim); }
+  .panel > header b { display: block; margin-top: 6px; font-size: 13px; font-weight: 500; }
+  #closePanel { width: 30px; height: 30px; border: 1px solid var(--line); border-radius: 50%; background: none; font-size: 16px; line-height: 1; }
+
+  .shapeGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .shapeGrid button {
+    position: relative; padding: 9px 10px 8px; text-align: left;
+    border: 1px solid var(--line); border-radius: 8px; background: rgba(140, 170, 230, .04);
+  }
+  .shapeGrid button b { display: block; font: 600 11px/1.2 var(--mono); letter-spacing: .06em; }
+  .shapeGrid button small { display: block; margin-top: 4px; font-size: 10px; color: var(--dim); }
+  .shapeGrid button i { position: absolute; top: 7px; right: 8px; font: normal 9px/1 var(--mono); color: var(--dim); }
+  .shapeGrid button.active { border-color: var(--accent); background: rgba(143, 184, 255, .12); }
+  .shapeGrid button.next { border-color: rgba(143, 184, 255, .45); }
+
+  .panel label, .option {
+    display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 6px 10px;
+    padding: 11px 2px; border-bottom: 1px solid var(--line);
+  }
+  .panel label span b, .option span b { display: block; font: 600 11px/1 var(--mono); letter-spacing: .1em; }
+  .panel label span small, .option span small { display: block; margin-top: 5px; font-size: 11px; color: var(--dim); }
+  output { font: 11px/1 var(--mono); color: var(--accent); }
+  .panel label input { grid-column: 1 / -1; }
+  input[type="range"] { width: 100%; height: 18px; margin: 0; background: none; accent-color: var(--accent); }
+  .segments { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; }
+  .segments button {
+    padding: 6px 9px; border: 1px solid var(--line); border-radius: 6px; background: none;
+    font: 10px/1 var(--mono); letter-spacing: .06em; color: var(--dim); white-space: nowrap;
+  }
+  .segments button.active { border-color: var(--accent); color: var(--ink); background: rgba(143, 184, 255, .12); }
+  .keys { margin: 14px 2px 0; font: 10px/1.7 var(--mono); letter-spacing: .04em; color: var(--dim); }
+  .err { position: fixed; inset: 0; display: grid; place-items: center; font: 14px var(--sans); }
+
+  @media (max-width: 900px) {
+    h1 { font-size: 18px; }
+    .panel {
+      top: auto; left: 0; width: auto; max-height: 60vh;
+      border-left: 0; border-top: 1px solid var(--line); border-radius: 16px 16px 0 0;
+      transform: translateY(100%);
+    }
+    .fab { top: auto; bottom: max(16px, env(safe-area-inset-bottom)); }
+    body.panelOpen .hud { opacity: 0; }
+  }
 </style>
 </head>
 <body>
-<canvas id="c"></canvas>
+<canvas id="c" aria-label="形を変えていく光の粒"></canvas>
 <div class="vignette"></div>
-<div class="tag" id="tag"></div>
+<header class="topbar">
+  <span class="eyebrow">PARTICLE MORPH · v1.0 · BY <a href="https://x.com/fumilin" target="_blank" rel="me noopener noreferrer">@fumilin ↗</a></span>
+  <h1>MORPH <em>/ PARTICLE FIELD</em></h1>
+  <div class="readout"><span><b id="count">--</b> PARTICLES</span><span><b id="fps">-- FPS</b></span></div>
+</header>
 <div class="hud">
   <div class="cap" id="cap"><span class="num" id="num">01 / 05</span><span class="name" id="name">Galaxy</span></div>
   <div class="bars" id="bars"></div>
 </div>
+<button id="openPanel" class="fab" aria-label="設定を開く"><b>⌁</b><small>CONTROLS</small></button>
+<aside class="panel" id="panel" aria-label="アニメーション設定">
+  <header><div><span>SHAPE LIBRARY</span><b>形を選ぶ・動きを変える</b></div><button id="closePanel" aria-label="設定を閉じる">×</button></header>
+  <div class="shapeGrid" id="shapeGrid"></div>
+  <div class="option"><span><b>AUTO CYCLE</b><small>順番に形を切り替える</small></span><div class="segments"><button id="autoToggle" class="active">ON</button></div></div>
+  <div id="sliders"></div>
+  <div class="option"><span><b>PARTICLES</b><small>粒の数</small></span><div class="segments" id="counts"></div></div>
+  <div class="option"><span><b>RESET</b><small>設定と視点を最初に戻す</small></span><div class="segments"><button id="reset">RESET</button></div></div>
+  <p class="keys">ドラッグ 回転 · ホイール / ピンチ ズーム · SPACE 再生/停止 · 1–5 形 · ← → 前/次</p>
+</aside>
 
 <script id="vs" type="x-shader/x-vertex">
 precision highp float;
 attribute vec4 a_seed;
 attribute vec4 a_seed2;
-uniform float u_time, u_local, u_a, u_b, u_aspect, u_px, u_intro, u_gain;
+uniform float u_time, u_morph, u_a, u_b, u_aspect, u_px, u_intro, u_gain;
+uniform float u_yaw, u_pitch, u_dist, u_fit, u_size, u_chaos, u_hue;
+uniform vec2 u_shift;
 varying vec3 v_col;
 varying float v_alpha;
 
 const float PI = 3.14159265;
 const float TAU = 6.2831853;
-const float HOLD = 2.3;
 const float F = 1.8;
 
 mat2 rot(float a) { float c = cos(a), s = sin(a); return mat2(c, -s, s, c); }
@@ -143,34 +240,35 @@ void main() {
     vec3 B = shape(u_b, s, u_time);
     // 中心から外へ波及する順に乗り換える
     float st = 0.6 * clamp(length(A) / 1.6, 0.0, 1.0) + 0.4 * r.x;
-    k = smoothstep(0.0, 1.0, (u_local - HOLD - st * 0.7) / 0.75);
+    k = smoothstep(0.0, 1.0, (u_morph - st * 0.7) / 0.75);
     mid = sin(PI * k);
+    float wild = mid * u_chaos;
     p = mix(A, B, k);
-    p.xz = rot(mid * 1.4 * (0.5 + r.y)) * p.xz;
-    p += mid * (r.yzw - 0.5) * 0.7;
-    p += mid * 0.22 * vec3(sin(p.y * 3.0 + u_time * 1.3), sin(p.z * 3.0 + u_time * 1.7), sin(p.x * 3.0 + u_time));
+    p.xz = rot(wild * 1.4 * (0.5 + r.y)) * p.xz;
+    p += wild * (r.yzw - 0.5) * 0.7;
+    p += wild * 0.22 * vec3(sin(p.y * 3.0 + u_time * 1.3), sin(p.z * 3.0 + u_time * 1.7), sin(p.x * 3.0 + u_time));
     p *= u_intro;
-    float hue = mix(hueOf(u_a), hueOf(u_b), k) + 0.16 * (r.z - 0.5) + 0.10 * length(p);
+    float hue = mix(hueOf(u_a), hueOf(u_b), k) + 0.16 * (r.z - 0.5) + 0.10 * length(p) + u_hue;
     col = pal(hue);
     col = mix(col, vec3(1.0), 0.15 + 0.35 * mid);
     col *= 0.6 + 0.8 * r.y;
   }
 
-  p.xz = rot(u_time * 0.22) * p.xz;
-  p.yz = rot(0.42 + 0.2 * sin(u_time * 0.19)) * p.yz;
-  float zc = p.z + 3.7 + 0.35 * sin(u_time * 0.31);
+  p.xz = rot(u_yaw) * p.xz;
+  p.yz = rot(u_pitch) * p.yz;
+  float zc = p.z + u_dist;
 
-  float size = mix(0.006, 0.015, r.z * r.z);
+  float size = mix(0.006, 0.015, r.z * r.z) * u_size;
   if (star < 0.5 && r.w < 0.04) { size *= 7.0; alpha *= 0.10; }
-  float sc = min(1.0, u_aspect);
-  float ps = u_px * size * F / max(zc, 0.05) * 0.5 * sc;
+  float ps = u_px * size * F / max(zc, 0.05) * 0.5 * u_fit;
   if (ps < 1.5) { alpha *= (ps / 1.5) * (ps / 1.5); ps = 1.5; }
 
-  float fog = 1.0 - smoothstep(2.2, 5.9, zc);
+  // 奥行きの暗さは、カメラの距離ではなく形の中での前後で決める。寄っても引いても同じ濃淡になる。
+  float fog = 1.0 - smoothstep(2.2, 5.9, p.z + 3.7);
   v_col = col;
   v_alpha = alpha * u_gain * mix(0.35, 1.0, star > 0.5 ? 1.0 : fog);
   gl_PointSize = ps;
-  gl_Position = vec4(p.x * F / u_aspect * sc, p.y * F * sc, 0.0, zc);
+  gl_Position = vec4(p.x * F * u_fit / u_aspect + u_shift.x * zc, p.y * F * u_fit + u_shift.y * zc, 0.0, zc);
 }
 </script>
 
@@ -189,23 +287,38 @@ void main() {
 
 <script>
 (() => {
-  const NAMES = ['Galaxy', 'Sphere', 'Torus Knot', 'Ripple', 'Lattice'];
-  const SEG = 4.0, HOLD = 2.3;
+  const SHAPES = [
+    { name: 'Galaxy', note: '渦巻く 3 本の腕' },
+    { name: 'Sphere', note: '脈打つ二重の球' },
+    { name: 'Torus Knot', note: '結び目の管' },
+    { name: 'Ripple', note: '波打つグリッド' },
+    { name: 'Lattice', note: '立方格子' },
+  ];
+  // 乗り換えは粒ごとに最大 0.7 遅れて始まり 0.75 かけて終わる。全粒が終わるまでの長さ。
+  const MORPH = 1.7;
+  const COUNTS = [40000, 80000, 160000, 320000];
+  const SLIDERS = [
+    { id: 'speed', label: 'SPEED', note: '動きと切り替えの速さ', min: -1, max: 0.7, step: 0.05, value: 0, log: true, fmt: (v) => '×' + v.toFixed(2) },
+    { id: 'hold', label: 'HOLD', note: '形を保つ時間', min: 0.3, max: 10, step: 0.1, value: 2.3, fmt: (v) => v.toFixed(1) + ' s' },
+    { id: 'chaos', label: 'TURBULENCE', note: '切り替え途中の乱れ', min: 0, max: 3, step: 0.05, value: 1, fmt: (v) => '×' + v.toFixed(2) },
+    { id: 'size', label: 'SIZE', note: '粒の大きさ', min: -0.5, max: 0.5, step: 0.02, value: 0, log: true, fmt: (v) => '×' + v.toFixed(2) },
+    { id: 'glow', label: 'GLOW', note: '明るさ', min: -0.6, max: 0.5, step: 0.02, value: 0, log: true, fmt: (v) => '×' + v.toFixed(2) },
+    { id: 'hue', label: 'HUE', note: '色相をずらす', min: -0.5, max: 0.5, step: 0.01, value: 0, fmt: (v) => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) },
+    { id: 'spin', label: 'SPIN', note: '自動回転の速さ', min: -3, max: 3, step: 0.1, value: 1, fmt: (v) => '×' + v.toFixed(1) },
+  ];
+  const VIEW = { yaw: 0, pitch: 0.42, dist: 3.7 };
 
-  const canvas = document.getElementById('c');
+  const $ = (id) => document.getElementById(id);
+  const canvas = $('c');
   const gl = canvas.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'high-performance' });
   if (!gl) {
     document.body.insertAdjacentHTML('beforeend', '<div class="err">WebGL is not available.</div>');
     return;
   }
 
-  const small = innerWidth * innerHeight < 700 * 700;
-  const N = small ? 80000 : 160000;
-  document.getElementById('tag').textContent = `Morph · ${N / 1000}k particles`;
-
   const compile = (type, id) => {
     const sh = gl.createShader(type);
-    gl.shaderSource(sh, document.getElementById(id).textContent);
+    gl.shaderSource(sh, $(id).textContent);
     gl.compileShader(sh);
     if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh));
     return sh;
@@ -217,20 +330,9 @@ void main() {
   if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
   gl.useProgram(prog);
 
-  const attr = (name) => {
-    const data = new Float32Array(N * 4);
-    for (let i = 0; i < data.length; i++) data[i] = Math.random();
-    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-    const loc = gl.getAttribLocation(prog, name);
-    gl.enableVertexAttribArray(loc);
-    gl.vertexAttribPointer(loc, 4, gl.FLOAT, false, 0, 0);
-  };
-  attr('a_seed');
-  attr('a_seed2');
-
   const U = {};
-  for (const n of ['u_time', 'u_local', 'u_a', 'u_b', 'u_aspect', 'u_px', 'u_intro', 'u_gain']) {
+  for (const n of ['u_time', 'u_morph', 'u_a', 'u_b', 'u_aspect', 'u_px', 'u_intro', 'u_gain',
+    'u_yaw', 'u_pitch', 'u_dist', 'u_fit', 'u_size', 'u_chaos', 'u_hue', 'u_shift']) {
     U[n] = gl.getUniformLocation(prog, n);
   }
 
@@ -239,58 +341,271 @@ void main() {
   gl.blendFunc(gl.ONE, gl.ONE);
   gl.clearColor(0.008, 0.012, 0.035, 1);
 
-  const resize = () => {
-    const dpr = Math.min(devicePixelRatio || 1, 2);
-    const w = Math.round(innerWidth * dpr), h = Math.round(innerHeight * dpr);
+  const st = {
+    a: 0, b: 0, morph: 0, morphing: false, queued: null, held: 0,
+    auto: true, playing: true, time: 0, camTime: 0,
+    count: innerWidth * innerHeight < 700 * 700 ? 80000 : 160000,
+    yaw: VIEW.yaw, pitch: VIEW.pitch, dist: VIEW.dist,
+    fit: 1, shiftX: 0, shiftY: 0,
+  };
+
+  // 粒は位置を持たない。属性は乱数 8 個だけで、位置は頂点シェーダーが毎フレーム計算する。
+  const buffers = ['a_seed', 'a_seed2'].map((name) => ({ loc: gl.getAttribLocation(prog, name), buf: gl.createBuffer() }));
+  function setCount(n) {
+    st.count = n;
+    for (const { loc, buf } of buffers) {
+      const data = new Float32Array(n * 4);
+      for (let i = 0; i < data.length; i++) data[i] = Math.random();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, 4, gl.FLOAT, false, 0, 0);
+    }
+    $('count').textContent = n / 1000 + 'k';
+    document.querySelectorAll('#counts button').forEach((b) => b.classList.toggle('active', Number(b.dataset.count) === n));
+  }
+
+  // ---- 形の切り替え ----
+
+  function goTo(i) {
+    const target = (i + SHAPES.length) % SHAPES.length;
+    if (st.morphing) {
+      st.queued = target;
+    } else if (target !== st.a) {
+      st.b = target;
+      st.morph = 0;
+      st.morphing = true;
+    }
+    renderShapes();
+  }
+
+  function tick(dt) {
+    const d = st.playing ? dt * st.speed : 0;
+    st.time += d;
+    if (st.playing) st.camTime += dt;
+    if (st.morphing) {
+      st.morph += d;
+      if (st.morph >= MORPH) {
+        st.a = st.b;
+        st.morph = 0;
+        st.morphing = false;
+        st.held = 0;
+        const next = st.queued;
+        st.queued = null;
+        if (next !== null && next !== st.a) goTo(next);
+        else renderShapes();
+      }
+    } else {
+      st.held += d;
+      if (st.auto && st.held >= st.hold) goTo(st.a + 1);
+    }
+  }
+
+  // ---- 画面 ----
+
+  const dpr = () => Math.min(devicePixelRatio || 1, 2);
+  const panel = $('panel');
+
+  function resize() {
+    const w = Math.round(innerWidth * dpr()), h = Math.round(innerHeight * dpr());
     if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
     gl.viewport(0, 0, w, h);
     gl.uniform1f(U.u_aspect, w / h);
     gl.uniform1f(U.u_px, h);
-  };
-  addEventListener('resize', resize);
-  resize();
-  gl.uniform1f(U.u_gain, 0.42 * 160000 / N);
+  }
 
-  const cap = document.getElementById('cap');
-  const num = document.getElementById('num');
-  const name = document.getElementById('name');
-  const bars = document.getElementById('bars');
-  const fills = NAMES.map(() => {
+  // パネルが開いているあいだは、残りの領域の中央に収める。広い画面では右、狭い画面では下にパネルが出る。
+  let laidOut = false;
+  function layout(dt) {
+    const W = canvas.width, H = canvas.height;
+    let w = W, bottom = 0;
+    if (document.body.classList.contains('panelOpen')) {
+      if (innerWidth > 900) w = W - panel.offsetWidth * dpr();
+      else bottom = panel.offsetHeight * dpr();
+    }
+    const k = laidOut ? 1 - Math.exp(-dt * 9) : 1;
+    laidOut = true;
+    st.fit +=(Math.min(w, H - bottom) / H - st.fit) * k;
+    st.shiftX += (w / W - 1 - st.shiftX) * k;
+    st.shiftY += (bottom / H - st.shiftY) * k;
+  }
+
+  function draw(intro) {
+    gl.uniform1f(U.u_time, st.time);
+    gl.uniform1f(U.u_morph, st.morphing ? st.morph : 0);
+    gl.uniform1f(U.u_a, st.a);
+    gl.uniform1f(U.u_b, st.morphing ? st.b : st.a);
+    gl.uniform1f(U.u_intro, intro);
+    gl.uniform1f(U.u_gain, (0.42 * 160000 / st.count) * st.glow);
+    gl.uniform1f(U.u_yaw, st.yaw);
+    gl.uniform1f(U.u_pitch, st.pitch + 0.2 * Math.sin(st.camTime * 0.19));
+    gl.uniform1f(U.u_dist, st.dist + 0.35 * Math.sin(st.camTime * 0.31));
+    gl.uniform1f(U.u_fit, st.fit);
+    gl.uniform2f(U.u_shift, st.shiftX, st.shiftY);
+    gl.uniform1f(U.u_size, st.size);
+    gl.uniform1f(U.u_chaos, st.chaos);
+    gl.uniform1f(U.u_hue, st.hue);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.POINTS, 0, st.count);
+  }
+
+  // ---- パネル ----
+
+  const fills = SHAPES.map(() => {
     const b = document.createElement('div');
     b.className = 'bar';
     const i = b.appendChild(document.createElement('i'));
-    bars.appendChild(b);
+    $('bars').appendChild(b);
     return i;
   });
 
-  let shown = -1;
-  const t0 = performance.now();
-  const frame = (now) => {
-    const t = window.__t ?? (now - t0) / 1000;
-    const cyc = t % (SEG * NAMES.length);
-    const seg = Math.floor(cyc / SEG);
-    const local = cyc - seg * SEG;
+  SHAPES.forEach((shape, i) => {
+    const b = document.createElement('button');
+    b.innerHTML = `<b>${shape.name.toUpperCase()}</b><small>${shape.note}</small><i>${i + 1}</i>`;
+    b.addEventListener('click', () => goTo(i));
+    $('shapeGrid').append(b);
+  });
 
-    gl.uniform1f(U.u_time, t);
-    gl.uniform1f(U.u_local, local);
-    gl.uniform1f(U.u_a, seg);
-    gl.uniform1f(U.u_b, (seg + 1) % NAMES.length);
-    gl.uniform1f(U.u_intro, 1 - Math.pow(2, -5 * t));
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.drawArrays(gl.POINTS, 0, N);
+  function renderShapes() {
+    const upcoming = st.queued ?? (st.morphing ? st.b : null);
+    document.querySelectorAll('#shapeGrid button').forEach((b, i) => {
+      b.classList.toggle('active', i === st.a);
+      b.classList.toggle('next', i === upcoming);
+    });
+    $('num').textContent = `0${st.a + 1} / 0${SHAPES.length}`;
+    $('name').textContent = SHAPES[st.a].name;
+  }
 
-    if (seg !== shown) {
-      shown = seg;
-      num.textContent = `0${seg + 1} / 0${NAMES.length}`;
-      name.textContent = NAMES[seg];
+  function setSlider(def, raw) {
+    const value = def.log ? Math.pow(10, raw) : raw;
+    st[def.id] = value;
+    $(def.id).value = raw;
+    $(def.id + 'Value').textContent = def.fmt(value);
+  }
+
+  SLIDERS.forEach((def) => {
+    const label = document.createElement('label');
+    label.innerHTML = `<span><b>${def.label}</b><small>${def.note}</small></span><output id="${def.id}Value"></output>` +
+      `<input id="${def.id}" type="range" min="${def.min}" max="${def.max}" step="${def.step}">`;
+    $('sliders').append(label);
+    $(def.id).addEventListener('input', (e) => setSlider(def, Number(e.target.value)));
+    setSlider(def, def.value);
+  });
+
+  COUNTS.forEach((n) => {
+    const b = document.createElement('button');
+    b.dataset.count = n;
+    b.textContent = n / 1000 + 'k';
+    b.addEventListener('click', () => setCount(n));
+    $('counts').append(b);
+  });
+
+  function setAuto(on) {
+    st.auto = on;
+    st.held = 0;
+    $('autoToggle').classList.toggle('active', on);
+    $('autoToggle').textContent = on ? 'ON' : 'OFF';
+  }
+
+  function setPanel(open) {
+    document.body.classList.toggle('panelOpen', open);
+  }
+
+  $('autoToggle').addEventListener('click', () => setAuto(!st.auto));
+  $('openPanel').addEventListener('click', () => setPanel(true));
+  $('closePanel').addEventListener('click', () => setPanel(false));
+  $('reset').addEventListener('click', () => {
+    SLIDERS.forEach((def) => setSlider(def, def.value));
+    Object.assign(st, VIEW);
+    setAuto(true);
+    st.playing = true;
+  });
+
+  addEventListener('keydown', (e) => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const digit = /^Digit([1-5])$/.exec(e.code);
+    if (digit) goTo(Number(digit[1]) - 1);
+    else if (e.code === 'Space') {
+      e.preventDefault();
+      st.playing = !st.playing;
+    } else if (e.code === 'ArrowRight') goTo((st.queued ?? (st.morphing ? st.b : st.a)) + 1);
+    else if (e.code === 'ArrowLeft') goTo((st.queued ?? (st.morphing ? st.b : st.a)) - 1);
+  });
+
+  // ---- 視点 ----
+
+  const pointers = new Map();
+  let pinch = 0;
+  const zoom = (factor) => { st.dist = Math.min(Math.max(st.dist * factor, 2.2), 9); };
+
+  canvas.addEventListener('pointerdown', (e) => {
+    canvas.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    canvas.classList.add('dragging');
+    if (pointers.size === 2) {
+      const [a, b] = [...pointers.values()];
+      pinch = Math.hypot(a.x - b.x, a.y - b.y);
     }
-    cap.classList.toggle('off', local > HOLD + 0.5);
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    const prev = pointers.get(e.pointerId);
+    if (!prev) return;
+    if (pointers.size === 1) {
+      st.yaw += (e.clientX - prev.x) * 0.006;
+      st.pitch = Math.min(Math.max(st.pitch + (e.clientY - prev.y) * 0.006, -1.4), 1.4);
+    }
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.size === 2) {
+      const [a, b] = [...pointers.values()];
+      const dist = Math.hypot(a.x - b.x, a.y - b.y);
+      if (pinch > 0 && dist > 0) zoom(pinch / dist);
+      pinch = dist;
+    }
+  });
+  const release = (e) => {
+    pointers.delete(e.pointerId);
+    pinch = 0;
+    if (!pointers.size) canvas.classList.remove('dragging');
+  };
+  canvas.addEventListener('pointerup', release);
+  canvas.addEventListener('pointercancel', release);
+  canvas.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    zoom(Math.exp(e.deltaY * 0.0012));
+  }, { passive: false });
+
+  // ---- ループ ----
+
+  const t0 = performance.now();
+  let last = t0, fpsFrames = 0, fpsSince = t0;
+
+  const frame = (now) => {
+    const dt = Math.min((now - last) / 1000, 0.05);
+    last = now;
+    resize();
+    layout(dt);
+    tick(dt);
+    if (st.playing && !pointers.size) st.yaw += dt * 0.22 * st.spin;
+    draw(1 - Math.pow(2, -5 * (now - t0) / 1000));
+
+    $('cap').classList.toggle('off', st.morphing && st.morph > 0.5);
     fills.forEach((f, i) => {
-      f.style.transform = `scaleX(${i < seg ? 1 : i === seg ? local / SEG : 0})`;
+      const filled = i !== st.a ? 0 : st.morphing || !st.auto ? 1 : Math.min(st.held / st.hold, 1);
+      f.style.transform = `scaleX(${filled})`;
     });
 
+    fpsFrames++;
+    if (now - fpsSince > 500) {
+      $('fps').textContent = `${Math.round((fpsFrames * 1000) / (now - fpsSince))} FPS`;
+      fpsFrames = 0;
+      fpsSince = now;
+    }
     requestAnimationFrame(frame);
   };
+
+  setCount(st.count);
+  setPanel(innerWidth > 900);
+  renderShapes();
   requestAnimationFrame(frame);
 })();
 </script>
