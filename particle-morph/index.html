@@ -43,8 +43,8 @@
   .cap.off { opacity: 0; transform: translateY(6px); }
   .num { opacity: .45; }
   .name { font-size: 22px; font-weight: 300; letter-spacing: .42em; }
-  .bars { display: flex; gap: 6px; margin-top: 18px; }
-  .bar { width: 44px; height: 2px; background: rgba(223, 232, 255, .16); overflow: hidden; }
+  .bars { display: flex; gap: 5px; width: min(300px, 60vw); margin-top: 18px; }
+  .bar { flex: 1; height: 2px; background: rgba(223, 232, 255, .16); overflow: hidden; }
   .bar i { display: block; height: 100%; width: 100%; background: var(--ink); transform-origin: left; transform: scaleX(0); }
 
   .fab {
@@ -115,7 +115,7 @@
 <canvas id="c" aria-label="形を変えていく光の粒"></canvas>
 <div class="vignette"></div>
 <header class="topbar">
-  <span class="eyebrow">PARTICLE MORPH · v1.0 · BY <a href="https://x.com/fumilin" target="_blank" rel="me noopener noreferrer">@fumilin ↗</a></span>
+  <span class="eyebrow">PARTICLE MORPH · v1.1 · BY <a href="https://x.com/fumilin" target="_blank" rel="me noopener noreferrer">@fumilin ↗</a></span>
   <h1>MORPH <em>/ PARTICLE FIELD</em></h1>
   <div class="readout"><span><b id="count">--</b> PARTICLES</span><span><b id="fps">-- FPS</b></span></div>
 </header>
@@ -127,20 +127,22 @@
 <aside class="panel" id="panel" aria-label="アニメーション設定">
   <header><div><span>SHAPE LIBRARY</span><b>形を選ぶ・動きを変える</b></div><button id="closePanel" aria-label="設定を閉じる">×</button></header>
   <div class="shapeGrid" id="shapeGrid"></div>
-  <div class="option"><span><b>AUTO CYCLE</b><small>順番に形を切り替える</small></span><div class="segments"><button id="autoToggle" class="active">ON</button></div></div>
+  <div class="option"><span><b>AUTO CYCLE</b><small>時間が来たら次の形へ切り替える</small></span><div class="segments"><button id="autoToggle" class="active">ON</button></div></div>
+  <div class="option"><span><b>SHUFFLE</b><small>次の形をランダムに選ぶ</small></span><div class="segments"><button id="shuffleToggle">OFF</button></div></div>
   <div id="sliders"></div>
   <div class="option"><span><b>PARTICLES</b><small>粒の数</small></span><div class="segments" id="counts"></div></div>
   <div class="option"><span><b>RESET</b><small>設定と視点を最初に戻す</small></span><div class="segments"><button id="reset">RESET</button></div></div>
-  <p class="keys">ドラッグ 回転 · ホイール / ピンチ ズーム · SPACE 再生/停止 · 1–5 形 · ← → 前/次</p>
+  <p class="keys">ドラッグ 回転 · ホイール / ピンチ ズーム · SPACE 再生/停止 · 1–0 形 · ← → 前/次</p>
 </aside>
 
 <script id="vs" type="x-shader/x-vertex">
 precision highp float;
 attribute vec4 a_seed;
 attribute vec4 a_seed2;
+attribute vec3 a_curve;
 uniform float u_time, u_morph, u_a, u_b, u_aspect, u_px, u_intro, u_gain;
-uniform float u_yaw, u_pitch, u_dist, u_fit, u_size, u_chaos, u_hue;
-uniform vec2 u_shift;
+uniform float u_yaw, u_pitch, u_dist, u_fit, u_size, u_chaos, u_hue, u_touch;
+uniform vec2 u_shift, u_pointer;
 varying vec3 v_col;
 varying float v_alpha;
 
@@ -207,12 +209,112 @@ vec3 lattice(vec4 s, float t) {
   return p * 0.85 * (1.0 + 0.04 * sin(t * 2.0 + (q.x + q.y + q.z) * 3.0));
 }
 
+vec3 saturn(vec4 s, float t) {
+  vec3 p;
+  if (s.z < 0.4) {
+    // 本体。自転で少しつぶれた球
+    float y = s.x * 2.0 - 1.0;
+    float a = s.y * TAU + t * 0.4;
+    float rr = sqrt(1.0 - y * y);
+    p = vec3(rr * cos(a), y * 0.9, rr * sin(a)) * 0.6;
+  } else {
+    // 環。カッシーニの間隙にあたる帯を空ける
+    float r = mix(0.82, 1.72, s.x);
+    if (r > 1.26 && r < 1.36) r += 0.13;
+    float a = s.y * TAU + t * 0.35 / pow(r, 1.5);
+    p = vec3(r * cos(a), (s.w - 0.5) * 0.012, r * sin(a));
+  }
+  p.xy = rot(0.47) * p.xy;
+  return p;
+}
+
+vec3 blackhole(vec4 s, float t) {
+  if (s.z < 0.12) {
+    // 上下に噴き出すジェット
+    float sgn = s.y < 0.5 ? 1.0 : -1.0;
+    float h = fract(s.x + t * 0.25) * 1.8 + 0.12;
+    float w = (0.02 + 0.06 * h) * sqrt(s.w);
+    float a = s.y * TAU * 9.0;
+    return vec3(w * cos(a), sgn * h, w * sin(a));
+  }
+  if (s.z < 0.24) {
+    // 事象の地平面のすぐ外の薄い殻。加算合成なので輪郭だけが光る
+    float y = s.x * 2.0 - 1.0;
+    float a = s.y * TAU;
+    float rr = sqrt(1.0 - y * y);
+    return vec3(rr * cos(a), y, rr * sin(a)) * 0.33;
+  }
+  // 降着円盤。内側ほど密で速い
+  float r = 0.45 + 1.35 * s.x * s.x;
+  float a = s.y * TAU + t * 0.9 / pow(r, 1.5);
+  return vec3(r * cos(a), (s.w - 0.5) * 0.05 * r, r * sin(a));
+}
+
+vec3 dna(vec4 s, float t) {
+  float h = s.x * 2.0 - 1.0;
+  float R = 0.5;
+  if (s.z < 0.68) {
+    // 2 本の鎖
+    float a = h * 7.0 + t * 0.6 + (s.y < 0.5 ? 0.0 : PI);
+    float rr = R + (s.w - 0.5) * 0.07;
+    return vec3(rr * cos(a), h * 1.55 + (fract(s.w * 7.31) - 0.5) * 0.05, rr * sin(a));
+  }
+  // 塩基対。高さを段に丸め、2 本の鎖を横に結ぶ
+  float hq = (floor(h * 15.0) + 0.5) / 15.0;
+  float a = hq * 7.0 + t * 0.6;
+  float u = s.y * 2.0 - 1.0;
+  return vec3(R * u * cos(a), hq * 1.55, R * u * sin(a));
+}
+
+vec3 mobius(vec4 s, float t) {
+  float u = s.x * TAU + t * 0.25;
+  float v = (s.y - 0.5) * 0.9;
+  if (s.z < 0.25) v = s.y < 0.5 ? -0.45 : 0.45;
+  float w = 1.15 + v * cos(u * 0.5);
+  return vec3(w * cos(u), v * sin(u * 0.5), w * sin(u));
+}
+
+vec3 shell(vec4 s, float t) {
+  // 対数らせんに沿って太くなる管。口の側ほど面積が広いので粒を多く回す
+  float u = sqrt(s.x);
+  float th = u * 3.2 * TAU;
+  float g = exp(0.19 * (th - 3.2 * TAU));
+  float v = s.y * TAU + t * 0.5;
+  return vec3(g * (1.0 + cos(v)) * cos(th), 1.7 * (1.0 - g) - 0.75 + g * sin(v), g * (1.0 + cos(v)) * sin(th)) * 0.78;
+}
+
+vec3 orrery(vec4 s, float t) {
+  if (s.z < 0.1) {
+    // 太陽
+    return normalize(vec3(s.x, s.y, s.w) - 0.5) * 0.15 * pow(fract(s.w * 9.7), 0.33);
+  }
+  float k = floor(s.x * 8.0);
+  float r = 0.3 + 0.2 * k;
+  if (s.z < 0.42) {
+    // 惑星。ケプラーの第 3 法則どおり、外側ほどゆっくり回る
+    float a = t * 1.2 / pow(r, 1.5) + k * 2.4;
+    float size = 0.025 + 0.035 * fract(k * 0.37 + 0.2);
+    vec3 d = normalize(vec3(s.y, s.w, fract(s.y * 13.7)) - 0.5);
+    return vec3(r * cos(a), 0.0, r * sin(a)) + d * size * pow(fract(s.w * 5.3), 0.33);
+  }
+  float a = s.y * TAU;
+  return vec3(r * cos(a), 0.0, r * sin(a));
+}
+
 vec3 shape(float i, vec4 s, float t) {
   if (i < 0.5) return galaxy(s, t);
   if (i < 1.5) return sphere(s, t);
   if (i < 2.5) return knot(s, t);
   if (i < 3.5) return wave(s, t);
-  return lattice(s, t);
+  if (i < 4.5) return lattice(s, t);
+  if (i < 5.5) return saturn(s, t);
+  if (i < 6.5) return blackhole(s, t);
+  if (i < 7.5) return dna(s, t);
+  if (i < 8.5) return mobius(s, t);
+  if (i < 9.5) return shell(s, t);
+  if (i < 10.5) return orrery(s, t);
+  // ローレンツアトラクタは数式 1 本では書けないので、CPU で積分した点を属性で受け取る
+  return a_curve * (1.0 + 0.012 * sin(t * 1.7 + s.x * 40.0));
 }
 
 float hueOf(float i) {
@@ -220,7 +322,14 @@ float hueOf(float i) {
   if (i < 1.5) return 0.42;
   if (i < 2.5) return 0.12;
   if (i < 3.5) return 0.72;
-  return 0.92;
+  if (i < 4.5) return 0.92;
+  if (i < 5.5) return -0.24;
+  if (i < 6.5) return -0.16;
+  if (i < 7.5) return 0.38;
+  if (i < 8.5) return 0.15;
+  if (i < 9.5) return -0.08;
+  if (i < 10.5) return 0.50;
+  return 0.80;
 }
 
 vec3 pal(float x) { return 0.5 + 0.5 * cos(TAU * (x + vec3(0.0, 0.33, 0.67))); }
@@ -268,7 +377,14 @@ void main() {
   v_col = col;
   v_alpha = alpha * u_gain * mix(0.35, 1.0, star > 0.5 ? 1.0 : fog);
   gl_PointSize = ps;
-  gl_Position = vec4(p.x * F * u_fit / u_aspect + u_shift.x * zc, p.y * F * u_fit + u_shift.y * zc, 0.0, zc);
+  vec2 ndc = vec2(p.x * F * u_fit / u_aspect, p.y * F * u_fit) / zc + u_shift;
+  if (star < 0.5) {
+    // ポインタの近くの粒を、画面上で押しのける(負なら引き寄せる)
+    vec2 away = (ndc - u_pointer) * vec2(u_aspect, 1.0);
+    float push = u_touch * exp(-dot(away, away) * 14.0) * 0.3;
+    ndc += normalize(away + 1e-5) * push / vec2(u_aspect, 1.0);
+  }
+  gl_Position = vec4(ndc * zc, 0.0, zc);
 }
 </script>
 
@@ -293,6 +409,13 @@ void main() {
     { name: 'Torus Knot', note: '結び目の管' },
     { name: 'Ripple', note: '波打つグリッド' },
     { name: 'Lattice', note: '立方格子' },
+    { name: 'Saturn', note: '環と間隙のある惑星' },
+    { name: 'Black Hole', note: '降着円盤とジェット' },
+    { name: 'DNA', note: '二重らせんと塩基対' },
+    { name: 'Möbius', note: '表裏のない帯' },
+    { name: 'Shell', note: '対数らせんの巻貝' },
+    { name: 'Orrery', note: '8 つの惑星と軌道' },
+    { name: 'Lorenz', note: 'カオスの蝶' },
   ];
   // 乗り換えは粒ごとに最大 0.7 遅れて始まり 0.75 かけて終わる。全粒が終わるまでの長さ。
   const MORPH = 1.7;
@@ -305,34 +428,48 @@ void main() {
     { id: 'glow', label: 'GLOW', note: '明るさ', min: -0.6, max: 0.5, step: 0.02, value: 0, log: true, fmt: (v) => '×' + v.toFixed(2) },
     { id: 'hue', label: 'HUE', note: '色相をずらす', min: -0.5, max: 0.5, step: 0.01, value: 0, fmt: (v) => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) },
     { id: 'spin', label: 'SPIN', note: '自動回転の速さ', min: -3, max: 3, step: 0.1, value: 1, fmt: (v) => '×' + v.toFixed(1) },
+    { id: 'afterglow', label: 'AFTERGLOW', note: '残像の長さ', min: 0, max: 0.9, step: 0.01, value: 0, fmt: (v) => v.toFixed(2) },
+    { id: 'touch', label: 'TOUCH', note: 'ポインタから粒が逃げる強さ(負で集まる)', min: -1, max: 1, step: 0.05, value: 0.5, fmt: (v) => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) },
   ];
   const VIEW = { yaw: 0, pitch: 0.42, dist: 3.7 };
 
   const $ = (id) => document.getElementById(id);
   const canvas = $('c');
-  const gl = canvas.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'high-performance' });
+  // 残像は前のフレームの絵を薄めて残すので、描画バッファを保持する。
+  const gl = canvas.getContext('webgl', { antialias: false, alpha: false, preserveDrawingBuffer: true, powerPreference: 'high-performance' });
   if (!gl) {
     document.body.insertAdjacentHTML('beforeend', '<div class="err">WebGL is not available.</div>');
     return;
   }
 
-  const compile = (type, id) => {
-    const sh = gl.createShader(type);
-    gl.shaderSource(sh, $(id).textContent);
-    gl.compileShader(sh);
-    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh));
-    return sh;
+  const link = (vs, fs) => {
+    const p = gl.createProgram();
+    for (const [type, source] of [[gl.VERTEX_SHADER, vs], [gl.FRAGMENT_SHADER, fs]]) {
+      const sh = gl.createShader(type);
+      gl.shaderSource(sh, source);
+      gl.compileShader(sh);
+      if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh));
+      gl.attachShader(p, sh);
+    }
+    gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+    return p;
   };
-  const prog = gl.createProgram();
-  gl.attachShader(prog, compile(gl.VERTEX_SHADER, 'vs'));
-  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, 'fs'));
-  gl.linkProgram(prog);
-  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+  const prog = link($('vs').textContent, $('fs').textContent);
+  // 残像用。画面全体を覆う四角を、色を指定して描くだけ
+  const fadeProg = link(
+    'attribute vec2 a_pos; void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }',
+    'precision mediump float; uniform vec4 u_color; void main() { gl_FragColor = u_color; }');
+  const fadeLoc = gl.getAttribLocation(fadeProg, 'a_pos');
+  const fadeColor = gl.getUniformLocation(fadeProg, 'u_color');
+  const fadeQuad = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, fadeQuad);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
   gl.useProgram(prog);
 
   const U = {};
   for (const n of ['u_time', 'u_morph', 'u_a', 'u_b', 'u_aspect', 'u_px', 'u_intro', 'u_gain',
-    'u_yaw', 'u_pitch', 'u_dist', 'u_fit', 'u_size', 'u_chaos', 'u_hue', 'u_shift']) {
+    'u_yaw', 'u_pitch', 'u_dist', 'u_fit', 'u_size', 'u_chaos', 'u_hue', 'u_shift', 'u_touch', 'u_pointer']) {
     U[n] = gl.getUniformLocation(prog, n);
   }
 
@@ -349,17 +486,46 @@ void main() {
     fit: 1, shiftX: 0, shiftY: 0,
   };
 
-  // 粒は位置を持たない。属性は乱数 8 個だけで、位置は頂点シェーダーが毎フレーム計算する。
-  const buffers = ['a_seed', 'a_seed2'].map((name) => ({ loc: gl.getAttribLocation(prog, name), buf: gl.createBuffer() }));
+  // ローレンツアトラクタ(σ=10, ρ=28, β=8/3)の軌道を 1 本たどり、n 個の点にする。
+  function lorenzPoints(n) {
+    const out = new Float32Array(n * 3);
+    let x = 0.1, y = 0, z = 0;
+    const dt = 0.004;
+    for (let i = -2000; i < n; i++) {
+      const dx = 10 * (y - x), dy = x * (28 - z) - y, dz = x * y - (8 / 3) * z;
+      x += dx * dt;
+      y += dy * dt;
+      z += dz * dt;
+      if (i >= 0) out.set([x / 17, (z - 25) / 17, y / 17], i * 3);
+    }
+    return out;
+  }
+
+  // 粒は位置を持たない。属性は乱数 8 個で、位置は頂点シェーダーが毎フレーム計算する。
+  // 例外はローレンツアトラクタの座標(a_curve)。
+  const buffers = [['a_seed', 4], ['a_seed2', 4], ['a_curve', 3]].map(([name, size]) =>
+    ({ name, size, loc: gl.getAttribLocation(prog, name), buf: gl.createBuffer() }));
+
+  function bindParticles() {
+    for (const { loc, size, buf } of buffers) {
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 0, 0);
+    }
+  }
+
   function setCount(n) {
     st.count = n;
-    for (const { loc, buf } of buffers) {
-      const data = new Float32Array(n * 4);
-      for (let i = 0; i < data.length; i++) data[i] = Math.random();
+    for (const { name, buf } of buffers) {
+      let data;
+      if (name === 'a_curve') {
+        data = lorenzPoints(n);
+      } else {
+        data = new Float32Array(n * 4);
+        for (let i = 0; i < data.length; i++) data[i] = Math.random();
+      }
       gl.bindBuffer(gl.ARRAY_BUFFER, buf);
       gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-      gl.enableVertexAttribArray(loc);
-      gl.vertexAttribPointer(loc, 4, gl.FLOAT, false, 0, 0);
     }
     $('count').textContent = n / 1000 + 'k';
     document.querySelectorAll('#counts button').forEach((b) => b.classList.toggle('active', Number(b.dataset.count) === n));
@@ -397,7 +563,10 @@ void main() {
       }
     } else {
       st.held += d;
-      if (st.auto && st.held >= st.hold) goTo(st.a + 1);
+      if (st.auto && st.held >= st.hold) {
+        const jump = st.shuffle ? 1 + Math.floor(Math.random() * (SHAPES.length - 1)) : 1;
+        goTo(st.a + jump);
+      }
     }
   }
 
@@ -430,13 +599,42 @@ void main() {
     st.shiftY += (bottom / H - st.shiftY) * k;
   }
 
-  function draw(intro) {
+  const pointer = { x: 0, y: 0, on: false, strength: 0 };
+
+  function draw(intro, dt) {
+    let exposure = 1;
+    if (st.afterglow > 0.005) {
+      // 前のフレームの絵を keep 倍に薄めて残す。掛け算だけだと 8bit の端数が残って消えきらないので、1 段だけ引く。
+      const keep = Math.pow(st.afterglow, dt * 60);
+      gl.useProgram(fadeProg);
+      gl.bindBuffer(gl.ARRAY_BUFFER, fadeQuad);
+      gl.enableVertexAttribArray(fadeLoc);
+      gl.vertexAttribPointer(fadeLoc, 2, gl.FLOAT, false, 0, 0);
+      gl.blendColor(keep, keep, keep, 1);
+      gl.blendEquation(gl.FUNC_ADD);
+      gl.blendFunc(gl.ZERO, gl.CONSTANT_COLOR);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      gl.blendEquation(gl.FUNC_REVERSE_SUBTRACT);
+      gl.blendFunc(gl.ONE, gl.ONE);
+      gl.uniform4f(fadeColor, 1 / 255, 1 / 255, 1 / 255, 0);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      gl.blendEquation(gl.FUNC_ADD);
+      gl.useProgram(prog);
+      // 止まっている粒は毎フレーム重なって 1 / (1 - keep) 倍に明るくなるので、そのぶん暗く描く。
+      exposure = 1 - keep;
+    } else {
+      gl.clear(gl.COLOR_BUFFER_BIT);
+    }
+    gl.blendFunc(gl.ONE, gl.ONE);
+    bindParticles();
+    gl.uniform1f(U.u_touch, st.touch * pointer.strength);
+    gl.uniform2f(U.u_pointer, pointer.x, pointer.y);
     gl.uniform1f(U.u_time, st.time);
     gl.uniform1f(U.u_morph, st.morphing ? st.morph : 0);
     gl.uniform1f(U.u_a, st.a);
     gl.uniform1f(U.u_b, st.morphing ? st.b : st.a);
     gl.uniform1f(U.u_intro, intro);
-    gl.uniform1f(U.u_gain, (0.42 * 160000 / st.count) * st.glow);
+    gl.uniform1f(U.u_gain, (0.42 * 160000 / st.count) * st.glow * exposure);
     gl.uniform1f(U.u_yaw, st.yaw);
     gl.uniform1f(U.u_pitch, st.pitch + 0.2 * Math.sin(st.camTime * 0.19));
     gl.uniform1f(U.u_dist, st.dist + 0.35 * Math.sin(st.camTime * 0.31));
@@ -445,7 +643,6 @@ void main() {
     gl.uniform1f(U.u_size, st.size);
     gl.uniform1f(U.u_chaos, st.chaos);
     gl.uniform1f(U.u_hue, st.hue);
-    gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.POINTS, 0, st.count);
   }
 
@@ -461,7 +658,9 @@ void main() {
 
   SHAPES.forEach((shape, i) => {
     const b = document.createElement('button');
-    b.innerHTML = `<b>${shape.name.toUpperCase()}</b><small>${shape.note}</small><i>${i + 1}</i>`;
+    // 数字キーは 1–9 と 0 の 10 個まで
+    const key = i < 10 ? (i + 1) % 10 : '';
+    b.innerHTML = `<b>${shape.name.toUpperCase()}</b><small>${shape.note}</small><i>${key}</i>`;
     b.addEventListener('click', () => goTo(i));
     $('shapeGrid').append(b);
   });
@@ -472,7 +671,8 @@ void main() {
       b.classList.toggle('active', i === st.a);
       b.classList.toggle('next', i === upcoming);
     });
-    $('num').textContent = `0${st.a + 1} / 0${SHAPES.length}`;
+    const two = (n) => String(n).padStart(2, '0');
+    $('num').textContent = `${two(st.a + 1)} / ${two(SHAPES.length)}`;
     $('name').textContent = SHAPES[st.a].name;
   }
 
@@ -511,20 +711,28 @@ void main() {
     document.body.classList.toggle('panelOpen', open);
   }
 
+  function setShuffle(on) {
+    st.shuffle = on;
+    $('shuffleToggle').classList.toggle('active', on);
+    $('shuffleToggle').textContent = on ? 'ON' : 'OFF';
+  }
+
   $('autoToggle').addEventListener('click', () => setAuto(!st.auto));
+  $('shuffleToggle').addEventListener('click', () => setShuffle(!st.shuffle));
   $('openPanel').addEventListener('click', () => setPanel(true));
   $('closePanel').addEventListener('click', () => setPanel(false));
   $('reset').addEventListener('click', () => {
     SLIDERS.forEach((def) => setSlider(def, def.value));
     Object.assign(st, VIEW);
     setAuto(true);
+    setShuffle(false);
     st.playing = true;
   });
 
   addEventListener('keydown', (e) => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
-    const digit = /^Digit([1-5])$/.exec(e.code);
-    if (digit) goTo(Number(digit[1]) - 1);
+    const digit = /^Digit(\d)$/.exec(e.code);
+    if (digit) goTo((Number(digit[1]) + 9) % 10);
     else if (e.code === 'Space') {
       e.preventDefault();
       st.playing = !st.playing;
@@ -548,6 +756,9 @@ void main() {
     }
   });
   canvas.addEventListener('pointermove', (e) => {
+    pointer.x = (e.clientX / innerWidth) * 2 - 1;
+    pointer.y = 1 - (e.clientY / innerHeight) * 2;
+    pointer.on = true;
     const prev = pointers.get(e.pointerId);
     if (!prev) return;
     if (pointers.size === 1) {
@@ -566,9 +777,12 @@ void main() {
     pointers.delete(e.pointerId);
     pinch = 0;
     if (!pointers.size) canvas.classList.remove('dragging');
+    // 指を離したら、押しのけるのもやめる。マウスは乗っているあいだ続ける。
+    if (e.pointerType !== 'mouse') pointer.on = false;
   };
   canvas.addEventListener('pointerup', release);
   canvas.addEventListener('pointercancel', release);
+  canvas.addEventListener('pointerleave', () => { pointer.on = false; });
   canvas.addEventListener('wheel', (e) => {
     e.preventDefault();
     zoom(Math.exp(e.deltaY * 0.0012));
@@ -586,7 +800,8 @@ void main() {
     layout(dt);
     tick(dt);
     if (st.playing && !pointers.size) st.yaw += dt * 0.22 * st.spin;
-    draw(1 - Math.pow(2, -5 * (now - t0) / 1000));
+    pointer.strength += ((pointer.on ? 1 : 0) - pointer.strength) * (1 - Math.exp(-dt * 8));
+    draw(1 - Math.pow(2, -5 * (now - t0) / 1000), dt);
 
     $('cap').classList.toggle('off', st.morphing && st.morph > 0.5);
     fills.forEach((f, i) => {
