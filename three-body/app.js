@@ -10,7 +10,11 @@
     return;
   }
 
-  const COLORS = [[1.0, 0.74, 0.36], [0.38, 0.82, 1.0], [1.0, 0.45, 0.68]];
+  const MAXN = 12;
+  const COLORS = [
+    [1.0, 0.74, 0.36], [0.38, 0.82, 1.0], [1.0, 0.45, 0.68], [0.6, 1.0, 0.6], [0.8, 0.7, 1.0], [1.0, 0.95, 0.6],
+    [0.5, 0.95, 0.95], [1.0, 0.6, 0.4], [0.85, 0.85, 0.85], [0.4, 0.6, 1.0], [1.0, 0.8, 0.9], [0.7, 1.0, 0.85],
+  ];
   const TRAIL_MAX = 8000;
   const GHOST_OFFSET = 1e-6;
   const MAX_STEPS_PER_FRAME = 20000;
@@ -31,9 +35,11 @@ void main() {
 precision highp float;
 uniform vec2 uRes;
 uniform float uPx, uDpr, uTime, uContour, uGhostOn;
-uniform vec2 uPos[3], uGhost[3];
-uniform float uMass[3], uRad[3];
-uniform vec3 uCol[3];
+uniform vec2 uPos[12], uGhost[12];
+uniform float uMass[12], uRad[12];
+uniform vec3 uCol[12];
+uniform int uN;
+uniform float uFrame;
 out vec4 outColor;
 
 float hash(vec2 p) {
@@ -65,11 +71,15 @@ void main() {
   vec2 f = gl_FragCoord.xy;
   vec2 uv = (f - .5 * uRes) / uRes.y;
   vec3 c = vec3(.010, .014, .026) + vec3(.010, .018, .032) * (1. - length(uv));
-  c += starfield(f / uDpr);
+  // 回転座標系では星空を逆に回して、視点が回っていることを見せる
+  vec2 sf = f - .5 * uRes;
+  sf = mat2(cos(uFrame), -sin(uFrame), sin(uFrame), cos(uFrame)) * sf;
+  c += starfield((sf + .5 * uRes) / uDpr);
 
   float phi = 0.;
   vec3 tint = vec3(0.);
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < 12; i++) {
+    if (i >= uN) break;
     float u = uMass[i] / max(length(f - uPos[i]), .5);
     phi += u;
     tint += uCol[i] * u;
@@ -80,7 +90,8 @@ void main() {
   float line = (1. - smoothstep(0., 1.4 * fw, abs(fract(lv) - .5))) * smoothstep(.45, .12, fw);
   c += mix(vec3(.35, .6, .8), tint, .55) * line * .17 * uContour;
 
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < 12; i++) {
+    if (i >= uN) break;
     float d = length(f - uPos[i]);
     float R = uRad[i];
     float q = R / max(d, R);
@@ -88,7 +99,8 @@ void main() {
     c += mix(uCol[i], vec3(1.), .7) * smoothstep(R, R * .45, d) * 1.6;
   }
   if (uGhostOn > .5) {
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 12; i++) {
+    if (i >= uN) break;
       float R = uRad[i] * 1.6 + 2. * uDpr;
       float ring = 1. - smoothstep(0., 1.2 * uDpr, abs(length(f - uGhost[i]) - R));
       c += vec3(.85, .9, 1.) * ring * .55;
@@ -222,7 +234,13 @@ void main() {
     }
   }
 
-  const trails = [new Trail(), new Trail(), new Trail()];
+  let trails = [];
+  const bodies = () => Array.from({ length: state.sys.n }, (_, i) => i);
+  const pairs = () => {
+    const out = [];
+    for (let i = 0; i < state.sys.n; i++) for (let j = i + 1; j < state.sys.n; j++) out.push([i, j]);
+    return out;
+  };
   const panel = $('panel');
   const overlay = $('overlay');
   const ctx = overlay.getContext('2d');
@@ -242,6 +260,8 @@ void main() {
     speedMul: 1,
     trailMul: 1,
     contour: true,
+    labels: true,
+    colors: COLORS.slice(0, 3),
     ghostMode: 'off',
     ghostMethod: 'euler',
     ghostDelta: 0,
@@ -307,7 +327,7 @@ void main() {
   }
 
   function heaviestPair(s) {
-    const order = [0, 1, 2].sort((a, b) => s.m[b] - s.m[a]);
+    const order = bodies().sort((a, b) => s.m[b] - s.m[a]);
     return [order[0], order[1]];
   }
 
@@ -318,7 +338,7 @@ void main() {
   function toView(src, angle, out) {
     const c = Math.cos(angle);
     const sn = Math.sin(angle);
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < state.sys.n; i++) {
       const x = src[2 * i];
       const y = src[2 * i + 1];
       out[2 * i] = c * x + sn * y;
@@ -326,9 +346,9 @@ void main() {
     }
   }
 
-  const viewPos = new Float64Array(6);
-  const viewGhost = new Float64Array(6);
-  const viewStep = new Float64Array(6);
+  const viewPos = new Float64Array(2 * MAXN);
+  const viewGhost = new Float64Array(2 * MAXN);
+  const viewStep = new Float64Array(2 * MAXN);
 
   function updateView() {
     const angle = frameAngle(state.sys);
@@ -391,20 +411,23 @@ void main() {
     state.e0 = TB.energy(state.sys);
     state.diverged = false;
     state.custom = false;
-    state.framePair = sc.rotating || heaviestPair(state.sys);
+    state.colors = bodies().map((i) => (sc.colors && sc.colors[i]) || COLORS[i % COLORS.length]);
+    colArr.set(state.colors.flat());
+    trails = bodies().map(() => new Trail());
+    state.framePair = sc.rotating || sc.rotatingPair || heaviestPair(state.sys);
     makeGhost();
     setRotating(Boolean(sc.rotating) && !state.edit);
     state.cam = { x: 0, y: 0, px: 1 };
     snapCamera = true;
     setAutoCam(true);
     renderScenarioInfo();
-    syncMassSliders();
+    buildMassSliders();
   }
 
   function recordTrail(s) {
     const ds = Math.max(state.cam.px * 1.5 * dpr(), state.sc.view * 3e-4);
     toView(s.p, frameAngle(s), viewStep);
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < state.sys.n; i++) {
       const x = viewStep[2 * i];
       const y = viewStep[2 * i + 1];
       if (trails[i].farFrom(x, y, ds)) trails[i].push(x, y, s.t);
@@ -434,10 +457,10 @@ void main() {
     const { sys, sc, cam } = state;
     const limit = sc.view * 6;
     // 遠くへ弾き出された星が出たら、残った連星(いちばん近い 2 つ)だけを追う。
-    let follow = [0, 1, 2];
+    let follow = bodies();
     if (follow.some((i) => Math.hypot(viewPos[2 * i], viewPos[2 * i + 1]) > limit)) {
       let best = Infinity;
-      for (const [i, j] of [[0, 1], [1, 2], [2, 0]]) {
+      for (const [i, j] of pairs()) {
         const d = Math.hypot(viewPos[2 * i] - viewPos[2 * j], viewPos[2 * i + 1] - viewPos[2 * j + 1]);
         if (d < best) {
           best = d;
@@ -480,19 +503,19 @@ void main() {
 
   // ---- 描画 ----
 
-  const posPx = new Float32Array(6);
-  const ghostPx = new Float32Array(6);
-  const massArr = new Float32Array(3);
-  const radArr = new Float32Array(3);
-  const colArr = new Float32Array(COLORS.flat());
+  const posPx = new Float32Array(2 * MAXN);
+  const ghostPx = new Float32Array(2 * MAXN);
+  const massArr = new Float32Array(MAXN);
+  const radArr = new Float32Array(MAXN);
+  const colArr = new Float32Array(3 * MAXN);
 
   function render(now) {
     const { sys, cam } = state;
     const vp = viewport();
     const scale = dpr();
     let mMax = 0;
-    for (let i = 0; i < 3; i++) mMax = Math.max(mMax, sys.m[i]);
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < state.sys.n; i++) mMax = Math.max(mMax, sys.m[i]);
+    for (let i = 0; i < state.sys.n; i++) {
       posPx[2 * i] = vp.ox + (viewPos[2 * i] - cam.x) / cam.px;
       posPx[2 * i + 1] = vp.oy + (viewPos[2 * i + 1] - cam.y) / cam.px;
       ghostPx[2 * i] = vp.ox + (viewGhost[2 * i] - cam.x) / cam.px;
@@ -516,6 +539,8 @@ void main() {
     gl.uniform1fv(bg.u.uMass, massArr);
     gl.uniform1fv(bg.u.uRad, radArr);
     gl.uniform3fv(bg.u.uCol, colArr);
+    gl.uniform1i(bg.u.uN, sys.n);
+    gl.uniform1f(bg.u.uFrame, frameAngle(sys));
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     // 加算だと線分の継ぎ目の重なりが点々に光るので、明るいほうを残す。
@@ -531,12 +556,12 @@ void main() {
     gl.uniform1f(trailProg.u.uNow, sys.t);
     gl.uniform1f(trailProg.u.uSpan, trailSpan());
     gl.uniform1f(trailProg.u.uWidth, 2 * scale);
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < state.sys.n; i++) {
       const points = trails[i].withHead(viewPos[2 * i], viewPos[2 * i + 1], sys.t);
       const segments = points.length / 3 - 1;
       if (segments < 1) continue;
       gl.bufferData(gl.ARRAY_BUFFER, points, gl.DYNAMIC_DRAW);
-      gl.uniform3fv(trailProg.u.uColor, COLORS[i]);
+      gl.uniform3fv(trailProg.u.uColor, state.colors[i]);
       gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, segments);
     }
     gl.bindVertexArray(null);
@@ -557,13 +582,57 @@ void main() {
   let overlayDirty = false;
 
   function drawOverlay() {
-    const wanted = ghostActive() || state.edit;
+    const labels = state.labels && state.sc.labels && !state.custom;
+    const wanted = ghostActive() || state.edit || labels || state.rotating;
     // 何も描かないフレームでは、全画面の消去も省く。
     if (!wanted && !overlayDirty) return;
     ctx.clearRect(0, 0, overlay.width, overlay.height);
     overlayDirty = wanted;
+    if (state.rotating) drawFrameLine();
+    if (labels) drawLabels();
     if (ghostActive()) drawGhostGraph();
     if (state.edit) drawHandles();
+  }
+
+  function labelOf(i) {
+    return (state.sc.labels && state.sc.labels[i]) || `BODY ${i + 1}`;
+  }
+
+  function drawLabels() {
+    const s = dpr();
+    ctx.font = `${10 * s}px ui-monospace, Consolas, monospace`;
+    ctx.textBaseline = 'bottom';
+    ctx.textAlign = 'left';
+    ctx.lineWidth = 3 * s;
+    ctx.strokeStyle = 'rgba(3, 6, 12, .8)';
+    for (let i = 0; i < state.sys.n; i++) {
+      const [x, y] = screenOf(i);
+      ctx.fillStyle = cssColor(state.colors[i], 0.9);
+      ctx.strokeText(labelOf(i), x + 11 * s, y - 9 * s);
+      ctx.fillText(labelOf(i), x + 11 * s, y - 9 * s);
+    }
+  }
+
+  // 回転座標系で止めている 2 体を点線で結び、何が止まっているかを示す。
+  function drawFrameLine() {
+    const s = dpr();
+    const [i, j] = state.framePair;
+    const [ax, ay] = screenOf(i);
+    const [bx, by] = screenOf(j);
+    ctx.save();
+    ctx.setLineDash([4 * s, 6 * s]);
+    ctx.strokeStyle = 'rgba(223, 233, 245, .35)';
+    ctx.lineWidth = s;
+    ctx.beginPath();
+    ctx.moveTo(ax, ay);
+    ctx.lineTo(bx, by);
+    ctx.stroke();
+    ctx.restore();
+    ctx.font = `${10 * s}px ui-monospace, Consolas, monospace`;
+    ctx.textBaseline = 'top';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'rgba(223, 233, 245, .55)';
+    ctx.fillText(`FRAME: ${labelOf(i)} – ${labelOf(j)} 固定`, (ax + bx) / 2, Math.max(ay, by) + 14 * s);
   }
 
   // 本体と分身のずれを対数で描く。カオスな軌道では右上がりの直線に近くなる。
@@ -635,11 +704,11 @@ void main() {
 
   function drawHandles() {
     const s = dpr();
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < state.sys.n; i++) {
       const [x, y] = screenOf(i);
       const [hx, hy] = handleOf(i);
-      ctx.strokeStyle = cssColor(COLORS[i], 0.9);
-      ctx.fillStyle = cssColor(COLORS[i], 0.9);
+      ctx.strokeStyle = cssColor(state.colors[i], 0.9);
+      ctx.fillStyle = cssColor(state.colors[i], 0.9);
       ctx.lineWidth = 1.5 * s;
       ctx.beginPath();
       ctx.arc(x, y, 15 * s, 0, 2 * Math.PI);
@@ -670,7 +739,7 @@ void main() {
     if (state.custom) {
       $('title').textContent = 'CUSTOM';
       $('subtitle').textContent = `/ FROM ${sc.name}`;
-      $('formula').textContent = [0, 1, 2].map((i) =>
+      $('formula').textContent = bodies().map((i) =>
         `r = (${fix(sys.p[2 * i])}, ${fix(sys.p[2 * i + 1])})  v = (${fix(sys.v[2 * i])}, ${fix(sys.v[2 * i + 1])})`).join('\n');
       $('theoryText').textContent = 'EDIT で星をつまんで作った初期条件。RESET を押すと元の軌道に戻る。';
     } else {
@@ -681,9 +750,9 @@ void main() {
     }
     $('theoryTitle').textContent = $('title').textContent;
     $('massList').innerHTML = '';
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < state.sys.n; i++) {
       const li = document.createElement('li');
-      li.innerHTML = `<i style="--c:${cssColor(COLORS[i])}"></i>m = ${formatMass(sys.m[i])}`;
+      li.innerHTML = `<i style="--c:${cssColor(state.colors[i])}"></i>${sc.labels ? labelOf(i) + ' ' : ''}m = ${formatMass(sys.m[i])}`;
       $('massList').append(li);
     }
     $('orbitRead').hidden = !sc.period || state.custom;
@@ -766,8 +835,8 @@ void main() {
   }
 
   function syncMassSliders() {
-    for (let i = 0; i < 3; i++) {
-      $(`mass${i}`).value = Math.min(Math.max(Math.log10(state.sys.m[i]), -3), 1);
+    for (let i = 0; i < state.sys.n; i++) {
+      $(`mass${i}`).value = Math.min(Math.max(Math.log10(state.sys.m[i]), -7), 1);
       $(`mass${i}Value`).textContent = formatMass(state.sys.m[i]);
     }
   }
@@ -776,14 +845,14 @@ void main() {
     const { sys } = state;
     let M = 0;
     const c = [0, 0, 0, 0];
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < state.sys.n; i++) {
       M += sys.m[i];
       c[0] += sys.m[i] * sys.p[2 * i];
       c[1] += sys.m[i] * sys.p[2 * i + 1];
       c[2] += sys.m[i] * sys.v[2 * i];
       c[3] += sys.m[i] * sys.v[2 * i + 1];
     }
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < state.sys.n; i++) {
       sys.p[2 * i] -= c[0] / M;
       sys.p[2 * i + 1] -= c[1] / M;
       sys.v[2 * i] -= c[2] / M;
@@ -798,7 +867,7 @@ void main() {
     const y = (clientY - rect.top) * dpr();
     const reach = 18 * dpr();
     for (const kind of ['vel', 'pos']) {
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < state.sys.n; i++) {
         const [px, py] = kind === 'vel' ? handleOf(i) : screenOf(i);
         if (Math.hypot(x - px, y - py) < reach) return { kind, i };
       }
@@ -859,16 +928,21 @@ void main() {
     }
   });
 
-  for (let i = 0; i < 3; i++) {
-    const label = document.createElement('label');
-    label.innerHTML = `<span><b><i class="dot" style="--c:${cssColor(COLORS[i])}"></i>MASS ${i + 1}</b></span><output id="mass${i}Value"></output>` +
-      `<input id="mass${i}" type="range" min="-3" max="1" step=".05">`;
-    $('massSliders').append(label);
-    $(`mass${i}`).addEventListener('input', (e) => {
-      state.sys.m[i] = Math.pow(10, Number(e.target.value));
-      $(`mass${i}Value`).textContent = formatMass(state.sys.m[i]);
-      applyEdit();
-    });
+  // 星の数はシナリオで変わるので、質量スライダーは読み込みのたびに作り直す。
+  function buildMassSliders() {
+    $('massSliders').innerHTML = '';
+    for (let i = 0; i < state.sys.n; i++) {
+      const label = document.createElement('label');
+      label.innerHTML = `<span><b><i class="dot" style="--c:${cssColor(state.colors[i])}"></i>${labelOf(i)}</b></span><output id="mass${i}Value"></output>` +
+        `<input id="mass${i}" type="range" min="-7" max="1" step=".05">`;
+      $('massSliders').append(label);
+      $(`mass${i}`).addEventListener('input', (e) => {
+        state.sys.m[i] = Math.pow(10, Number(e.target.value));
+        $(`mass${i}Value`).textContent = formatMass(state.sys.m[i]);
+        applyEdit();
+      });
+    }
+    syncMassSliders();
   }
 
   document.querySelectorAll('#ghostModes button').forEach((b) => b.addEventListener('click', () => setGhostMode(b.dataset.mode)));
@@ -878,6 +952,10 @@ void main() {
   $('closePanel').addEventListener('click', () => setPanel(false));
   $('cameraToggle').addEventListener('click', () => setAutoCam(!state.autoCam));
   $('frameToggle').addEventListener('click', () => setRotating(!state.rotating));
+  $('labelsToggle').addEventListener('click', () => {
+    state.labels = !state.labels;
+    setToggle('labelsToggle', state.labels);
+  });
   $('editToggle').addEventListener('click', () => setEdit(!state.edit));
   $('recenter').addEventListener('click', stopCenterOfMass);
   $('contourToggle').addEventListener('click', () => {

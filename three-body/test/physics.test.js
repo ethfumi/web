@@ -98,6 +98,20 @@ test('スイングバイで探査機の軌道が大きくなる', () => {
   assert.ok(semiMajor() > 5 && semiMajor() < 7, `after=${semiMajor()}`);
 });
 
+test('太陽系では地球が 2π で 1 周し、木星は 11.86 年で 1 周する', () => {
+  const angle = (s, i) => Math.atan2(s.p[2 * i + 1] - s.p[1], s.p[2 * i] - s.p[0]);
+  const turned = (s, i, before) => ((((angle(s, i) - before) * 180) / Math.PI + 540) % 360) - 180;
+  const inner = TB.createSystem(scenario('inner'));
+  assert.equal(inner.n, 6);
+  const earth0 = angle(inner, 3);
+  TB.advance(inner, 2 * Math.PI, 'forestRuth');
+  assert.ok(Math.abs(turned(inner, 3, earth0)) < 0.5, `earth=${turned(inner, 3, earth0)}`);
+  const outer = TB.createSystem(scenario('outer'));
+  const jupiter0 = angle(outer, 1);
+  TB.advance(outer, 2 * Math.PI * 11.86, 'forestRuth');
+  assert.ok(Math.abs(turned(outer, 1, jupiter0)) < 1, `jupiter=${turned(outer, 1, jupiter0)}`);
+});
+
 test('連星への来訪者が片方と入れ替わる', () => {
   const sc = scenario('exchange');
   const s = TB.createSystem(sc);

@@ -352,6 +352,41 @@
     ]);
   }
 
+  // 太陽系。単位は太陽質量・天文単位で、G = 1 なので 1 年 = 2π。
+  // 各惑星は近日点から出発し、出発の向きは惑星ごとにばらしてある。
+  const PLANETS = {
+    MERCURY: { m: 1.66e-7, a: 0.387, e: 0.206, color: [0.75, 0.73, 0.7] },
+    VENUS: { m: 2.45e-6, a: 0.723, e: 0.007, color: [1.0, 0.9, 0.65] },
+    EARTH: { m: 3.0e-6, a: 1.0, e: 0.017, color: [0.4, 0.7, 1.0] },
+    MARS: { m: 3.23e-7, a: 1.524, e: 0.093, color: [1.0, 0.45, 0.3] },
+    JUPITER: { m: 9.55e-4, a: 5.203, e: 0.049, color: [1.0, 0.72, 0.45] },
+    SATURN: { m: 2.86e-4, a: 9.537, e: 0.057, color: [1.0, 0.88, 0.55] },
+    URANUS: { m: 4.37e-5, a: 19.19, e: 0.046, color: [0.6, 0.95, 0.95] },
+    NEPTUNE: { m: 5.15e-5, a: 30.07, e: 0.009, color: [0.4, 0.55, 1.0] },
+  };
+
+  function solarSystem(names) {
+    const bodies = [{ m: 1, x: 0, y: 0, vx: 0, vy: 0 }];
+    names.forEach((name, i) => {
+      const p = PLANETS[name];
+      const th = i * 2.4;
+      const r = p.a * (1 - p.e);
+      const v = Math.sqrt(((1 + p.m) * (1 + p.e)) / r);
+      bodies.push({ m: p.m, x: r * Math.cos(th), y: r * Math.sin(th), vx: -v * Math.sin(th), vy: v * Math.cos(th) });
+    });
+    return recenter(bodies);
+  }
+
+  function solarScenario(id, name, sub, names, extra) {
+    return Object.assign({
+      id, group: 'system', name, sub,
+      make: () => solarSystem(names),
+      labels: ['SUN', ...names],
+      colors: [[1.0, 0.85, 0.4], ...names.map((n) => PLANETS[n].color)],
+      formula: names.map((n) => `${n}: a = ${PLANETS[n].a} AU, e = ${PLANETS[n].e}, m = ${PLANETS[n].m.toExponential(2)}`).join('\n'),
+    }, extra);
+  }
+
   function suvakovScenario(id, name, p1, p2, period) {
     return {
       id, group: 'periodic', name, sub: 'ŠUVAKOV–DMITRAŠINOVIĆ 2013',
@@ -466,37 +501,45 @@
     },
     {
       id: 'moon', key: '8', group: 'system', name: 'STAR·PLANET·MOON', sub: 'HIERARCHY',
-      make: starPlanetMoon, view: 1.35, speed: 1.2, trail: 5,
+      make: starPlanetMoon, labels: ['STAR', 'PLANET', 'MOON'], view: 1.35, speed: 1.2, trail: 5,
       formula: 'm = 1, 10⁻², 10⁻⁵\nr(planet) = 1,  r(moon) = 0.05',
       text: '恒星・惑星・月。質量と距離に大きな段差がある「階層的」な三体は、2 つの二体問題にほぼ分かれて安定に回る。月の軌道は、惑星の重力が勝つ範囲(ヒル球)の内側にある。',
     },
     {
       id: 'binary', key: '9', group: 'system', name: 'CIRCUMBINARY', sub: 'PLANET OF TWO SUNS',
-      make: circumbinary, view: 3.8, speed: 4, trail: 40,
+      make: circumbinary, view: 3.8, speed: 4, trail: 40, labels: ['SUN A', 'SUN B', 'PLANET'],
       formula: 'm = 1, 1, 10⁻³\na(binary) = 1,  r(planet) = 3.2',
       text: '2 つの太陽のまわりを回る惑星。連星の間隔のおよそ 2〜3 倍より外側なら、惑星の軌道は安定する。ケプラー 16b など、実在の周連星惑星もこの境界のすぐ外側で見つかっている。',
     },
     {
       id: 'trojan', group: 'system', name: 'TROJAN', sub: 'L4 TADPOLE', rotating: [0, 1],
-      make: () => coorbital(1e-3, 100, 0), view: 1.4, speed: 12, trail: 90,
+      make: () => coorbital(1e-3, 100, 0), view: 1.4, speed: 12, trail: 90, labels: ['SUN', 'JUPITER', 'TROJAN'],
       formula: 'm = 1, 10⁻³, 10⁻⁹\n惑星の 100° 前方、同じ半径・同じ角速度',
       text: '恒星・惑星と正三角形をつくる点(L4)は惑星の 60° 前方にある。その少し先に置いた小天体は、L4 のまわりをおたまじゃくし形にゆっくり往復し続ける。木星のこの場所には、トロヤ群と呼ばれる小惑星が 1 万個以上見つかっている。ROTATING FRAME を切ると、ただの円軌道にしか見えない。',
     },
     {
       id: 'horseshoe', group: 'system', name: 'HORSESHOE', sub: 'CO-ORBITAL', rotating: [0, 1],
-      make: () => coorbital(1e-3, 180, 0), view: 1.4, speed: 40, trail: 400,
+      make: () => coorbital(1e-3, 180, 0), view: 1.4, speed: 40, trail: 400, labels: ['SUN', 'PLANET', 'CO-ORBITAL'],
       formula: 'm = 1, 10⁻³, 10⁻⁹\n惑星の反対側、同じ半径・同じ角速度',
       text: '惑星と同じ軌道を回る小天体。惑星に後ろから近づくと外側の軌道へ押し出されて遅れはじめ、1 周遅れで前から近づくと内側へ入ってまた追いかける。惑星と一緒に回る座標で見ると、軌跡が馬蹄形になる。土星の衛星ヤヌスとエピメテウスは、約 4 年ごとにこのやり方で軌道を入れ替えている。',
     },
     {
       id: 'slingshot', group: 'system', name: 'SLINGSHOT', sub: 'GRAVITY ASSIST',
-      make: () => slingshot(1e-3, 0.5, 1.15, 63), view: 2, speed: 0.8, trail: 30, eta: 0.002,
+      make: () => slingshot(1e-3, 0.5, 1.15, 63), view: 2, speed: 0.8, trail: 30, eta: 0.002, labels: ['SUN', 'JUPITER', 'PROBE'],
       formula: 'm = 1, 10⁻³, 10⁻⁹\n探査機: 近日点 0.5・遠日点 1.15 の楕円',
       text: '探査機が t ≈ 1.3 で惑星のすぐ後ろをかすめ、惑星の公転の勢いをもらって加速する。軌道の長半径は 0.8 から 6 へ伸び、惑星の軌道の 10 倍の遠さまで届くようになる。燃料を使わずに速度を得るスイングバイで、ボイジャーの木星通過や、はやぶさの地球スイングバイと同じ原理。',
     },
+    solarScenario('inner', 'INNER PLANETS', 'SUN TO JUPITER', ['MERCURY', 'VENUS', 'EARTH', 'MARS', 'JUPITER'], {
+      view: 5.6, speed: 1.5, trail: 2 * Math.PI * 1.1, period: 2 * Math.PI, rotatingPair: [0, 3],
+      text: '太陽から木星までの実際の太陽系。単位は天文単位と太陽質量で、1 年が 2π、ORBIT は地球の公転数。ズームすると水星や金星が分かれて見える。ROTATING FRAME をオンにすると地球と一緒に回る視点になり、火星が時々逆戻りする「逆行」や、金星が太陽の手前を通る「内合」がそのまま見える。',
+    }),
+    solarScenario('outer', 'OUTER PLANETS', 'JUPITER TO NEPTUNE', ['JUPITER', 'SATURN', 'URANUS', 'NEPTUNE'], {
+      view: 32, speed: 12, trail: 2 * Math.PI * 170, period: 2 * Math.PI * 11.86,
+      text: '木星から海王星までの実際の太陽系。海王星が 1 周するあいだに木星は 14 周する。ORBIT は木星の公転数。惑星どうしの引力も計算しているので、長く回すと互いの軌道が少しずつ揺らぐ。',
+    }),
     {
       id: 'exchange', group: 'chaos', name: 'EXCHANGE', sub: 'BINARY + VISITOR',
-      make: () => flyby(1, 0.5, 45), view: 3, speed: 2, trail: 20, eta: 0.002,
+      make: () => flyby(1, 0.5, 45), view: 3, speed: 2, trail: 20, eta: 0.002, labels: ['BINARY A', 'BINARY B', 'VISITOR'],
       formula: 'm = 1, 1, 1   連星の間隔 1\n来訪者: 速さ 0.5、衝突径数 1',
       text: '回り合う連星に、遠くから 3 つ目の星が飛び込む。もつれ合ったあと、来訪者が連星の片方と入れ替わり、元の相方が弾き出される。星が密集した球状星団の中で実際に起きている交換反応。',
     },
@@ -513,7 +556,7 @@
   }
 
   return {
-    System, METHODS, GROUPS, SCENARIOS, advance, energy, momentum, separation, freeFallTime,
-    recenter, suvakov, randomBodies, createSystem,
+    System, METHODS, GROUPS, SCENARIOS, PLANETS, advance, energy, momentum, separation, freeFallTime,
+    recenter, suvakov, randomBodies, solarSystem, createSystem,
   };
 });

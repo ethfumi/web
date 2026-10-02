@@ -8,7 +8,7 @@
   <meta property="og:title" content="THREE BODIES / GRAVITY FIELD">
   <meta property="og:description" content="8 の字、蝶、毛糸玉、ピタゴラス問題。三体問題の有名な軌道をリアルタイムに計算する">
   <title>THREE BODIES / GRAVITY FIELD</title>
-  <link rel="stylesheet" href="./style.css?v=1.2">
+  <link rel="stylesheet" href="./style.css?v=1.3">
 </head>
 <body>
 <main class="app">
@@ -16,7 +16,7 @@
   <canvas id="overlay" aria-hidden="true"></canvas>
   <header class="topbar">
     <div>
-      <span class="eyebrow">THREE BODIES · v1.2 · BY <a href="https://x.com/fumilin" target="_blank" rel="me noopener noreferrer">@fumilin ↗</a></span>
+      <span class="eyebrow">THREE BODIES · v1.3 · BY <a href="https://x.com/fumilin" target="_blank" rel="me noopener noreferrer">@fumilin ↗</a></span>
       <h1><span id="title">FIGURE-8</span> <em id="subtitle">/ MOORE 1993</em></h1>
     </div>
     <div class="readout">
@@ -46,7 +46,8 @@
     <label><span><b>TRAIL</b><small>軌跡の長さ</small></span><output id="trailValue">×1.0</output><input id="trail" type="range" min="-1" max="1" step=".05" value="0"></label>
     <div class="option"><span><b>INTEGRATOR</b><small id="methodNote"></small></span><div class="segments wide" id="methods"></div></div>
     <div class="option"><span><b>GHOST</b><small id="ghostNote"></small></span><div class="segments" id="ghostModes"><button data-mode="off">OFF</button><button data-mode="shift">10⁻⁶</button><button data-mode="method">METHOD</button></div><div class="segments wide" id="ghostMethods" hidden></div></div>
-    <div class="option"><span><b>ROTATING FRAME</b><small>重い 2 体を結ぶ線を止めて見る</small></span><div class="segments"><button id="frameToggle">OFF</button></div></div>
+    <div class="option"><span><b>ROTATING FRAME</b><small>点線で結んだ 2 体と一緒に回る視点。惑星が止まって見え、ほかの星の「惑星から見た動き」だけが残る</small></span><div class="segments"><button id="frameToggle">OFF</button></div></div>
+    <div class="option"><span><b>LABELS</b><small>星の名前</small></span><div class="segments"><button id="labelsToggle" class="active">ON</button></div></div>
     <div class="option"><span><b>CONTOUR</b><small>重力ポテンシャルの等高線</small></span><div class="segments"><button id="contourToggle" class="active">ON</button></div></div>
     <div class="option"><span><b>AUTO CAMERA</b><small>星を画面に収め続ける</small></span><div class="segments"><button id="cameraToggle" class="active">ON</button></div></div>
     <p class="keys">SPACE 再生/停止 · 1–0 軌道 · N / B 次/前 · R やり直し · G 分身 · F 回転座標 · E 編集</p>
@@ -59,7 +60,7 @@
   </nav>
   <div id="error" class="error" hidden><b>WEBGL2 NOT AVAILABLE</b><p>最新の Safari または Chrome で開いてください。</p></div>
 </main>
-<script src="./physics.js?v=1.2"></script>
-<script src="./app.js?v=1.2"></script>
+<script src="./physics.js?v=1.3"></script>
+<script src="./app.js?v=1.3"></script>
 </body>
 </html>
