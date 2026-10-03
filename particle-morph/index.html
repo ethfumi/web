@@ -306,6 +306,19 @@ vec3 orrery(vec4 s, float t) {
 // 集合の内側と、すぐ逃げる遠くの点は下へ落として見せない。境界の帯だけが山脈になる。
 vec3 mandelbrot(vec4 s) {
   vec2 c = u_mCenter + (s.xy - 0.5) * 2.0 * u_mScale;
+  // 全体図では、一様にまくと境界に落ちる粒が数 % しかない。粒の 3/4 を主カーディオイドと
+  // 周期 2 の円のふちの近くにまく。ズームするにつれて一様に戻す
+  float near = clamp((u_mScale - 0.25) / 1.2, 0.0, 1.0);
+  if (s.w < 0.02 + 0.75 * near) {
+    float th = s.x * TAU;
+    vec2 edge = fract(s.z * 5.0) < 0.3
+      ? vec2(-1.0 + 0.25 * cos(th), 0.25 * sin(th))
+      : vec2(0.5 * cos(th) - 0.25 * cos(2.0 * th), 0.5 * sin(th) - 0.25 * sin(2.0 * th));
+    float ph = s.z * TAU;
+    c = edge + 0.09 * s.y * s.y * vec2(cos(ph), sin(ph));
+  }
+  vec2 win = (c - u_mCenter) / (2.0 * u_mScale);
+  if (abs(win.x) > 0.5 || abs(win.y) > 0.5) return vec3(0.0, -40.0, 0.0);
   vec2 z = vec2(0.0);
   float n = 0.0;
   float m2 = 0.0;
@@ -322,13 +335,14 @@ vec3 mandelbrot(vec4 s) {
     float sn = n - log2(0.5 * log2(m2));
     h = log(sn) / log(u_mIter) * 1.3 - 0.7;
   }
-  return vec3((s.x - 0.5) * 3.2, h, (0.5 - s.y) * 3.2);
+  return vec3(win.x * 3.2, h, -win.y * 3.2);
 }
 
 // 形ごとの明るさの重み。マンデルブロは平地を薄く、境界の山脈だけ光らせる
 float dimOf(float i, vec3 p) {
   // 境界に落ちる粒は全体の数 % しかないので、そのぶん 1 粒を明るくする
-  if (i > 11.5) return 0.15 + 1.9 * pow(smoothstep(-0.7, 0.6, p.y), 3.0);
+  float e = smoothstep(-0.7, 0.6, p.y);
+  if (i > 11.5) return 0.15 + 1.9 * e * e * e;
   return 1.0;
 }
 
@@ -622,6 +636,8 @@ void main() {
 
   function resize() {
     const w = Math.round(innerWidth * dpr()), h = Math.round(innerHeight * dpr());
+    // ペインが隠れたままタブが開くと最初は 0×0 で、0 / 0 の NaN が画面合わせの平滑化に残り続ける
+    if (!w || !h) return;
     if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
     gl.viewport(0, 0, w, h);
     gl.uniform1f(U.u_aspect, w / h);
@@ -632,6 +648,7 @@ void main() {
   let laidOut = false;
   function layout(dt) {
     const W = canvas.width, H = canvas.height;
+    if (!W || !H) return;
     let w = W, bottom = 0;
     if (document.body.classList.contains('panelOpen')) {
       if (innerWidth > 900) w = W - panel.offsetWidth * dpr();
