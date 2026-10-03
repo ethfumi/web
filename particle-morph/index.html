@@ -1,0 +1,940 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#02030a">
+<meta name="description" content="十数万個の光の粒が、銀河・球・結び目・波・格子へと形を変えていく WebGL アニメーション">
+<meta property="og:title" content="MORPH / PARTICLE FIELD">
+<meta property="og:description" content="十数万個の光の粒が形を変えていく WebGL アニメーション">
+<title>MORPH / PARTICLE FIELD</title>
+<style>
+  :root {
+    --ink: #dfe8ff;
+    --dim: #7f8fae;
+    --line: rgba(160, 185, 235, .16);
+    --glass: rgba(5, 8, 20, .74);
+    --accent: #8fb8ff;
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+    --sans: system-ui, -apple-system, "Hiragino Sans", "Yu Gothic UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #02030a; color: var(--ink); font-family: var(--sans); overflow: hidden; overscroll-behavior: none; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+  canvas.dragging { cursor: grabbing; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  .vignette { position: fixed; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, .65) 100%); }
+
+  .topbar { position: fixed; top: max(14px, env(safe-area-inset-top)); left: max(16px, env(safe-area-inset-left)); pointer-events: none; }
+  .topbar a { color: inherit; pointer-events: auto; }
+  .eyebrow { font: 10px/1 var(--mono); letter-spacing: .18em; color: var(--dim); }
+  h1 { margin: 6px 0 8px; font: 600 22px/1.1 var(--mono); letter-spacing: .06em; }
+  h1 em { font-style: normal; font-weight: 400; font-size: 12px; color: var(--dim); letter-spacing: .14em; }
+  .readout { display: flex; gap: 14px; font: 11px/1.4 var(--mono); letter-spacing: .08em; color: var(--dim); }
+  .readout b { color: var(--ink); font-weight: 500; }
+
+  .hud {
+    position: fixed; left: max(16px, env(safe-area-inset-left)); bottom: 5vh;
+    font: 500 12px/1 var(--mono); letter-spacing: .32em; text-transform: uppercase;
+    user-select: none; pointer-events: none; transition: opacity .3s ease;
+  }
+  .cap { display: flex; align-items: baseline; gap: 1.4em; transition: opacity .45s ease, transform .45s ease; }
+  .cap.off { opacity: 0; transform: translateY(6px); }
+  .num { opacity: .45; }
+  .name { font-size: 22px; font-weight: 300; letter-spacing: .42em; }
+  .bars { display: flex; gap: 5px; width: min(300px, 60vw); margin-top: 18px; }
+  .bar { flex: 1; height: 2px; background: rgba(223, 232, 255, .16); overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 100%; background: var(--ink); transform-origin: left; transform: scaleX(0); }
+
+  .fab {
+    position: fixed; top: max(14px, env(safe-area-inset-top)); right: 16px;
+    display: grid; justify-items: center; gap: 3px; padding: 8px 12px;
+    border: 1px solid var(--line); border-radius: 999px; background: var(--glass);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  }
+  .fab b { font-size: 15px; font-weight: 400; line-height: 1; }
+  .fab small { font: 8px/1 var(--mono); letter-spacing: .14em; color: var(--dim); }
+  body.panelOpen .fab { display: none; }
+
+  .panel {
+    position: fixed; top: 0; right: 0; bottom: 0; width: 348px; padding: 16px 16px 28px; overflow-y: auto;
+    background: var(--glass); border-left: 1px solid var(--line);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    transform: translateX(100%); transition: transform .28s ease;
+    scrollbar-width: thin; scrollbar-color: var(--line) transparent;
+  }
+  body.panelOpen .panel { transform: none; }
+  .panel > header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .panel > header span { display: block; font: 10px/1 var(--mono); letter-spacing: .18em; color: var(--dim); }
+  .panel > header b { display: block; margin-top: 6px; font-size: 13px; font-weight: 500; }
+  #closePanel { width: 30px; height: 30px; border: 1px solid var(--line); border-radius: 50%; background: none; font-size: 16px; line-height: 1; }
+
+  .shapeGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .shapeGrid button {
+    position: relative; padding: 9px 10px 8px; text-align: left;
+    border: 1px solid var(--line); border-radius: 8px; background: rgba(140, 170, 230, .04);
+  }
+  .shapeGrid button b { display: block; font: 600 11px/1.2 var(--mono); letter-spacing: .06em; }
+  .shapeGrid button small { display: block; margin-top: 4px; font-size: 10px; color: var(--dim); }
+  .shapeGrid button i { position: absolute; top: 7px; right: 8px; font: normal 9px/1 var(--mono); color: var(--dim); }
+  .shapeGrid button.active { border-color: var(--accent); background: rgba(143, 184, 255, .12); }
+  .shapeGrid button.next { border-color: rgba(143, 184, 255, .45); }
+
+  .panel label, .option {
+    display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 6px 10px;
+    padding: 11px 2px; border-bottom: 1px solid var(--line);
+  }
+  .panel label span b, .option span b { display: block; font: 600 11px/1 var(--mono); letter-spacing: .1em; }
+  .panel label span small, .option span small { display: block; margin-top: 5px; font-size: 11px; color: var(--dim); }
+  output { font: 11px/1 var(--mono); color: var(--accent); }
+  .panel label input { grid-column: 1 / -1; }
+  input[type="range"] { width: 100%; height: 18px; margin: 0; background: none; accent-color: var(--accent); }
+  .segments { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; }
+  .segments button {
+    padding: 6px 9px; border: 1px solid var(--line); border-radius: 6px; background: none;
+    font: 10px/1 var(--mono); letter-spacing: .06em; color: var(--dim); white-space: nowrap;
+  }
+  .segments button.active { border-color: var(--accent); color: var(--ink); background: rgba(143, 184, 255, .12); }
+  .keys { margin: 14px 2px 0; font: 10px/1.7 var(--mono); letter-spacing: .04em; color: var(--dim); }
+  .err { position: fixed; inset: 0; display: grid; place-items: center; font: 14px var(--sans); }
+
+  @media (max-width: 900px) {
+    h1 { font-size: 18px; }
+    .panel {
+      top: auto; left: 0; width: auto; max-height: 60vh;
+      border-left: 0; border-top: 1px solid var(--line); border-radius: 16px 16px 0 0;
+      transform: translateY(100%);
+    }
+    .fab { top: auto; bottom: max(16px, env(safe-area-inset-bottom)); }
+    body.panelOpen .hud { opacity: 0; }
+  }
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="形を変えていく光の粒"></canvas>
+<div class="vignette"></div>
+<header class="topbar">
+  <span class="eyebrow">PARTICLE MORPH · v1.2 · BY <a href="https://x.com/fumilin" target="_blank" rel="me noopener noreferrer">@fumilin ↗</a></span>
+  <h1>MORPH <em>/ PARTICLE FIELD</em></h1>
+  <div class="readout"><span><b id="count">--</b> PARTICLES</span><span id="zoom" hidden>ZOOM <b id="zoomOut">×1.0</b></span><span><b id="fps">-- FPS</b></span></div>
+</header>
+<div class="hud">
+  <div class="cap" id="cap"><span class="num" id="num">01 / 05</span><span class="name" id="name">Galaxy</span></div>
+  <div class="bars" id="bars"></div>
+</div>
+<button id="openPanel" class="fab" aria-label="設定を開く"><b>⌁</b><small>CONTROLS</small></button>
+<aside class="panel" id="panel" aria-label="アニメーション設定">
+  <header><div><span>SHAPE LIBRARY</span><b>形を選ぶ・動きを変える</b></div><button id="closePanel" aria-label="設定を閉じる">×</button></header>
+  <div class="shapeGrid" id="shapeGrid"></div>
+  <div class="option"><span><b>AUTO CYCLE</b><small>時間が来たら次の形へ切り替える</small></span><div class="segments"><button id="autoToggle" class="active">ON</button></div></div>
+  <div class="option"><span><b>SHUFFLE</b><small>次の形をランダムに選ぶ</small></span><div class="segments"><button id="shuffleToggle">OFF</button></div></div>
+  <div id="sliders"></div>
+  <div class="option"><span><b>PARTICLES</b><small>粒の数</small></span><div class="segments" id="counts"></div></div>
+  <div class="option"><span><b>RESET</b><small>設定と視点を最初に戻す</small></span><div class="segments"><button id="reset">RESET</button></div></div>
+  <p class="keys">ドラッグ 回転 · ホイール / ピンチ ズーム · SPACE 再生/停止 · 1–0 形 · ← → 前/次<br>MANDELBROT では ドラッグ 移動 · ホイール / ピンチ 集合のズーム · RESET で全体図</p>
+</aside>
+
+<script id="vs" type="x-shader/x-vertex">
+precision highp float;
+attribute vec4 a_seed;
+attribute vec4 a_seed2;
+attribute vec3 a_curve;
+uniform float u_time, u_morph, u_a, u_b, u_aspect, u_px, u_intro, u_gain;
+uniform float u_yaw, u_pitch, u_dist, u_fit, u_size, u_chaos, u_hue, u_touch;
+uniform vec2 u_shift, u_pointer, u_mCenter;
+uniform float u_mScale, u_mIter;
+varying vec3 v_col;
+varying float v_alpha;
+
+const float PI = 3.14159265;
+const float TAU = 6.2831853;
+const float F = 1.8;
+
+mat2 rot(float a) { float c = cos(a), s = sin(a); return mat2(c, -s, s, c); }
+
+vec3 galaxy(vec4 s, float t) {
+  float r = pow(s.y, 0.7) * 1.7 + 0.02;
+  float arm = floor(s.x * 3.0) / 3.0 * TAU;
+  float sp = fract(s.x * 3.0) - 0.5;
+  sp = sp * sp * sp * 8.0;
+  float ang = arm + r * 2.4 + sp * 1.6 - t * 0.25 / (0.35 + r);
+  float h = (s.z - 0.5) * (0.35 * exp(-r * 1.8) + 0.04);
+  return vec3(cos(ang) * r, h, sin(ang) * r);
+}
+
+vec3 sphere(vec4 s, float t) {
+  float y = s.x * 2.0 - 1.0;
+  float inner = step(0.75, s.z);
+  float a = s.y * TAU + t * mix(0.15, -0.5, inner);
+  float rr = sqrt(1.0 - y * y);
+  vec3 p = vec3(rr * cos(a), y, rr * sin(a));
+  float d = 1.0 + 0.10 * sin(p.y * 7.0 - t * 2.2) + 0.06 * sin(a * 5.0 + t * 1.5) * rr;
+  return p * d * mix(1.1, 0.5, inner);
+}
+
+vec3 knotC(float u) {
+  float R = 0.8, r0 = 0.36;
+  float w = R + r0 * cos(3.0 * u);
+  return vec3(w * cos(2.0 * u), r0 * sin(3.0 * u), w * sin(2.0 * u));
+}
+
+vec3 knot(vec4 s, float t) {
+  float u = s.x * TAU + t * 0.2;
+  vec3 c = knotC(u);
+  vec3 T = normalize(knotC(u + 0.01) - c);
+  vec3 N = normalize(cross(T, vec3(0.0, 1.0, 0.0)));
+  vec3 B = cross(T, N);
+  float v = s.y * TAU + u * 4.0;
+  float tube = 0.15 * (0.55 + 0.45 * sqrt(s.z));
+  return (c + (N * cos(v) + B * sin(v)) * tube) * 1.3;
+}
+
+vec3 wave(vec4 s, float t) {
+  float gx = s.x * 2.0 - 1.0, gz = s.y * 2.0 - 1.0;
+  if (s.z < 0.5) gx = (floor(gx * 18.0) + 0.5) / 18.0;
+  else gz = (floor(gz * 18.0) + 0.5) / 18.0;
+  vec2 q = vec2(gx, gz) * 1.9;
+  float d = length(q);
+  float y = 0.28 * sin(d * 5.0 - t * 2.6) * exp(-d * 0.7) + 0.10 * sin(q.x * 3.0 + t) * cos(q.y * 2.5 - t * 0.7);
+  return vec3(q.x, y - 0.15, q.y);
+}
+
+vec3 lattice(vec4 s, float t) {
+  vec3 p = s.xyz * 2.0 - 1.0;
+  vec3 q = floor(p * 2.0 + 0.5) / 2.0;
+  float k = s.w * 3.0;
+  if (k < 1.0) p = vec3(p.x, q.y, q.z);
+  else if (k < 2.0) p = vec3(q.x, p.y, q.z);
+  else p = vec3(q.x, q.y, p.z);
+  return p * 0.85 * (1.0 + 0.04 * sin(t * 2.0 + (q.x + q.y + q.z) * 3.0));
+}
+
+vec3 saturn(vec4 s, float t) {
+  vec3 p;
+  if (s.z < 0.4) {
+    // 本体。自転で少しつぶれた球
+    float y = s.x * 2.0 - 1.0;
+    float a = s.y * TAU + t * 0.4;
+    float rr = sqrt(1.0 - y * y);
+    p = vec3(rr * cos(a), y * 0.9, rr * sin(a)) * 0.6;
+  } else {
+    // 環。カッシーニの間隙にあたる帯を空ける
+    float r = mix(0.82, 1.72, s.x);
+    if (r > 1.26 && r < 1.36) r += 0.13;
+    float a = s.y * TAU + t * 0.35 / pow(r, 1.5);
+    p = vec3(r * cos(a), (s.w - 0.5) * 0.012, r * sin(a));
+  }
+  p.xy = rot(0.47) * p.xy;
+  return p;
+}
+
+vec3 blackhole(vec4 s, float t) {
+  if (s.z < 0.12) {
+    // 上下に噴き出すジェット
+    float sgn = s.y < 0.5 ? 1.0 : -1.0;
+    float h = fract(s.x + t * 0.25) * 1.8 + 0.12;
+    float w = (0.02 + 0.06 * h) * sqrt(s.w);
+    float a = s.y * TAU * 9.0;
+    return vec3(w * cos(a), sgn * h, w * sin(a));
+  }
+  if (s.z < 0.24) {
+    // 事象の地平面のすぐ外の薄い殻。加算合成なので輪郭だけが光る
+    float y = s.x * 2.0 - 1.0;
+    float a = s.y * TAU;
+    float rr = sqrt(1.0 - y * y);
+    return vec3(rr * cos(a), y, rr * sin(a)) * 0.33;
+  }
+  // 降着円盤。内側ほど密で速い
+  float r = 0.45 + 1.35 * s.x * s.x;
+  float a = s.y * TAU + t * 0.9 / pow(r, 1.5);
+  return vec3(r * cos(a), (s.w - 0.5) * 0.05 * r, r * sin(a));
+}
+
+vec3 dna(vec4 s, float t) {
+  float h = s.x * 2.0 - 1.0;
+  float R = 0.5;
+  if (s.z < 0.68) {
+    // 2 本の鎖
+    float a = h * 7.0 + t * 0.6 + (s.y < 0.5 ? 0.0 : PI);
+    float rr = R + (s.w - 0.5) * 0.07;
+    return vec3(rr * cos(a), h * 1.55 + (fract(s.w * 7.31) - 0.5) * 0.05, rr * sin(a));
+  }
+  // 塩基対。高さを段に丸め、2 本の鎖を横に結ぶ
+  float hq = (floor(h * 15.0) + 0.5) / 15.0;
+  float a = hq * 7.0 + t * 0.6;
+  float u = s.y * 2.0 - 1.0;
+  return vec3(R * u * cos(a), hq * 1.55, R * u * sin(a));
+}
+
+vec3 mobius(vec4 s, float t) {
+  float u = s.x * TAU + t * 0.25;
+  float v = (s.y - 0.5) * 0.9;
+  if (s.z < 0.25) v = s.y < 0.5 ? -0.45 : 0.45;
+  float w = 1.15 + v * cos(u * 0.5);
+  return vec3(w * cos(u), v * sin(u * 0.5), w * sin(u));
+}
+
+vec3 shell(vec4 s, float t) {
+  // 対数らせんに沿って太くなる管。口の側ほど面積が広いので粒を多く回す
+  float u = sqrt(s.x);
+  float th = u * 3.2 * TAU;
+  float g = exp(0.19 * (th - 3.2 * TAU));
+  float v = s.y * TAU + t * 0.5;
+  return vec3(g * (1.0 + cos(v)) * cos(th), 1.7 * (1.0 - g) - 0.75 + g * sin(v), g * (1.0 + cos(v)) * sin(th)) * 0.78;
+}
+
+vec3 orrery(vec4 s, float t) {
+  if (s.z < 0.1) {
+    // 太陽
+    return normalize(vec3(s.x, s.y, s.w) - 0.5) * 0.15 * pow(fract(s.w * 9.7), 0.33);
+  }
+  float k = floor(s.x * 8.0);
+  float r = 0.3 + 0.2 * k;
+  if (s.z < 0.42) {
+    // 惑星。ケプラーの第 3 法則どおり、外側ほどゆっくり回る
+    float a = t * 1.2 / pow(r, 1.5) + k * 2.4;
+    float size = 0.025 + 0.035 * fract(k * 0.37 + 0.2);
+    vec3 d = normalize(vec3(s.y, s.w, fract(s.y * 13.7)) - 0.5);
+    return vec3(r * cos(a), 0.0, r * sin(a)) + d * size * pow(fract(s.w * 5.3), 0.33);
+  }
+  float a = s.y * TAU;
+  return vec3(r * cos(a), 0.0, r * sin(a));
+}
+
+// 乱数を複素平面の窓(中心 u_mCenter、半幅 u_mScale)にまき、脱出までの反復回数を高さにする。
+// 集合の内側と、すぐ逃げる遠くの点は下へ落として見せない。境界の帯だけが山脈になる。
+vec3 mandelbrot(vec4 s) {
+  vec2 c = u_mCenter + (s.xy - 0.5) * 2.0 * u_mScale;
+  // 全体図では、一様にまくと境界に落ちる粒が数 % しかない。粒の 3/4 を主カーディオイドと
+  // 周期 2 の円のふちの近くにまく。ズームするにつれて一様に戻す
+  float near = clamp((u_mScale - 0.25) / 1.2, 0.0, 1.0);
+  if (s.w < 0.02 + 0.75 * near) {
+    float th = s.x * TAU;
+    vec2 edge = fract(s.z * 5.0) < 0.3
+      ? vec2(-1.0 + 0.25 * cos(th), 0.25 * sin(th))
+      : vec2(0.5 * cos(th) - 0.25 * cos(2.0 * th), 0.5 * sin(th) - 0.25 * sin(2.0 * th));
+    float ph = s.z * TAU;
+    c = edge + 0.09 * s.y * s.y * vec2(cos(ph), sin(ph));
+  }
+  vec2 win = (c - u_mCenter) / (2.0 * u_mScale);
+  if (abs(win.x) > 0.5 || abs(win.y) > 0.5) return vec3(0.0, -40.0, 0.0);
+  vec2 z = vec2(0.0);
+  float n = 0.0;
+  float m2 = 0.0;
+  for (int i = 0; i < 400; i++) {
+    if (float(i) >= u_mIter) break;
+    z = vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y) + c;
+    m2 = dot(z, z);
+    if (m2 > 64.0) break;
+    n += 1.0;
+  }
+  // 高さは反復回数の対数を上限で割った 0〜1。ズームして上限が増えても、境界がいちばん高い
+  float h = -40.0;
+  if (m2 > 64.0 && n >= 3.0) {
+    float sn = n - log2(0.5 * log2(m2));
+    h = log(sn) / log(u_mIter) * 1.3 - 0.7;
+  }
+  return vec3(win.x * 3.2, h, -win.y * 3.2);
+}
+
+// 形ごとの明るさの重み。マンデルブロは平地を薄く、境界の山脈だけ光らせる
+float dimOf(float i, vec3 p) {
+  // 境界に落ちる粒は全体の数 % しかないので、そのぶん 1 粒を明るくする
+  float e = smoothstep(-0.7, 0.6, p.y);
+  if (i > 11.5) return 0.15 + 1.9 * e * e * e;
+  return 1.0;
+}
+
+vec3 shape(float i, vec4 s, float t) {
+  if (i < 0.5) return galaxy(s, t);
+  if (i < 1.5) return sphere(s, t);
+  if (i < 2.5) return knot(s, t);
+  if (i < 3.5) return wave(s, t);
+  if (i < 4.5) return lattice(s, t);
+  if (i < 5.5) return saturn(s, t);
+  if (i < 6.5) return blackhole(s, t);
+  if (i < 7.5) return dna(s, t);
+  if (i < 8.5) return mobius(s, t);
+  if (i < 9.5) return shell(s, t);
+  if (i < 10.5) return orrery(s, t);
+  // ローレンツアトラクタは数式 1 本では書けないので、CPU で積分した点を属性で受け取る
+  if (i < 11.5) return a_curve * (1.0 + 0.012 * sin(t * 1.7 + s.x * 40.0));
+  return mandelbrot(s);
+}
+
+float hueOf(float i, vec3 p) {
+  // マンデルブロは高さ(脱出の遅さ)で色を変える
+  if (i > 11.5) return 0.55 + 0.5 * p.y;
+  if (i < 0.5) return 0.30;
+  if (i < 1.5) return 0.42;
+  if (i < 2.5) return 0.12;
+  if (i < 3.5) return 0.72;
+  if (i < 4.5) return 0.92;
+  if (i < 5.5) return -0.24;
+  if (i < 6.5) return -0.16;
+  if (i < 7.5) return 0.38;
+  if (i < 8.5) return 0.15;
+  if (i < 9.5) return -0.08;
+  if (i < 10.5) return 0.50;
+  return 0.80;
+}
+
+vec3 pal(float x) { return 0.5 + 0.5 * cos(TAU * (x + vec3(0.0, 0.33, 0.67))); }
+
+void main() {
+  vec4 s = a_seed, r = a_seed2;
+  float star = step(s.w, 0.02);
+  float k = 0.0, mid = 0.0, alpha = 1.0;
+  vec3 p, col;
+
+  if (star > 0.5) {
+    p = normalize(r.yzw - 0.5) * (5.0 + 3.0 * r.x);
+    col = mix(vec3(0.7, 0.8, 1.0), vec3(1.0, 0.85, 0.7), s.x);
+    alpha = 0.9 * (0.55 + 0.45 * sin(u_time * 2.0 + r.x * 100.0));
+  } else {
+    vec3 A = shape(u_a, s, u_time);
+    vec3 B = shape(u_b, s, u_time);
+    // 中心から外へ波及する順に乗り換える
+    float st = 0.6 * clamp(length(A) / 1.6, 0.0, 1.0) + 0.4 * r.x;
+    k = smoothstep(0.0, 1.0, (u_morph - st * 0.7) / 0.75);
+    mid = sin(PI * k);
+    float wild = mid * u_chaos;
+    p = mix(A, B, k);
+    p.xz = rot(wild * 1.4 * (0.5 + r.y)) * p.xz;
+    p += wild * (r.yzw - 0.5) * 0.7;
+    p += wild * 0.22 * vec3(sin(p.y * 3.0 + u_time * 1.3), sin(p.z * 3.0 + u_time * 1.7), sin(p.x * 3.0 + u_time));
+    p *= u_intro;
+    float hue = mix(hueOf(u_a, A), hueOf(u_b, B), k) + 0.16 * (r.z - 0.5) + 0.10 * length(p) + u_hue;
+    col = pal(hue);
+    col = mix(col, vec3(1.0), 0.15 + 0.35 * mid);
+    col *= 0.6 + 0.8 * r.y;
+    alpha *= mix(dimOf(u_a, A), dimOf(u_b, B), k);
+  }
+
+  p.xz = rot(u_yaw) * p.xz;
+  p.yz = rot(u_pitch) * p.yz;
+  float zc = p.z + u_dist;
+
+  float size = mix(0.006, 0.015, r.z * r.z) * u_size;
+  if (star < 0.5 && r.w < 0.04) { size *= 7.0; alpha *= 0.10; }
+  float ps = u_px * size * F / max(zc, 0.05) * 0.5 * u_fit;
+  if (ps < 1.5) { alpha *= (ps / 1.5) * (ps / 1.5); ps = 1.5; }
+
+  // 奥行きの暗さは、カメラの距離ではなく形の中での前後で決める。寄っても引いても同じ濃淡になる。
+  float fog = 1.0 - smoothstep(2.2, 5.9, p.z + 3.7);
+  v_col = col;
+  v_alpha = alpha * u_gain * mix(0.35, 1.0, star > 0.5 ? 1.0 : fog);
+  gl_PointSize = ps;
+  vec2 ndc = vec2(p.x * F * u_fit / u_aspect, p.y * F * u_fit) / zc + u_shift;
+  if (star < 0.5) {
+    // ポインタの近くの粒を、画面上で押しのける(負なら引き寄せる)
+    vec2 away = (ndc - u_pointer) * vec2(u_aspect, 1.0);
+    float push = u_touch * exp(-dot(away, away) * 14.0) * 0.3;
+    ndc += normalize(away + 1e-5) * push / vec2(u_aspect, 1.0);
+  }
+  gl_Position = vec4(ndc * zc, 0.0, zc);
+}
+</script>
+
+<script id="fs" type="x-shader/x-fragment">
+precision mediump float;
+varying vec3 v_col;
+varying float v_alpha;
+void main() {
+  vec2 d = gl_PointCoord - 0.5;
+  float r2 = dot(d, d) * 4.0;
+  if (r2 > 1.0) discard;
+  float a = 1.0 - r2;
+  gl_FragColor = vec4(v_col * a * a * v_alpha, 1.0);
+}
+</script>
+
+<script>
+(() => {
+  const SHAPES = [
+    { name: 'Galaxy', note: '渦巻く 3 本の腕' },
+    { name: 'Sphere', note: '脈打つ二重の球' },
+    { name: 'Torus Knot', note: '結び目の管' },
+    { name: 'Ripple', note: '波打つグリッド' },
+    { name: 'Lattice', note: '立方格子' },
+    { name: 'Saturn', note: '環と間隙のある惑星' },
+    { name: 'Black Hole', note: '降着円盤とジェット' },
+    { name: 'DNA', note: '二重らせんと塩基対' },
+    { name: 'Möbius', note: '表裏のない帯' },
+    { name: 'Shell', note: '対数らせんの巻貝' },
+    { name: 'Orrery', note: '8 つの惑星と軌道' },
+    { name: 'Lorenz', note: 'カオスの蝶' },
+    { name: 'Mandelbrot', note: '境界の山脈。ホイールでズーム' },
+  ];
+  const MANDEL_INDEX = 12;
+  // 初期の窓はタツノオトシゴの谷のあたりを中心にした全体図
+  const MANDEL = { center: [-0.7435, 0.1314], scale: 1.6 };
+  // 乗り換えは粒ごとに最大 0.7 遅れて始まり 0.75 かけて終わる。全粒が終わるまでの長さ。
+  const MORPH = 1.7;
+  const COUNTS = [40000, 80000, 160000, 320000];
+  const SLIDERS = [
+    { id: 'speed', label: 'SPEED', note: '動きと切り替えの速さ', min: -1, max: 0.7, step: 0.05, value: 0, log: true, fmt: (v) => '×' + v.toFixed(2) },
+    { id: 'hold', label: 'HOLD', note: '形を保つ時間', min: 0.3, max: 10, step: 0.1, value: 2.3, fmt: (v) => v.toFixed(1) + ' s' },
+    { id: 'chaos', label: 'TURBULENCE', note: '切り替え途中の乱れ', min: 0, max: 3, step: 0.05, value: 1, fmt: (v) => '×' + v.toFixed(2) },
+    { id: 'size', label: 'SIZE', note: '粒の大きさ', min: -0.5, max: 0.5, step: 0.02, value: 0, log: true, fmt: (v) => '×' + v.toFixed(2) },
+    { id: 'glow', label: 'GLOW', note: '明るさ', min: -0.6, max: 0.5, step: 0.02, value: 0, log: true, fmt: (v) => '×' + v.toFixed(2) },
+    { id: 'hue', label: 'HUE', note: '色相をずらす', min: -0.5, max: 0.5, step: 0.01, value: 0, fmt: (v) => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) },
+    { id: 'spin', label: 'SPIN', note: '自動回転の速さ', min: -3, max: 3, step: 0.1, value: 1, fmt: (v) => '×' + v.toFixed(1) },
+    { id: 'afterglow', label: 'AFTERGLOW', note: '残像の長さ', min: 0, max: 0.9, step: 0.01, value: 0, fmt: (v) => v.toFixed(2) },
+    { id: 'touch', label: 'TOUCH', note: 'ポインタから粒が逃げる強さ(負で集まる)', min: -1, max: 1, step: 0.05, value: 0.5, fmt: (v) => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) },
+  ];
+  const VIEW = { yaw: 0, pitch: 0.42, dist: 3.7 };
+
+  const $ = (id) => document.getElementById(id);
+  const canvas = $('c');
+  // 残像は前のフレームの絵を薄めて残すので、描画バッファを保持する。
+  const gl = canvas.getContext('webgl', { antialias: false, alpha: false, preserveDrawingBuffer: true, powerPreference: 'high-performance' });
+  if (!gl) {
+    document.body.insertAdjacentHTML('beforeend', '<div class="err">WebGL is not available.</div>');
+    return;
+  }
+
+  const link = (vs, fs) => {
+    const p = gl.createProgram();
+    for (const [type, source] of [[gl.VERTEX_SHADER, vs], [gl.FRAGMENT_SHADER, fs]]) {
+      const sh = gl.createShader(type);
+      gl.shaderSource(sh, source);
+      gl.compileShader(sh);
+      if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh));
+      gl.attachShader(p, sh);
+    }
+    gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+    return p;
+  };
+  const prog = link($('vs').textContent, $('fs').textContent);
+  // 残像用。画面全体を覆う四角を、色を指定して描くだけ
+  const fadeProg = link(
+    'attribute vec2 a_pos; void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }',
+    'precision mediump float; uniform vec4 u_color; void main() { gl_FragColor = u_color; }');
+  const fadeLoc = gl.getAttribLocation(fadeProg, 'a_pos');
+  const fadeColor = gl.getUniformLocation(fadeProg, 'u_color');
+  const fadeQuad = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, fadeQuad);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  gl.useProgram(prog);
+
+  const U = {};
+  for (const n of ['u_time', 'u_morph', 'u_a', 'u_b', 'u_aspect', 'u_px', 'u_intro', 'u_gain',
+    'u_yaw', 'u_pitch', 'u_dist', 'u_fit', 'u_size', 'u_chaos', 'u_hue', 'u_shift', 'u_touch', 'u_pointer',
+    'u_mCenter', 'u_mScale', 'u_mIter']) {
+    U[n] = gl.getUniformLocation(prog, n);
+  }
+
+  gl.disable(gl.DEPTH_TEST);
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.ONE, gl.ONE);
+  gl.clearColor(0.008, 0.012, 0.035, 1);
+
+  const st = {
+    a: 0, b: 0, morph: 0, morphing: false, queued: null, held: 0,
+    auto: true, playing: true, time: 0, camTime: 0,
+    count: innerWidth * innerHeight < 700 * 700 ? 80000 : 160000,
+    yaw: VIEW.yaw, pitch: VIEW.pitch, dist: VIEW.dist,
+    fit: 1, shiftX: 0, shiftY: 0,
+    mCenter: [...MANDEL.center], mScale: MANDEL.scale,
+  };
+
+  // マンデルブロを表示中(へ切り替え中)は、ホイールとドラッグを集合の窓の操作に使う
+  const mandelActive = () => st.a === MANDEL_INDEX || (st.morphing && st.b === MANDEL_INDEX);
+  // カメラの揺れ。マンデルブロのズーム中は、ポインタの真下の点がぶれないように止める
+  const sway = () => (mandelActive() ? 0 : 1);
+  const mandelIter = () => Math.min(400, Math.max(60, 60 + 50 * Math.log10(MANDEL.scale / st.mScale)));
+
+  // ローレンツアトラクタ(σ=10, ρ=28, β=8/3)の軌道を 1 本たどり、n 個の点にする。
+  function lorenzPoints(n) {
+    const out = new Float32Array(n * 3);
+    let x = 0.1, y = 0, z = 0;
+    const dt = 0.004;
+    for (let i = -2000; i < n; i++) {
+      const dx = 10 * (y - x), dy = x * (28 - z) - y, dz = x * y - (8 / 3) * z;
+      x += dx * dt;
+      y += dy * dt;
+      z += dz * dt;
+      if (i >= 0) out.set([x / 17, (z - 25) / 17, y / 17], i * 3);
+    }
+    return out;
+  }
+
+  // 粒は位置を持たない。属性は乱数 8 個で、位置は頂点シェーダーが毎フレーム計算する。
+  // 例外はローレンツアトラクタの座標(a_curve)。
+  const buffers = [['a_seed', 4], ['a_seed2', 4], ['a_curve', 3]].map(([name, size]) =>
+    ({ name, size, loc: gl.getAttribLocation(prog, name), buf: gl.createBuffer() }));
+
+  function bindParticles() {
+    for (const { loc, size, buf } of buffers) {
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 0, 0);
+    }
+  }
+
+  function setCount(n) {
+    st.count = n;
+    for (const { name, buf } of buffers) {
+      let data;
+      if (name === 'a_curve') {
+        data = lorenzPoints(n);
+      } else {
+        data = new Float32Array(n * 4);
+        for (let i = 0; i < data.length; i++) data[i] = Math.random();
+      }
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+    }
+    $('count').textContent = n / 1000 + 'k';
+    document.querySelectorAll('#counts button').forEach((b) => b.classList.toggle('active', Number(b.dataset.count) === n));
+  }
+
+  // ---- 形の切り替え ----
+
+  function goTo(i) {
+    const target = (i + SHAPES.length) % SHAPES.length;
+    if (st.morphing) {
+      st.queued = target;
+    } else if (target !== st.a) {
+      st.b = target;
+      st.morph = 0;
+      st.morphing = true;
+    }
+    renderShapes();
+  }
+
+  function tick(dt) {
+    const d = st.playing ? dt * st.speed : 0;
+    st.time += d;
+    if (st.playing) st.camTime += dt;
+    if (st.morphing) {
+      st.morph += d;
+      if (st.morph >= MORPH) {
+        st.a = st.b;
+        st.morph = 0;
+        st.morphing = false;
+        st.held = 0;
+        const next = st.queued;
+        st.queued = null;
+        if (next !== null && next !== st.a) goTo(next);
+        else renderShapes();
+      }
+    } else {
+      st.held += d;
+      if (st.auto && st.held >= st.hold) {
+        const jump = st.shuffle ? 1 + Math.floor(Math.random() * (SHAPES.length - 1)) : 1;
+        goTo(st.a + jump);
+      }
+    }
+  }
+
+  // ---- 画面 ----
+
+  const dpr = () => Math.min(devicePixelRatio || 1, 2);
+  const panel = $('panel');
+
+  function resize() {
+    const w = Math.round(innerWidth * dpr()), h = Math.round(innerHeight * dpr());
+    // ペインが隠れたままタブが開くと最初は 0×0 で、0 / 0 の NaN が画面合わせの平滑化に残り続ける
+    if (!w || !h) return;
+    if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+    gl.viewport(0, 0, w, h);
+    gl.uniform1f(U.u_aspect, w / h);
+    gl.uniform1f(U.u_px, h);
+  }
+
+  // パネルが開いているあいだは、残りの領域の中央に収める。広い画面では右、狭い画面では下にパネルが出る。
+  let laidOut = false;
+  function layout(dt) {
+    const W = canvas.width, H = canvas.height;
+    if (!W || !H) return;
+    let w = W, bottom = 0;
+    if (document.body.classList.contains('panelOpen')) {
+      if (innerWidth > 900) w = W - panel.offsetWidth * dpr();
+      else bottom = panel.offsetHeight * dpr();
+    }
+    const k = laidOut ? 1 - Math.exp(-dt * 9) : 1;
+    laidOut = true;
+    st.fit +=(Math.min(w, H - bottom) / H - st.fit) * k;
+    st.shiftX += (w / W - 1 - st.shiftX) * k;
+    st.shiftY += (bottom / H - st.shiftY) * k;
+  }
+
+  const pointer = { x: 0, y: 0, on: false, strength: 0 };
+
+  function draw(intro, dt) {
+    let exposure = 1;
+    if (st.afterglow > 0.005) {
+      // 前のフレームの絵を keep 倍に薄めて残す。掛け算だけだと 8bit の端数が残って消えきらないので、1 段だけ引く。
+      const keep = Math.pow(st.afterglow, dt * 60);
+      gl.useProgram(fadeProg);
+      gl.bindBuffer(gl.ARRAY_BUFFER, fadeQuad);
+      gl.enableVertexAttribArray(fadeLoc);
+      gl.vertexAttribPointer(fadeLoc, 2, gl.FLOAT, false, 0, 0);
+      gl.blendColor(keep, keep, keep, 1);
+      gl.blendEquation(gl.FUNC_ADD);
+      gl.blendFunc(gl.ZERO, gl.CONSTANT_COLOR);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      gl.blendEquation(gl.FUNC_REVERSE_SUBTRACT);
+      gl.blendFunc(gl.ONE, gl.ONE);
+      gl.uniform4f(fadeColor, 1 / 255, 1 / 255, 1 / 255, 0);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      gl.blendEquation(gl.FUNC_ADD);
+      gl.useProgram(prog);
+      // 止まっている粒は毎フレーム重なって 1 / (1 - keep) 倍に明るくなるので、そのぶん暗く描く。
+      exposure = 1 - keep;
+    } else {
+      gl.clear(gl.COLOR_BUFFER_BIT);
+    }
+    gl.blendFunc(gl.ONE, gl.ONE);
+    bindParticles();
+    gl.uniform1f(U.u_touch, st.touch * pointer.strength);
+    gl.uniform2f(U.u_pointer, pointer.x, pointer.y);
+    gl.uniform1f(U.u_time, st.time);
+    gl.uniform1f(U.u_morph, st.morphing ? st.morph : 0);
+    gl.uniform1f(U.u_a, st.a);
+    gl.uniform1f(U.u_b, st.morphing ? st.b : st.a);
+    gl.uniform1f(U.u_intro, intro);
+    gl.uniform1f(U.u_gain, (0.42 * 160000 / st.count) * st.glow * exposure);
+    gl.uniform1f(U.u_yaw, st.yaw);
+    gl.uniform1f(U.u_pitch, st.pitch + 0.2 * sway() * Math.sin(st.camTime * 0.19));
+    gl.uniform1f(U.u_dist, st.dist + 0.35 * sway() * Math.sin(st.camTime * 0.31));
+    gl.uniform1f(U.u_fit, st.fit);
+    gl.uniform2f(U.u_shift, st.shiftX, st.shiftY);
+    gl.uniform1f(U.u_size, st.size);
+    gl.uniform1f(U.u_chaos, st.chaos);
+    gl.uniform1f(U.u_hue, st.hue);
+    gl.uniform2f(U.u_mCenter, st.mCenter[0], st.mCenter[1]);
+    gl.uniform1f(U.u_mScale, st.mScale);
+    gl.uniform1f(U.u_mIter, mandelIter());
+    gl.drawArrays(gl.POINTS, 0, st.count);
+  }
+
+  // ---- パネル ----
+
+  const fills = SHAPES.map(() => {
+    const b = document.createElement('div');
+    b.className = 'bar';
+    const i = b.appendChild(document.createElement('i'));
+    $('bars').appendChild(b);
+    return i;
+  });
+
+  SHAPES.forEach((shape, i) => {
+    const b = document.createElement('button');
+    // 数字キーは 1–9 と 0 の 10 個まで
+    const key = i < 10 ? (i + 1) % 10 : '';
+    b.innerHTML = `<b>${shape.name.toUpperCase()}</b><small>${shape.note}</small><i>${key}</i>`;
+    b.addEventListener('click', () => goTo(i));
+    $('shapeGrid').append(b);
+  });
+
+  function renderShapes() {
+    const upcoming = st.queued ?? (st.morphing ? st.b : null);
+    document.querySelectorAll('#shapeGrid button').forEach((b, i) => {
+      b.classList.toggle('active', i === st.a);
+      b.classList.toggle('next', i === upcoming);
+    });
+    const two = (n) => String(n).padStart(2, '0');
+    $('num').textContent = `${two(st.a + 1)} / ${two(SHAPES.length)}`;
+    $('name').textContent = SHAPES[st.a].name;
+  }
+
+  function setSlider(def, raw) {
+    const value = def.log ? Math.pow(10, raw) : raw;
+    st[def.id] = value;
+    $(def.id).value = raw;
+    $(def.id + 'Value').textContent = def.fmt(value);
+  }
+
+  SLIDERS.forEach((def) => {
+    const label = document.createElement('label');
+    label.innerHTML = `<span><b>${def.label}</b><small>${def.note}</small></span><output id="${def.id}Value"></output>` +
+      `<input id="${def.id}" type="range" min="${def.min}" max="${def.max}" step="${def.step}">`;
+    $('sliders').append(label);
+    $(def.id).addEventListener('input', (e) => setSlider(def, Number(e.target.value)));
+    setSlider(def, def.value);
+  });
+
+  COUNTS.forEach((n) => {
+    const b = document.createElement('button');
+    b.dataset.count = n;
+    b.textContent = n / 1000 + 'k';
+    b.addEventListener('click', () => setCount(n));
+    $('counts').append(b);
+  });
+
+  function setAuto(on) {
+    st.auto = on;
+    st.held = 0;
+    $('autoToggle').classList.toggle('active', on);
+    $('autoToggle').textContent = on ? 'ON' : 'OFF';
+  }
+
+  function setPanel(open) {
+    document.body.classList.toggle('panelOpen', open);
+  }
+
+  function setShuffle(on) {
+    st.shuffle = on;
+    $('shuffleToggle').classList.toggle('active', on);
+    $('shuffleToggle').textContent = on ? 'ON' : 'OFF';
+  }
+
+  $('autoToggle').addEventListener('click', () => setAuto(!st.auto));
+  $('shuffleToggle').addEventListener('click', () => setShuffle(!st.shuffle));
+  $('openPanel').addEventListener('click', () => setPanel(true));
+  $('closePanel').addEventListener('click', () => setPanel(false));
+  $('reset').addEventListener('click', () => {
+    SLIDERS.forEach((def) => setSlider(def, def.value));
+    Object.assign(st, VIEW);
+    st.mCenter = [...MANDEL.center];
+    st.mScale = MANDEL.scale;
+    setAuto(true);
+    setShuffle(false);
+    st.playing = true;
+  });
+
+  addEventListener('keydown', (e) => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const digit = /^Digit(\d)$/.exec(e.code);
+    if (digit) goTo((Number(digit[1]) + 9) % 10);
+    else if (e.code === 'Space') {
+      e.preventDefault();
+      st.playing = !st.playing;
+    } else if (e.code === 'ArrowRight') goTo((st.queued ?? (st.morphing ? st.b : st.a)) + 1);
+    else if (e.code === 'ArrowLeft') goTo((st.queued ?? (st.morphing ? st.b : st.a)) - 1);
+  });
+
+  // ---- 視点 ----
+
+  const pointers = new Map();
+  let pinch = 0;
+  // 画面上の点(clientX, clientY)の真下にある複素平面の点。頂点シェーダーの投影を y = 0 の平面で逆にたどる。
+  function complexAt(clientX, clientY) {
+    const F = 1.8;
+    const aspect = canvas.width / canvas.height;
+    const pitch = st.pitch + 0.2 * sway() * Math.sin(st.camTime * 0.19);
+    const dist = st.dist + 0.35 * sway() * Math.sin(st.camTime * 0.31);
+    const nx =(((clientX / innerWidth) * 2 - 1) - st.shiftX) * aspect / (F * st.fit);
+    const ny = ((1 - (clientY / innerHeight) * 2) - st.shiftY) / (F * st.fit);
+    // GLSL の mat2(c, -s, s, c) は列優先なので、rot(a) * v = (c*vx + s*vy, -s*vx + c*vy)
+    const c2 = Math.cos(pitch), s2 = Math.sin(pitch);
+    const z1 = (ny * dist) / (s2 - ny * c2);
+    const x1 = nx * (c2 * z1 + dist);
+    const c1 = Math.cos(st.yaw), s1 = Math.sin(st.yaw);
+    const X = c1 * x1 - s1 * z1;
+    const Z = s1 * x1 + c1 * z1;
+    return [st.mCenter[0] + (X / 3.2) * 2 * st.mScale, st.mCenter[1] + (-Z / 3.2) * 2 * st.mScale];
+  }
+
+  const zoom = (factor, clientX, clientY) => {
+    if (!mandelActive()) {
+      st.dist = Math.min(Math.max(st.dist * factor, 2.2), 9);
+      return;
+    }
+    const next = Math.min(Math.max(st.mScale * factor, 2e-6), 2);
+    const ratio = next / st.mScale;
+    // ポインタの真下の点が動かないように、窓の中心をそちらへ寄せる
+    const [cx, cy] = complexAt(clientX, clientY);
+    st.mCenter[0] = cx - (cx - st.mCenter[0]) * ratio;
+    st.mCenter[1] = cy - (cy - st.mCenter[1]) * ratio;
+    st.mScale = next;
+  };
+
+  canvas.addEventListener('pointerdown', (e) => {
+    canvas.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    canvas.classList.add('dragging');
+    if (pointers.size === 2) {
+      const [a, b] = [...pointers.values()];
+      pinch = Math.hypot(a.x - b.x, a.y - b.y);
+    }
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    pointer.x = (e.clientX / innerWidth) * 2 - 1;
+    pointer.y = 1 - (e.clientY / innerHeight) * 2;
+    pointer.on = true;
+    const prev = pointers.get(e.pointerId);
+    if (!prev) return;
+    if (pointers.size === 1 && mandelActive()) {
+      // 窓の幅 2 * mScale が画面でおよそ高さの 0.8 倍に見える
+      const k = (2 * st.mScale) / (0.8 * innerHeight);
+      st.mCenter[0] -= (e.clientX - prev.x) * k;
+      st.mCenter[1] += (e.clientY - prev.y) * k;
+    } else if (pointers.size === 1) {
+      st.yaw += (e.clientX - prev.x) * 0.006;
+      st.pitch = Math.min(Math.max(st.pitch + (e.clientY - prev.y) * 0.006, -1.4), 1.4);
+    }
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.size === 2) {
+      const [a, b] = [...pointers.values()];
+      const dist = Math.hypot(a.x - b.x, a.y - b.y);
+      if (pinch > 0 && dist > 0) zoom(pinch / dist, (a.x + b.x) / 2, (a.y + b.y) / 2);
+      pinch = dist;
+    }
+  });
+  const release = (e) => {
+    pointers.delete(e.pointerId);
+    pinch = 0;
+    if (!pointers.size) canvas.classList.remove('dragging');
+    // 指を離したら、押しのけるのもやめる。マウスは乗っているあいだ続ける。
+    if (e.pointerType !== 'mouse') pointer.on = false;
+  };
+  canvas.addEventListener('pointerup', release);
+  canvas.addEventListener('pointercancel', release);
+  canvas.addEventListener('pointerleave', () => { pointer.on = false; });
+  canvas.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    zoom(Math.exp(e.deltaY * 0.0012), e.clientX, e.clientY);
+  }, { passive: false });
+
+  // ---- ループ ----
+
+  const t0 = performance.now();
+  let last = t0, fpsFrames = 0, fpsSince = t0;
+
+  const frame = (now) => {
+    const dt = Math.min((now - last) / 1000, 0.05);
+    last = now;
+    resize();
+    layout(dt);
+    tick(dt);
+    if (mandelActive()) {
+      // 真上から少し傾けて見下ろし、画面の左右と複素平面の実軸を合わせる
+      const k = 1 - Math.exp(-dt * 3);
+      st.yaw = ((st.yaw + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
+      st.yaw -= st.yaw * k;
+      st.pitch += (1.15 - st.pitch) * k;
+    } else if (st.playing && !pointers.size) st.yaw += dt * 0.22 * st.spin;
+    $('zoom').hidden = !mandelActive();
+    if (mandelActive()) $('zoomOut').textContent = '×' + (MANDEL.scale / st.mScale).toFixed(MANDEL.scale / st.mScale < 10 ? 1 : 0);
+    pointer.strength += ((pointer.on ? 1 : 0) - pointer.strength) * (1 - Math.exp(-dt * 8));
+    draw(1 - Math.pow(2, -5 * (now - t0) / 1000), dt);
+
+    $('cap').classList.toggle('off', st.morphing && st.morph > 0.5);
+    fills.forEach((f, i) => {
+      const filled = i !== st.a ? 0 : st.morphing || !st.auto ? 1 : Math.min(st.held / st.hold, 1);
+      f.style.transform = `scaleX(${filled})`;
+    });
+
+    fpsFrames++;
+    if (now - fpsSince > 500) {
+      $('fps').textContent = `${Math.round((fpsFrames * 1000) / (now - fpsSince))} FPS`;
+      fpsFrames = 0;
+      fpsSince = now;
+    }
+    requestAnimationFrame(frame);
+  };
+
+  setCount(st.count);
+  setPanel(innerWidth > 900);
+  renderShapes();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
