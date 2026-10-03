@@ -1,0 +1,5 @@
+# 各ツールの作業用フォルダ(worktree・設定・一時物)
+.claude/
+.codex/
+tmp/
+outputs/
