@@ -543,6 +543,8 @@ void main() {
 
   // マンデルブロを表示中(へ切り替え中)は、ホイールとドラッグを集合の窓の操作に使う
   const mandelActive = () => st.a === MANDEL_INDEX || (st.morphing && st.b === MANDEL_INDEX);
+  // カメラの揺れ。マンデルブロのズーム中は、ポインタの真下の点がぶれないように止める
+  const sway = () => (mandelActive() ? 0 : 1);
   const mandelIter = () => Math.min(400, Math.max(60, 60 + 50 * Math.log10(MANDEL.scale / st.mScale)));
 
   // ローレンツアトラクタ(σ=10, ρ=28, β=8/3)の軌道を 1 本たどり、n 個の点にする。
@@ -698,8 +700,8 @@ void main() {
     gl.uniform1f(U.u_intro, intro);
     gl.uniform1f(U.u_gain, (0.42 * 160000 / st.count) * st.glow * exposure);
     gl.uniform1f(U.u_yaw, st.yaw);
-    gl.uniform1f(U.u_pitch, st.pitch + 0.2 * Math.sin(st.camTime * 0.19));
-    gl.uniform1f(U.u_dist, st.dist + 0.35 * Math.sin(st.camTime * 0.31));
+    gl.uniform1f(U.u_pitch, st.pitch + 0.2 * sway() * Math.sin(st.camTime * 0.19));
+    gl.uniform1f(U.u_dist, st.dist + 0.35 * sway() * Math.sin(st.camTime * 0.31));
     gl.uniform1f(U.u_fit, st.fit);
     gl.uniform2f(U.u_shift, st.shiftX, st.shiftY);
     gl.uniform1f(U.u_size, st.size);
@@ -811,9 +813,36 @@ void main() {
 
   const pointers = new Map();
   let pinch = 0;
-  const zoom = (factor) => {
-    if (mandelActive()) st.mScale = Math.min(Math.max(st.mScale * factor, 2e-6), 2);
-    else st.dist = Math.min(Math.max(st.dist * factor, 2.2), 9);
+  // 画面上の点(clientX, clientY)の真下にある複素平面の点。頂点シェーダーの投影を y = 0 の平面で逆にたどる。
+  function complexAt(clientX, clientY) {
+    const F = 1.8;
+    const aspect = canvas.width / canvas.height;
+    const pitch = st.pitch + 0.2 * sway() * Math.sin(st.camTime * 0.19);
+    const dist = st.dist + 0.35 * sway() * Math.sin(st.camTime * 0.31);
+    const nx =(((clientX / innerWidth) * 2 - 1) - st.shiftX) * aspect / (F * st.fit);
+    const ny = ((1 - (clientY / innerHeight) * 2) - st.shiftY) / (F * st.fit);
+    // GLSL の mat2(c, -s, s, c) は列優先なので、rot(a) * v = (c*vx + s*vy, -s*vx + c*vy)
+    const c2 = Math.cos(pitch), s2 = Math.sin(pitch);
+    const z1 = (ny * dist) / (s2 - ny * c2);
+    const x1 = nx * (c2 * z1 + dist);
+    const c1 = Math.cos(st.yaw), s1 = Math.sin(st.yaw);
+    const X = c1 * x1 - s1 * z1;
+    const Z = s1 * x1 + c1 * z1;
+    return [st.mCenter[0] + (X / 3.2) * 2 * st.mScale, st.mCenter[1] + (-Z / 3.2) * 2 * st.mScale];
+  }
+
+  const zoom = (factor, clientX, clientY) => {
+    if (!mandelActive()) {
+      st.dist = Math.min(Math.max(st.dist * factor, 2.2), 9);
+      return;
+    }
+    const next = Math.min(Math.max(st.mScale * factor, 2e-6), 2);
+    const ratio = next / st.mScale;
+    // ポインタの真下の点が動かないように、窓の中心をそちらへ寄せる
+    const [cx, cy] = complexAt(clientX, clientY);
+    st.mCenter[0] = cx - (cx - st.mCenter[0]) * ratio;
+    st.mCenter[1] = cy - (cy - st.mCenter[1]) * ratio;
+    st.mScale = next;
   };
 
   canvas.addEventListener('pointerdown', (e) => {
@@ -844,7 +873,7 @@ void main() {
     if (pointers.size === 2) {
       const [a, b] = [...pointers.values()];
       const dist = Math.hypot(a.x - b.x, a.y - b.y);
-      if (pinch > 0 && dist > 0) zoom(pinch / dist);
+      if (pinch > 0 && dist > 0) zoom(pinch / dist, (a.x + b.x) / 2, (a.y + b.y) / 2);
       pinch = dist;
     }
   });
@@ -860,7 +889,7 @@ void main() {
   canvas.addEventListener('pointerleave', () => { pointer.on = false; });
   canvas.addEventListener('wheel', (e) => {
     e.preventDefault();
-    zoom(Math.exp(e.deltaY * 0.0012));
+    zoom(Math.exp(e.deltaY * 0.0012), e.clientX, e.clientY);
   }, { passive: false });
 
   // ---- ループ ----
