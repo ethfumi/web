@@ -88,6 +88,71 @@ function splitLyrics(text) {
   return out;
 }
 
+// ===== 左手の伴奏 =====
+const CHORD_ROOT = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+const CHORD_KIND = { '': [0, 4, 7], m: [0, 3, 7], '7': [0, 4, 7, 10], m7: [0, 3, 7, 10], maj7: [0, 4, 7, 11], dim: [0, 3, 6], sus4: [0, 5, 7] };
+function parseChordName(name) {
+  const m = /^([A-G])([#b]?)(maj7|m7|dim|sus4|m|7)?$/.exec(name);
+  if (!m) return null;
+  const root = (CHORD_ROOT[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0) + 12) % 12;
+  return { root, tones: CHORD_KIND[m[3] || ''].map((iv) => (root + iv) % 12) };
+}
+// "C:4 F G7" → [{root, tones, beats}]
+function parseChords(text) {
+  const out = [];
+  String(text || '').split(/[\s|/]+/).filter(Boolean).forEach((tok) => {
+    const [nm, len] = tok.split(':');
+    const c = parseChordName(nm);
+    if (c) out.push({ ...c, beats: Number(len) > 0 ? Number(len) : 2 });
+  });
+  return out;
+}
+
+// コードが書いていない曲は、2拍ごとにメロディの音をいちばん多くふくむコードをえらぶ
+const AUTO_CHORDS = [['C', 0.35], ['F', 0.2], ['G', 0.25], ['Am', 0], ['Dm', 0], ['Em', -0.1]].map(([n, bias]) => ({ ...parseChordName(n), bias }));
+function autoChords(flat, totalBeats) {
+  const out = [];
+  let prev = AUTO_CHORDS[0];
+  for (let b = 0; b < totalBeats; b += 2) {
+    const w = new Array(12).fill(0);
+    flat.forEach((n) => {
+      if (n.midi == null) return;
+      const ov = Math.min(n.start + n.beats, b + 2) - Math.max(n.start, b);
+      if (ov > 0) w[n.midi % 12] += ov * (n.start >= b && n.start < b + 1 ? 1.3 : 1);
+    });
+    if (w.every((v) => v === 0)) { out.push({ ...prev, beats: 2 }); continue; }
+    const last = b + 2 >= totalBeats;
+    let best = null, bestScore = -Infinity;
+    AUTO_CHORDS.forEach((c) => {
+      let sc = c.bias + (c === prev ? 0.15 : 0) + (last && c.root === 0 ? 2 : 0);
+      for (let pc = 0; pc < 12; pc++) if (w[pc]) sc += c.tones.includes(pc) ? w[pc] * (pc === c.root ? 1.2 : 1) : -w[pc] * 1.1;
+      if (sc > bestScore) { bestScore = sc; best = c; }
+    });
+    out.push({ ...best, beats: 2 });
+    prev = best;
+  }
+  return out;
+}
+
+// コード列 → 左手の音(ベース→和音 の「ブン・チャッ」)
+function accompEvents(chords, shift) {
+  const ev = [];
+  let beat = 0;
+  chords.forEach((c) => {
+    const root = (c.root + shift + 120) % 12;
+    let bass = 48 + root; if (bass > 52) bass -= 12;                 // F2〜E3
+    const fifth = bass + 7 > 55 ? bass - 5 : bass + 7;
+    const chord = c.tones.map((pc) => 52 + (((pc + shift - 52) % 12) + 12) % 12).sort((a, b) => a - b); // E3〜D#4
+    for (let k = 0; k < c.beats; k++) {
+      const t = beat + k;
+      if (k % 2 === 0) ev.push({ start: t, beats: 1, notes: [k % 4 === 2 ? fifth : bass], gain: 0.5 });
+      else ev.push({ start: t, beats: 0.8, notes: chord, gain: 0.22 });
+    }
+    beat += c.beats;
+  });
+  return ev;
+}
+
 // ===== 音 =====
 let ctx = null, master = null, noiseBuf = null, mixOut = null;
 function ensureAudio() {
@@ -331,7 +396,7 @@ function tick(t, strong) {
 }
 
 // ===== 状態 =====
-const settings = Object.assign({ countIn: true, loop: false, layer: false }, store.get('settings', {}));
+const settings = Object.assign({ countIn: true, loop: false, layer: false, accomp: true }, store.get('settings', {}));
 const state = {
   songId: store.get('song', 'kirakira'),
   sound: store.get('sound', 'piano'),
@@ -355,6 +420,8 @@ function songDef(id) {
     melody: ov.melody != null ? ov.melody : base.melody,
     lyrics: ov.lyrics || '',
     bpm: ov.bpm || base.bpm,
+    key: ov.key || 0,
+    chords: ov.chords != null ? ov.chords : (base.chords || ''),
     base,
   };
 }
@@ -365,6 +432,12 @@ function loadSong(id) {
   state.songId = def.id;
   store.set('song', def.id);
   const phrases = parseMelody(def.melody);
+  // けんばんにおさまる範囲で転調する
+  const mids = phrases.flat().filter((n) => n.midi != null).map((n) => n.midi);
+  const keyMin = mids.length ? Math.max(-6, LOW - Math.min(...mids)) : 0;
+  const keyMax = mids.length ? Math.min(6, HIGH - Math.max(...mids)) : 0;
+  const key = Math.max(keyMin, Math.min(keyMax, def.key));
+  phrases.flat().forEach((n) => { if (n.midi != null) n.midi += key; });
   const lyr = splitLyrics(def.lyrics);
   const flat = [];
   let beat = 0, li = 0;
@@ -374,9 +447,11 @@ function loadSong(id) {
     beat += n.beats;
     flat.push(n);
   }));
-  state.song = { def, phrases, flat, totalBeats: beat, hasLyrics: lyr.length > 0 };
+  const chords = def.chords.trim() ? parseChords(def.chords) : autoChords(flat.map((n) => ({ ...n, midi: n.midi == null ? null : n.midi - key })), beat);
+  state.song = { def, phrases, flat, totalBeats: beat, hasLyrics: lyr.length > 0, key, keyMin, keyMax, acc: accompEvents(chords, key) };
   state.bpm = def.bpm;
   $('bpm').textContent = state.bpm;
+  renderKey();
   state.guideIdx = firstNoteIdx(0);
   renderSongs();
   renderScore();
@@ -404,53 +479,92 @@ function renderSongs() {
 }
 
 // ===== 画面: 譜面 =====
-// 段の位置: 曲でつかう音の高さに合わせて上下をきめる(低い音ほど下)
-let STEP_TOP = 7, STEP_BOTTOM = -1;
-const yPct = (step) => ((STEP_TOP - step) / (STEP_TOP - STEP_BOTTOM)) * 100;
-function fitSteps(flat) {
-  const steps = flat.filter((n) => n.midi != null).map((n) => stepOf(n.midi));
-  let lo = Math.min(...steps, 2), hi = Math.max(...steps, 4);
-  while (hi - lo < 6) { hi += 0.5; lo -= 0.5; }
-  STEP_TOP = hi + 1.6; STEP_BOTTOM = lo - 2.2;
+// ふつうのト音記号の五線。段(step)は ド(C4)=0、線は ミ2 ソ4 シ6 レ8 ファ10。
+// 上はト音記号が入るぶん、下は ラ↓ の加線が入るぶんをあけておく。
+const STEP_TOP = 13, STEP_BOTTOM = -3.6;
+const STEP_RANGE = STEP_TOP - STEP_BOTTOM;
+const yPct = (step) => ((STEP_TOP - step) / STEP_RANGE) * 100;
+// ト音記号の形(Bravura, SIL Open Font License)。原点がソの線、1間=360。
+const GCLEF_PATH = 'M541 -598C539 -615 541 -616 550 -625C706 -770 824 -953 824 -1174C824 -1299 789 -1423 730 -1509C708 -1541 671 -1581 655 -1581C635 -1581 590 -1544 562 -1512C455 -1394 420 -1214 420 -1064C420 -981 431 -887 441 -828C444 -811 445 -808 428 -793C220 -622 0 -416 0 -125C0 125 171 363 524 363C557 363 595 360 624 354C639 351 642 350 645 367C662 464 684 589 684 657C684 870 540 896 455 896C377 896 340 873 340 854C340 844 353 840 386 829C431 816 482 778 482 694C482 615 432 547 344 547C248 547 190 624 190 713C190 806 246 948 464 948C560 948 747 904 747 660C747 577 721 441 706 351C703 334 704 336 724 327C870 269 966 147 966 -16C966 -200 831 -363 619 -363C582 -363 582 -363 577 -389ZM677 -1358C724 -1358 763 -1319 763 -1240C763 -1080 626 -950 513 -851C503 -842 497 -844 494 -863C488 -900 485 -949 485 -995C485 -1220 589 -1358 677 -1358ZM520 -377C524 -350 524 -351 498 -343C372 -300 289 -186 289 -63C289 66 357 158 455 192C467 196 484 200 494 200C505 200 511 193 511 184C511 174 500 170 490 166C429 140 386 78 386 12C386 -71 442 -132 530 -157C553 -163 556 -161 559 -145L631 284C634 300 632 300 611 304C588 308 559 311 530 311C278 311 115 171 115 -29C115 -114 130 -228 249 -363C336 -459 402 -513 469 -567C484 -579 487 -577 490 -562ZM619 -148C616 -166 618 -170 635 -168C752 -158 848 -60 848 66C848 157 793 230 713 271C696 279 693 279 690 262Z';
+const CLEF_UP = 1581 / 180, CLEF_DOWN = 948 / 180; // ソの線から上/下へ何段ぶん
+const CLEF_W_STEPS = 966 / 180 + 1.2;             // 記号の幅 + すき間(段の単位)
+
+function clefSvg() {
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', '0 -1581 966 2529');
+  svg.setAttribute('class', 'clef');
+  svg.style.top = yPct(4 + CLEF_UP) + '%';
+  svg.style.height = ((CLEF_UP + CLEF_DOWN) / STEP_RANGE) * 100 + '%';
+  const path = document.createElementNS(ns, 'path');
+  path.setAttribute('d', GCLEF_PATH);
+  svg.appendChild(path);
+  return svg;
 }
 
 function renderScore() {
   const box = $('score');
   box.textContent = '';
   const { phrases } = state.song;
-  fitSteps(state.song.flat);
+  const perBar = state.song.def.base.beatsPerBar || 4;
   const maxBeats = Math.max(4, ...phrases.map((p) => p.reduce((a, n) => a + n.beats, 0)));
   phrases.forEach((p, pi) => {
-    const row = el('div', 'row');
+    const row = el('div', 'row' + (state.song.hasLyrics ? ' has-lyr' : ''));
     row.dataset.phrase = pi;
     const staff = el('div', 'staff');
-    [2, 4, 6, 8, 10].filter((s) => s > STEP_BOTTOM && s < STEP_TOP).forEach((s) => { const ln = el('i'); ln.style.top = yPct(s) + '%'; staff.appendChild(ln); });
+    [2, 4, 6, 8, 10].forEach((st) => { const ln = el('i'); ln.style.top = yPct(st) + '%'; staff.appendChild(ln); });
+    staff.appendChild(clefSvg());
+    const notes = el('div', 'notes');
+    staff.appendChild(notes);
     row.appendChild(staff);
-    row.appendChild(el('div', 'clef', '𝄞'));
+
+    const rowStart = p[0].start;
+    const used = p.reduce((a, n) => a + n.beats, 0);
+    // 小節線(曲の最後は太く)
+    const isLast = pi === phrases.length - 1;
+    for (let bt = Math.ceil((rowStart + 0.001) / perBar) * perBar; bt <= rowStart + used + 0.001; bt += perBar) {
+      const bl = el('div', 'barline' + (isLast && bt >= rowStart + used - 0.001 ? ' end' : ''));
+      bl.style.left = ((bt - rowStart) / maxBeats) * 100 + '%';
+      bl.style.top = yPct(10) + '%';
+      bl.style.height = (8 / STEP_RANGE) * 100 + '%';
+      notes.appendChild(bl);
+    }
+
     p.forEach((n) => {
       const cell = el('div', 'cell');
       cell.style.flexGrow = n.beats;
       cell.dataset.idx = n.idx;
       n.cell = cell;
+      // 音符は拍のまんなかに置く(長い音は最初の拍)
+      const x = (50 / n.beats) + '%';
       if (n.midi == null) {
         cell.classList.add('rest');
-        const h = el('div', 'head', '・'); h.style.top = '50%'; cell.appendChild(h);
+        const h = el('div', 'rest-mark', '𝄽');
+        h.style.left = x; h.style.top = yPct(6) + '%';
+        cell.appendChild(h);
       } else {
         const step = stepOf(n.midi);
         const top = yPct(step) + '%';
         if (n.beats > 1) {
-          const bar = el('div', 'bar-len'); bar.style.top = top; bar.style.background = color(n.midi); cell.appendChild(bar);
+          const bar = el('div', 'bar-len');
+          bar.style.top = top; bar.style.left = x; bar.style.background = color(n.midi);
+          cell.appendChild(bar);
         }
-        for (let s = 0; s >= step; s -= 2) { const lg = el('div', 'ledger'); lg.style.top = yPct(s) + '%'; cell.appendChild(lg); }
-        for (let s = 12; s <= step; s += 2) { const lg = el('div', 'ledger'); lg.style.top = yPct(s) + '%'; cell.appendChild(lg); }
-        const h = el('div', 'head', PC_NAME[n.midi % 12]);
-        h.style.top = top; h.style.background = color(n.midi);
+        const ledgers = [];
+        for (let st = 0; st >= step - 0.5; st -= 2) ledgers.push(st);
+        for (let st = 12; st <= step + 0.5; st += 2) ledgers.push(st);
+        ledgers.forEach((st) => { const lg = el('div', 'ledger'); lg.style.top = yPct(st) + '%'; lg.style.left = x; cell.appendChild(lg); });
+        const h = el('div', 'head');
+        h.style.top = top; h.style.left = x; h.style.background = color(n.midi);
         if (PC_SHARP[n.midi % 12]) h.appendChild(el('span', 'sh', '♯'));
         cell.appendChild(h);
+        const sol = el('div', 'lbl-solfa', PC_NAME[n.midi % 12] + (PC_SHARP[n.midi % 12] ? '♯' : ''));
+        sol.style.left = x;
+        cell.appendChild(sol);
         if (state.song.hasLyrics) {
-          cell.appendChild(el('div', 'lyr' + ((n.lyric || '').length > 2 ? ' long' : ''), n.lyric || ''));
-        } else {
-          cell.appendChild(el('div', 'lyr solfa', PC_NAME[n.midi % 12]));
+          const ly = el('div', 'lbl-lyr' + ((n.lyric || '').length > 2 ? ' long' : ''), n.lyric || '');
+          ly.style.left = x;
+          cell.appendChild(ly);
         }
         cell.addEventListener('pointerdown', (ev) => {
           ev.preventDefault();
@@ -461,28 +575,24 @@ function renderScore() {
           flashKey(n.midi, 300);
         });
       }
-      row.appendChild(cell);
+      notes.appendChild(cell);
     });
     // 短い行が横に広がりすぎないよう、残りをすき間でうめる
-    const used = p.reduce((a, n) => a + n.beats, 0);
-    if (used < maxBeats) { const pad = el('div', 'cell'); pad.style.flexGrow = maxBeats - used; row.appendChild(pad); }
+    if (used < maxBeats) { const pad = el('div', 'cell pad'); pad.style.flexGrow = maxBeats - used; notes.appendChild(pad); }
     box.appendChild(row);
   });
   sizeHeads();
 }
 
+// 段の高さ(px)から、音符・ト音記号の大きさをきめる
 function sizeHeads() {
-  const row = document.querySelector('.row');
-  if (!row) return;
-  const rowH = parseFloat(getComputedStyle(row).getPropertyValue('--rowH')) || 100;
-  const stepPx = rowH / (STEP_TOP - STEP_BOTTOM);
-  // 1拍あたりの幅も見て、となりとかさならない大きさ
-  const cells = row.querySelectorAll('.cell[data-idx]');
-  let beatPx = Infinity;
-  cells.forEach((c) => { const n = state.song.flat[c.dataset.idx]; if (n) beatPx = Math.min(beatPx, c.getBoundingClientRect().width / n.beats); });
-  const minBeat = Math.min(...state.song.flat.map((n) => n.beats));
-  const hs = Math.max(14, Math.min(stepPx * 2.3, beatPx * minBeat * 0.9, 40));
-  $('score').style.setProperty('--hs', hs + 'px');
+  const staff = document.querySelector('.staff');
+  if (!staff) return;
+  const sp = staff.clientHeight / STEP_RANGE;
+  const box = $('score');
+  box.style.setProperty('--sp', sp + 'px');
+  box.style.setProperty('--clefW', (CLEF_W_STEPS * sp) + 'px');
+  box.style.setProperty('--hs', Math.max(9, sp * 2.3) + 'px');
 }
 
 let curCell = null, curRow = null;
@@ -677,7 +787,7 @@ function startPlay() {
   const count = settings.countIn ? 4 : 0;
   const t0 = ctx.currentTime + 0.15;
   for (let k = 0; k < count; k++) tick(t0 + k * spb, k === 0);
-  play = { t0: t0 + count * spb, spb, next: 0, handles: [], timer: 0, raf: 0 };
+  play = { t0: t0 + count * spb, spb, next: 0, nextAcc: 0, handles: [], timer: 0, raf: 0 };
   play.timer = setInterval(schedule, 25);
   schedule();
   play.raf = requestAnimationFrame(draw);
@@ -699,6 +809,20 @@ function schedule() {
     }
     play.next++;
   }
+  const acc = settings.accomp ? state.song.acc : [];
+  while (play.nextAcc < acc.length) {
+    const a = acc[play.nextAcc];
+    if (a.start >= state.song.totalBeats) { play.nextAcc = acc.length; break; }
+    const t = play.t0 + a.start * play.spb;
+    if (t > ahead) break;
+    const end = t + a.beats * play.spb * 0.92;
+    a.notes.forEach((m) => {
+      const h = pianoNote(m, t, a.gain);
+      h.release(end);
+      play.handles.push({ h, end });
+    });
+    play.nextAcc++;
+  }
   const now = ctx.currentTime;
   play.handles = play.handles.filter((x) => x.end > now - 1);
   if (play.next >= flat.length) {
@@ -708,6 +832,7 @@ function schedule() {
     } else if (settings.loop && songEnd - now < 0.2) {
       play.t0 = songEnd + play.spb; // 1拍あけてもう一度
       play.next = 0;
+      play.nextAcc = 0;
     } else if (!settings.loop && now > songEnd + 0.3) {
       stopPlay();
       cheer('じょうず！👏');
@@ -944,6 +1069,7 @@ function setRecUI(on) {
   b.querySelector('.ico').textContent = on ? '■' : '●';
   b.querySelector('.lbl').textContent = on ? 'とめる' : 'ろくおん';
   ['play', 'slower', 'faster', 'edit'].forEach((id) => { $(id).disabled = on; });
+  renderKey();
   document.querySelectorAll('.chip').forEach((c) => { c.disabled = on; });
   document.body.classList.toggle('recording', on);
   renderTake();
@@ -985,6 +1111,8 @@ function openEditor() {
   $('optCount').checked = settings.countIn;
   $('optLoop').checked = settings.loop;
   $('optLayer').checked = settings.layer;
+  $('optAccomp').checked = settings.accomp;
+  $('edChords').value = d.chords.replace(/^\n/, '').split('\n').map((x) => x.trim()).join('\n');
   document.querySelector('.ed').classList.toggle('is-custom', d.custom);
   updateCount();
   $('editor').showModal();
@@ -1010,6 +1138,9 @@ function saveEditor() {
   const baseMel = d.base.melody.replace(/^\n/, '').split('\n').map((s) => s.trim()).join('\n');
   if (mel.trim() && mel !== baseMel) ov.melody = mel; else delete ov.melody;
   if ($('edLyrics').value.trim()) ov.lyrics = $('edLyrics').value; else delete ov.lyrics;
+  const ch = $('edChords').value;
+  const baseCh = (d.base.chords || '').replace(/^\n/, '').split('\n').map((x) => x.trim()).join('\n');
+  if (ch.trim() !== baseCh.trim()) ov.chords = ch; else delete ov.chords;
   if (d.custom && $('edName').value.trim()) ov.title = $('edName').value.trim();
   ov.bpm = state.bpm;
   store.set('song.' + d.id, ov);
@@ -1034,6 +1165,27 @@ function setSound(s) {
     b.classList.toggle('on', on);
     b.setAttribute('aria-checked', String(on));
   });
+}
+
+function renderKey() {
+  const k = state.song.key;
+  $('key').textContent = k === 0 ? '±0' : (k > 0 ? '+' : '') + k;
+  $('keyDown').disabled = !!rec || k <= state.song.keyMin;
+  $('keyUp').disabled = !!rec || k >= state.song.keyMax;
+}
+
+function setKey(d) {
+  const s = state.song;
+  const k = Math.max(s.keyMin, Math.min(s.keyMax, s.key + d));
+  if (k === s.key) return;
+  const ov = store.get('song.' + state.songId, {});
+  if (k) ov.key = k; else delete ov.key;
+  store.set('song.' + state.songId, ov);
+  const wasPlaying = state.playing;
+  loadSong(state.songId);
+  ensureAudio();
+  if (wasPlaying) startPlay();
+  else { const h = startNote(60 + k); h.release(ctx.currentTime + 0.4); flashKey(60 + k, 300); }
 }
 
 function setBpm(v) {
@@ -1076,6 +1228,8 @@ function init() {
     flashKey(60, 300);
   }));
   $('slower').addEventListener('click', () => setBpm(state.bpm - 8));
+  $('keyDown').addEventListener('click', () => setKey(-1));
+  $('keyUp').addEventListener('click', () => setKey(1));
   $('faster').addEventListener('click', () => setBpm(state.bpm + 8));
   $('kbLeft').addEventListener('click', () => shiftKeyboard(-1));
   $('kbRight').addEventListener('click', () => shiftKeyboard(1));
@@ -1084,7 +1238,7 @@ function init() {
   $('edReset').addEventListener('click', resetEditor);
   $('edMelody').addEventListener('input', updateCount);
   $('edLyrics').addEventListener('input', updateCount);
-  [['optCount', 'countIn'], ['optLoop', 'loop'], ['optLayer', 'layer']].forEach(([id, key]) => {
+  [['optCount', 'countIn'], ['optLoop', 'loop'], ['optLayer', 'layer'], ['optAccomp', 'accomp']].forEach(([id, key]) => {
     $(id).addEventListener('change', () => { settings[key] = $(id).checked; store.set('settings', settings); });
   });
 

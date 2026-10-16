@@ -27,13 +27,18 @@
         <span class="ico">☝</span><span class="lbl">じぶんで</span>
       </button>
       <div class="seg" id="sound" role="radiogroup" aria-label="おと">
-        <button data-sound="piano" class="on" role="radio" aria-checked="true">🎹<span class="lbl">ピアノ</span></button>
-        <button data-sound="voice" role="radio" aria-checked="false">🗣<span class="lbl">ドレミ</span></button>
+        <button data-sound="piano" class="on" role="radio" aria-checked="true"><span class="em">🎹</span><span class="lbl">ピアノ</span></button>
+        <button data-sound="voice" role="radio" aria-checked="false"><span class="em">🗣</span><span class="lbl">ドレミ</span></button>
       </div>
       <div class="tempo" aria-label="はやさ">
         <button class="btn mini" id="slower" aria-label="ゆっくり">🐢</button>
         <span id="bpm">100</span>
         <button class="btn mini" id="faster" aria-label="はやく">🐇</button>
+      </div>
+      <div class="tempo" aria-label="キー(転調)">
+        <button class="btn mini" id="keyDown" aria-label="キーをさげる">♭</button>
+        <span id="key" class="keyval">±0</span>
+        <button class="btn mini" id="keyUp" aria-label="キーをあげる">♯</button>
       </div>
       <button class="btn mini" id="edit" aria-label="へんしゅう・せってい">⚙</button>
       <button class="btn mini" id="fs" aria-label="ぜんがめん" hidden>⛶</button>
@@ -79,7 +84,11 @@
       <textarea id="edLyrics" rows="4" placeholder="ここに歌詞をひらがなで入れると、音符の下に出ます"></textarea>
     </label>
     <p class="hint" id="edCount"></p>
+    <label>伴奏のコード <small>(C F G G7 Am など。1つ＝2拍、C:4 で4拍。からにするとメロディから自動)</small>
+      <textarea id="edChords" rows="3" spellcheck="false" placeholder="からのときは自動でつけます"></textarea>
+    </label>
     <div class="opts">
+      <label class="chk"><input type="checkbox" id="optAccomp"> おてほんに左手の伴奏をつける</label>
       <label class="chk"><input type="checkbox" id="optCount"> まえに「ぽんぽん」と合図</label>
       <label class="chk"><input type="checkbox" id="optLoop"> くりかえす</label>
       <label class="chk"><input type="checkbox" id="optLayer"> ドレミの声にピアノもかさねる</label>

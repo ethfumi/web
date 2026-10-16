@@ -76,6 +76,7 @@ html, body {
 .seg button.on { background: #fff0c2; color: var(--ink); }
 
 .tempo { display: inline-flex; align-items: center; gap: 2px; }
+#key { min-width: 1.8em; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; font-size: 14px; }
 #bpm { min-width: 2.2em; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; font-size: 14px; }
 
 .btn.rec { color: #e03131; }
@@ -103,44 +104,52 @@ html, body {
   position: relative;
 }
 .row {
-  --rowH: 116px;
+  --rowH: 130px;
+  --labH: 22px;
   position: relative;
-  display: flex; align-items: stretch;
-  height: calc(var(--rowH) + 26px);
-  margin: 2px 0 8px;
-  padding-left: 26px;
+  height: calc(var(--rowH) + var(--labH));
+  margin: 0 0 6px;
   border-radius: 14px;
   transition: background .2s;
 }
+.row.has-lyr { --labH: 42px; }
 .row.now { background: #fff0d6; }
-.staff { position: absolute; left: 0; right: 0; top: 0; height: var(--rowH); pointer-events: none; }
-.staff i { position: absolute; left: 4px; right: 4px; height: 1px; background: #d6c6b3; }
-.clef { position: absolute; left: 2px; top: 0; height: var(--rowH); display: flex; align-items: center; font-size: calc(var(--rowH) * .5); color: #c6b39e; line-height: 1; pointer-events: none; }
+.staff { position: absolute; left: 4px; right: 4px; top: 0; height: var(--rowH); }
+.staff > i { position: absolute; left: 0; right: 0; height: 1px; margin-top: -.5px; background: #bfae99; pointer-events: none; }
+.clef { position: absolute; left: calc(var(--sp) * .4); fill: #8c7b6b; pointer-events: none; overflow: visible; }
+.notes {
+  position: absolute; top: 0; bottom: 0; left: var(--clefW); right: 0;
+  display: flex;
+}
+.barline { position: absolute; width: 1px; margin-left: -.5px; background: #bfae99; pointer-events: none; }
+.barline.end { width: 3px; margin-left: -3px; background: #8c7b6b; box-shadow: -4px 0 0 -3px #8c7b6b; }
 .cell { position: relative; flex: 1 1 0; min-width: 0; }
 .cell .bar-len {
-  position: absolute; height: 6px; left: 50%; right: -1px; border-radius: 3px; opacity: .28;
+  position: absolute; height: calc(var(--sp) * .7); right: 2px; border-radius: 99px; opacity: .3;
   transform: translateY(-50%);
 }
 .cell .head {
-  position: absolute; left: 50%; transform: translate(-50%, -50%);
-  width: var(--hs); height: var(--hs); border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  color: #fff; font-weight: 800; font-size: calc(var(--hs) * .42); line-height: 1;
-  box-shadow: 0 1px 0 rgba(0,0,0,.15);
+  position: absolute; transform: translate(-50%, -50%) rotate(-18deg);
+  width: calc(var(--hs) * 1.22); height: var(--hs); border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.18);
   transition: transform .12s;
   z-index: 1;
 }
-.cell .head .sh { position: absolute; left: -.55em; top: -.2em; color: var(--ink); font-size: 1.1em; }
-.cell .ledger { position: absolute; left: 50%; width: calc(var(--hs) * 1.5); height: 1px; background: #b8a690; transform: translateX(-50%); }
-.cell .lyr {
-  position: absolute; left: 50%; top: calc(var(--rowH) + 2px); transform: translateX(-50%);
-  font-size: 15px; font-weight: 700; white-space: nowrap; color: var(--ink);
+.cell .head .sh {
+  position: absolute; right: 115%; top: 50%; transform: translateY(-50%) rotate(18deg);
+  color: var(--ink); font-size: calc(var(--hs) * 1.1); line-height: 1; font-weight: 700;
 }
-.cell .lyr.long { font-size: 12px; letter-spacing: -.05em; }
-.cell .lyr.solfa { font-size: 13px; color: var(--sub); }
-.cell.rest .head { background: transparent !important; box-shadow: none; color: #c6b39e; font-size: calc(var(--hs) * .7); }
-.cell.now .head { transform: translate(-50%, -50%) scale(1.35); box-shadow: 0 0 0 4px rgba(255,255,255,.9), 0 0 0 7px var(--accent); }
-.cell.now .lyr { color: var(--accent); transform: translateX(-50%) scale(1.25); }
+.cell .ledger { position: absolute; width: calc(var(--hs) * 2); height: 1px; margin-top: -.5px; background: #8c7b6b; transform: translateX(-50%); }
+.cell .rest-mark { position: absolute; transform: translate(-50%, -50%); color: #8c7b6b; font-size: calc(var(--sp) * 4); line-height: 1; }
+.cell .lbl-solfa, .cell .lbl-lyr {
+  position: absolute; transform: translateX(-50%);
+  white-space: nowrap; font-weight: 700; line-height: 1.2;
+}
+.cell .lbl-solfa { top: calc(var(--rowH) + 2px); font-size: 13px; color: var(--sub); }
+.cell .lbl-lyr { top: calc(var(--rowH) + 21px); font-size: 15px; color: var(--ink); }
+.cell .lbl-lyr.long { font-size: 12px; letter-spacing: -.05em; }
+.cell.now .head { transform: translate(-50%, -50%) rotate(-18deg) scale(1.4); box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--accent); }
+.cell.now .lbl-solfa, .cell.now .lbl-lyr { color: var(--accent); transform: translateX(-50%) scale(1.2); }
 .cell.done .head { opacity: .45; }
 
 /* ---------- けんばん ---------- */
@@ -185,8 +194,10 @@ html, body {
 
 /* ---------- よこ画面(スマホ) ---------- */
 @media (orientation: landscape) {
-  .row { --rowH: 80px; margin: 0 0 4px; height: calc(var(--rowH) + 22px); }
-  .cell .lyr { font-size: 14px; top: calc(var(--rowH) + 1px); }
+  .row { --rowH: 84px; --labH: 18px; margin: 0 0 4px; }
+  .row.has-lyr { --labH: 34px; }
+  .cell .lbl-solfa { font-size: 12px; top: calc(var(--rowH) + 1px); }
+  .cell .lbl-lyr { font-size: 14px; top: calc(var(--rowH) + 16px); }
   .kb-wrap { height: 50vh; }
   .bar { flex-wrap: nowrap; padding-top: 4px; padding-bottom: 4px; }
   .btn, .seg button { min-height: 34px; }
@@ -197,17 +208,22 @@ html, body {
   .btn.rec.on .lbl { display: inline; }
   .rec-bar { flex-wrap: nowrap; padding: 2px 8px; }
   .has-take .kb-wrap { height: 45vh; }
-  .has-take .row { --rowH: 64px; }
+  .has-take .row { --rowH: 72px; }
   .rec-bar .btn { min-height: 30px; padding: 2px 8px; }
 }
 
 /* ---------- たて画面 ---------- */
 @media (orientation: portrait) {
   .kb-wrap { height: 40vh; }
-  .row { --rowH: 120px; }
   .kb-shift { display: flex; }
   .controls { flex-wrap: wrap; width: 100%; justify-content: space-between; }
   .songs { flex-basis: 100%; }
+}
+@media (orientation: portrait) {
+  #fs { display: none; }
+  .seg .em { display: none; }
+  .controls { gap: 6px 4px; }
+  .controls .btn.mini { min-width: 34px; padding: 4px 6px; }
 }
 @media (orientation: portrait) and (max-width: 380px) {
   .controls .seg .lbl, .btn.toggle .lbl { display: none; }
