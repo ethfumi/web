@@ -89,22 +89,28 @@ function splitLyrics(text) {
 }
 
 // ===== 音 =====
-let ctx = null, master = null, noiseBuf = null;
+let ctx = null, master = null, noiseBuf = null, mixOut = null;
 function ensureAudio() {
   if (!ctx) {
-    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) { /* iOS のマナーモード対策 */ }
+    setAudioSession('playback');
     ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
     const comp = ctx.createDynamicsCompressor();
     comp.threshold.value = -14; comp.knee.value = 12; comp.ratio.value = 4;
     comp.attack.value = 0.003; comp.release.value = 0.2;
     master = ctx.createGain(); master.gain.value = 0.9;
     master.connect(comp); comp.connect(ctx.destination);
+    mixOut = comp;
     noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
     const d = noiseBuf.getChannelData(0);
     for (let k = 0; k < d.length; k++) d[k] = Math.random() * 2 - 1;
   }
   if (ctx.state !== 'running') ctx.resume();
   return ctx;
+}
+
+// iOS: ふだんはマナーモードでも鳴る 'playback'、録音中だけ 'play-and-record'
+function setAudioSession(type) {
+  try { if (navigator.audioSession) navigator.audioSession.type = type; } catch (e) { /* 対応していない */ }
 }
 
 function noiseSource(t) {
@@ -661,6 +667,7 @@ let play = null; // { t0, spb, next, handles, timer, raf }
 function startPlay() {
   ensureAudio();
   if (state.playing) return;
+  stopReview();
   state.playing = true;
   updateGuide();
   $('play').classList.add('on');
@@ -696,7 +703,9 @@ function schedule() {
   play.handles = play.handles.filter((x) => x.end > now - 1);
   if (play.next >= flat.length) {
     const songEnd = play.t0 + state.song.totalBeats * play.spb;
-    if (settings.loop && songEnd - now < 0.2) {
+    if (rec) {
+      if (now > songEnd + 1.2) stopRecording();
+    } else if (settings.loop && songEnd - now < 0.2) {
       play.t0 = songEnd + play.spb; // 1拍あけてもう一度
       play.next = 0;
     } else if (!settings.loop && now > songEnd + 0.3) {
@@ -708,8 +717,9 @@ function schedule() {
 
 let litKey = null;
 function draw() {
-  if (!play) return;
-  const beat = (ctx.currentTime - play.t0) / play.spb;
+  const src = play || review;
+  if (!src) return;
+  const beat = (ctx.currentTime - src.t0) / src.spb;
   const flat = state.song.flat;
   let cur = null;
   if (beat >= 0) {
@@ -725,7 +735,12 @@ function draw() {
     if (midi != null && keyEls.get(midi)) { keyEls.get(midi).classList.add('on'); followKey(midi); }
     litKey = midi;
   }
-  play.raf = requestAnimationFrame(draw);
+  src.raf = requestAnimationFrame(draw);
+}
+
+function clearLit() {
+  if (litKey != null && keyEls.get(litKey)) keyEls.get(litKey).classList.remove('on');
+  litKey = null;
 }
 
 function stopPlay() {
@@ -735,13 +750,228 @@ function stopPlay() {
   play.handles.forEach((x) => x.h.kill());
   play = null;
   state.playing = false;
-  if (litKey != null && keyEls.get(litKey)) keyEls.get(litKey).classList.remove('on');
-  litKey = null;
+  clearLit();
+  if (rec) stopRecording();
   $('play').classList.remove('on');
   $('play').querySelector('.ico').textContent = '▶';
   $('play').querySelector('.lbl').textContent = 'おてほん';
   markNow(null);
   updateGuide();
+}
+
+// ===== ろくおん =====
+// マイク(ch0)と、アプリが鳴らしている音(ch1)をいっしょに取りこむ。
+// 残すのは最後の1回だけ(メモリの中だけ)。
+const REC_WORKLET = `
+class RecTap extends AudioWorkletProcessor {
+  constructor() {
+    super();
+    this.on = true; this.a = []; this.b = []; this.n = 0; this.t = null;
+    this.port.onmessage = (e) => { if (e.data === 'stop') { this.flush(); this.on = false; } };
+  }
+  flush() {
+    if (!this.n) return;
+    this.port.postMessage({ t: this.t, a: this.a, b: this.b });
+    this.a = []; this.b = []; this.n = 0;
+  }
+  process(inputs) {
+    if (!this.on) return false;
+    const inp = inputs[0];
+    if (inp && inp.length) {
+      if (this.t == null) this.t = currentTime;
+      this.a.push(inp[0].slice(0)); this.b.push((inp[1] || inp[0]).slice(0));
+      this.n += inp[0].length;
+      if (this.n >= 4096) this.flush();
+    }
+    return true;
+  }
+}
+registerProcessor('rec-tap', RecTap);`;
+const REC_MAX_SEC = 300;
+
+let rec = null;    // 録音中: { stream, nodes, chunksA, chunksB, t0Cap, songT0, spb, songId }
+let take = null;   // 最後の録音: { mic, acc, sr, beat0, spb, songId, latency, gain }
+let review = null; // ききかえし中: { src, t0, spb, raf, mode }
+const recOffset = { ms: store.get('recOffset', 0) };
+let workletReady = null;
+
+async function startRecording() {
+  ensureAudio();
+  if (state.playing || rec) return;
+  stopReview();
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    alert('このブラウザでは録音できません');
+    return;
+  }
+  setAudioSession('play-and-record');
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: false, channelCount: 1 },
+    });
+  } catch (e) {
+    setAudioSession('playback');
+    alert('マイクがつかえませんでした。ブラウザの設定でマイクをゆるしてください。');
+    return;
+  }
+  if (ctx.state !== 'running') await ctx.resume();
+
+  const micSrc = ctx.createMediaStreamSource(stream);
+  const merger = ctx.createChannelMerger(2);
+  micSrc.connect(merger, 0, 0);
+  mixOut.connect(merger, 0, 1);
+  const sink = ctx.createGain(); sink.gain.value = 0; sink.connect(ctx.destination);
+  const r = { stream, chunksA: [], chunksB: [], t0Cap: null, nodes: [micSrc, merger, sink], songId: state.songId };
+  const onChunk = (t, a, b) => {
+    if (r.t0Cap == null) r.t0Cap = t;
+    r.chunksA.push(...a); r.chunksB.push(...b);
+  };
+  try {
+    if (!ctx.audioWorklet) throw new Error('no worklet');
+    if (!workletReady) {
+      const url = URL.createObjectURL(new Blob([REC_WORKLET], { type: 'application/javascript' }));
+      workletReady = ctx.audioWorklet.addModule(url);
+    }
+    await workletReady;
+    const node = new AudioWorkletNode(ctx, 'rec-tap', { numberOfInputs: 1, numberOfOutputs: 1, channelCount: 2, channelCountMode: 'explicit' });
+    node.port.onmessage = (e) => onChunk(e.data.t, e.data.a, e.data.b);
+    merger.connect(node); node.connect(sink);
+    r.tap = node;
+  } catch (e) {
+    // 古いブラウザ向け
+    const sp = ctx.createScriptProcessor(4096, 2, 2);
+    sp.onaudioprocess = (ev) => {
+      if (!rec) return;
+      const ib = ev.inputBuffer;
+      onChunk(ev.playbackTime, [ib.getChannelData(0).slice(0)], [ib.getChannelData(ib.numberOfChannels > 1 ? 1 : 0).slice(0)]);
+    };
+    merger.connect(sp); sp.connect(sink);
+    r.tap = sp;
+  }
+  const track = stream.getAudioTracks()[0];
+  const trackLat = (track && track.getSettings && track.getSettings().latency) || 0.02;
+  r.latency = (ctx.outputLatency || 0.02) + (ctx.baseLatency || 0) + trackLat;
+  rec = r;
+  setRecUI(true);
+  startPlay();
+  rec.songT0 = play.t0;
+  rec.spb = play.spb;
+  rec.limit = setTimeout(() => stopRecording(), REC_MAX_SEC * 1000);
+}
+
+function stopRecording() {
+  const r = rec;
+  if (!r) return;
+  rec = null;
+  clearTimeout(r.limit);
+  if (state.playing) stopPlay();
+  const finish = () => {
+    r.nodes.forEach((n) => { try { n.disconnect(); } catch (e) { /* noop */ } });
+    try { mixOut.disconnect(r.nodes[1]); } catch (e) { /* noop */ }
+    try { r.tap.disconnect(); } catch (e) { /* noop */ }
+    r.stream.getTracks().forEach((t) => t.stop());
+    setAudioSession('playback');
+    setRecUI(false);
+    const len = r.chunksA.reduce((a, c) => a + c.length, 0);
+    if (!len || r.t0Cap == null) { renderTake(); return; }
+    const mic = new Float32Array(len), acc = new Float32Array(len);
+    let o = 0;
+    r.chunksA.forEach((c, k) => { mic.set(c, o); acc.set(r.chunksB[k], o); o += c.length; });
+    let peak = 0;
+    for (let k = 0; k < len; k++) peak = Math.max(peak, Math.abs(mic[k]));
+    take = {
+      mic, acc, sr: ctx.sampleRate,
+      beat0: r.songT0 - r.t0Cap, spb: r.spb, songId: r.songId,
+      latency: r.latency, gain: peak > 0 ? Math.min(10, 0.8 / peak) : 1,
+    };
+    renderTake();
+  };
+  // ワークレットに残っている分を出しきってから
+  if (r.tap.port) { r.tap.port.postMessage('stop'); setTimeout(finish, 150); } else finish();
+}
+
+// マイクは少しおくれて入るので、そのぶん前にずらして伴奏と合わせる(recOffset.ms が大きいほど、うたが前に出る)
+function takeBuffer(mode) {
+  const { mic, acc, sr } = take;
+  const shift = Math.round((take.latency + recOffset.ms / 1000) * sr);
+  const n = mic.length;
+  const buf = ctx.createBuffer(1, n, sr);
+  const out = buf.getChannelData(0);
+  const g = take.gain;
+  for (let k = 0; k < n; k++) {
+    const j = k + shift;
+    let v = j >= 0 && j < n ? mic[j] * g : 0;
+    if (mode === 'mix') v = v * 0.9 + acc[k] * 0.7;
+    out[k] = v > 1 ? 1 : v < -1 ? -1 : v;
+  }
+  return buf;
+}
+
+function playTake(mode) {
+  ensureAudio();
+  if (!take) return;
+  const same = review && review.mode === mode;
+  stopReview();
+  if (same) return; // もう一度おしたら止める
+  stopPlay();
+  const src = ctx.createBufferSource();
+  src.buffer = takeBuffer(mode);
+  const g = ctx.createGain(); g.gain.value = 1;
+  src.connect(g); g.connect(ctx.destination);
+  const at = ctx.currentTime + 0.05;
+  src.start(at);
+  review = { src, mode, t0: at + take.beat0, spb: take.spb, raf: 0 };
+  src.onended = () => { if (review && review.src === src) stopReview(); };
+  if (take.songId === state.songId) review.raf = requestAnimationFrame(draw);
+  renderTake();
+}
+
+function stopReview() {
+  if (!review) return;
+  const r = review;
+  review = null;
+  try { r.src.stop(); } catch (e) { /* noop */ }
+  cancelAnimationFrame(r.raf);
+  clearLit();
+  markNow(null);
+  updateGuide();
+  renderTake();
+}
+
+function setRecUI(on) {
+  const b = $('rec');
+  b.classList.toggle('on', on);
+  b.querySelector('.ico').textContent = on ? '■' : '●';
+  b.querySelector('.lbl').textContent = on ? 'とめる' : 'ろくおん';
+  ['play', 'slower', 'faster', 'edit'].forEach((id) => { $(id).disabled = on; });
+  document.querySelectorAll('.chip').forEach((c) => { c.disabled = on; });
+  document.body.classList.toggle('recording', on);
+  renderTake();
+}
+
+function renderTake() {
+  const bar = $('recBar');
+  bar.hidden = !take || !!rec;
+  document.body.classList.toggle('has-take', !bar.hidden);
+  if (!take) return;
+  [['recPlayVoice', 'voice', 'うただけ'], ['recPlayMix', 'mix', 'うた＋伴奏']].forEach(([id, mode, lbl]) => {
+    const on = review && review.mode === mode;
+    $(id).classList.toggle('on', !!on);
+    $(id).querySelector('.ico').textContent = on ? '■' : '▶';
+    $(id).querySelector('.lbl').textContent = lbl;
+  });
+  // 表示は「うたが後ろにずれている量」(ミリ秒)
+  const v = -recOffset.ms;
+  $('recOff').textContent = (v > 0 ? '+' : '') + v;
+  requestAnimationFrame(() => { layoutKeyboard(); sizeHeads(); });
+}
+
+function nudgeOffset(d) {
+  recOffset.ms = Math.max(-500, Math.min(500, recOffset.ms + d));
+  store.set('recOffset', recOffset.ms);
+  const mode = review && review.mode;
+  renderTake();
+  if (mode) { stopReview(); playTake(mode); }
 }
 
 // ===== へんしゅう =====
@@ -827,6 +1057,11 @@ function init() {
   loadSong(state.songId);
 
   $('play').addEventListener('click', () => (state.playing ? stopPlay() : startPlay()));
+  $('rec').addEventListener('click', () => (rec ? stopRecording() : startRecording()));
+  $('recPlayVoice').addEventListener('click', () => playTake('voice'));
+  $('recPlayMix').addEventListener('click', () => playTake('mix'));
+  $('recEarlier').addEventListener('click', () => nudgeOffset(20));
+  $('recLater').addEventListener('click', () => nudgeOffset(-20));
   $('practice').addEventListener('click', () => {
     state.practice = !state.practice;
     $('practice').setAttribute('aria-pressed', String(state.practice));
@@ -872,12 +1107,12 @@ function init() {
   window.addEventListener('resize', onResize);
   window.addEventListener('orientationchange', () => setTimeout(onResize, 200));
   // 画面がかくれたら止める
-  document.addEventListener('visibilitychange', () => { if (document.hidden) { stopPlay(); [...held.keys()].forEach(release); } });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) { stopPlay(); stopReview(); [...held.keys()].forEach(release); } });
   // 最初のタッチで音を準備(iOS)
   const unlock = () => { ensureAudio(); window.removeEventListener('pointerdown', unlock, true); };
   window.addEventListener('pointerdown', unlock, true);
 }
 
 // テスト用
-window.__piano = { parseMelody, splitLyrics, state };
+window.__piano = { parseMelody, splitLyrics, state, getTake: () => take, playTake, stopRecording };
 init();

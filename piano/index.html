@@ -20,6 +20,9 @@
       <button class="btn play" id="play" aria-label="おてほん">
         <span class="ico">▶</span><span class="lbl">おてほん</span>
       </button>
+      <button class="btn rec" id="rec" aria-label="ろくおん">
+        <span class="ico">●</span><span class="lbl">ろくおん</span>
+      </button>
       <button class="btn toggle" id="practice" aria-pressed="false" aria-label="じぶんでひく">
         <span class="ico">☝</span><span class="lbl">じぶんで</span>
       </button>
@@ -36,6 +39,18 @@
       <button class="btn mini" id="fs" aria-label="ぜんがめん" hidden>⛶</button>
     </div>
   </header>
+
+  <div class="rec-bar" id="recBar" hidden>
+    <span class="rec-ttl">🎤 さいごのろくおん</span>
+    <button class="btn" id="recPlayVoice"><span class="ico">▶</span><span class="lbl">うただけ</span></button>
+    <button class="btn" id="recPlayMix"><span class="ico">▶</span><span class="lbl">うた＋伴奏</span></button>
+    <span class="rec-off" title="うたと伴奏のずれ(ミリ秒)">
+      ずれ
+      <button class="btn mini" id="recEarlier" aria-label="うたをまえにずらす">◀</button>
+      <span id="recOff">0</span>
+      <button class="btn mini" id="recLater" aria-label="うたをうしろにずらす">▶</button>
+    </span>
+  </div>
 
   <main class="score" id="score" aria-label="がくふ"></main>
 
