@@ -78,6 +78,22 @@ html, body {
 .tempo { display: inline-flex; align-items: center; gap: 2px; }
 #bpm { min-width: 2.2em; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; font-size: 14px; }
 
+.btn.rec { color: #e03131; }
+.btn.rec.on { background: #e03131; border-color: #e03131; color: #fff; animation: recpulse 1s ease-in-out infinite alternate; }
+@keyframes recpulse { from { box-shadow: 0 0 0 0 rgba(224,49,49,.5); } to { box-shadow: 0 0 0 6px rgba(224,49,49,0); } }
+.btn:disabled, .chip:disabled { opacity: .4; }
+
+.rec-bar {
+  flex: none; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  margin: 0 8px 4px; padding: 4px 8px; border-radius: 12px; background: #fdecec;
+}
+.rec-bar[hidden] { display: none; }
+.rec-bar .rec-ttl { font-size: 13px; font-weight: 700; color: #c92a2a; }
+.rec-bar .btn.on { background: #e03131; border-color: #e03131; color: #fff; }
+.rec-bar .rec-off { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--sub); }
+.rec-bar .rec-off .btn.mini { min-width: 30px; min-height: 30px; padding: 2px 6px; }
+#recOff { min-width: 2.4em; text-align: center; font-variant-numeric: tabular-nums; }
+
 /* ---------- 譜面 ---------- */
 .score {
   flex: 1 1 auto; min-height: 0;
@@ -178,6 +194,11 @@ html, body {
 @media (orientation: landscape) and (max-height: 430px) {
   .controls .lbl { display: none; }
   .btn.play .lbl { display: inline; }
+  .btn.rec.on .lbl { display: inline; }
+  .rec-bar { flex-wrap: nowrap; padding: 2px 8px; }
+  .has-take .kb-wrap { height: 45vh; }
+  .has-take .row { --rowH: 64px; }
+  .rec-bar .btn { min-height: 30px; padding: 2px 8px; }
 }
 
 /* ---------- たて画面 ---------- */
