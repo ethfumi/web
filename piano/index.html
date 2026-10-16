@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="うたのけんばん">
+<meta name="theme-color" content="#fff7ec">
+<meta name="description" content="ちいさな子どもの歌・発声れんしゅう用のけんばん。ピアノの音と「ドーレーミー」とうたう声、おてほんの自動演奏つき。">
+<title>うたのけんばん</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <header class="bar">
+    <div class="songs" id="songs" role="tablist" aria-label="きょく"></div>
+    <div class="controls">
+      <button class="btn play" id="play" aria-label="おてほん">
+        <span class="ico">▶</span><span class="lbl">おてほん</span>
+      </button>
+      <button class="btn toggle" id="practice" aria-pressed="false" aria-label="じぶんでひく">
+        <span class="ico">☝</span><span class="lbl">じぶんで</span>
+      </button>
+      <div class="seg" id="sound" role="radiogroup" aria-label="おと">
+        <button data-sound="piano" class="on" role="radio" aria-checked="true">🎹<span class="lbl">ピアノ</span></button>
+        <button data-sound="voice" role="radio" aria-checked="false">🗣<span class="lbl">ドレミ</span></button>
+      </div>
+      <div class="tempo" aria-label="はやさ">
+        <button class="btn mini" id="slower" aria-label="ゆっくり">🐢</button>
+        <span id="bpm">100</span>
+        <button class="btn mini" id="faster" aria-label="はやく">🐇</button>
+      </div>
+      <button class="btn mini" id="edit" aria-label="へんしゅう・せってい">⚙</button>
+      <button class="btn mini" id="fs" aria-label="ぜんがめん" hidden>⛶</button>
+    </div>
+  </header>
+
+  <main class="score" id="score" aria-label="がくふ"></main>
+
+  <section class="kb-wrap">
+    <div class="kb-shift">
+      <button class="btn mini" id="kbLeft" aria-label="ひだりへ">◀</button>
+      <button class="btn mini" id="kbRight" aria-label="みぎへ">▶</button>
+    </div>
+    <div class="keyboard" id="keyboard"><div class="keys" id="keys"></div></div>
+  </section>
+</div>
+
+<div class="cheer" id="cheer" aria-live="polite"></div>
+
+<dialog id="editor">
+  <form method="dialog" class="ed">
+    <h2 id="edTitle">へんしゅう</h2>
+    <label class="custom-only">きょくのなまえ
+      <input id="edName" maxlength="20">
+    </label>
+    <label>メロディ
+      <textarea id="edMelody" rows="6" spellcheck="false"></textarea>
+    </label>
+    <p class="hint">ド レ ミ ファ ソ ラ シ ＝1拍 ／ ー＝のばす ／ (ドレ)＝1拍にふたつ ／ ↑↓＝オクターブ ／ #＝半音上 ／ ウ＝やすみ ／ 改行＝譜面の行がえ</p>
+    <label>かし <small>(1文字＝1音。まとめたいときは「(らん)」のようにかっこ)</small>
+      <textarea id="edLyrics" rows="4" placeholder="ここに歌詞をひらがなで入れると、音符の下に出ます"></textarea>
+    </label>
+    <p class="hint" id="edCount"></p>
+    <div class="opts">
+      <label class="chk"><input type="checkbox" id="optCount"> まえに「ぽんぽん」と合図</label>
+      <label class="chk"><input type="checkbox" id="optLoop"> くりかえす</label>
+      <label class="chk"><input type="checkbox" id="optLayer"> ドレミの声にピアノもかさねる</label>
+    </div>
+    <div class="ed-btns">
+      <button type="button" class="btn" id="edReset">もとにもどす</button>
+      <span class="sp"></span>
+      <button value="cancel" class="btn">とじる</button>
+      <button type="button" class="btn primary" id="edSave">ほぞん</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="songs.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
