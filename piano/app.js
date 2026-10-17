@@ -13,6 +13,8 @@ const LOW = 57, HIGH = 74;
 const WHITES = [];
 for (let m = LOW; m <= HIGH; m++) if (!PC_SHARP[m % 12]) WHITES.push(m);
 const PORTRAIT_KEYS = 8;
+// けんばんにない高さの音は、オクターブをずらして同じ音名の鍵にする
+const fold = (m) => { while (m < LOW) m += 12; while (m > HIGH) m -= 12; return m; };
 
 // ===== 保存 =====
 const store = {
@@ -432,10 +434,9 @@ function loadSong(id) {
   state.songId = def.id;
   store.set('song', def.id);
   const phrases = parseMelody(def.melody);
-  // けんばんにおさまる範囲で転調する
   const mids = phrases.flat().filter((n) => n.midi != null).map((n) => n.midi);
-  const keyMin = mids.length ? Math.max(-6, LOW - Math.min(...mids)) : 0;
-  const keyMax = mids.length ? Math.min(6, HIGH - Math.max(...mids)) : 0;
+  // 転調は上下1オクターブまで。けんばんからはみ出た音は、同じ音名の鍵を光らせる
+  const keyMin = -12, keyMax = 12;
   const key = Math.max(keyMin, Math.min(keyMax, def.key));
   phrases.flat().forEach((n) => { if (n.midi != null) n.midi += key; });
   const lyr = splitLyrics(def.lyrics);
@@ -460,7 +461,7 @@ function loadSong(id) {
 
 function firstNoteIdx(from) {
   const f = state.song.flat;
-  for (let k = from; k < f.length; k++) if (f[k].midi != null && f[k].midi >= LOW && f[k].midi <= HIGH) return k;
+  for (let k = from; k < f.length; k++) if (f[k].midi != null) return k;
   return -1;
 }
 
@@ -508,12 +509,25 @@ function renderScore() {
   const { phrases } = state.song;
   const perBar = state.song.def.base.beatsPerBar || 4;
   const maxBeats = Math.max(4, ...phrases.map((p) => p.reduce((a, n) => a + n.beats, 0)));
+  // 五線からはみ出すときは、1オクターブずらして書き、ト音記号に「8」をつける
+  const steps = state.song.flat.filter((n) => n.midi != null).map((n) => stepOf(n.midi));
+  let oct = 0, bestOut = Infinity;
+  [0, 7, -7, 14, -14].forEach((o) => {
+    const out = steps.filter((st) => st - o < -2 || st - o > 12).length;
+    if (out < bestOut) { bestOut = out; oct = o; }
+  });
   phrases.forEach((p, pi) => {
     const row = el('div', 'row' + (state.song.hasLyrics ? ' has-lyr' : ''));
     row.dataset.phrase = pi;
     const staff = el('div', 'staff');
     [2, 4, 6, 8, 10].forEach((st) => { const ln = el('i'); ln.style.top = yPct(st) + '%'; staff.appendChild(ln); });
     staff.appendChild(clefSvg());
+    if (oct) {
+      const o8 = el('div', 'clef-oct', String(Math.abs(oct) / 7 * 7 + 1));
+      o8.style.top = yPct(oct > 0 ? 12.4 : 4 - CLEF_DOWN - 1.4) + '%';
+      if (oct > 0) o8.style.left = 'calc(var(--sp) * 4.2)';
+      staff.appendChild(o8);
+    }
     const notes = el('div', 'notes');
     staff.appendChild(notes);
     row.appendChild(staff);
@@ -543,7 +557,7 @@ function renderScore() {
         h.style.left = x; h.style.top = yPct(6) + '%';
         cell.appendChild(h);
       } else {
-        const step = stepOf(n.midi);
+        const step = stepOf(n.midi) - oct;
         const top = yPct(step) + '%';
         if (n.beats > 1) {
           const bar = el('div', 'bar-len');
@@ -572,7 +586,7 @@ function renderScore() {
           const h2 = startNote(n.midi);
           h2.release(ctx.currentTime + Math.min(1.2, n.beats * 60 / state.bpm));
           if (state.practice) { state.guideIdx = n.idx; updateGuide(); }
-          flashKey(n.midi, 300);
+          flashKey(fold(n.midi), 300);
         });
       }
       notes.appendChild(cell);
@@ -742,15 +756,15 @@ function updateGuide() {
   if (!state.practice || state.playing) { if (!state.playing) markNow(null); return; }
   const n = state.song.flat[state.guideIdx];
   if (!n) { markNow(null); return; }
-  keyEls.get(n.midi) && keyEls.get(n.midi).classList.add('next');
+  keyEls.get(fold(n.midi)).classList.add('next');
   markNow(n.idx);
-  followKey(n.midi);
+  followKey(fold(n.midi));
 }
 
 function onUserNote(midi) {
   if (!state.practice || state.playing) return;
   const n = state.song.flat[state.guideIdx];
-  if (!n || n.midi !== midi) return;
+  if (!n || fold(n.midi) !== midi) return;
   const nx = firstNoteIdx(state.guideIdx + 1);
   if (nx < 0) {
     cheer('できたね！🎉');
@@ -854,7 +868,7 @@ function draw() {
     }
   }
   markNow(cur && cur.midi != null ? cur.idx : (cur ? cur.idx : null));
-  const midi = cur && cur.midi != null && beat < cur.start + cur.beats * 0.94 ? cur.midi : null;
+  const midi = cur && cur.midi != null && beat < cur.start + cur.beats * 0.94 ? fold(cur.midi) : null;
   if (midi !== litKey) {
     if (litKey != null) keyEls.get(litKey) && keyEls.get(litKey).classList.remove('on');
     if (midi != null && keyEls.get(midi)) { keyEls.get(midi).classList.add('on'); followKey(midi); }
@@ -1193,7 +1207,7 @@ function setKey(d) {
   updateGuide();
   renderKey();
   ensureAudio();
-  if (!state.playing) { const h = startNote(60 + k); h.release(ctx.currentTime + 0.4); flashKey(60 + k, 300); }
+  if (!state.playing) { const h = startNote(60 + k); h.release(ctx.currentTime + 0.4); flashKey(fold(60 + k), 300); }
 }
 
 function setBpm(v) {
