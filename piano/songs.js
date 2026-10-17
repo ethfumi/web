@@ -58,25 +58,27 @@ window.PIANO_SONGS = [
   // ---- はっせい(発声練習) ----
   // exercise: pattern を1回ずつ半音あげて from→to までのぼり、またおりてくる。
   //   from / to は pattern の「ド」をどの高さにするか(ド=60, レ=62 …)。
-  //   うたう言葉は「ドレミ」をその回の高さに合わせて読みかえる(移動ド)。
+  //   うたう言葉は「ま」(へんしゅうで「あ」や、高さに合わせて読みかえる「ドレミ」にもできる)。
+//   毎回、歌いだす前に次の高さの和音を2分音符でならす。さいごの音も2分音符にして、
+//   「ドレミレ ド(2分) 和音(2分)」とすきまなく続ける。
   {
     id: 'ex-long', title: 'ロングトーン', bpm: 84,
-    exercise: { pattern: 'ドーーウ', chords: 'C:4', from: 60, to: 69 },
+    exercise: { pattern: 'ドーーー', chords: 'C:4', from: 60, to: 69 },
   },
   {
     id: 'ex-3', title: 'ドレミレド', bpm: 96,
-    exercise: { pattern: 'ドレミレ ドーーウ', chords: 'C:2 G7:2 C:4', from: 60, to: 65 },
+    exercise: { pattern: 'ドレミレ ドー', chords: 'C:2 G7:2 C:2', from: 60, to: 65 },
   },
   {
     id: 'ex-5', title: 'ドレミファソ', bpm: 100,
-    exercise: { pattern: 'ドレミファ ソファミレ ドーーウ', chords: 'C:4 G7:4 C:4', from: 60, to: 62 },
+    exercise: { pattern: 'ドレミファ ソファミレ ドー', chords: 'C:4 G7:4 C:2', from: 60, to: 62 },
   },
   {
     id: 'ex-arp', title: 'ドミソミド', bpm: 92,
-    exercise: { pattern: 'ドミソミ ドーーウ', chords: 'C:8', from: 60, to: 64 },
+    exercise: { pattern: 'ドミソミ ドー', chords: 'C:6', from: 60, to: 64 },
   },
   {
     id: 'ex-down', title: 'ソファミレド', bpm: 96,
-    exercise: { pattern: 'ソファミレ ドーーウ', chords: 'G7:4 C:4', from: 60, to: 65 },
+    exercise: { pattern: 'ソファミレ ドー', chords: 'G7:4 C:2', from: 60, to: 65 },
   },
 ];

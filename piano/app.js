@@ -255,8 +255,10 @@ const SYLLABLE = {
   7: { c: 's', v: 'o', lv: 1.45 }, 9: { c: 'r', v: 'a', lv: 1.35 }, 11: { c: 'sh', v: 'i', lv: 1.6 },
 };
 // 子音が母音より前に出る長さ(自動演奏では拍に母音が合うよう先に出す)
-const CONS_LEAD = { d: 0.02, r: 0.025, m: 0.07, f: 0.08, s: 0.1, sh: 0.11 };
-const syllableOf = (midi) => SYLLABLE[midi % 12] || SYLLABLE[(midi - 1) % 12];
+const CONS_LEAD = { '': 0.01, d: 0.02, r: 0.025, m: 0.07, f: 0.08, s: 0.1, sh: 0.11 };
+// はっせいの読み(「ま」「あ」)。ドレミのときは音の高さから読む
+const SYL_TEXT = { 'ま': { c: 'm', v: 'a', lv: 1.3 }, 'あ': { c: '', v: 'a', lv: 1.35 } };
+const syllableOf = (x) => (typeof x === 'string' ? SYL_TEXT[x] : SYLLABLE[x % 12] || SYLLABLE[(x - 1) % 12]);
 
 function voiceNote(midi, t, gainScale = 1, sylPc = null) {
   const f0 = mtof(midi);
@@ -433,7 +435,7 @@ function songDef(id) {
     bpm: ov.bpm || base.bpm,
     key: ov.key || 0,
     chords: ov.chords != null ? ov.chords : (base.chords || ''),
-    exercise: base.exercise ? { ...base.exercise, from: ov.from || base.exercise.from, to: ov.to || base.exercise.to } : null,
+    exercise: base.exercise ? { ...base.exercise, from: ov.from || base.exercise.from, to: ov.to || base.exercise.to, syl: ov.syl || base.exercise.syl || 'ま' } : null,
     base,
   };
 }
@@ -465,7 +467,8 @@ function loadSong(id) {
       return [cueNote, ...parseMelody(ex.pattern).flat().map((n) => {
         if (n.midi == null) return n;
         const solfa = PC_NAME[((n.midi % 12) + 12) % 12];
-        return { ...n, syl: n.midi, lyric: solfa, midi: n.midi + sh };
+        const yomi = ex.syl === 'ドレミ' ? null : ex.syl;
+        return { ...n, syl: yomi || n.midi, lyric: yomi || solfa, midi: n.midi + sh };
       })];
     });
   } else {
@@ -1205,6 +1208,7 @@ function openEditor() {
   if (d.exercise) {
     fillRootSelect($('edFrom'), d.exercise.from);
     fillRootSelect($('edTo'), d.exercise.to);
+    $('edSyl').value = d.exercise.syl;
   }
   updateCount();
   $('editor').showModal();
@@ -1239,6 +1243,7 @@ function saveEditor() {
   if (d.exercise) {
     ov.from = Number($('edFrom').value);
     ov.to = Number($('edTo').value);
+    ov.syl = $('edSyl').value;
     ov.bpm = state.bpm;
     store.set('song.' + d.id, ov);
     $('editor').close();
