@@ -448,7 +448,7 @@ function loadSong(id) {
     flat.push(n);
   }));
   const chords = def.chords.trim() ? parseChords(def.chords) : autoChords(flat.map((n) => ({ ...n, midi: n.midi == null ? null : n.midi - key })), beat);
-  state.song = { def, phrases, flat, totalBeats: beat, hasLyrics: lyr.length > 0, key, keyMin, keyMax, acc: accompEvents(chords, key) };
+  state.song = { def, phrases, flat, totalBeats: beat, hasLyrics: lyr.length > 0, key, keyMin, keyMax, chords, acc: accompEvents(chords, key) };
   state.bpm = def.bpm;
   $('bpm').textContent = state.bpm;
   renderKey();
@@ -1170,8 +1170,8 @@ function setSound(s) {
 function renderKey() {
   const k = state.song.key;
   $('key').textContent = k === 0 ? '±0' : (k > 0 ? '+' : '') + k;
-  $('keyDown').disabled = !!rec || k <= state.song.keyMin;
-  $('keyUp').disabled = !!rec || k >= state.song.keyMax;
+  $('keyDown').disabled = k <= state.song.keyMin;
+  $('keyUp').disabled = k >= state.song.keyMax;
 }
 
 function setKey(d) {
@@ -1181,11 +1181,19 @@ function setKey(d) {
   const ov = store.get('song.' + state.songId, {});
   if (k) ov.key = k; else delete ov.key;
   store.set('song.' + state.songId, ov);
-  const wasPlaying = state.playing;
-  loadSong(state.songId);
+  // 演奏・録音を止めずに、これから鳴る音だけ高さをかえる
+  const shift = k - s.key;
+  s.flat.forEach((n) => { if (n.midi != null) n.midi += shift; });
+  s.key = k;
+  s.acc = accompEvents(s.chords, k); // 並びは同じなので、演奏中の位置(nextAcc)はそのまま使える
+  const idx = curCell ? Number(curCell.dataset.idx) : null;
+  curCell = null; curRow = null;
+  renderScore();
+  if (idx != null && state.playing) markNow(idx);
+  updateGuide();
+  renderKey();
   ensureAudio();
-  if (wasPlaying) startPlay();
-  else { const h = startNote(60 + k); h.release(ctx.currentTime + 0.4); flashKey(60 + k, 300); }
+  if (!state.playing) { const h = startNote(60 + k); h.release(ctx.currentTime + 0.4); flashKey(60 + k, 300); }
 }
 
 function setBpm(v) {
