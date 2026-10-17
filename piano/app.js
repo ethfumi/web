@@ -137,10 +137,18 @@ function autoChords(flat, totalBeats) {
 }
 
 // コード列 → 左手の音(ベース→和音 の「ブン・チャッ」)
+const CUE_BEATS = 2;
 function accompEvents(chords, shift) {
   const ev = [];
   let beat = 0;
   chords.forEach((c) => {
+    if (c.cue) {
+      // はっせいの合図: ベース + その高さのドミソ(メロディと同じ高さ)を「ジャーン」
+      const r = c.cueMidi + shift;
+      ev.push({ start: beat, beats: c.beats * 0.9, notes: [r - 12, r, r + 4, r + 7], gain: 0.42, cue: true });
+      beat += c.beats;
+      return;
+    }
     const root = (c.root + shift + 120) % 12;
     let bass = 48 + root; if (bass > 52) bass -= 12;                 // F2〜E3
     const fifth = bass + 7 > 55 ? bass - 5 : bass + 7;
@@ -450,12 +458,15 @@ function loadSong(id) {
     exChords = [];
     phrases = roots.map((r) => {
       const sh = r - 60;
+      // 歌いだす前に、その回の「ド」の和音を1回ならして高さを聞かせる
+      exChords.push({ cue: true, cueMidi: r, beats: CUE_BEATS });
+      const cueNote = { midi: null, beats: CUE_BEATS, cue: true, cueMidi: r };
       base.forEach((c) => exChords.push({ ...c, root: (c.root + sh + 120) % 12, tones: c.tones.map((pc) => (pc + sh + 120) % 12) }));
-      return parseMelody(ex.pattern).flat().map((n) => {
+      return [cueNote, ...parseMelody(ex.pattern).flat().map((n) => {
         if (n.midi == null) return n;
         const solfa = PC_NAME[((n.midi % 12) + 12) % 12];
         return { ...n, syl: n.midi, lyric: solfa, midi: n.midi + sh };
-      });
+      })];
     });
   } else {
     phrases = parseMelody(def.melody);
@@ -578,7 +589,10 @@ function renderScore() {
     const used = p.reduce((a, n) => a + n.beats, 0);
     // 小節線(曲の最後は太く)
     const isLast = pi === phrases.length - 1;
-    for (let bt = Math.ceil((rowStart + 0.001) / perBar) * perBar; bt <= rowStart + used + 0.001; bt += perBar) {
+    // はっせいは、合図の和音のあとから小節を数える
+    const org = state.song.def.exercise ? rowStart + CUE_BEATS : 0;
+    const firstBar = state.song.def.exercise ? org : Math.ceil((rowStart + 0.001) / perBar) * perBar;
+    for (let bt = firstBar; bt <= rowStart + used + 0.001; bt += perBar) {
       const bl = el('div', 'barline' + (isLast && bt >= rowStart + used - 0.001 ? ' end' : ''));
       bl.style.left = ((bt - rowStart) / maxBeats) * 100 + '%';
       bl.style.top = yPct(10) + '%';
@@ -593,7 +607,21 @@ function renderScore() {
       n.cell = cell;
       // 音符は拍のまんなかに置く(長い音は最初の拍)
       const x = (50 / n.beats) + '%';
-      if (n.midi == null) {
+      if (n.cue) {
+        // 合図の和音: うすい色の和音と 🎹
+        cell.classList.add('cue');
+        const r = n.cueMidi + state.song.key;
+        const low = stepOf(r) - oct;
+        for (let st = 0; st >= low - 0.5; st -= 2) { const lg = el('div', 'ledger'); lg.style.top = yPct(st) + '%'; lg.style.left = '50%'; cell.appendChild(lg); }
+        [r, r + 4, r + 7].forEach((m) => {
+          const h = el('div', 'head cue-head');
+          h.style.left = '50%'; h.style.top = yPct(stepOf(m) - oct) + '%';
+          cell.appendChild(h);
+        });
+        const lb = el('div', 'lbl-lyr cue-lbl', '🎹');
+        lb.style.left = '50%';
+        cell.appendChild(lb);
+      } else if (n.midi == null) {
         cell.classList.add('rest');
         const h = el('div', 'rest-mark', '𝄽');
         h.style.left = x; h.style.top = yPct(6) + '%';
@@ -866,12 +894,14 @@ function schedule() {
     }
     play.next++;
   }
-  const acc = settings.accomp ? state.song.acc : [];
+  const acc = state.song.acc;
   while (play.nextAcc < acc.length) {
     const a = acc[play.nextAcc];
     if (a.start >= state.song.totalBeats) { play.nextAcc = acc.length; break; }
     const t = play.t0 + a.start * play.spb;
     if (t > ahead) break;
+    // 伴奏オフでも、はっせいの合図の和音はならす
+    if (!settings.accomp && !a.cue) { play.nextAcc++; continue; }
     const end = t + a.beats * play.spb * 0.92;
     a.notes.forEach((m) => {
       const h = pianoNote(m, t, a.gain);

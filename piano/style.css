@@ -280,3 +280,6 @@ dialog::backdrop { background: rgba(60, 40, 30, .35); }
 .ex-range select { font: inherit; font-size: 16px; padding: 4px 8px; border: 2px solid var(--line); border-radius: 10px; background: #fff; }
 .ex-range .hint { flex-basis: 100%; }
 .row.ex .lbl-lyr { top: calc(var(--rowH) + 2px); }
+.cell .head.cue-head { background: #d9cbbb; box-shadow: 0 0 0 1px #b8a690; }
+.cell .lbl-lyr.cue-lbl { font-size: 12px; color: var(--sub); font-weight: 700; }
+.cell.cue.now .lbl-lyr.cue-lbl { color: var(--accent); }
