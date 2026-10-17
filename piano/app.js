@@ -435,7 +435,7 @@ function songDef(id) {
     bpm: ov.bpm || base.bpm,
     key: ov.key || 0,
     chords: ov.chords != null ? ov.chords : (base.chords || ''),
-    exercise: base.exercise ? { ...base.exercise, from: ov.from || base.exercise.from, to: ov.to || base.exercise.to, syl: ov.syl || base.exercise.syl || 'ま' } : null,
+    exercise: base.exercise ? { ...base.exercise, from: ov.from || base.exercise.from, to: ov.to || base.exercise.to, syl: ov.syl || base.exercise.syl || 'ドレミ' } : null,
     base,
   };
 }
