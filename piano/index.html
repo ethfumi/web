@@ -15,7 +15,10 @@
 <body>
 <div id="app">
   <header class="bar">
-    <div class="songs" id="songs" role="tablist" aria-label="きょく"></div>
+    <div class="song-row">
+      <div id="cats"></div>
+      <div class="songs" id="songs" role="tablist" aria-label="きょく"></div>
+    </div>
     <div class="controls">
       <button class="btn play" id="play" aria-label="おてほん">
         <span class="ico">▶</span><span class="lbl">おてほん</span>
@@ -73,18 +76,23 @@
 <dialog id="editor">
   <form method="dialog" class="ed">
     <h2 id="edTitle">へんしゅう</h2>
+    <div class="ex-only ex-range">
+      <label>はじめの高さ <select id="edFrom"></select></label>
+      <label>いちばん上 <select id="edTo"></select></label>
+      <p class="hint">1回ごとに半音ずつ上がって「いちばん上」まで行き、またおりてきます。</p>
+    </div>
     <label class="custom-only">きょくのなまえ
       <input id="edName" maxlength="20">
     </label>
-    <label>メロディ
+    <label class="song-only">メロディ
       <textarea id="edMelody" rows="6" spellcheck="false"></textarea>
     </label>
-    <p class="hint">ド レ ミ ファ ソ ラ シ ＝1拍 ／ ー＝のばす ／ (ドレ)＝1拍にふたつ ／ ↑↓＝オクターブ ／ #＝半音上 ／ ウ＝やすみ ／ 改行＝譜面の行がえ</p>
-    <label>かし <small>(1文字＝1音。まとめたいときは「(らん)」のようにかっこ)</small>
+    <p class="hint song-only">ド レ ミ ファ ソ ラ シ ＝1拍 ／ ー＝のばす ／ (ドレ)＝1拍にふたつ ／ ↑↓＝オクターブ ／ #＝半音上 ／ ウ＝やすみ ／ 改行＝譜面の行がえ</p>
+    <label class="song-only">かし <small>(1文字＝1音。まとめたいときは「(らん)」のようにかっこ)</small>
       <textarea id="edLyrics" rows="4" placeholder="ここに歌詞をひらがなで入れると、音符の下に出ます"></textarea>
     </label>
-    <p class="hint" id="edCount"></p>
-    <label>伴奏のコード <small>(C F G G7 Am など。1つ＝2拍、C:4 で4拍。からにするとメロディから自動)</small>
+    <p class="hint song-only" id="edCount"></p>
+    <label class="song-only">伴奏のコード <small>(C F G G7 Am など。1つ＝2拍、C:4 で4拍。からにするとメロディから自動)</small>
       <textarea id="edChords" rows="3" spellcheck="false" placeholder="からのときは自動でつけます"></textarea>
     </label>
     <div class="opts">
