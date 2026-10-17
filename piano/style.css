@@ -117,6 +117,7 @@ html, body {
 .staff { position: absolute; left: 4px; right: 4px; top: 0; height: var(--rowH); }
 .staff > i { position: absolute; left: 0; right: 0; height: 1px; margin-top: -.5px; background: #bfae99; pointer-events: none; }
 .clef { position: absolute; left: calc(var(--sp) * .4); fill: #8c7b6b; pointer-events: none; overflow: visible; }
+.clef-oct { position: absolute; left: calc(var(--sp) * 2.2); transform: translate(-50%, -50%); font-size: calc(var(--sp) * 2.6); font-style: italic; font-weight: 700; color: #8c7b6b; line-height: 1; }
 .notes {
   position: absolute; top: 0; bottom: 0; left: var(--clefW); right: 0;
   display: flex;
