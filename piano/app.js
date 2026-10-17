@@ -250,9 +250,9 @@ const SYLLABLE = {
 const CONS_LEAD = { d: 0.02, r: 0.025, m: 0.07, f: 0.08, s: 0.1, sh: 0.11 };
 const syllableOf = (midi) => SYLLABLE[midi % 12] || SYLLABLE[(midi - 1) % 12];
 
-function voiceNote(midi, t, gainScale = 1) {
+function voiceNote(midi, t, gainScale = 1, sylPc = null) {
   const f0 = mtof(midi);
-  const { c, v, lv } = syllableOf(midi);
+  const { c, v, lv } = syllableOf(sylPc == null ? midi : sylPc);
   const V = VOWEL[v];
   const tv = t + CONS_LEAD[c]; // 母音がはじまる時刻
 
@@ -370,13 +370,13 @@ function voiceNote(midi, t, gainScale = 1) {
 }
 
 // 今の音色でならす。自動演奏では声の母音が t に合うよう前倒しする。
-function startNote(midi, t, { aligned = false } = {}) {
+function startNote(midi, t, { aligned = false, syl = null } = {}) {
   ensureAudio();
   const at = t == null ? ctx.currentTime + 0.005 : t;
   if (state.sound === 'voice') {
-    const lead = aligned ? CONS_LEAD[syllableOf(midi).c] : 0;
+    const lead = aligned ? CONS_LEAD[syllableOf(syl == null ? midi : syl).c] : 0;
     const vStart = Math.max(ctx.currentTime, at - lead);
-    const v = voiceNote(midi, vStart);
+    const v = voiceNote(midi, vStart, 1, syl);
     const p = settings.layer ? pianoNote(midi, at, 0.45) : null;
     return {
       release(r) { v.release(r); if (p) p.release(r); },
@@ -401,6 +401,7 @@ function tick(t, strong) {
 const settings = Object.assign({ countIn: true, loop: false, layer: false, accomp: true }, store.get('settings', {}));
 const state = {
   songId: store.get('song', 'kirakira'),
+  cat: 'song',
   sound: store.get('sound', 'piano'),
   bpm: 100,
   song: null,         // { title, phrases, flat, lyrics }
@@ -424,6 +425,7 @@ function songDef(id) {
     bpm: ov.bpm || base.bpm,
     key: ov.key || 0,
     chords: ov.chords != null ? ov.chords : (base.chords || ''),
+    exercise: base.exercise ? { ...base.exercise, from: ov.from || base.exercise.from, to: ov.to || base.exercise.to } : null,
     base,
   };
 }
@@ -433,13 +435,37 @@ function loadSong(id) {
   const def = songDef(id);
   state.songId = def.id;
   store.set('song', def.id);
-  const phrases = parseMelody(def.melody);
+  const ex = def.exercise;
+  state.cat = ex ? 'ex' : 'song';
+  store.set('cat', state.cat);
+  store.set('song.last.' + state.cat, def.id);
+  let phrases, exChords = null;
+  if (ex) {
+    // のぼって、おりる
+    const roots = [];
+    const lo = Math.min(ex.from, ex.to), hi = Math.max(ex.from, ex.to);
+    for (let r = lo; r <= hi; r++) roots.push(r);
+    for (let r = hi - 1; r >= lo; r--) roots.push(r);
+    const base = parseChords(ex.chords);
+    exChords = [];
+    phrases = roots.map((r) => {
+      const sh = r - 60;
+      base.forEach((c) => exChords.push({ ...c, root: (c.root + sh + 120) % 12, tones: c.tones.map((pc) => (pc + sh + 120) % 12) }));
+      return parseMelody(ex.pattern).flat().map((n) => {
+        if (n.midi == null) return n;
+        const solfa = PC_NAME[((n.midi % 12) + 12) % 12];
+        return { ...n, syl: n.midi, lyric: solfa, midi: n.midi + sh };
+      });
+    });
+  } else {
+    phrases = parseMelody(def.melody);
+  }
   const mids = phrases.flat().filter((n) => n.midi != null).map((n) => n.midi);
   // 転調は上下1オクターブまで。けんばんからはみ出た音は、同じ音名の鍵を光らせる
   const keyMin = -12, keyMax = 12;
   const key = Math.max(keyMin, Math.min(keyMax, def.key));
   phrases.flat().forEach((n) => { if (n.midi != null) n.midi += key; });
-  const lyr = splitLyrics(def.lyrics);
+  const lyr = ex ? [] : splitLyrics(def.lyrics);
   const flat = [];
   let beat = 0, li = 0;
   phrases.forEach((p, pi) => p.forEach((n) => {
@@ -448,8 +474,8 @@ function loadSong(id) {
     beat += n.beats;
     flat.push(n);
   }));
-  const chords = def.chords.trim() ? parseChords(def.chords) : autoChords(flat.map((n) => ({ ...n, midi: n.midi == null ? null : n.midi - key })), beat);
-  state.song = { def, phrases, flat, totalBeats: beat, hasLyrics: lyr.length > 0, key, keyMin, keyMax, chords, acc: accompEvents(chords, key) };
+  const chords = exChords || (def.chords.trim() ? parseChords(def.chords) : autoChords(flat.map((n) => ({ ...n, midi: n.midi == null ? null : n.midi - key })), beat));
+  state.song = { def, phrases, flat, totalBeats: beat, hasLyrics: lyr.length > 0 || !!ex, key, keyMin, keyMax, chords, acc: accompEvents(chords, key) };
   state.bpm = def.bpm;
   $('bpm').textContent = state.bpm;
   renderKey();
@@ -469,7 +495,23 @@ function firstNoteIdx(from) {
 function renderSongs() {
   const box = $('songs');
   box.textContent = '';
-  window.PIANO_SONGS.forEach((s) => {
+  const tabs = el('div', 'seg cat');
+  [['song', '🎵', 'うた'], ['ex', '🎤', 'はっせい']].forEach(([c, em, lbl]) => {
+    const t = el('button', c === state.cat ? 'on' : '');
+    t.append(el('span', 'em', em), el('span', 'lbl', lbl));
+    t.setAttribute('aria-label', lbl);
+    t.addEventListener('click', () => {
+      if (c === state.cat) return;
+      const list = window.PIANO_SONGS.filter((x) => !!x.exercise === (c === 'ex'));
+      const last = store.get('song.last.' + c, null);
+      loadSong(list.some((x) => x.id === last) ? last : list[0].id);
+    });
+    tabs.appendChild(t);
+  });
+  const cats = $('cats');
+  cats.textContent = '';
+  cats.appendChild(tabs);
+  window.PIANO_SONGS.filter((x) => !!x.exercise === (state.cat === 'ex')).forEach((s) => {
     const d = songDef(s.id);
     const b = el('button', 'chip' + (s.id === state.songId ? ' on' : ''), d.title);
     b.setAttribute('role', 'tab');
@@ -517,7 +559,7 @@ function renderScore() {
     if (out < bestOut) { bestOut = out; oct = o; }
   });
   phrases.forEach((p, pi) => {
-    const row = el('div', 'row' + (state.song.hasLyrics ? ' has-lyr' : ''));
+    const row = el('div', 'row' + (state.song.def.exercise ? ' ex' : state.song.hasLyrics ? ' has-lyr' : ''));
     row.dataset.phrase = pi;
     const staff = el('div', 'staff');
     [2, 4, 6, 8, 10].forEach((st) => { const ln = el('i'); ln.style.top = yPct(st) + '%'; staff.appendChild(ln); });
@@ -572,7 +614,8 @@ function renderScore() {
         h.style.top = top; h.style.left = x; h.style.background = color(n.midi);
         if (PC_SHARP[n.midi % 12]) h.appendChild(el('span', 'sh', '♯'));
         cell.appendChild(h);
-        const sol = el('div', 'lbl-solfa', PC_NAME[n.midi % 12] + (PC_SHARP[n.midi % 12] ? '♯' : ''));
+        // はっせいは、うたう言葉(移動ド)だけを出す
+        const sol = state.song.def.exercise ? el('div') : el('div', 'lbl-solfa', PC_NAME[n.midi % 12] + (PC_SHARP[n.midi % 12] ? '♯' : ''));
         sol.style.left = x;
         cell.appendChild(sol);
         if (state.song.hasLyrics) {
@@ -816,7 +859,7 @@ function schedule() {
     const t = play.t0 + n.start * play.spb;
     if (t > ahead) break;
     if (n.midi != null) {
-      const h = startNote(n.midi, t, { aligned: true });
+      const h = startNote(n.midi, t, { aligned: true, syl: n.syl });
       const end = t + n.beats * play.spb * 0.94;
       h.release(end);
       play.handles.push({ h, end });
@@ -1120,7 +1163,7 @@ function openEditor() {
   const d = songDef(state.songId);
   $('edTitle').textContent = d.title + ' のへんしゅう';
   $('edName').value = d.title;
-  $('edMelody').value = d.melody.replace(/^\n/, '').split('\n').map((s) => s.trim()).join('\n');
+  $('edMelody').value = (d.melody || '').replace(/^\n/, '').split('\n').map((s) => s.trim()).join('\n');
   $('edLyrics').value = d.lyrics;
   $('optCount').checked = settings.countIn;
   $('optLoop').checked = settings.loop;
@@ -1128,6 +1171,11 @@ function openEditor() {
   $('optAccomp').checked = settings.accomp;
   $('edChords').value = d.chords.replace(/^\n/, '').split('\n').map((x) => x.trim()).join('\n');
   document.querySelector('.ed').classList.toggle('is-custom', d.custom);
+  document.querySelector('.ed').classList.toggle('is-ex', !!d.exercise);
+  if (d.exercise) {
+    fillRootSelect($('edFrom'), d.exercise.from);
+    fillRootSelect($('edTo'), d.exercise.to);
+  }
   updateCount();
   $('editor').showModal();
 }
@@ -1145,9 +1193,28 @@ function updateCount() {
   p.classList.toggle('warn', (lyr > 0 && notes !== lyr) || out > 0);
 }
 
+function fillRootSelect(sel, val) {
+  sel.textContent = '';
+  for (let m = LOW; m <= HIGH; m++) {
+    const o = el('option', '', PC_NAME[m % 12] + (PC_SHARP[m % 12] ? '♯' : '') + (m < 60 ? '↓' : m >= 72 ? '↑' : ''));
+    o.value = m;
+    if (m === val) o.selected = true;
+    sel.appendChild(o);
+  }
+}
+
 function saveEditor() {
   const d = songDef(state.songId);
   const ov = store.get('song.' + d.id, {});
+  if (d.exercise) {
+    ov.from = Number($('edFrom').value);
+    ov.to = Number($('edTo').value);
+    ov.bpm = state.bpm;
+    store.set('song.' + d.id, ov);
+    $('editor').close();
+    loadSong(d.id);
+    return;
+  }
   const mel = $('edMelody').value;
   const baseMel = d.base.melody.replace(/^\n/, '').split('\n').map((s) => s.trim()).join('\n');
   if (mel.trim() && mel !== baseMel) ov.melody = mel; else delete ov.melody;
