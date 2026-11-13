@@ -682,7 +682,9 @@ function renderScore() {
           ev.preventDefault();
           if (state.playing) return;
           const h2 = startNote(n.midi);
-          h2.release(ctx.currentTime + Math.min(1.2, n.beats * 60 / state.bpm));
+          const rel = ctx.currentTime + Math.min(1.2, n.beats * 60 / state.bpm);
+          h2.release(rel);
+          if (state.song.def.exercise && (state.sound === 'piano' || settings.layer)) pianoNote(n.midi + 12, ctx.currentTime + 0.005, state.sound === 'piano' ? 0.6 : 0.3).release(rel);
           if (state.practice) { state.guideIdx = n.idx; updateGuide(); }
           flashKey(fold(n.midi), 300);
         });
@@ -918,6 +920,12 @@ function schedule() {
       const end = t + n.beats * play.spb * 0.94;
       h.release(end);
       play.handles.push({ h, end });
+      // はっせいは、ピアノの音に1オクターブ上もかさねて2音でならす(子どもの声の高さ)
+      if (state.song.def.exercise && (state.sound === 'piano' || settings.layer)) {
+        const o = pianoNote(n.midi + 12, t, state.sound === 'piano' ? 0.6 : 0.3);
+        o.release(end);
+        play.handles.push({ h: o, end });
+      }
     }
     play.next++;
   }
