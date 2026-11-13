@@ -196,19 +196,11 @@ float ambientOcclusion(vec3 p, vec3 normal) {
   return clamp(1.0 - occlusion * 3.4, 0.0, 1.0);
 }
 
-vec2 complexSquare(vec2 z) {
-  return vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y);
-}
-
 vec2 complexPower(vec2 z, float power) {
   float radius = max(length(z), 0.0000000001);
   float angle = atan(z.y, z.x);
   float poweredRadius = pow(radius, power);
   return poweredRadius * vec2(cos(angle * power), sin(angle * power));
-}
-
-vec2 complexMultiply(vec2 a, vec2 b) {
-  return vec2(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x);
 }
 
 vec2 complexDivide(vec2 a, vec2 b) {
@@ -398,13 +390,13 @@ vec3 renderInfiniteKaleidoscope(vec2 coordinate) {
   float glassShift = shardId + 0.17 * sin(6.28318530718 * (phase - fold));
   vec3 glass = glassPalette(glassShift);
   vec3 reflectedGlass = glassPalette(glassShift + 0.38 + facetLight * 0.14);
-  vec3 pane = uPalette == 3
+  vec3 pane = uPalette == 11
     ? mix(glass, reflectedGlass, 0.06 + facetLight * 0.12)
     : mix(glass, reflectedGlass, 0.28 + facetLight * 0.36);
 
   float mirrorSeam = exp(-48.0 * min(fold, 1.0 - fold));
   float jewel = pow(max(0.0, sin(6.28318530718 * phase) * cos(3.14159265359 * fold)), 10.0);
-  vec3 color = pane * (uPalette == 3 ? (0.17 + facetLight * 0.38) : (0.09 + facetLight * 0.24));
+  vec3 color = pane * (uPalette == 11 ? (0.17 + facetLight * 0.38) : (0.09 + facetLight * 0.24));
   color += pane * jewel * 0.62;
   color += mix(pane, vec3(0.82, 0.95, 1.0), 0.68) * lead * 0.42;
   color += vec3(0.72, 0.94, 1.0) * (hairline * 0.42 + mirrorSeam * 0.14);
@@ -664,73 +656,73 @@ void main() {
   });
 
   const modes = [
-    { title: "MANDELBULB", subtitle: "/ DEEP FIELD", dimension: "3D", distance: 3.08, orbit: [-0.48, 0.12], pan: [0, 0], formula: "", explanation: "複素数の累乗を3次元の球面座標へ拡張したもの。各点を反復し、無限へ逃げる速さから表面までの距離を推定します。", note: "POWERを変えると突起の本数と全体の輪郭が変化します。", parameters: [
+    { title: "MANDELBULB", subtitle: "/ DEEP FIELD", dimension: "3D", distance: 3.08, orbit: [-0.48, 0.12], pan: [0, 0], explanation: "複素数の累乗を3次元の球面座標へ拡張したもの。各点を反復し、無限へ逃げる速さから表面までの距離を推定します。", note: "POWERを変えると突起の本数と全体の輪郭が変化します。", parameters: [
       { key: "power", label: "POWER", description: "球面累乗", min: 2, max: 16, step: 0.1, value: 8, digits: 1 }
     ] },
-    { title: "MANDELBOX", subtitle: "/ FOLDED SPACE", dimension: "3D", distance: 8.2, orbit: [-0.62, 0.22], pan: [0, 0], formula: "", explanation: "座標を箱の内側へ折り返し、球で反転してから拡大する操作を反復します。丸い有機物ではなく『折り紙の空間』に近い構造です。", note: "SCALEとINNER FOLDで反転の強さと空洞の密度が変わります。", parameters: [
+    { title: "MANDELBOX", subtitle: "/ FOLDED SPACE", dimension: "3D", distance: 8.2, orbit: [-0.62, 0.22], pan: [0, 0], explanation: "座標を箱の内側へ折り返し、球で反転してから拡大する操作を反復します。丸い有機物ではなく『折り紙の空間』に近い構造です。", note: "SCALEとINNER FOLDで反転の強さと空洞の密度が変わります。", parameters: [
       { key: "scale", label: "SCALE", description: "折り返し後の倍率", min: -2.5, max: -1.1, step: 0.01, value: -1.77, digits: 2 },
       { key: "innerRadius", label: "INNER FOLD", description: "球面反転の内半径", min: 0.2, max: 0.9, step: 0.01, value: 0.5, digits: 2 }
     ] },
-    { title: "MENGER SPONGE", subtitle: "/ VOID CUBE", dimension: "3D", distance: 4.15, orbit: [-0.58, 0.34], pan: [0, 0], formula: "", explanation: "立方体へ中央を貫く空洞を反復的に刻む、建築模型のような幾何学フラクタルです。", note: "CELL SCALEを3から外すと、古典的Menger spongeから崩れた別の空洞構造になります。", parameters: [
+    { title: "MENGER SPONGE", subtitle: "/ VOID CUBE", dimension: "3D", distance: 4.15, orbit: [-0.58, 0.34], pan: [0, 0], explanation: "立方体へ中央を貫く空洞を反復的に刻む、建築模型のような幾何学フラクタルです。", note: "CELL SCALEを3から外すと、古典的Menger spongeから崩れた別の空洞構造になります。", parameters: [
       { key: "cellScale", label: "CELL SCALE", description: "反復セルの倍率", min: 2.2, max: 4.2, step: 0.05, value: 3, digits: 2 }
     ] },
-    { title: "MANDELBROT", subtitle: "/ CLASSIC SET", dimension: "2D", orbit: [0, 0], pan: [-0.52, 0], formula: "", explanation: "画面上の点 c ごとに反復し、値が発散しない点を集合にします。指数を変えると花弁状の対称性が変わります。", note: "cは画面座標なので、位置はドラッグ、スケールはズームで操作します。", parameters: [
+    { title: "MANDELBROT", subtitle: "/ CLASSIC SET", dimension: "2D", orbit: [0, 0], pan: [-0.52, 0], explanation: "画面上の点 c ごとに反復し、値が発散しない点を集合にします。指数を変えると花弁状の対称性が変わります。", note: "cは画面座標なので、位置はドラッグ、スケールはズームで操作します。", parameters: [
       { key: "exponent", label: "EXPONENT", description: "複素累乗の次数", min: 2, max: 8, step: 1, value: 2, digits: 0 }
     ] },
-    { title: "JULIA SET", subtitle: "/ ORBIT SLICE", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "開始点 z₀ を画面上で変え、cを固定します。指数と固定するcの両方で模様が大きく変わります。", note: "cの実部・虚部を動かすと、連結した島から粉状の集合まで遷移します。", parameters: [
+    { title: "JULIA SET", subtitle: "/ ORBIT SLICE", dimension: "2D", orbit: [0, 0], pan: [0, 0], explanation: "開始点 z₀ を画面上で変え、cを固定します。指数と固定するcの両方で模様が大きく変わります。", note: "cの実部・虚部を動かすと、連結した島から粉状の集合まで遷移します。", parameters: [
       { key: "exponent", label: "EXPONENT", description: "複素累乗の次数", min: 2, max: 8, step: 1, value: 2, digits: 0 },
       { key: "cReal", label: "C · REAL", description: "固定するcの実部", min: -1.5, max: 1.5, step: 0.00001, value: -0.74543, digits: 5, signed: true },
       { key: "cImag", label: "C · IMAGINARY", description: "固定するcの虚部", min: -1.5, max: 1.5, step: 0.00001, value: 0.11301, digits: 5, signed: true }
     ] },
-    { title: "BURNING SHIP", subtitle: "/ ABSOLUTE SET", dimension: "2D", orbit: [0, 0], pan: [-0.45, -0.5], formula: "", explanation: "反復前に実部と虚部を絶対値へ折り返します。指数を変えると炎や船の尖り方と対称性が変化します。", note: "このcは画面座標です。固定c版はBURNING JULIAとして別標本にしています。", parameters: [
+    { title: "BURNING SHIP", subtitle: "/ ABSOLUTE SET", dimension: "2D", orbit: [0, 0], pan: [-0.45, -0.5], explanation: "反復前に実部と虚部を絶対値へ折り返します。指数を変えると炎や船の尖り方と対称性が変化します。", note: "このcは画面座標です。固定c版はBURNING JULIAとして別標本にしています。", parameters: [
       { key: "exponent", label: "EXPONENT", description: "折り返し後の累乗", min: 2, max: 8, step: 1, value: 2, digits: 0 }
     ] },
-    { title: "NEWTON FRACTAL", subtitle: "/ ROOT BASINS", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "方程式 zⁿ = 1 をNewton法で解き、各開始点がどの解へ収束するかを色分けします。", note: "DEGREEが解の個数になり、収束領域の枝数も一緒に変わります。", parameters: [
+    { title: "NEWTON FRACTAL", subtitle: "/ ROOT BASINS", dimension: "2D", orbit: [0, 0], pan: [0, 0], explanation: "方程式 zⁿ = 1 をNewton法で解き、各開始点がどの解へ収束するかを色分けします。", note: "DEGREEが解の個数になり、収束領域の枝数も一緒に変わります。", parameters: [
       { key: "degree", label: "DEGREE", description: "方程式の次数", min: 2, max: 8, step: 1, value: 3, digits: 0 }
     ] },
-    { title: "SIERPINSKI CARPET", subtitle: "/ CLEAN GRID", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "正方形を奇数個の格子へ分けて中央を除き、残った領域へ同じ操作を繰り返します。", note: "DIVISIONSを3・5・7・9へ変えると、穴の密度と自己相似の周期が変わります。", parameters: [
+    { title: "SIERPINSKI CARPET", subtitle: "/ CLEAN GRID", dimension: "2D", orbit: [0, 0], pan: [0, 0], explanation: "正方形を奇数個の格子へ分けて中央を除き、残った領域へ同じ操作を繰り返します。", note: "DIVISIONSを3・5・7・9へ変えると、穴の密度と自己相似の周期が変わります。", parameters: [
       { key: "divisions", label: "DIVISIONS", description: "一辺の分割数", min: 3, max: 9, step: 2, value: 3, digits: 0 }
     ] },
-    { title: "KALEIDOSCOPE", subtitle: "/ MIRROR TILES", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "角度を鏡へ折り畳み、その中で反射・移動・拡大を反復する対称フィールドです。", note: "鏡の枚数・反復倍率・折り返し位置をそれぞれ変更できます。", parameters: [
+    { title: "KALEIDOSCOPE", subtitle: "/ MIRROR TILES", dimension: "2D", orbit: [0, 0], pan: [0, 0], explanation: "角度を鏡へ折り畳み、その中で反射・移動・拡大を反復する対称フィールドです。", note: "鏡の枚数・反復倍率・折り返し位置をそれぞれ変更できます。", parameters: [
       { key: "mirrors", label: "MIRRORS", description: "放射対称の枚数", min: 3, max: 24, step: 1, value: 12, digits: 0 },
       { key: "foldScale", label: "FOLD SCALE", description: "反復ごとの倍率", min: 1.1, max: 2.2, step: 0.01, value: 1.65, digits: 2 },
       { key: "offset", label: "OFFSET", description: "鏡像の折り返し位置", min: 0.1, max: 0.65, step: 0.005, value: 0.37, digits: 3 }
     ] },
-    { title: "PHYLLOTAXIS", subtitle: "/ GOLDEN SEEDS", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "一定角度で回りながら半径をnの累乗に比例させて種を置く、植物に見られる充填パターンです。", note: "黄金角137.51°から少し外すだけでも、別の螺旋列が急に現れます。", parameters: [
+    { title: "PHYLLOTAXIS", subtitle: "/ GOLDEN SEEDS", dimension: "2D", orbit: [0, 0], pan: [0, 0], explanation: "一定角度で回りながら半径をnの累乗に比例させて種を置く、植物に見られる充填パターンです。", note: "黄金角137.51°から少し外すだけでも、別の螺旋列が急に現れます。", parameters: [
       { key: "angle", label: "DIVERGENCE", description: "種ごとの回転角", min: 120, max: 160, step: 0.01, value: 137.50776, digits: 2, suffix: "°" },
       { key: "radialPower", label: "RADIAL POWER", description: "半径 r ∝ nᵖ", min: 0.35, max: 0.75, step: 0.005, value: 0.5, digits: 3 }
     ] },
-    { title: "TRUCHET TILES", subtitle: "/ QUIET MAZE", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "各マスの向きを擬似乱数で決め、隣接する円弧をつないで迷路を作ります。", note: "SEEDで経路そのもの、LAYER RATIOで細い迷路の重なり方が変わります。", parameters: [
+    { title: "TRUCHET TILES", subtitle: "/ QUIET MAZE", dimension: "2D", orbit: [0, 0], pan: [0, 0], explanation: "各マスの向きを擬似乱数で決め、隣接する円弧をつないで迷路を作ります。", note: "SEEDで経路そのもの、LAYER RATIOで細い迷路の重なり方が変わります。", parameters: [
       { key: "seed", label: "SEED", description: "タイル配置の種", min: 0, max: 100, step: 0.1, value: 0, digits: 1 },
       { key: "layerRatio", label: "LAYER RATIO", description: "細密層との倍率比", min: 2, max: 5, step: 0.05, value: 3, digits: 2 }
     ] },
-    { title: "HARMONIC FIELD", subtitle: "/ WAVE NODES", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "方向と周期の違う正弦波を重ね、同じ値になる等高線を光らせています。", note: "WARPは波の曲がり、CROSS MIXは交差する波の寄与を変えます。", parameters: [
+    { title: "HARMONIC FIELD", subtitle: "/ WAVE NODES", dimension: "2D", orbit: [0, 0], pan: [0, 0], explanation: "方向と周期の違う正弦波を重ね、同じ値になる等高線を光らせています。", note: "WARPは波の曲がり、CROSS MIXは交差する波の寄与を変えます。", parameters: [
       { key: "warp", label: "WARP", description: "波面の曲がり", min: 0, max: 1.5, step: 0.01, value: 0.65, digits: 2 },
       { key: "crossMix", label: "CROSS MIX", description: "交差波の混合率", min: 0, max: 1.5, step: 0.01, value: 0.82, digits: 2 }
     ] },
-    { title: "BURNING JULIA", subtitle: "/ FIXED FLAME", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "Burning Shipの絶対値折り返しを使いながら、cを固定して開始点 z₀ を画面上で変えるJulia型の集合です。", note: "固定cを動かすと、羽根・炎・結晶のような構造へ大きく変形します。", parameters: [
+    { title: "BURNING JULIA", subtitle: "/ FIXED FLAME", dimension: "2D", orbit: [0, 0], pan: [0, 0], explanation: "Burning Shipの絶対値折り返しを使いながら、cを固定して開始点 z₀ を画面上で変えるJulia型の集合です。", note: "固定cを動かすと、羽根・炎・結晶のような構造へ大きく変形します。", parameters: [
       { key: "exponent", label: "EXPONENT", description: "折り返し後の累乗", min: 2, max: 8, step: 1, value: 2, digits: 0 },
       { key: "cReal", label: "C · REAL", description: "固定するcの実部", min: -1.5, max: 1.5, step: 0.00001, value: -0.4, digits: 5, signed: true },
       { key: "cImag", label: "C · IMAGINARY", description: "固定するcの虚部", min: -1.5, max: 1.5, step: 0.00001, value: -0.59, digits: 5, signed: true }
     ] },
-    { title: "INFINITE KALEIDOSCOPE", subtitle: "/ STAINED MIRRORS", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "中心の特異点から色ガラスを鏡映する無限ズーム万華鏡です。CENTERSを増やすと、周囲の各ズーム階層にも潜り込める特異点を追加できます。", note: "初期値は中央1点。CENTERSとSPREADで追加特異点を配置でき、RAINBOWでは面ごとの多色ガラスへ切り替わります。", parameters: [
+    { title: "INFINITE KALEIDOSCOPE", subtitle: "/ STAINED MIRRORS", dimension: "2D", orbit: [0, 0], pan: [0, 0], explanation: "中心の特異点から色ガラスを鏡映する無限ズーム万華鏡です。CENTERSを増やすと、周囲の各ズーム階層にも潜り込める特異点を追加できます。", note: "初期値は中央1点。CENTERSとSPREADで追加特異点を配置でき、SPECTRUMの虹色(Spectrum)では面ごとの多色ガラスへ切り替わります。", parameters: [
       { key: "mirrors", label: "MIRRORS", description: "放射対称の枚数", min: 4, max: 32, step: 1, value: 12, digits: 0 },
       { key: "zoomPeriod", label: "ZOOM PERIOD", description: "ガラス模様が戻る倍率", min: 1.35, max: 5, step: 0.05, value: 2.6, digits: 2, suffix: "×" },
       { key: "twist", label: "TWIST", description: "階層ごとの回転", min: -3, max: 3, step: 0.05, value: 0.05, digits: 2, signed: true },
       { key: "centers", label: "CENTERS", description: "各階層の追加特異点", min: 0, max: 12, step: 1, value: 0, digits: 0 },
       { key: "spread", label: "SPREAD", description: "特異点の広がり", min: 0.2, max: 1.4, step: 0.02, value: 0.72, digits: 2 }
     ] },
-    { title: "INFINITE CRYSTAL", subtitle: "/ PRISM TUNNEL", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "対数半径と鏡映角を斜めに交差させ、拡大しても終わらない結晶格子を作ります。線の交点が次々に奥へ続く回廊になります。", note: "SIDESで結晶の面数、ZOOM PERIODで階層間隔、SHEARで回廊の傾きを調整できます。", parameters: [
+    { title: "INFINITE CRYSTAL", subtitle: "/ PRISM TUNNEL", dimension: "2D", orbit: [0, 0], pan: [0, 0], explanation: "対数半径と鏡映角を斜めに交差させ、拡大しても終わらない結晶格子を作ります。線の交点が次々に奥へ続く回廊になります。", note: "SIDESで結晶の面数、ZOOM PERIODで階層間隔、SHEARで回廊の傾きを調整できます。", parameters: [
       { key: "sides", label: "SIDES", description: "結晶の面数", min: 3, max: 24, step: 1, value: 8, digits: 0 },
       { key: "zoomPeriod", label: "ZOOM PERIOD", description: "格子が戻る倍率", min: 1.35, max: 5, step: 0.05, value: 2.35, digits: 2, suffix: "×" },
       { key: "shear", label: "SHEAR", description: "階層のねじれ", min: -2.5, max: 2.5, step: 0.05, value: 0.35, digits: 2, signed: true }
     ] },
-    { title: "INFINITE SPIRAL", subtitle: "/ ENDLESS CHAMBER", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "角度と対数半径を結び、逆向きの螺旋を重ねたスケール周期パターンです。ズームすると螺旋が回転しながら同じ構造へ戻ります。", note: "ARMSで腕の本数、ZOOM PERIODで反復倍率、SPIRALで巻きの強さを変えられます。", parameters: [
+    { title: "INFINITE SPIRAL", subtitle: "/ ENDLESS CHAMBER", dimension: "2D", orbit: [0, 0], pan: [0, 0], explanation: "角度と対数半径を結び、逆向きの螺旋を重ねたスケール周期パターンです。ズームすると螺旋が回転しながら同じ構造へ戻ります。", note: "ARMSで腕の本数、ZOOM PERIODで反復倍率、SPIRALで巻きの強さを変えられます。", parameters: [
       { key: "arms", label: "ARMS", description: "螺旋の本数", min: 3, max: 24, step: 1, value: 10, digits: 0 },
       { key: "zoomPeriod", label: "ZOOM PERIOD", description: "模様が戻る倍率", min: 1.35, max: 5, step: 0.05, value: 2, digits: 2, suffix: "×" },
       { key: "spiral", label: "SPIRAL", description: "巻きの強さ", min: 0.25, max: 3, step: 0.05, value: 1.15, digits: 2 }
     ] },
-    { title: "APOLLONIAN GASKET", subtitle: "/ TOUCHING CIRCLES", dimension: "2D", orbit: [0, 0], pan: [0, 0], formula: "", explanation: "格子へ折り返してから円で反転する操作を反復し、互いに接する円で平面を埋め尽くします。隙間には必ずより小さい円が入るため、ズームしても充填が終わりません。", note: "CURVATUREで円の大きさの配分、ASPECTで格子の縦横比が変わります。比率を変えると接する円の並びが組み替わります。", parameters: [
+    { title: "APOLLONIAN GASKET", subtitle: "/ TOUCHING CIRCLES", dimension: "2D", orbit: [0, 0], pan: [0, 0], explanation: "格子へ折り返してから円で反転する操作を反復し、互いに接する円で平面を埋め尽くします。隙間には必ずより小さい円が入るため、ズームしても充填が終わりません。", note: "CURVATUREで円の大きさの配分、ASPECTで格子の縦横比が変わります。比率を変えると接する円の並びが組み替わります。", parameters: [
       { key: "curvature", label: "CURVATURE", description: "円反転の強さ", min: 0.7, max: 1.6, step: 0.005, value: 1.09, digits: 3 },
       { key: "aspect", label: "ASPECT", description: "格子の縦横比", min: 0.45, max: 2.2, step: 0.01, value: 1, digits: 2 },
       { key: "shell", label: "SHELL", description: "強調する円の半径", min: 0.2, max: 1.4, step: 0.01, value: 0.72, digits: 2 }
@@ -751,6 +743,7 @@ void main() {
     panY: defaultMode.pan[1],
     distance: defaultMode.distance,
     zoom: 1,
+    shaderZoom: 1,
     logZoom: 0,
     targetLogZoom: 0,
     iterations: 12,
@@ -779,12 +772,17 @@ void main() {
 
   // 13〜15 は周期で巻き戻す無限ズーム。16(APOLLONIAN)の 2 番目のパラメータは周期ではない
   const isInfiniteZoom = mode => mode >= 13 && mode <= 15;
+  // renderPlane の planeScale と同じ値。ドラッグ量を絵の動きに合わせる
+  const planeScaleOf = mode => ({ 6: 1.42, 7: 1.15, 8: 1.75, 9: 1.55, 10: 1.35, 11: 1.65, 16: 1.05 })[mode] ?? (isInfiniteZoom(mode) ? 1.75 : 1.72);
+  // 自動回転・自動ズームが無いモード(2D の 3〜12 と 16)では再生ボタンを使えなくする
+  const hasMotion = mode => modes[mode].dimension === "3D" || isInfiniteZoom(mode);
 
   function setMotion(active) {
     state.motion = active;
     $("#motion").textContent = active ? "Ⅱ" : "▶";
     const action = isInfiniteZoom(state.mode) ? "自動ズーム" : "自動回転";
     $("#motion").ariaLabel = active ? action + "を一時停止" : action + "を再開";
+    $("#motion").disabled = !hasMotion(state.mode);
   }
 
   function formatParameter(parameter, value) {
@@ -874,7 +872,7 @@ void main() {
     state.targetLogZoom = 0;
     state.logZoom = 0;
     state.zoom = 1;
-    setMotion(mode.dimension === "3D" || isInfiniteZoom(index));
+    setMotion(hasMotion(index));
 
     $("#fractalTitle").textContent = mode.title;
     $("#fractalSubtitle").textContent = mode.subtitle;
@@ -908,24 +906,24 @@ void main() {
   function formatZoom() {
     if (state.zoom > 0 && state.zoom < 0.0001) {
       const scientific = state.zoom.toExponential(2).replace("e+", "e");
-      return { compact: "×" + scientific, rich: "×" + scientific };
+      return "×" + scientific;
     }
     if (state.zoom < 1000) {
       const digits = state.zoom < 0.01 ? 4 : state.zoom < 0.1 ? 3 : state.zoom < 10 ? 2 : state.zoom < 100 ? 1 : 0;
       const plain = state.zoom.toFixed(digits);
-      return { compact: "×" + plain, rich: "×" + plain };
+      return "×" + plain;
     }
     if (state.zoom >= 1e15) {
       const scientific = state.zoom.toExponential(2).replace("e+", "e");
-      return { compact: "×" + scientific, rich: "×" + scientific };
+      return "×" + scientific;
     }
     const grouped = Math.round(state.zoom).toLocaleString("en-US");
-    return { compact: "×" + grouped, rich: "×" + grouped };
+    return "×" + grouped;
   }
   function updateReadouts() {
     const zoomText = formatZoom();
-    $("#distOut").textContent = zoomText.compact;
-    $("#zoomBadge").innerHTML = zoomText.rich;
+    $("#distOut").textContent = zoomText;
+    $("#zoomBadge").textContent = zoomText;
     const primaryParameter = modes[state.mode].parameters[0];
     $("#shapeLabel").textContent = primaryParameter.label;
     $("#powerOut").textContent = formatParameter(primaryParameter, parameterValues[state.mode][primaryParameter.key]);
@@ -1019,6 +1017,7 @@ void main() {
       zoomCycle = Math.floor(state.logZoom / periodLog);
       shaderZoom = Math.exp(state.logZoom - zoomCycle * periodLog);
     }
+    state.shaderZoom = shaderZoom;
     gl.uniform4f(uniforms.uShapeParams, shapeValues[0] || 0, shapeValues[1] || 0, shapeValues[2] || 0, zoomCycle);
     gl.uniform2f(uniforms.uExtraParams, shapeValues[3] || 0, shapeValues[4] || 0);
     gl.uniform1f(uniforms.uExposure, state.exposure);
@@ -1078,7 +1077,7 @@ void main() {
         state.targetOrbitX += deltaX * sensitivity;
         state.targetOrbitY = clamp(state.targetOrbitY + deltaY * sensitivity, -1.35, 1.35);
       } else {
-        const scale = 3.44 / (Math.min(canvas.clientWidth, canvas.clientHeight) * state.zoom);
+        const scale = 2 * planeScaleOf(state.mode) / (Math.min(canvas.clientWidth, canvas.clientHeight) * state.shaderZoom);
         state.panX -= deltaX * scale;
         state.panY += deltaY * scale;
       }

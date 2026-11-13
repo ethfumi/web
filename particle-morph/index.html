@@ -791,6 +791,7 @@ void main() {
   $('reset').addEventListener('click', () => {
     SLIDERS.forEach((def) => setSlider(def, def.value));
     Object.assign(st, VIEW);
+    pitchBeforeMandel = null;
     st.mCenter = [...MANDEL.center];
     st.mScale = MANDEL.scale;
     setAuto(true);
@@ -896,6 +897,8 @@ void main() {
 
   const t0 = performance.now();
   let last = t0, fpsFrames = 0, fpsSince = t0;
+  // Mandelbrot の間だけ見下ろしにし、抜けたら入る前の傾きへ戻す(指で傾けたら戻さない)
+  let pitchBeforeMandel = null;
 
   const frame = (now) => {
     const dt = Math.min((now - last) / 1000, 0.05);
@@ -906,10 +909,20 @@ void main() {
     if (mandelActive()) {
       // 真上から少し傾けて見下ろし、画面の左右と複素平面の実軸を合わせる
       const k = 1 - Math.exp(-dt * 3);
+      if (pitchBeforeMandel === null) pitchBeforeMandel = st.pitch;
       st.yaw = ((st.yaw + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
       st.yaw -= st.yaw * k;
       st.pitch += (1.15 - st.pitch) * k;
-    } else if (st.playing && !pointers.size) st.yaw += dt * 0.22 * st.spin;
+    } else {
+      if (pitchBeforeMandel !== null) {
+        if (pointers.size) pitchBeforeMandel = null;
+        else {
+          st.pitch += (pitchBeforeMandel - st.pitch) * (1 - Math.exp(-dt * 3));
+          if (Math.abs(pitchBeforeMandel - st.pitch) < 1e-3) pitchBeforeMandel = null;
+        }
+      }
+      if (st.playing && !pointers.size) st.yaw += dt * 0.22 * st.spin;
+    }
     $('zoom').hidden = !mandelActive();
     if (mandelActive()) $('zoomOut').textContent = '×' + (MANDEL.scale / st.mScale).toFixed(MANDEL.scale / st.mScale < 10 ? 1 : 0);
     pointer.strength += ((pointer.on ? 1 : 0) - pointer.strength) * (1 - Math.exp(-dt * 8));
