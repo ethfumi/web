@@ -41,16 +41,22 @@ function parseMelody(text) {
     }
     if (ch === '(') { group = []; i++; continue; }
     if (ch === ')') {
+      i++;
+      // かっこのうしろの ー で、かっこ全体を長くする: (ミーーレ)ー ＝2拍を ミ1.5拍・レ0.5拍
+      let span = 1;
+      while (i < src.length && 'ー-〜~'.includes(src[i])) { span++; i++; }
       if (group && group.length) {
-        group.forEach((n) => { n.beats = 1 / group.length; cur().push(n); });
+        const total = group.reduce((a, n) => a + n.w, 0);
+        group.forEach((n) => { n.beats = (n.w / total) * span; delete n.w; cur().push(n); });
       }
-      group = null; i++; continue;
+      group = null; continue;
     }
     let ev = null;
     const hit = NOTE.find(([s]) => src.startsWith(s, i));
     if (hit) { ev = { midi: 60 + hit[1], beats: 1 }; i += hit[0].length; }
     else if (ch === 'ウ' || ch === 'う' || ch === '・') { ev = { midi: null, beats: 1 }; i++; }
     else { i++; continue; }
+    if (group) ev.w = 1;
     // うしろの記号
     while (i < src.length) {
       const c = src[i];
@@ -58,7 +64,7 @@ function parseMelody(text) {
       else if (c === 'b') { if (ev.midi != null) ev.midi -= 1; }
       else if (c === '↑' || c === "'") { if (ev.midi != null) ev.midi += 12; }
       else if (c === '↓' || c === ',') { if (ev.midi != null) ev.midi -= 12; }
-      else if (c === 'ー' || c === '-' || c === '〜' || c === '~') { if (!group) ev.beats += 1; }
+      else if (c === 'ー' || c === '-' || c === '〜' || c === '~') { if (group) ev.w += 1; else ev.beats += 1; }
       else break;
       i++;
     }
@@ -569,7 +575,7 @@ function renderScore() {
   const steps = state.song.flat.filter((n) => n.midi != null).map((n) => stepOf(n.midi));
   let oct = 0, bestOut = Infinity;
   [0, 7, -7, 14, -14].forEach((o) => {
-    const out = steps.filter((st) => st - o < -2 || st - o > 12).length;
+    const out = steps.filter((st) => st - o < -3 || st - o > 12).length; // ソ↓(-3)までは加線で書ける
     if (out < bestOut) { bestOut = out; oct = o; }
   });
   phrases.forEach((p, pi) => {
