@@ -777,10 +777,13 @@ void main() {
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
   const damp = (from, to, factor, delta) => from + (to - from) * (1 - Math.exp(-factor * delta));
 
+  // 13〜15 は周期で巻き戻す無限ズーム。16(APOLLONIAN)の 2 番目のパラメータは周期ではない
+  const isInfiniteZoom = mode => mode >= 13 && mode <= 15;
+
   function setMotion(active) {
     state.motion = active;
     $("#motion").textContent = active ? "Ⅱ" : "▶";
-    const action = state.mode >= 13 ? "自動ズーム" : "自動回転";
+    const action = isInfiniteZoom(state.mode) ? "自動ズーム" : "自動回転";
     $("#motion").ariaLabel = active ? action + "を一時停止" : action + "を再開";
   }
 
@@ -871,7 +874,7 @@ void main() {
     state.targetLogZoom = 0;
     state.logZoom = 0;
     state.zoom = 1;
-    setMotion(mode.dimension === "3D" || index >= 13);
+    setMotion(mode.dimension === "3D" || isInfiniteZoom(index));
 
     $("#fractalTitle").textContent = mode.title;
     $("#fractalSubtitle").textContent = mode.subtitle;
@@ -995,7 +998,7 @@ void main() {
 
     if (state.motion && state.mode < 3) {
       state.targetOrbitX += state.speed * delta * 0.18;
-    } else if (state.motion && state.mode >= 13) {
+    } else if (state.motion && isInfiniteZoom(state.mode)) {
       state.targetLogZoom += state.speed * delta * 0.7;
     }
     state.orbitX = damp(state.orbitX, state.targetOrbitX, 9.5, delta);
@@ -1011,7 +1014,7 @@ void main() {
     const shapeValues = modes[state.mode].parameters.map(parameter => parameterValues[state.mode][parameter.key]);
     let shaderZoom = state.zoom;
     let zoomCycle = 0;
-    if (state.mode >= 13) {
+    if (isInfiniteZoom(state.mode)) {
       const periodLog = Math.log(shapeValues[1]);
       zoomCycle = Math.floor(state.logZoom / periodLog);
       shaderZoom = Math.exp(state.logZoom - zoomCycle * periodLog);
