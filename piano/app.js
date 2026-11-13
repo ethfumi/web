@@ -41,16 +41,22 @@ function parseMelody(text) {
     }
     if (ch === '(') { group = []; i++; continue; }
     if (ch === ')') {
+      i++;
+      // かっこのうしろの ー で、かっこ全体を長くする: (ミーーレ)ー ＝2拍を ミ1.5拍・レ0.5拍
+      let span = 1;
+      while (i < src.length && 'ー-〜~'.includes(src[i])) { span++; i++; }
       if (group && group.length) {
-        group.forEach((n) => { n.beats = 1 / group.length; cur().push(n); });
+        const total = group.reduce((a, n) => a + n.w, 0);
+        group.forEach((n) => { n.beats = (n.w / total) * span; delete n.w; cur().push(n); });
       }
-      group = null; i++; continue;
+      group = null; continue;
     }
     let ev = null;
     const hit = NOTE.find(([s]) => src.startsWith(s, i));
     if (hit) { ev = { midi: 60 + hit[1], beats: 1 }; i += hit[0].length; }
     else if (ch === 'ウ' || ch === 'う' || ch === '・') { ev = { midi: null, beats: 1 }; i++; }
     else { i++; continue; }
+    if (group) ev.w = 1;
     // うしろの記号
     while (i < src.length) {
       const c = src[i];
@@ -58,7 +64,7 @@ function parseMelody(text) {
       else if (c === 'b') { if (ev.midi != null) ev.midi -= 1; }
       else if (c === '↑' || c === "'") { if (ev.midi != null) ev.midi += 12; }
       else if (c === '↓' || c === ',') { if (ev.midi != null) ev.midi -= 12; }
-      else if (c === 'ー' || c === '-' || c === '〜' || c === '~') { if (!group) ev.beats += 1; }
+      else if (c === 'ー' || c === '-' || c === '〜' || c === '~') { if (group) ev.w += 1; else ev.beats += 1; }
       else break;
       i++;
     }
@@ -255,9 +261,9 @@ const SYLLABLE = {
   7: { c: 's', v: 'o', lv: 1.45 }, 9: { c: 'r', v: 'a', lv: 1.35 }, 11: { c: 'sh', v: 'i', lv: 1.6 },
 };
 // 子音が母音より前に出る長さ(自動演奏では拍に母音が合うよう先に出す)
-const CONS_LEAD = { '': 0.01, d: 0.02, r: 0.025, m: 0.07, f: 0.08, s: 0.1, sh: 0.11 };
-// はっせいの読み(「ま」「あ」)。ドレミのときは音の高さから読む
-const SYL_TEXT = { 'ま': { c: 'm', v: 'a', lv: 1.3 }, 'あ': { c: '', v: 'a', lv: 1.35 } };
+const CONS_LEAD = { '': 0.01, d: 0.02, r: 0.025, m: 0.07, f: 0.08, s: 0.1, sh: 0.11, h: 0.07 };
+// はっせいの読み(「ま」「あ」「は」「め」)。ドレミのときは音の高さから読む
+const SYL_TEXT = { 'ま': { c: 'm', v: 'a', lv: 1.3 }, 'あ': { c: '', v: 'a', lv: 1.35 }, 'は': { c: 'h', v: 'a', lv: 1.3 }, 'め': { c: 'm', v: 'e', lv: 1.4 } };
 const syllableOf = (x) => (typeof x === 'string' ? SYL_TEXT[x] : SYLLABLE[x % 12] || SYLLABLE[(x - 1) % 12]);
 
 function voiceNote(midi, t, gainScale = 1, sylPc = null) {
@@ -339,6 +345,13 @@ function voiceNote(midi, t, gainScale = 1, sylPc = null) {
       hiss('bandpass', 1600, 0.7, 0.16, t, tv + 0.02);
       vg.gain.setValueAtTime(0, tv - 0.015);
       vg.gain.linearRampToValueAtTime(PEAK, tv + 0.04);
+      break;
+    case 'h':
+      // いきの音(母音の形のまま、ノイズだけ先に出す)
+      setFormants(V, t);
+      hiss('bandpass', 1300, 0.5, 0.2, t, tv + 0.015);
+      vg.gain.setValueAtTime(0, tv - 0.01);
+      vg.gain.linearRampToValueAtTime(PEAK, tv + 0.03);
       break;
     case 's':
       setFormants(V, t);
@@ -435,7 +448,11 @@ function songDef(id) {
     bpm: ov.bpm || base.bpm,
     key: ov.key || 0,
     chords: ov.chords != null ? ov.chords : (base.chords || ''),
-    exercise: base.exercise ? { ...base.exercise, from: ov.from || base.exercise.from, to: ov.to || base.exercise.to, syl: ov.syl || base.exercise.syl || 'ドレミ' } : null,
+    exercise: base.exercise ? {
+      ...base.exercise, from: ov.from || base.exercise.from, to: ov.to || base.exercise.to,
+      syl: (ov.syl === 'ことば' && !base.exercise.words ? null : ov.syl) || base.exercise.syl || (base.exercise.words ? 'ことば' : 'ドレミ'),
+      dir: ov.dir || base.exercise.dir || 'updown',
+    } : null,
     base,
   };
 }
@@ -451,11 +468,13 @@ function loadSong(id) {
   store.set('song.last.' + state.cat, def.id);
   let phrases, exChords = null;
   if (ex) {
-    // のぼって、おりる
+    // のぼって、おりる(dir: 'up' なら のぼるだけ)
     const roots = [];
     const lo = Math.min(ex.from, ex.to), hi = Math.max(ex.from, ex.to);
     for (let r = lo; r <= hi; r++) roots.push(r);
-    for (let r = hi - 1; r >= lo; r--) roots.push(r);
+    if (ex.dir !== 'up') for (let r = hi - 1; r >= lo; r--) roots.push(r);
+    // きまった言葉(「はっ はっ はー」など)。1つ＝1音、最初の字の声でうたう
+    const words = String(ex.words || '').split(/\s+/).filter(Boolean);
     const base = parseChords(ex.chords);
     exChords = [];
     phrases = roots.map((r) => {
@@ -464,10 +483,15 @@ function loadSong(id) {
       exChords.push({ cue: true, cueMidi: r, beats: CUE_BEATS });
       const cueNote = { midi: null, beats: CUE_BEATS, cue: true, cueMidi: r };
       base.forEach((c) => exChords.push({ ...c, root: (c.root + sh + 120) % 12, tones: c.tones.map((pc) => (pc + sh + 120) % 12) }));
+      let wi = 0;
       return [cueNote, ...parseMelody(ex.pattern).flat().map((n) => {
         if (n.midi == null) return n;
         const solfa = PC_NAME[((n.midi % 12) + 12) % 12];
-        const yomi = ex.syl === 'ドレミ' ? null : ex.syl;
+        if (ex.syl === 'ことば' && words.length) {
+          const w = words[wi++ % words.length];
+          return { ...n, syl: SYL_TEXT[w[0]] ? w[0] : n.midi, lyric: w, midi: n.midi + sh };
+        }
+        const yomi = ex.syl === 'ドレミ' || ex.syl === 'ことば' ? null : ex.syl;
         return { ...n, syl: yomi || n.midi, lyric: yomi || solfa, midi: n.midi + sh };
       })];
     });
@@ -569,7 +593,7 @@ function renderScore() {
   const steps = state.song.flat.filter((n) => n.midi != null).map((n) => stepOf(n.midi));
   let oct = 0, bestOut = Infinity;
   [0, 7, -7, 14, -14].forEach((o) => {
-    const out = steps.filter((st) => st - o < -2 || st - o > 12).length;
+    const out = steps.filter((st) => st - o < -3 || st - o > 12).length; // ソ↓(-3)までは加線で書ける
     if (out < bestOut) { bestOut = out; oct = o; }
   });
   phrases.forEach((p, pi) => {
@@ -658,7 +682,9 @@ function renderScore() {
           ev.preventDefault();
           if (state.playing) return;
           const h2 = startNote(n.midi);
-          h2.release(ctx.currentTime + Math.min(1.2, n.beats * 60 / state.bpm));
+          const rel = ctx.currentTime + Math.min(1.2, n.beats * 60 / state.bpm);
+          h2.release(rel);
+          if (state.song.def.exercise && (state.sound === 'piano' || settings.layer)) pianoNote(n.midi + 12, ctx.currentTime + 0.005, state.sound === 'piano' ? 0.6 : 0.3).release(rel);
           if (state.practice) { state.guideIdx = n.idx; updateGuide(); }
           flashKey(fold(n.midi), 300);
         });
@@ -894,6 +920,12 @@ function schedule() {
       const end = t + n.beats * play.spb * 0.94;
       h.release(end);
       play.handles.push({ h, end });
+      // はっせいは、ピアノの音に1オクターブ上もかさねて2音でならす(子どもの声の高さ)
+      if (state.song.def.exercise && (state.sound === 'piano' || settings.layer)) {
+        const o = pianoNote(n.midi + 12, t, state.sound === 'piano' ? 0.6 : 0.3);
+        o.release(end);
+        play.handles.push({ h: o, end });
+      }
     }
     play.next++;
   }
@@ -1208,7 +1240,12 @@ function openEditor() {
   if (d.exercise) {
     fillRootSelect($('edFrom'), d.exercise.from);
     fillRootSelect($('edTo'), d.exercise.to);
+    // 「ことば」は、きまった言葉のあるはっせいだけ(iPhone の select は option の hidden がきかないので出し入れする)
+    const wOpt = $('edSyl').querySelector('[value="ことば"]');
+    if (wOpt) wOpt.remove();
+    if (d.exercise.words) $('edSyl').appendChild(Object.assign(el('option', '', d.exercise.words.replace(/\s+/g, '')), { value: 'ことば' }));
     $('edSyl').value = d.exercise.syl;
+    $('edDir').value = d.exercise.dir;
   }
   updateCount();
   $('editor').showModal();
@@ -1244,6 +1281,7 @@ function saveEditor() {
     ov.from = Number($('edFrom').value);
     ov.to = Number($('edTo').value);
     ov.syl = $('edSyl').value;
+    ov.dir = $('edDir').value;
     ov.bpm = state.bpm;
     store.set('song.' + d.id, ov);
     $('editor').close();
