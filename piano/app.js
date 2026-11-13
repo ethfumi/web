@@ -464,7 +464,6 @@ function loadSong(id) {
   store.set('song', def.id);
   const ex = def.exercise;
   state.cat = ex ? 'ex' : 'song';
-  store.set('cat', state.cat);
   store.set('song.last.' + state.cat, def.id);
   let phrases, exChords = null;
   if (ex) {
@@ -498,7 +497,6 @@ function loadSong(id) {
   } else {
     phrases = parseMelody(def.melody);
   }
-  const mids = phrases.flat().filter((n) => n.midi != null).map((n) => n.midi);
   // 転調は上下1オクターブまで。けんばんからはみ出た音は、同じ音名の鍵を光らせる
   const keyMin = -12, keyMax = 12;
   const key = Math.max(keyMin, Math.min(keyMax, def.key));
@@ -718,7 +716,7 @@ function markNow(idx) {
     if (cell) cell.classList.add('now');
     curCell = cell;
   }
-  const row = cell ? cell.parentElement : null;
+  const row = cell ? cell.closest('.row') : null;
   if (curRow !== row) {
     if (curRow) curRow.classList.remove('now');
     if (row) { row.classList.add('now'); scrollRowIntoView(row); }
@@ -975,7 +973,7 @@ function draw() {
       if (beat >= n.start && beat < n.start + n.beats) { cur = n; break; }
     }
   }
-  markNow(cur && cur.midi != null ? cur.idx : (cur ? cur.idx : null));
+  markNow(cur ? cur.idx : null);
   const midi = cur && cur.midi != null && beat < cur.start + cur.beats * 0.94 ? fold(cur.midi) : null;
   if (midi !== litKey) {
     if (litKey != null) keyEls.get(litKey) && keyEls.get(litKey).classList.remove('on');
