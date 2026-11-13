@@ -361,6 +361,8 @@ void main() {
   }
 
   function setRotating(on) {
+    // 編集は慣性系の座標で星をつまむので、編集中は回転座標にしない。
+    if (state.edit) on = false;
     state.rotating = on;
     // 切り替えた瞬間の向きを基準にするので、表示は飛ばない。
     state.frameZero = pairAngle(state.sys);
@@ -481,7 +483,7 @@ void main() {
     for (const i of follow) {
       reach = Math.max(reach, Math.abs(viewPos[2 * i] - tx), Math.abs(viewPos[2 * i + 1] - ty));
     }
-    const half = Math.max(follow.length === 3 ? sc.view : sc.view * 0.5, 1.15 * reach);
+    const half = Math.max(follow.length === sys.n ? sc.view : sc.view * 0.5, 1.15 * reach);
     const target = fitPx(half);
     const snap = snapCamera;
     snapCamera = false;
