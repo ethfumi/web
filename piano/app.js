@@ -1190,7 +1190,7 @@ function setRecUI(on) {
   b.querySelector('.lbl').textContent = on ? 'とめる' : 'ろくおん';
   ['play', 'slower', 'faster', 'edit'].forEach((id) => { $(id).disabled = on; });
   renderKey();
-  document.querySelectorAll('.chip').forEach((c) => { c.disabled = on; });
+  document.querySelectorAll('.chip, #cats button').forEach((c) => { c.disabled = on; });
   document.body.classList.toggle('recording', on);
   renderTake();
 }
@@ -1302,7 +1302,7 @@ function saveEditor() {
 
 function resetEditor() {
   const d = songDef(state.songId);
-  if (!confirm(`「${d.title}」のメロディ・かし・はやさを、さいしょの状態にもどしますか？`)) return;
+  if (!confirm(`「${d.title}」でへんしゅう・せっていした内容(メロディ・かし・コード・はやさ・キーなど)を、ぜんぶさいしょの状態にもどしますか？`)) return;
   store.del('song.' + d.id);
   $('editor').close();
   loadSong(d.id);
