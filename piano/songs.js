@@ -151,6 +151,8 @@ window.PIANO_SONGS = [
   // ---- はっせい(発声練習) ----
   // exercise: pattern を1回ずつ半音あげて from→to までのぼり、またおりてくる。
   //   from / to は pattern の「ド」をどの高さにするか(ド=60, レ=62 …)。
+  //   words: きまった言葉(1音ずつ、スペースで区切る)。よみの「ことば」でこれをうたう。
+  //   dir: 'up' なら のぼるだけで おりてこない。
   //   うたう言葉は「ドレミ」を、その回の高さに合わせて読みかえる(移動ド)。へんしゅうで「ま」「あ」にもできる。
   //   毎回、歌いだす前に次の高さの和音を2分音符でならす。さいごの音も2分音符にして、
   //   「ドレミレ ド(2分) 和音(2分)」とすきまなく続ける。
@@ -189,5 +191,21 @@ window.PIANO_SONGS = [
   {
     id: 'ex-scale', title: 'ドレミファソラシド', bpm: 108,
     exercise: { pattern: 'ドレミファ ソラシド↑ シラソファ ミレドー', chords: 'C:6 G7:8 C:2', from: 60, to: 62 },
+  },
+  {
+    id: 'ex-ha', title: 'はっはっはー', bpm: 96,
+    exercise: { pattern: '(ドウ)(ドウ) ドー', chords: 'C:4', from: 60, to: 69, words: 'はっ はっ はー' },
+  },
+  {
+    id: 'ex-mame', title: 'まめまめ', bpm: 100,
+    exercise: { pattern: 'ドレミファ ソファミレ ドー', chords: 'C:4 G7:4 C:2', from: 60, to: 65, words: 'ま め ま め ま め ま め まー' },
+  },
+  {
+    id: 'ex-kira', title: 'きらきら星(転調)', bpm: 100,
+    exercise: { pattern: 'ドドソソ ララソー ファファミミ レレドー', chords: 'C:4 F C F C G7 C', from: 60, to: 65 },
+  },
+  {
+    id: 'ex-rise', title: 'のぼっていく', bpm: 100,
+    exercise: { pattern: 'ドレミファ ソー', chords: 'C:4 G:2', from: 60, to: 67, syl: 'あ', dir: 'up' },
   },
 ];
