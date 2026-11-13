@@ -20,7 +20,10 @@
 
 再取得には `pmtiles`、`mapbox-vector-tile`、`shapely` が必要。全体アーカイブをダウンロードせずHTTP Rangeで必要な部分だけ読む。
 
+`land-mask.json` は `tools/build-land-mask.py` で作る。Natural Earthの `ne_10m_land.geojson` をキャッシュへ取得する。
+
 ```sh
+python train-go/tools/build-land-mask.py --cache <作業用キャッシュディレクトリ>
 python train-go/tools/build-water-map.py --cache <作業用キャッシュディレクトリ>
 python train-go/tools/build-runtime.py --optimize
 ```
@@ -44,13 +47,13 @@ node --test train-go/tests/*.test.cjs
 
 道の駅はOpenStreetMapで休憩施設として位置情報がある982地点を収録する。`data/rest-stops.json` に位置・名称・出典を保存し、`tools/build-rest-stops.py` で表示用データを生成する。公式登録駅の全件網羅ではない。読みは登録値がある場合に優先し、それ以外は自動変換する。広域表示では省略し、拡大時に駅名や名所名と重ならない場所へ表示する。
 
-名所は既存の東京の4地点に、北海道から沖縄まで34地点を追加する。`data/landmarks.json` にOpenStreetMapの位置の出典・漢字名・読みを保存し、`tools/build-landmarks.py` で `landmark-data.js` を生成する。表示は駅名を優先する。東京湾は水面上に文字だけで表示する。
+名所は既存の東京の4地点と東京湾に、北海道から沖縄まで34地点を追加する。`data/landmarks.json` にOpenStreetMapの位置の出典・漢字名・読みを保存し、`tools/build-landmarks.py` で `landmark-data.js` を生成する。表示は駅名を優先する。東京湾は水面上に文字だけで表示する。
 
 表示の漢字・ひらがな切替は駅・路線・県・川・湖・ランドマーク・車両形式に適用する。駅の記録キーは変更しない。加志々の表示読みは[対馬市の運賃表](https://www.city.tsushima.nagasaki.jp/gyousei/soshiki/nakatsushima/chiikisinkou/tokaisen/849.html)の「かしし」を使用する。英語のみの一般施設名はひらがなモードで説明を訳す。
 
 `terrain-data.js` は[国土地理院の標高タイル（DEM10B）](https://maps.gsi.go.jp/development/demtile.html)を約2km間隔・50m刻みへ間引いた標高の色分け。山地と平地の目安を示し、細かな起伏や地点ごとの正確な標高は表さない。`tools/build-terrain.py` で生成し、描画画像はタイルごとに再利用する。
 
-`geographic-label-data.js` は島名324件と山頂名・標高1,059件を収録する。島名は同じ国土地理院ベクトルタイル、山頂は[日本の主な山岳標高（2026年3月31日版）](https://web2.gsi.go.jp/kihonjohochousa/kihonjohochousa41139.html)の1,003山の山頂レコードを使用する。原資料は `geographic-labels.json` と `mountains.json`、生成は `tools/build-geographic-labels.py`。駅名を優先して空いている場所へ表示し、漢字・ひらがな設定に合わせる。
+`geographic-label-data.js` は島名325件と山頂名・標高1,059件を収録する。島名は同じ国土地理院ベクトルタイル、山頂は[日本の主な山岳標高（2026年3月31日版）](https://web2.gsi.go.jp/kihonjohochousa/kihonjohochousa41139.html)の1,003山の山頂レコードを使用する。原資料は `geographic-labels.json` と `mountains.json`、生成は `tools/build-geographic-labels.py`。駅名を優先して空いている場所へ表示し、漢字・ひらがな設定に合わせる。
 
 ## 路線色
 
@@ -66,7 +69,7 @@ node --test train-go/tests/*.test.cjs
 
 基準は `station_database` v20260831 の現役扱い602レコード。旧社名の4レコードを現在の運営路線へ対応づけ、598レコードを収録する。
 データ元が運転区間・系統単位で分けている路線は、その区分を引き継ぐ。さらに元データ未収録のケーブルカー18路線を補完する。
-支線、環状運転、新たな長距離直通9コースを含めたゲーム内の選択肢は鉄道655コース、空路274コース、海路594コース。[空路・航路の出典と範囲](transport-network.md)も参照。
+支線、環状運転、直通35コースを含めたゲーム内の選択肢は鉄道681コース、空路274コース、海路594コース。[空路・航路の出典と範囲](transport-network.md)も参照。
 現実の法的な路線数とは数え方が異なる。すべての臨時列車・愛称列車・直通パターンを個別に収録するものではない。
 
 ## 出典・権利表示
